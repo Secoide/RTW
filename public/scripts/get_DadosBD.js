@@ -168,8 +168,12 @@ function atualizarStatusDia(painelDia) {
                 `<div class="iconeStatusDia" title="Programação Liberada!">
                     <i class="fa-solid fa-file-circle-check"></i>
                 </div>`;
-            }
-
+            }else if(statuss == 0) {
+                htmlStatus =
+                `<div class="iconeStatusDia" title="Programação não finalizada.">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>`;
+            };
             addDiv.append(htmlStatus);
         });
     }).fail(function () {
