@@ -52,7 +52,7 @@ function escondeXdoColab() {
 
 
 //ATUALIZA AUTOMATICAMENTE ALGUMA ALTERAÇÃO PARA OUTRO USuARIO
-const socket = new WebSocket('ws://localhost:3000');
+const socket = new WebSocket('wss://rtw.railway.internal');
 
 
 //FUNÇÕES DE ARRASTAR E SOLTAR
