@@ -52,8 +52,8 @@ function escondeXdoColab() {
 
 
 //ATUALIZA AUTOMATICAMENTE ALGUMA ALTERAÇÃO PARA OUTRO USuARIO
-const socket = new WebSocket('wss://rtw.railway.internal');
-
+//const socket = new WebSocket('ws://localhost:3000');
+const socket = new WebSocket('wss://rtw.up.railway.app');
 
 //FUNÇÕES DE ARRASTAR E SOLTAR
 const dragCounters = new WeakMap(); // Controle de dragleave
