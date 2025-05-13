@@ -1,0 +1,48 @@
+<div id="aviso">
+    <div id="aviso-content">
+        <h2><i style="color: #4caf50; font-size: 30px;" class="fa-solid fa-file-circle-check"></i></h2><br>
+        <p id="mensagem-aviso"></p>
+
+        <div id="progress-bar">
+            <div id="progress-fill"></div>
+        </div>
+
+        <button id="btn-ok" onclick="$('#aviso').css({ visibility: 'hidden', opacity: 0 });">OK</button>
+    </div>
+</div>
+
+<script>
+    let tempoTotal = 10; // segundos (2 minutos)
+    let intervalo;
+    let tempoAtual = 0;
+    
+    function mostrarAviso(mensagem) {
+        
+        $('#mensagem-aviso').text(mensagem);
+        $('#progress-fill').css('width', '0%');
+        $('#aviso').css({ visibility: 'visible', opacity: 1 });
+
+        tempoAtual = 0;
+        intervalo = setInterval(() => {
+            tempoAtual++;
+            let percentual = (tempoAtual / tempoTotal) * 130;
+            $('#progress-fill').css('width', percentual + '%');
+
+            if (tempoAtual >= tempoTotal) {
+                avisos = '';
+                //fecharAviso();
+            }
+        }, 1000);
+    }
+
+    function fecharAviso() {
+        clearInterval(intervalo);
+        $('#aviso').css({ visibility: 'hidden', opacity: 0 });
+    }
+
+    $('#botaoAcao').on('click', function () {
+        mostrarAviso('Ação concluída com sucesso!');
+    });
+
+
+</script>
