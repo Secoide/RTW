@@ -680,16 +680,16 @@ function verificarAutenticacao(req, res, next) {
   }
 }
 
-server.listen(3000, '0.0.0.0', () => {
-  console.log('Servidor rodando em todas as interfaces na porta 3000');
-});
+//server.listen(3000, '0.0.0.0', () => {
+//  console.log('Servidor rodando em todas as interfaces na porta 3000');
+//});
 //Retirar o ip para ficar localhost
 //nodemon server.js
 
 
-//const PORT = process.env.PORT || 3000;
-//server.listen(PORT, () => {
-//  console.log(`Servidor rodando.`);
-//});
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Servidor rodando.`);
+});
 
 
