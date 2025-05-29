@@ -123,7 +123,7 @@ app.get('/api/painelOS', (req, res) => {
 app.get('/api/colaboradorEmOS', async (req, res) => {
   try {
     const [results] = await connection.query(`
-      SELECT o.id_OSs, o.descricao, e.nome AS nomeEmpresa, 
+      SELECT fno.id as idNaOS, o.id_OSs, o.descricao, e.nome AS nomeEmpresa,
         IFNULL(c.nome, 'VERIFICAR GERÊNCIA') AS nomeCidade, 
         IFNULL(f.id, '') AS idfuncionario, 
         IF(f.id IS NOT NULL, CONCAT(SUBSTRING_INDEX(f.nome, ' ', 1), ' ', LEFT(SUBSTRING_INDEX(f.nome, ' ', -1), 1), '.'), '') AS nome_formatado, 
@@ -576,7 +576,7 @@ wss.on('connection', (ws) => {
 
     if (data.acao === 'excluir_colaboradorEmOS') {
       const { osID, id, idNaOS, data: dataDia } = data;
-
+      
       const sql = `DELETE FROM funcionario_na_os WHERE id = ?;`;
       const valores = [idNaOS];
 
@@ -680,16 +680,16 @@ function verificarAutenticacao(req, res, next) {
   }
 }
 
-//server.listen(3000, '0.0.0.0', () => {
-//  console.log('Servidor rodando em todas as interfaces na porta 3000');
-//});
+server.listen(3000, '0.0.0.0', () => {
+  console.log('Servidor rodando em todas as interfaces na porta 3000');
+});
 //Retirar o ip para ficar localhost
 //nodemon server.js
 
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Servidor rodando.`);
-});
+//const PORT = process.env.PORT || 3000;
+//server.listen(PORT, () => {
+//  console.log(`Servidor rodando.`);
+//});
 
 
