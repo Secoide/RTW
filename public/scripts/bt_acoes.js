@@ -92,7 +92,7 @@ $(document).on('click', '.icone-olho', function () {
 
     $colabs.slideToggle(200, function () {
         let osOcultas = JSON.parse(localStorage.getItem("osOcultas") || "[]");
-
+        
         if ($colabs.is(':visible')) {
             // Painel está sendo mostrado -> remover do localStorage
             $icon.removeClass('fa-eye-slash').addClass('fa-eye');

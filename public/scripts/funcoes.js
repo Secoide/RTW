@@ -1,3 +1,13 @@
+
+$(document).ready(function () {
+    $(document).on('click mousedown mouseup mousemove mouseenter mouseleave', '.colaborador.saude, .colaborador.paternidade, .colaborador.ferias, .colaborador.afastamento', function (e) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        return false;
+    });
+});
+
+
 function carregarOSComColaboradores() {
     $('.painelDia').each(function () {
         const painelDia = $(this);
@@ -91,7 +101,7 @@ function restaurarOSOcultas() {
         const $painel = $(this);
         const os = $painel.find('.lbl_OS').text().trim();
         const $colabs = $painel.find('.p_colabs');
-        const $icon  = $painel.find('.icone-olho');
+        const $icon = $painel.find('.icone-olho');
 
         if (ocultas.includes(os)) {
             // Está na lista de ocultas → mantém escondido
@@ -468,3 +478,10 @@ function alterar_status_progDia(iconeClick, status) {
         }));
     }
 }
+
+
+
+
+
+
+

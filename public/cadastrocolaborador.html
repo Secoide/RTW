@@ -1,0 +1,407 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const nome = sessionStorage.getItem("nome_usuario");
+    const nivel = sessionStorage.getItem("nivel_acesso");
+
+    if (!nome || !nivel) {
+        window.location.href = "login.html"; // redireciona para a página de login
+    }
+    });
+</script>
+
+
+
+<div class="cad" style="visibility: visible; opacity: 1;">
+    <div class="painel_principal">
+        <div class="painel_todos">
+            <div class="painel_perfil">
+                <div class="subpainel_foto linha_padrao">
+                    <div class="foto">
+                        <img id="fotoavatar" class="foto avatar" src="\imagens\user-default.jpg" alt="Avatar">
+                    </div>
+                    <div class="bt_foto">
+                        <form id="form_foto" enctype="multipart/form-data">
+                            <input class="bt_escolherFoto" type="file" id="select_foto" name="fotoperfil"
+                                style="width: 110px;">
+                            <button class="bt_padrao bt_cad" type="submit">Salvar foto</button>
+                        </form>
+                    </div>
+
+                </div>
+                <form id="formColaborador" method="POST" action="/cad_Colaborador">
+                    <div class="linha_infoColab linha_padrao">
+                        <input id="nome" class="tbx_pesquisarOS input_obrigatorio" type="text"
+                            placeholder="Nome Completo" name="nome" title="" required="required" onkeyup=""
+                            style="width: 97%; text-align: left; padding-left: 10px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <select id="sexo" class="bt_padrao info_padrao opcoes input_obrigatorio" name="genero"
+                                required="required" style="color: var(--texto_cinza); width: 120px;">
+                                <option value="" disabled selected hidden>Gênero...</option>
+                                <option value="1">Masculino</option>
+                                <option value="0">Feminino</option>
+                                <option value="2">Outro</option>
+                            </select>
+                            <div style="display: flex; align-items: center;">
+                                <p class="dataNasc">Data de Nascimento:</p>
+                                <input id="nascimento" class="tbx_pesquisarOS" type="date" name="dataNascimento"
+                                    title="" onkeyup="" style="width: 140px;">
+                            </div>
+                        </div>
+                        <input id="endereco" class="tbx_pesquisarOS" type="text" placeholder="Endereço" name="endereco"
+                            title="" onkeyup="" style="width: 97%; text-align: left; padding-left: 10px;">
+                    </div>
+                    <div class="linha_contatoColab linha_padrao">
+                        <input id="telefone" class="tbx_pesquisarOS" type="text" name="telefone"
+                            placeholder="(00) 0 0000-0000">
+                        <input id="mail" class="tbx_pesquisarOS" type="email" name="email"
+                            placeholder="exemplo@email.com" autocomplete="off" required="required"
+                            style="width: 63%; text-align: left; padding-left: 10px;">
+                        <div id="email-suggestions" class="email-suggestions" style="display: none;"></div>
+                    </div>
+                    <div class="linha_sobreMim linha_padrao">
+                        <textarea id="sobremim" name="sobre" placeholder="Sobre mim"
+                            style="width: 97%; height:50px; border: 1px solid var(--cor_letraFundo); border-radius: 5px; padding: 4px; resize: none;"></textarea>
+                    </div>
+                    <div class="linha_Setor linha_padrao">
+                        <select id="categoria" class="bt_padrao info_padrao opcoes input_obrigatorio" name="setor"
+                            required="required">
+                            <option value="" disabled selected hidden>Selecione o setor...</option>
+                            <option value="8">Estágio</option>
+                            <option value="1">Produção</option>
+                            <option value="12">Terceiro</option>
+                            <option value="10">Encarregado</option>
+                            <option value="2">Almoxarifado</option>
+                            <option value="3">Compras</option>
+                            <option value="5">Engenharia</option>
+                            <option value="4">Gerência</option>
+                            <option value="7">Financeiro</option>
+                            <option value="9">RH</option>
+                            <option value="6">Diretoria</option>
+                            
+                        </select>
+                        <div style="display: flex; align-items: center;">
+                            <p class="lblcpf">CPF:</p>
+                            <input id="cpf" class="tbx_pesquisarOS input_obrigatorio" type="text" placeholder="CPF"
+                                name="cpf" title="" oninput="formatarCPF(this)" maxlength="14">
+                            <p class="lblrg">RG:</p>
+                            <input id="rg" class="tbx_pesquisarOS input_obrigatorio" type="text" placeholder="RG"
+                                name="rg" title="" oninput="" maxlength="10">
+                        </div>
+                    </div>
+                    <input type="hidden" name="idColaborador" id="idColaborador">
+                    <div class="p_acoes p_padrao linha_padrao">
+                        <input id="bt_cadColaborador" class="bt_padrao bt_cad" type="submit" name="cadColab"
+                            value="Cadastrar">
+                        <input id="bt_editColab" class="bt_padrao bt_cad" type="submit" name="editColab" value="Salvar"
+                            style="display: none;">
+                        <input id="" class="bt_padrao bt_cancel" type="reset" value="Cancelar"
+                            onclick="$('#form_cadColab').empty();">
+                    </div>
+                </form>
+            </div>
+            <div class="painel_vestimentas">
+                <p>Vestimentas</p>
+
+            </div>
+            <div class="painel_exames">
+                <p>Exames</p>
+
+            </div>
+            <div class="painel_cursos">
+                <p>Cursos</p>
+
+            </div>
+            <div class="painel_integra">
+                <p>Integração</p>
+
+            </div>
+            <div class="painel_atestar">
+                <form id="form_atestar" method="POST" action="/atestar_Colaborador">
+                    <div class="linha_padrao">
+                        <select id="motivo" class="bt_padrao info_padrao opcoes input_obrigatorio" name="atestado"
+                            required="required">
+                            <option value="" disabled selected hidden>Selecione o Atestado...</option>
+                            <option value="Ferias">Férias</option>
+                            <option value="Saude">Atestado Saúde</option>
+                            <option value="Paternidade">Licença Paternidade</option>
+                            <option value="Afastamento">Afastamento</option>
+                        </select>
+                        <br>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <label for="datainicio">Data Inicial</label>
+                                <input id="datainicio" class="tbx_pesquisarOS" type="date" name="periodoinicial"
+                                    title="" onkeyup="" style="width: 120px;">
+                            </div>
+                            <div>
+                                <label for="datafinal">Data Final</label>
+                                <input id="datafinal" class="tbx_pesquisarOS" type="date" name="periodofinal" title=""
+                                    onkeyup="" style="width: 120px;">
+                            </div>
+                        </div>
+                        <textarea id="descricao" name="descricaoatest" placeholder="Descreva algo, se necessário"
+                            style="width: 97%; height:50px; border: 1px solid var(--cor_letraFundo); border-radius: 5px; padding: 4px; resize: none;"></textarea>
+                    </div>
+                    <div class="p_acoes p_padrao linha_padrao">
+                        <input id="" class="bt_padrao bt_cad" type="submit" name="salvarAtestado" value="Salvar">
+                    </div>
+                    <input id="id" type="hidden" name="idColab" value="">
+                </form>
+                <div class="painel_historicoAtestar">
+                    <table id="tb_historico_atestar" class="linha_padrao tb_padrao">
+                        <thead class="tb_padrao_cabecalho">
+                            <tr>
+                                <th style="display:none;">ID</th>
+                                <th>Motivo</th>
+                                <th>Data Inicio</th>
+                                <th>Data Final</th>
+                                <th>Descrição</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="tb_padrao_conteudo">
+                            <!-- Linhas serão adicionadas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+
+
+            <div class="painel_nivel">
+                <div class="painelLiberarAcessos">
+                    <p>Liberar Acessos</p>
+                    <div class="LiberarAcessos">
+                        <div class="blocoroigem">
+                            <div id="origem" class="bloco origem" data-id="230701">Guilherme S.</div>
+                        </div>
+                        <div class="blocos">
+                            <div class="bloco destino" id="dest1" data-nivel="0">Home</div>
+                            <div class="bloco destino" id="dest2" data-nivel="1">Programação</div>
+                            <div class="bloco destino" id="dest3" data-nivel="2">Projetos</div>
+                            <div class="bloco destino" id="dest4" data-nivel="3">Recursos Humanos</div>
+                            <div class="bloco destino" id="dest5" data-nivel="4">Administrativo</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="painel_apoio">
+                <p>Apoio</p>
+
+            </div>
+            <div class="painel_senha">
+                <p>Senha</p>
+            </div>
+        </div>
+        <div class="painel_menu">
+            <div class="bt_perfil bt_menu ativo" data-target=".painel_perfil">
+                <i class="fa-solid fa-user"></i>
+                <p class="titulo_bt_menu">Perfil</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_vestimentas" style="display: none;">
+                <i class="fa-solid fa-shirt"></i>
+                <p class="titulo_bt_menu">Vestim.</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_exames" style="display: none;">
+                <i class="fa-solid fa-suitcase-medical"></i>
+                <p class="titulo_bt_menu">Exames</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_cursos" style="display: none;">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <p class="titulo_bt_menu">Cursos</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_integra" style="display: none;">
+                <i class="fa-solid fa-paperclip"></i>
+                <p class="titulo_bt_menu">Integra.</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_atestar">
+                <i class="fa-solid fa-calendar-days"></i>
+                <p class="titulo_bt_menu">Atestar</p>
+            </div>
+            <div class="push"></div>
+            <div class="bt_menu" data-target=".painel_nivel" style="display: none;">
+                <i class="fa-solid fa-code-fork"></i>
+                <p class="titulo_bt_menu">Nível</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_apoio" style="display: none;">
+                <i class="fa-solid fa-handshake-simple"></i>
+                <p class="titulo_bt_menu">Apoio</p>
+            </div>
+            <div class="bt_menu" data-target=".painel_senha" style="display: none;">
+                <i class="fa-solid fa-lock"></i>
+                <p class="titulo_bt_menu">Senha</p>
+            </div>
+            <div class="bt_menu bt_cancel bt_sair" onclick="$('#form_cadColab').empty();">
+                <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>
+                <p class="titulo_bt_menu">Sair</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!--<script type="text/javascript" src="scripts/extetica/linhas_cordas.js"></script>-->
+
+<script>
+
+    $('#formColaborador input[type=submit]').on('click', function () {
+        botaoClicado = $(this).attr('name');
+    });
+
+    $('#formColaborador').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serialize() + `&acao=${botaoClicado}`;
+
+        $.ajax({
+            url: '/cad_Colaborador',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function (res) {
+                if (res.sucesso) {
+                    let msg = `Colaborador ${botaoClicado === 'cadColab' ? 'cadastrado' : 'atualizado'} com sucesso!`;
+                    if (botaoClicado === 'cadColab') {
+                        msg += `\n\nLogin: ${res.id}`;
+                        msg += `\nSenha: ${res.senha}`;
+                    }
+                    alert(msg);
+                    $('#formColaborador')[0].reset();
+                    $('#bt_editColab').hide();
+                    $('#bt_cadColaborador').show();
+                } else {
+                    alert(res.mensagem);
+                }
+            },
+            error: function () {
+                alert('Erro ao processar a solicitação.');
+            }
+        });
+
+        botaoClicado = null;
+    });
+
+
+
+
+
+
+    $('#form_foto').submit(function (e) {
+        e.preventDefault();
+        const userId = $('.painel_todos').find('#id').val();
+        var formData = new FormData(this);
+        formData.append('id', userId);
+        $.ajax({
+            url: '/upload-foto',
+            type: 'POST',
+            data: formData,
+            processData: false,  // importante para FormData
+            contentType: false,  // importante para FormData
+            success: function (data) {
+                // Atualiza a imagem com a URL nova + timestamp para evitar cache
+                $('#fotoavatar').attr('src', data.novaFotoURL + '?t=' + new Date().getTime());
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no upload da foto');
+            }
+        });
+    });
+
+
+    $('#form_atestar').on('submit', function (e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: '/atestar_Colaborador',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function (res) {
+                if (res.sucesso) {
+                    preencherTabelaAtestar($('.painel_todos').find('#id').val());
+                } else {
+                    alert(res.mensagem);
+                }
+            },
+            error: function () {
+                alert('Erro ao excluir historico.');
+            }
+        });
+
+        botaoClicado = null;
+    });
+
+    //Prenche hitorico tabela atestar
+    function preencherTabelaAtestar(userId) {
+        const tbody = $('#tb_historico_atestar tbody');
+        tbody.empty(); // Limpa antes de preencher
+        $.ajax({
+            url: '/listar_tb_hitorico_atestar',
+            type: 'POST',
+            data: { id: userId },
+            success: function (data) {
+                data.forEach(colab => {
+                    const linha = `
+                        <tr data-idatestar="${colab.id_funcInterrups}">
+                            <td>${colab.motivo}</td>
+                            <td>${formatarDataISO(colab.datainicio)}</td>
+                            <td>${formatarDataISO(colab.datafinal)}</td>
+                            <td>${colab.descricao}</td>
+                            <td><i class="fa-solid fa-trash-can bt_excluirHistoricoAtestar"></i></td>
+                        </tr>
+                        `;
+                    tbody.append(linha);
+                });
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            }
+        });
+    }
+
+    $('#tb_historico_atestar').on('click', '.bt_excluirHistoricoAtestar', function () {
+        const idatestar = $(this).closest('tr').data('idatestar');
+        $.ajax({
+            url: '/excluir_hitorico_atestar',
+            type: 'POST',
+            data: { id: idatestar },
+            success: function (data) {
+                preencherTabelaAtestar($('.painel_todos').find('#id').val());
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            }
+        });
+    });
+
+
+
+
+    // Controle dos botões do menu
+    $('.bt_menu').on('click', function () {
+        const target = $(this).data('target');
+        // Mostrar ou esconder linhas conforme painel
+        //if (target === '.painel_nivel') {
+        //    linhas.forEach(l => l.show());
+        //} else {
+        //    linhas.forEach(l => l.hide());
+        //}
+        $('.bt_menu').removeClass('ativo');
+        $(this).addClass('ativo');
+
+        // Oculta todos os painéis
+        $('.painel_perfil, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_apoio, .painel_senha').hide();
+
+
+        // Mostra o painel clicado
+        $(target).fadeIn(200);
+
+
+    });
+
+    
+</script>

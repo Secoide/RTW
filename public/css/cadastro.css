@@ -1,0 +1,205 @@
+.painel_principal {
+    display: flex;
+
+    height: 590px;
+    width: 500px;
+    background-color: var(--branco);
+    border-radius: 10px;
+    border: 1px solid var(--fundo_noturno);
+}
+
+
+.painel_todos {
+    width: 450px;
+    background-color: var(--branco);
+    border-radius: 10px 0 0 10px;
+    padding: 10px;
+}
+
+.painel_menu {
+    display: flex;
+    flex-direction: column;
+    height: 590px;
+    width: 50px;
+    background-color: var(--fundo_noturno);
+    border-radius: 0 8px 8px 0;
+}
+
+.bt_menu {
+    display: block;
+    justify-items: center;
+    padding: 8px;
+    color: var(--branco);
+}
+
+.push {
+    flex-grow: 1;
+}
+
+.bt_menu i {
+    font-size: 17px;
+}
+
+.bt_menu p {
+    padding-top: 5px;
+    font-size: 10px;
+}
+
+.bt_menu:hover:not(.bt_sair) {
+    color: var(--hover_verde);
+    cursor: pointer;
+}
+
+.subpainel_foto {
+    display: flex;
+    justify-content: center;
+}
+
+.foto {
+    height: 130px;
+    width: 130px;
+    border-radius: 50%;
+    border: 1px solid var(--border_cinza);
+}
+
+.bt_foto {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    width: 100px;
+    padding-left: 10px;
+}
+
+.dataNasc, .lblcpf, .lblrg {
+    color: grey; 
+    text-align: left; 
+    font-size: 10px; 
+    padding-right: 2px;
+}
+.lblcpf, .lblrg {
+   padding-left: 8px; 
+}
+
+
+#telefone{
+    width: 30%; 
+    text-align: left; 
+    padding-left: 10px;
+}
+.email-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 300px;
+    font-size: 14px;
+    z-index: 999;
+}
+
+.email-suggestions div {
+    padding: 6px;
+    cursor: pointer;
+}
+
+.email-suggestions div:hover {
+    background: #eee;
+}
+
+.linha_Setor{
+    display: flex;
+}
+
+#categoria{
+    color: var(--texto_cinza); 
+    width: 130px;
+}
+
+#motivo{
+    color: var(--texto_cinza); 
+    width: 200px;
+}
+
+#cpf, #rg{
+    width: 100px;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.linha_padrao {
+    padding: 10px;
+}
+
+.linha_padrao input,
+.linha_padrao select {
+    margin-block: 4px;
+    font-size: 12px;
+}
+
+.opcoes {
+    padding-left: 5px;
+    font-size: 11px;
+}
+
+.bt_menu.ativo {
+    background-color: var(--branco);
+    color: var(--fundo_noturno);
+    border-radius: 0 7px 7px 0;
+}
+
+
+
+
+.painelLiberarAcessos {
+    margin-top: 180px;
+}
+
+.LiberarAcessos {
+    display: flex;
+    justify-content: space-between;
+    margin-left: 10px;
+    margin-right: 50px;
+}
+
+.blocoroigem {
+    display: flex;
+    align-items: center;
+}
+
+.blocos {
+    width: 50px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.bloco {
+    width: 100px;
+    padding-block: 10px;
+    color: var(--branco);
+    background-color: var(--fundo_noturno);
+    border: 2px solid transparent;
+    text-align: center;
+    user-select: none;
+    border-radius: 5px;
+}
+
+#origem {
+    height: 20px;
+    color: var(--branco);
+    background-color: var(--fundo_noturno);
+}
+
+.destino.highlight {
+    border: 2px solid var(--hover_verde);
+}
+
+.painel_historicoAtestar {
+    height: 250px;
+    width: 95%;
+    margin: 10px;
+    border: 1px solid var(--border_cinza);
+    border-radius: 10px;
+}

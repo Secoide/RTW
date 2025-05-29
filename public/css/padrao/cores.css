@@ -1,0 +1,142 @@
+:root {
+    --azul_1: #0C80C1;
+    --verde_1: #05BA37;
+    --verde_2: #258E43;
+    --amarelo: #F0C428;
+    --laranja_1: #FF8A00;
+    --vermelho: #B13434;
+    --alerta: #ec1313;
+    --white: #ffffff;
+    --cinza_claro: #b8b8b8;
+    --cinza_tituloForm: #7C7C7C;
+    --black: #000000;
+    --papel: #EEF2D4;
+    --form: #333;
+    --menu_hover: #353535;
+    --menu_1: #222222;
+    --menu_2: #202020;
+    --text_excuro: #121212;
+    --pagina: #d1d1d1;
+
+
+    --status_projetoSemResp: #505050;
+    --status_projetoParado: #c53838;
+    --status_projetoAguardando: #CD6702;
+    --status_projetoExecutando: #007B97;
+    --status_projetoConcluido: #00972A;
+    --status_projetoEmEspera: #dfe224;
+
+    --borda_barraQuaseBranca: #eeeeee;
+    --cor_letraFundo: #e4e4e4;
+    --cor_fundotabela: #d6d6d6;
+    --cor_fundoPainelAnexos: #b2eec3;
+
+    --cor_LetrasSelect: #3F3F3F;
+
+    --cor_fundoConfirmado: #568d56f1;
+    --cor_fundoAlterado: #8d8556f1;
+    --cor_fundoAvisos: #868686f1;
+    --cor_fundoExcluir: #FFD0D0;
+
+    --texto_cinza: #494949;
+
+
+    --barra_foguete: rgb(108, 192, 105);
+
+    --fundo_noturno: #262626;
+    --border_cinza: #e4e4e4;
+
+    --hover_verde: #258E43;
+
+
+
+    /* COLABORADOR */
+    --fundopadrao: #3a3434;
+    --ferias: #d3d615;
+    --afastado: #c92828;
+    --saude: #e25d15;
+    --paternidade: #3debf1;
+
+
+    /* PAINEL OS */
+    --painel_OSinfos: #ccc;
+    --painel_Colabs: #f1f1f1;
+    --painel_OSAcoes: #f1f1f1;
+
+    --painel_ColabAceita: #d4f9d4;
+    --painel_ColabAceitaDentro: #4ff881;
+
+    /* Painel OS - botões de ação */
+    --botao_acao: #a8a8a8;
+    --botao_acao_hover: #404040;
+
+
+
+
+
+    /* VERMELHO */
+    --vermelhoForte: #da0000;
+    --vermelhoMédio: #d40000;
+    --vermelhoClaro: #e74c4c;
+    --vermelhoEscuro: #9c2828;
+    --vermelhoAceso: #ff0000;
+
+    /* LARANJA */
+
+    /* AMARELO */
+    --amareloNeon: #e7ff0e;
+
+    /* VERDE */
+    --verdeClaro2: #d4f9d4;
+    --verdeMedio: #4caf50;
+    --verdeAceso: #00be00;
+    --verdeIluminar: #93e690;
+    --verdeEscuroHover: #43a047;
+
+    /* AZUL */
+    --azulClaro: #e6f2ff;
+    --azulDestaque: #e6f7ff;
+    --azulBotao: #0d6efd;
+    --azulHoverMatch: rgba(0, 123, 255, 0.4);
+    --azulOutline: #1e90ff;
+    --azulItem: #dce9ff;
+
+    /* ANIL / ROXO */
+    /* (não encontrado diretamente, pular) */
+
+    /* VIOLETA */
+    /* (não encontrado diretamente, pular) */
+
+    /* BRANCO */
+    --branco: #ffffff;
+
+    /* CINZAS */
+    --cinzaMuitoClaro: #f8f8f8;
+    --cinzaClaro: #f1f1f1;
+    --cinzaClaro2: #f0f0f0;
+    --cinzaClaro3: #dfdfdf;
+    --cinzaClaro4: #e6e6e6;
+    --cinzaNeutro: #ccc;
+    --cinzaMédio: #afafaf;
+    --cinzaMedioEscuro: #8f8f8f;
+    --cinzaEscuro: #666;
+    --cinzaForte: #383838;
+    --cinzaEscuro2: #444;
+    --cinzaHover: #474747;
+    --cinzaBorda: #b6b6b6;
+    --cinzaTexto: #494949;
+    --cinzaItem: #888;
+    --cinzaItemHover: #aaa;
+
+    /* PRETO */
+    --preto: #000000;
+    --pretoClaro: #181818;
+    --pretoMedio: #272727;
+    --pretoForte: #222;
+    --pretoModal: rgba(0, 0, 0, 0.5);
+    --pretoOverlay: rgba(0, 0, 0, 0.3);
+    --pretoOverlayEscuro: rgba(0, 0, 0, 0.8);
+
+
+    
+}

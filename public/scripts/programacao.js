@@ -8,7 +8,6 @@ $(document).ready(function () {
 
     $('#seletor_data').val(dataFormatada).trigger('change'); // <- simula o "click + seleção"
 
-    carregarColaboradoresDisp();
     let percent = 0;
     const intervalo = setInterval(() => {
         percent += Math.floor(Math.random() * 14) + 1; // Avança aleatoriamente 5-15%
@@ -16,7 +15,7 @@ $(document).ready(function () {
         $("#loadingPercent").text(percent + "%");
 
         if (percent === 100) {
-            $(".loadingProgress").text("Programação carregada! 🚀");
+            $(".loadingProgress").text("Programação carregada!");
             clearInterval(intervalo);
 
             setTimeout(() => {
@@ -25,7 +24,7 @@ $(document).ready(function () {
                     atualizarPainel($(this));
                 });
                 // E some o overlay
-                
+
             }, 100); // Pequeno delay para ficar bonito
             setTimeout(() => {
                 $("#loadingOverlay").fadeOut(1000);
@@ -34,6 +33,13 @@ $(document).ready(function () {
     }, 100); // Atualiza a porcentagem a cada 100ms
     //escondeXdoColab();
 });
+
+$('#btn-debug-ws').on('click', function () {
+    $('#form_debugws').empty().load('../debug_ws.html', function () {
+
+    });
+});
+
 
 function escondeXdoColab() {
     setTimeout(() => {
@@ -49,11 +55,6 @@ function escondeXdoColab() {
     }, 500);
 }
 
-
-
-//ATUALIZA AUTOMATICAMENTE ALGUMA ALTERAÇÃO PARA OUTRO USuARIO
-//const socket = new WebSocket('ws://localhost:3000');
-const socket = new WebSocket('wss://rtw.up.railway.app');
 
 //FUNÇÕES DE ARRASTAR E SOLTAR
 const dragCounters = new WeakMap(); // Controle de dragleave
@@ -243,9 +244,6 @@ $(document).on("drop", ".p_colabs", function (e) {
 
 
 
-
-
-
 //AO CLICAR NO COLABORADOR, muda interface
 let colaboradoresSelecionados = [];
 $(document).on("click", ".colaborador", function (e) {
@@ -267,10 +265,8 @@ $(document).on("click", ".colaborador", function (e) {
 });
 
 
-
 //Funções do PAINEL de Buscas
-
-//PESQUISAR OS 
+//PESQUISAR/BUSCAR OS, descrição ou Cliente
 $(document).on("input", ".pesquisarOS", function () {
     const $inputAtual = $(this);
     const termo = removerAcentos($inputAtual.val().toLowerCase());
@@ -280,20 +276,29 @@ $(document).on("input", ".pesquisarOS", function () {
         const $painel = $(this);
         const osTexto = $painel.find(".lbl_OS").text().toLowerCase();
         const descricaoOS = $painel.find(".lbl_descricaoOS").text().toLowerCase();
+        const clienteOS = $painel.find(".lbl_clienteOS").text().toLowerCase();
         if (termo.length === 0) {
             $painel.removeClass("matchOS noMatchOS");
+            if ($painel.find('.p_colabs').find('.colaborador').length == 0) {
+                $painel.find('.p_colabs').hide();
+            }
         } else if (osTexto.includes(termo)) {
+            $painel.find('.p_colabs').show();
             $painel.addClass("matchOS").removeClass("noMatchOS");
         } else if (removerAcentos(descricaoOS).includes(termo)) {
             $painel.addClass("matchOS").removeClass("noMatchOS");
+        } else if (removerAcentos(clienteOS).includes(termo)) {
+            $painel.addClass("matchOS").removeClass("noMatchOS");
         } else {
+            if ($painel.find('.p_colabs').find('.colaborador').length == 0) {
+                $painel.find('.p_colabs').hide();
+            }
             $painel.addClass("noMatchOS").removeClass("matchOS");
         }
     });
 
     atualizarPainel($painelDia);
 });
-
 
 
 //Função DE CLICAR na OS do colaborador ocupado
@@ -359,7 +364,6 @@ $(document).on("click", ".ocupadoEmOS", function () {
 
 
 //Função DE CLICAR no FILTRO de OSs com PRIORIDADE
-
 $('.filtroPrioridade').on('click', function () {
     ativar_FiltroPrioridade($(this));
 });
@@ -410,8 +414,6 @@ function ativar_FiltroFoco(parametro) {
         $('.painel_OS').show();
     }
 }
-
-
 
 
 // Clique no X para retornar o colaborador
@@ -468,10 +470,7 @@ $(document).on("click", ".bt_tirarColab", function () {
 });
 
 
-
-
 //BUSCAR COLABORADOR
-
 
 let indiceSelecionado = -1;
 // Cria dropdown de sugestões
@@ -508,7 +507,7 @@ $(document).on('input', '.buscarColab input', function () {
             }
 
             $lista.append(`
-                <div class="itemSugestao" data-id="${id}" data-nome="${nome}" style="font-size: 11px;">
+                <div class="itemSugestao" data-id="${id}" data-nome="${nome}">
                   <i class="fa-solid fa-circle" style="color:${cor}; margin-right: 2px; font-size: 8px;"></i> ${nome}
                 </div>
             `);
@@ -522,12 +521,10 @@ $(document).on('input', '.buscarColab input', function () {
         }
     }
 });
-
 // Função para remover acentuação
 function removerAcentos(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
-
 //Ao clicar no colaborador sugerido, coloca no painel da OS
 $(document).on('click', '.itemSugestao', function () {
     const id = $(this).data("id"); // Agora pega o data-id
@@ -536,6 +533,15 @@ $(document).on('click', '.itemSugestao', function () {
     const osID = $osNova.find(".lbl_OS").text().trim();
     const painelDia = $osNova.closest('.painelDia');
 
+    let colaboradorComStatus = painelDia.find('.p_colabsDisp .colaborador .nome:contains("' + nome + '")')
+        .closest('.colaborador') // sobe para o elemento que tem o data-status
+        .filter(function () {
+            return $(this).attr('data-status') !== '';
+        });
+
+    if (colaboradorComStatus.length > 0) {
+        return false;
+    }
     // 🔄 Remove o colaborador de qualquer outra OS
     $('.painel_OS').each(function () {
         const $os = $(this);
@@ -598,7 +604,6 @@ $(document).on('click', '.itemSugestao', function () {
         }));
     }
 });
-
 // Navegação por teclado (↓ ↑ Enter)
 $(document).on('keydown', '.buscarColab input', function (e) {
     const $input = $(this);
@@ -628,191 +633,6 @@ $(document).on('keydown', '.buscarColab input', function (e) {
     }
 });
 
-
-// Quando clicar em "Entrar"
-$('#btn_salvar_nome').on('click', function () {
-    const nomeDigitado = $('#input_nome_usuario').val().trim();
-    if (nomeDigitado === '') return;
-
-    localStorage.setItem("nome_usuario", nomeDigitado);
-    meuNome = nomeDigitado;
-
-    $('#overlay_nome, #box_nome_usuario').fadeOut(200);
-
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-            acao: 'usuario_online',
-            nome: meuNome
-        }));
-    }
-});
-
-
-
-
-
-// Função para enviar o nome via WebSocket
-// Quando o socket abrir, envia o nome salvo (se tiver)
-let meuNome = localStorage.getItem("nome_usuario");
-socket.onopen = function () {
-    if (meuNome) {
-        socket.send(JSON.stringify({
-            acao: 'usuario_online',
-            nome: meuNome
-        }));
-    } else {
-        $('#overlay_nome, #box_nome_usuario').show(200);
-    }
-};
-
-socket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-
-    if (data.acao === 'atualizar_usuarios_online') {
-        const nomes = data.usuarios; // array de nomes
-        const texto = nomes.length > 0 ? nomes.join(', ') : 'Nenhum usuário';
-        $('#lista_usuarios_online').text(texto);
-    }
-
-    if (data.acao === "alocar_colaborador") {
-        const { osID, nomes, data: dataDia } = data;
-        // Busca apenas dentro do painelDia correto
-        const $painelDia = $('.painelDia').filter(function () {
-            return $(this).attr('data-dia') === dataDia;
-        });
-
-        const $destinoOS = $painelDia.find('.painel_OS').filter(function () {
-            return $(this).find('.lbl_OS').text().trim() === osID;
-        });
-
-        nomes.forEach(({ id, nome }) => {
-            const jaExiste = $destinoOS.find(".p_colabs .colaborador").filter(function () {
-                return $(this).data('id') === id;
-            }).length > 0;
-
-            if (!jaExiste) {
-                adicionarColaboradorNaOS(id, nome, $destinoOS); // 🔥 Agora passar id também
-            }
-
-            // Atualizar o ocupadoEmOS no painelDia certo
-            const $colabBase = $painelDia.find('.painel_colaboradores .p_colabsDisp .colaborador').filter(function () {
-                return $(this).data('id') === id;
-            }).first();
-
-            if ($colabBase.length) {
-                // Primeiro limpa divs antigos (caso tenha)
-                $colabBase.find('.ocupadoEmOS div').remove();
-                // Adiciona a nova OS
-                $colabBase.find('.ocupadoEmOS').append(`<div>${osID}</div>`);
-                $colabBase.addClass('colaboradorEmOS');
-            }
-        });
-    } else if (data.acao === "remover_colaborador") {
-        const { osID, id, data: dataDia } = data;
-        if (!osID) {
-            return;
-        }
-        // Busca apenas dentro do painelDia correto
-        const $painelDia = $('.painelDia').filter(function () {
-            return $(this).attr('data-dia') == dataDia;
-        });
-        const $os = $painelDia.find('.painel_OS').filter(function () {
-            return $(this).find('.p_infoOS').data('os') == osID; // usar == para evitar falha entre número e string
-        });
-        if ($os.length === 0) {
-            return;
-        }
-        const $colabRemovido = $os.find('.p_colabs .colaborador').filter(function () {
-            return $(this).data('id') == id; // com dois iguais
-        });
-        if ($colabRemovido.length > 0) {
-            $colabRemovido.remove();
-
-            // Atualiza contador da OS
-            const total = $os.find('.p_colabs .colaborador').length;
-            $os.find('.lbl_total').text(total);
-
-            if (total === 0) {
-                $os.find('.p_colabs').slideUp(150);
-                $os.find('.icone-olho').removeClass('fa-eye').addClass('fa-eye-slash');
-            }
-
-            // Agora: Atualizar todos os clones do colaborador
-            const $colabsBase = $painelDia.find('.painel_colaboradores .p_colabsDisp .colaborador').filter(function () {
-                return $(this).data('id') == id;
-            });
-
-            $colabsBase.each(function () {
-                const $colabBase = $(this);
-                $colabBase.find('.ocupadoEmOS div').filter(function () {
-                    return $(this).text().trim() == osID;
-                }).remove();
-
-                if ($colabBase.find('.ocupadoEmOS div').length === 0) {
-                    $colabBase.removeClass('colaboradorEmOS');
-                }
-            });
-        }
-    }
-    else if (data.acao === "confirmar_alocacao") {
-        const { osID, nome, idNaOS } = data;
-
-        const $painel = $('.painel_OS').filter(function () {
-            return $(this).find('.lbl_OS').text().trim() === osID;
-        });
-
-        const $colab = $painel.find('.colaborador').filter(function () {
-            return $(this).find('.nome').text().trim() === nome;
-        });
-
-        $colab.attr('data-idnaos', idNaOS);
-    } else if (data.acao === 'atualizar_prioridade_os') {
-        const { osID, prioridade } = data;
-
-        const $os = $('.painel_OS').filter(function () {
-            return $(this).find('.lbl_OS').text().trim() === osID;
-        });
-
-        const $icon = $os.find('.bt_prioridade');
-
-        if (prioridade) {
-            $os.addClass('prioridade-alta fixadaPorPrioridade');
-            $icon.addClass('alta').attr('title', 'Prioridade: Alta');
-            localStorage.setItem("prioridade_OS_" + osID, 'prioridade-alta');
-        } else {
-            $os.removeClass('prioridade-alta fixadaPorPrioridade');
-            $icon.removeClass('alta').attr('title', 'Sem prioridade');
-            localStorage.removeItem("prioridade_OS_" + osID);
-        }
-
-        $('.painelDia').each(function () {
-            atualizarPainel($(this));
-        }); // 🧼 reorganiza
-        // Aplica animação se a prioridade foi marcada por outro usuário
-        $os.addClass('shake');
-        setTimeout(() => {
-            $os.removeClass('shake');
-        }, 800);
-    } else if (data.acao === "mudar_statusProgDia") {
-        const { statuss, dia} = data;
-        console.log(dia);
-        const $painel = $('.painelDia').filter(function () {
-            return $(this).data('dia') == dia;
-        });
-        console.log(statuss);
-        if (statuss === 1){
-            const diaSmena = formatarData(dia);
-            let avisos;
-            avisos = $('#aviso #mensagem-aviso').text() + '\n\n' + "Programação de " + diaSmena + " liberada para lançamento!";
-            $('#form_aviso').load('../aviso.html', function() {
-                mostrarAviso(avisos);
-            });
-        }
-        $painel.find('.iconeStatusDia i').trigger('click', { programatico: true });; // <- simula o "click" e manda como sendo programado
-        
-    }
-
-};
 
 const estiloShake = `
 <style>
@@ -872,6 +692,9 @@ $('#seletor_data').on('change', function () {
         $(this).find('.painel_Dia').text(formatarData(dataFormatada));
 
     });
+    $('.painelDia').each(function () {
+        carregarColaboradoresDisp($(this));
+    });
     carregarOSComColaboradores();
     setTimeout(() => {
         restaurarOSOcultas();
@@ -886,6 +709,7 @@ $('#seletor_data').on('change', function () {
     }, 200);
     setTimeout(() => {
         atualizarStatusColaboradoresOS();
+        esconderPainelOSsemColab();
     }, 400);
 });
 
@@ -905,7 +729,152 @@ $(function () {
 
     // Ao clicar no X, limpa o campo e esconde o botão
     $btn.on('click', function () {
-        $input.val('').focus();
         $btn.hide();
+        $('.pesquisarOS').val('').trigger('input');
+        $('.painelDia').each(function () {
+            atualizarPainel($(this));
+        });
     });
 });
+
+$(document).ready(function () {
+    if ($(window).width() < 600) {
+        const $scrollDiv = $('#scrollDiv');
+        const $setaEsquerda = $('.seta-esquerda');
+        const $setaDireita = $('.seta-direita');
+        function atualizarSetas() {
+            const scrollLeft = $scrollDiv.scrollLeft();
+            const maxScroll = $scrollDiv[0].scrollWidth - $scrollDiv.outerWidth();
+
+            $setaEsquerda.toggle(scrollLeft > 10);
+            if (scrollLeft == 0) {
+                $setaDireita.toggle(true);
+            } else {
+                $setaDireita.toggle((scrollLeft) < maxScroll - 5);
+            }
+        }
+
+        $scrollDiv.on('scroll', atualizarSetas);
+        $(window).on('resize', atualizarSetas);
+
+
+        // Chamada inicial
+        atualizarSetas();
+    };
+});
+
+
+let botaoClicado = null;
+// ABRIR Form Colaborador com os dados do colaborador clicado
+$(document).on('dblclick', '.p_colabsDisp .colaborador', function () {
+    const id = $(this).data('id');
+
+    $.ajax({
+        url: '/get_dadosColab',
+        type: 'POST',
+        contentType: 'application/json', // define o tipo do corpo da requisição
+        data: JSON.stringify({ id: id }), // converte o objeto para JSON
+        success: function (res) {
+            if (res.sucesso) {
+                $('#form_cadColab').empty().load('../cadastrocolaborador.html', function (response, status, xhr) {
+                    if (status === "success") {
+                        $('.painel_perfil, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_apoio, .painel_senha').hide();
+                        $('.painel_perfil').show();
+                        $('#bt_editColab').show(); // Também remove o display: none
+                        $('#bt_cadColaborador').hide();
+                        const dados = res.dados;
+
+                        $('#id').val(dados.id);
+                        $('#idColaborador').val(dados.id);
+                        $('#nome').val(dados.nome);
+                        $('#sexo').val(dados.sexo);
+                        $('#nascimento').val(formatDateToInput(dados.nascimento));
+                        $('#endereco').val(dados.endereco);
+                        $('#telefone').val(dados.telefone);
+                        $('#mail').val(dados.mail);
+                        $('#sobremim').val(dados.sobre);
+                        $('#categoria').val(dados.categoria);
+                        $('#cpf').val(dados.cpf);
+                        $('#rg').val(dados.rg);
+                        $('#datainicio').val(formatDateToInput(dados.datainicio));
+                        $('#datafinal').val(formatDateToInput(dados.datafinal));
+                        $('#motivo').val(dados.motivo);
+                        $('#fotoavatar').attr('src', dados.fotoperfil + '?t=' + new Date().getTime());
+                        preencherTabelaAtestar(dados.id);
+                    } else {
+                        alert("Erro ao carregar o formulário: " + xhr.status + " " + xhr.statusText);
+                    }
+                });
+            } else {
+                alert(res.mensagem); // Mensagem de erro ao logar
+            }
+        },
+        error: function () {
+            alert('Erro ao logar. Tente novamente.');
+        }
+    });
+});
+
+
+// exemplo de como extrair a data yyyy-MM-dd
+function formatDateToInput(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    // getMonth() retorna 0-11, por isso soma 1 e padStart para 2 dígitos
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+
+
+let btn;
+$('.bt_abrirmenu').on('click', function (e) {
+    btn = $(this);
+    let menu = $('#popupMenu');
+
+    // Posiciona o menu abaixo do botão
+    menu.css({
+        top: btn.offset().top + btn.outerHeight(),
+        right: '0px'
+    }).toggle();
+});
+
+// Fecha o menu se clicar fora
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('.bt_abrirmenu, #popupMenu').length) {
+        $('#popupMenu').hide();
+    }
+});
+
+
+
+let desconectandoPorLogout = false;
+// Ação ao clicar nas opções
+$('.popup-option-menu').on('click', function () {
+    const type = $(this).data('type');
+
+    switch (type) {
+        case 'novaos':
+            break;
+        case 'colaborador':
+            $('#form_cadColab').empty().load('../cadastrocolaborador.html', function () {
+                // Mostrar só o painel Perfil inicialmente
+                // Oculta todos os painéis
+                $('.painel_perfil, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_apoio, .painel_senha').hide();
+
+                $('.painel_perfil').show();
+            });
+            break;
+        case 'logout':
+                desconectandoPorLogout = true;
+                socket.send(JSON.stringify({ acao: 'logout' }));
+            break;
+
+        default:
+            console.warn('Tipo de menu desconhecido:', type);
+    }
+    $('#popupMenu').hide();
+});
+

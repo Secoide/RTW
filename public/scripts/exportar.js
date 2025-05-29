@@ -107,7 +107,7 @@ function exportarWHATS(botaoClicado) {
     let semana = "*Programação para " + dia + "*\n\n";
     let enviar = "";
     ordenarColaboradoresNasOS();
-    // Objeto para agrupar por cidade
+
     let cidades = {};
 
     $painelDia.find('.painel_OS').filter(function () {
@@ -119,7 +119,7 @@ function exportarWHATS(botaoClicado) {
         const cliente = os.find('.lbl_clienteOS').text().trim();
         const cidade = os.find('.p_infoOS').data('cidade');
 
-        let dadosDaOS = "—— *OS " + idOS + "* ——\n> " + cliente.toUpperCase() + " - " + descricao.toUpperCase() + "\n";
+        let dadosDaOS = "—— *OS " + idOS + "* ——\n> " + cliente.toUpperCase() + " - " + descricao + "\n";
 
         let colaboradores = "";
         os.find('.colaborador').each(function () {
@@ -129,31 +129,53 @@ function exportarWHATS(botaoClicado) {
 
         let blocoOS = dadosDaOS + colaboradores + "\n";
 
-        // Agrupa por cidade
         if (!cidades[cidade]) {
             cidades[cidade] = [];
         }
         cidades[cidade].push(blocoOS);
     });
 
-    // Monta o texto final agrupado por cidade
     for (const cidade in cidades) {
         enviar += "`" + cidade + " ▼`\n" + cidades[cidade].join("") + "\n";
     }
 
     enviar = semana + enviar;
 
-    // Copia para a área de transferência
-    if (navigator.clipboard && navigator.clipboard.writeText) {
+    // Tenta usar clipboard moderna
+    if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(enviar).then(function () {
             alert("Programação de " + dia + " gerada e copiada!");
         }).catch(function (err) {
-            alert("Erro ao copiar: " + err);
+            fallbackCopiarTexto(enviar, dia, err);
         });
     } else {
-        alert("Seu navegador não suporta copiar direto sem textarea.");
+        fallbackCopiarTexto(enviar, dia);
+    }
+
+    function fallbackCopiarTexto(texto, dia, erro) {
+        const textarea = document.createElement("textarea");
+        textarea.value = texto;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = 0;
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            const sucesso = document.execCommand("copy");
+            if (sucesso) {
+                alert("Programação de " + dia + " gerada e copiada!");
+            } else {
+                alert("Não foi possível copiar. Copie manualmente.");
+            }
+        } catch (err) {
+            alert("Erro ao copiar: " + (erro || err));
+        }
+
+        document.body.removeChild(textarea);
     }
 }
+
 
 
 $(document).on('click', '.bt_exportDados', function () {
@@ -164,26 +186,55 @@ function exportarDADOS(botaoClicado) {
     const dataDia = painelDia.attr('data-dia');
     const id = botaoClicado.closest('.painel_OS').find('.p_infoOS').attr('data-os');
 
-    console.log(painelDia +'\n' + dataDia + '\n'+ id);
     get_dadosColab(dataDia, id, function(dadosColab) {
+        if (!dadosColab || dadosColab.length === 0) {
+            alert("Nenhum colaborador encontrado.");
+            return;
+        }
+
         let dados = '';
         dadosColab.forEach(colab => {
-            dados += colab.nome.toUpperCase() + '\nRG: ' + colab.rg + '\nCPF: ' + formatarCPF(colab.cpf) + '\n\n'; 
+            dados += colab.nome.toUpperCase() + '\nRG: ' + colab.rg + '\nCPF: ' + formatarCPF__(colab.cpf) + '\n\n';
         });
 
+        copiarTexto(dados);
+    });
 
-        // Copia para a área de transferência
+    function copiarTexto(texto) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(dados).then(function () {
-                alert("Dados dos colaboradores exportado!");
+            navigator.clipboard.writeText(texto).then(function () {
+                alert("Dados dos colaboradores exportados!");
             }).catch(function (err) {
-                alert("Erro ao exportar dados: " + err);
+                fallbackCopyText(texto);
             });
         } else {
-            alert("Seu navegador não suporta copiar direto sem textarea.");
+            fallbackCopyText(texto);
         }
-    });
+    }
+
+    function fallbackCopyText(texto) {
+        const textarea = document.createElement('textarea');
+        textarea.value = texto;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+
+        // Pequeno delay para garantir foco
+        setTimeout(() => {
+            textarea.select();
+            try {
+                const sucesso = document.execCommand('copy');
+                alert(sucesso ? "Dados dos colaboradores exportados!" : "Falha exportar dados.");
+            } catch (err) {
+                alert("Erro ao exportar dados: " + err);
+            }
+            document.body.removeChild(textarea);
+        }, 10);
+    }
 }
-function formatarCPF(cpf) {
+
+
+function formatarCPF__(cpf) {
   return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }

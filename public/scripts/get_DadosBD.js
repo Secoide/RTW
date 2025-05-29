@@ -1,33 +1,43 @@
 
-function carregarColaboradoresDisp() {
-    $.get('/api/colaboradores', function (colaboradores) {
-        $('.p_colabsDisp').empty();
+document.addEventListener('DOMContentLoaded', () => {
+  const nome = sessionStorage.getItem("nome_usuario");
+  const nivel = sessionStorage.getItem("nivel_acesso");
+
+  if (!nome || !nivel) {
+    window.location.href = "login.html"; // redireciona para a página de login
+  }
+});
+
+
+
+function carregarColaboradoresDisp(painelDia) {
+    const colabDisp = painelDia.find('.p_colabsDisp');
+    const dia = painelDia.attr('data-dia');
+    $.get('/api/colaboradores', {
+            dataDia: dia
+        },
+        function (colaboradores) {
+        $(colabDisp).empty();
         const htmlColabs = colaboradores.map(colab => {
-            const status = colab.statuss;
+            const classeMotivo = colab.motivo.toLowerCase();
             const nome = colab.nome_formatado;
             const nomecompleto = colab.nome;
-            const cargo = colab.nivel_acesso;
+            const cargo = colab.funcao.toLowerCase();
             const idFunc = colab.idFunc;
 
-            const classeStatus = status === 1 ? 'ferias' : (status === 2) ? '' : '';
-            const iconeClass = status === 'ferias' ? 'i_colabBloqueado' : 'i_colabLiberado';
-            const cargoClass = (cargo === 9) ? 'encarregado' :
-                (cargo === 6 || cargo === 7) ? 'lider' :
-                    (cargo === 1) ? 'producao' : '';
-
+            let display = classeMotivo === '' ? 'visible;' : 'hidden;';
+            let iconeClass = classeMotivo === '' ? 'i_colabLiberado' : 'i_colabBloqueado';
             return `
-                <div class="colaborador ${classeStatus}" title="Colaborador de ${classeStatus}!" draggable="true" data-status="${status}" data-id="${idFunc}" data-nome="${nome}">
-                    <i class="${iconeClass} fa-solid fa-circle"></i>
-                    <p class="nome ${cargoClass}" title="${nomecompleto}">${nome}</p>
+                <div class="colaborador ${classeMotivo} areaRestrita" title="" draggable="true" data-status="${classeMotivo}" data-id="${idFunc}" data-nome="${nome}">
+                    <i class="${iconeClass} fa-solid fa-circle areaRestrita" style="visibility: ${display}"></i>
+                    <p class="nome ${cargo} areaRestrita" title="${nomecompleto}">${nome}</p>
                     <i class="bt_tirarColab fa-solid fa-x"></i>
-                    <p class="ocupadoEmOS" title=""></p>
+                    <p class="ocupadoEmOS areaRestrita" title=""></p>
                 </div>
             `;
         }).join('');
 
-        $('.p_colabsDisp').each(function () {
-            $(this).append(htmlColabs);
-        });
+        colabDisp.append(htmlColabs);
     });
 }
 
@@ -61,8 +71,6 @@ function buscarColaboradores(paineldasOS) {
             const idFunc = colab.idfuncionario;
             const idNaOS = colab.idNaOS;
             const totalColab = colab.total_colaboradores;
-            const iconeClass = status === 'ferias' ? 'i_colabBloqueado' : 'i_colabLiberado';
-
             if (id_OSprimeiro) {
                 id_OSprimeiro = false;
                 id_OScomp = idOS
@@ -73,21 +81,20 @@ function buscarColaboradores(paineldasOS) {
                                     <p class="lbl_descricaoOS">${descricao}</p>
                                     <p class="lbl_clienteOS">${cliente}</p>
                                 </div>
-                                <div class="p_colabs">
+                                <div class="p_colabs areaRestrita">
                         `;
             }
 
             if (!id_OSprimeiro && cont <= totalColab && nome.length > 0) {
                 cont += 1;
-                // console.log(cont + ": " + nome + "\nData Alocada: " + dataAlocada + "\nData painel: " + painelDIa + "\nOS: " + idOS + "\n")
-
+                
                 // Verifica se já existe para não duplicar
                 htmlColbasRest = `
-                        <div class="colaborador ${status}" draggable="true" data-status="${status}" data-id="${idFunc}" data-nome="${nome}" data-idnaos="${idNaOS}">
-                            <i class="${iconeClass} fa-solid fa-circle"></i>
-                            <p class="nome ${cargo}" title="${nomecompleto}">${nome}</p>
-                            <i class="bt_tirarColab fa-solid fa-x"></i>
-                            <p class="ocupadoEmOS" title=""></p>
+                        <div class="colaborador areaRestrita" draggable="true" data-status="" data-id="${idFunc}" data-nome="${nome}" data-idnaos="${idNaOS}">
+                            <i class="i_colabLiberado fa-solid fa-circle areaRestrita"></i>
+                            <p class="nome ${cargo} areaRestrita" title="${nomecompleto}">${nome}</p>
+                            <i class="bt_tirarColab fa-solid fa-x areaRestrita"></i>
+                            <p class="ocupadoEmOS areaRestrita" title=""></p>
                         </div>
                     `;
                 htmlOS += htmlColbasRest;
@@ -97,7 +104,7 @@ function buscarColaboradores(paineldasOS) {
                 id_OSprimeiro = true;
                 cont = 0;
                 const fecharHtml = `<div class="buscarColab">
-                                                <input type="text" title="Buscar colaborador" placeholder="Buscar...">
+                                                <input type="text" title="Buscar colaborador" placeholder="Buscar..."> 
                                             </div>
                                         </div>
                                         <div class="p_infoAcoes">

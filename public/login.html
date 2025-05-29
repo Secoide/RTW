@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+    <!--Pega info de fontawesome-->
+    <title>Programação Colaboradores</title>
+
+    <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
+    <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+</head>
+
+
+<body>
+    <div class="fundo_img">
+        <div class="painel_login centralizada">
+            <div class="form_login">
+                <p class="tituloLogin">Faça seu login.</p>
+                <form id="formLogin" method="POST" action="/login" autocomplete="on">
+                    <label for="usuario">Usuário</label><br>
+                    <input id="username" type="text" name="username" class="" placeholder="" autocomplete="username" required>
+                    <label for="senha">Senha</label><br>
+                    <input id="password" type="password" name="password" class="" placeholder=""
+                        autocomplete="current-password" required>
+                    <a class="esquecisenha" href="" target="" rel="noopener noreferrer">Esqueci minha senha</a>
+                    <div class="divbutton">
+                        <input id="" class="botao-degrade" type="submit" name="bt_logar" value="Entrar">
+                        <a class="semconta" href="" target="" rel="noopener noreferrer">Ainda não tenho uma conta</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+<script>
+    let socket = new WebSocket('wss://rtw.up.railway.app');
+
+    $('#formLogin').on('submit', function (e) {
+        e.preventDefault(); // Evita o envio padrão
+
+        const formData = $(this).serialize();
+
+        $.ajax({
+            url: '/login',
+            type: 'POST',
+            data: formData,
+            success: function (res) {
+                if (res.sucesso) {
+                    $('#formLogin')[0].reset();
+                    localStorage.setItem("nome_usuario", res.nome);
+                    sessionStorage.setItem("nome_usuario", res.nome);
+                    sessionStorage.setItem("nivel_acesso", res.nivel); // ← salva o nível aqui
+                    meuNome = res.nome;
+
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            acao: 'usuario_online',
+                            nome: meuNome
+                        }));
+                    }
+
+                    window.location.href = 'programacaoOS.html';
+                } else {
+                    alert(res.mensagem);
+                }
+            },
+            error: function () {
+                alert('Erro ao logar. Tente novamente.');
+            }
+        });
+    });
+</script>

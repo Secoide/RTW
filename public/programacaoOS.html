@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const nome = sessionStorage.getItem("nome_usuario");
+    const nivel = sessionStorage.getItem("nivel_acesso");
+
+    if (!nome || !nivel) {
+        window.location.href = "login.html"; // redireciona para a página de login
+    }
+    });
+</script>
+
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,24 +20,34 @@
     <!--Pega info de fontawesome-->
     <title>Programação Colaboradores</title>
 
-    <link rel="stylesheet" type="text/css" href="programacao.css">
-    <link rel="stylesheet" type="text/css" href="padrao/cores.css">
-    <link rel="stylesheet" type="text/css" href="padrao/padrao.css">
+    <link rel="stylesheet" type="text/css" href="css/programacao.css">
+    <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
+    <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
+    <link rel="stylesheet" type="text/css" href="css/cadastro.css">
+    <link rel="stylesheet" type="text/css" href="css/responsive.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
 </head>
 
 <body class="painel_pagina">
     <div class="painel_menuSuperior">
-        <div id="usuarios_online" style="padding: 5px 15px;">
+        <div id="usuarios_online" style="padding: 5px 10px;">
             👤 Online: <span id="lista_usuarios_online">carregando...</span>
+            <div class="conjuntoServidor" style="display: flex;">
+                <i id="btn-debug-ws" class="fa-solid fa-server"></i>
+                <div id="status">Conectando servidor...</div>
+            </div>
         </div>
-        <div class="painel_EsqBtAcoes" style="padding-right: 10px; cursor: pointer;">
-            <input id="seletor_data" class="tbx_pesquisarOS" type="date" value="" style="width: 120px; color:grey;">
-            <p id="toggle-mode" class=""></p>
+        <div class="painel_EsqBtAcoes" style="padding-right: 10px; ">
+            <i class="fa-solid fa-bell"></i>
+            <input id="seletor_data" class="tbx_pesquisarOS" type="date" value="" style="width: 120px; color:grey; cursor: pointer;">
+            <button class="bt_abrirmenu"><i class="fa-solid fa-ellipsis"></i></button>
+            <!--<p id="toggle-mode" class=""></p>-->
         </div>
+    </div>
     </div>
 
     <main id="home">
@@ -35,35 +57,39 @@
                     <div class="painel_Dia">
                     </div>
                     <div class="painel_iconeDia">
-                        
+
                     </div>
                 </div>
                 <div class="painel_Padrao painel_colaboradores">
-                    <div class="p_colabsDisp">
+                    <div class="p_colabsDisp areaRestrita">
 
                     </div>
                 </div>
                 <div class="painel_Padrao painel_BuscaOS">
                     <div class="buscaLadoEsq">
+                        <i class="fa-solid fa-magnifying-glass"></i>
                         <div class="input-clearable">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" name="" id="" class="pesquisarOS" placeholder="Pesquisar OS...">
+
+                            <input type="text" name=""  class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
                         <!--<button id="exportarExcel" disabled class="bt_padrao bt_cancel">Excel</button>-->
-                        <button id="" class="exportBtn bt_padrao">Exportar ▼</button>
+                        <button  class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
                     </div>
                     <div class="filtroLadoDir">
-                        <div id="filtro_prioridade_btn" class="filtroPrioridade" title="Filtrar prioridade: Alta">
+                        <div title="Trasnferir Colaboradores">
+                            <i class="fa-solid fa-arrows-turn-right bt_transferirColabs"></i>
+                        </div>
+                        <div class="filtro_prioridade_btn filtroPrioridade" title="Filtrar prioridade: Alta">
                             <i class="fa-solid fa-flag" style="cursor: pointer;"></i>
                         </div>
-                        <div id="modo_foco_btn" class="filtroFocar" title="Ativar modo foco">
+                        <div class="modo_foco_btn filtroFocar" title="Ativar modo foco">
                             <i class="fa-solid fa-eye-low-vision" style="cursor: pointer;"></i>
                         </div>
                     </div>
                 </div>
 
-                <div id="painel_daOS" class="painel_Padrao painel_dasOS scroll-container">
+                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
 
                 </div>
             </div>
@@ -72,35 +98,41 @@
                     <div class="painel_Dia">
                     </div>
                     <div class="painel_iconeDia">
-                        
+
                     </div>
                 </div>
                 <div class="painel_Padrao painel_colaboradores">
-                    <div class="p_colabsDisp">
+                    <i class="seta-esquerda fa fa-chevron-left seta" style="display: none;"></i>
+                    <div class="p_colabsDisp areaRestrita" id="scrollDiv">
 
                     </div>
+                    <!--<i class="maisProlado fa-solid fa-arrow-right"></i>-->
+                    <i class="seta-direita fa fa-chevron-right seta" style="display: none;"></i>
                 </div>
                 <div class="painel_Padrao painel_BuscaOS">
                     <div class="buscaLadoEsq">
                         <div class="input-clearable">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" name="" id="" class="pesquisarOS" placeholder="Pesquisar OS...">
+                            <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <button id="" class="exportBtn bt_padrao">Exportar ▼</button>
+                        <button class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
                     </div>
                     <div class="filtroLadoDir">
-                        <div id="filtro_prioridade_btn" class="filtroPrioridade" title="Filtrar prioridade: Alta">
+                        <div title="Trasnferir Colaboradores">
+                            <i class="fa-solid fa-arrows-turn-right bt_transferirColabs"></i>
+                        </div>
+                        <div class="filtro_prioridade_btn filtroPrioridade" title="Filtrar prioridade: Alta">
                             <i class="fa-solid fa-flag" style="cursor: pointer;"></i>
                         </div>
-                        <div id="modo_foco_btn" class="filtroFocar" title="Ativar modo foco">
+                        <div class="modo_foco_btn filtroFocar" title="Ativar modo foco">
                             <i class="fa-solid fa-eye-low-vision" style="cursor: pointer;"></i>
                         </div>
                     </div>
                 </div>
 
-                <div id="painel_daOS" class="painel_Padrao painel_dasOS scroll-container">
-
+                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
+                    
                 </div>
             </div>
             <div class="painelDia diaamanha" data-dia="">
@@ -108,11 +140,11 @@
                     <div class="painel_Dia">
                     </div>
                     <div class="painel_iconeDia">
-                        
+
                     </div>
                 </div>
                 <div class="painel_Padrao painel_colaboradores">
-                    <div class="p_colabsDisp">
+                    <div class="p_colabsDisp areaRestrita">
 
                     </div>
                 </div>
@@ -120,35 +152,38 @@
                     <div class="buscaLadoEsq">
                         <div class="input-clearable">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" name="" id="" class="pesquisarOS" placeholder="Pesquisar OS...">
+                            <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <button id="" class="exportBtn bt_padrao">Exportar ▼</button>
+                        <button class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
                     </div>
                     <div class="filtroLadoDir">
-                        <div id="filtro_prioridade_btn" class="filtroPrioridade" title="Filtrar prioridade: Alta">
+                        <div title="Trasnferir Colaboradores">
+                            <i class="fa-solid fa-arrows-turn-right bt_transferirColabs"></i>
+                        </div>
+                        <div class="filtro_prioridade_btn filtroPrioridade" title="Filtrar prioridade: Alta">
                             <i class="fa-solid fa-flag" style="cursor: pointer;"></i>
                         </div>
-                        <div id="modo_foco_btn" class="filtroFocar" title="Ativar modo foco">
+                        <div class="modo_foco_btn filtroFocar" title="Ativar modo foco">
                             <i class="fa-solid fa-eye-low-vision" style="cursor: pointer;"></i>
                         </div>
                     </div>
                 </div>
 
-                <div id="painel_daOS" class="painel_Padrao painel_dasOS scroll-container">
+                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
 
                 </div>
             </div>
-            <div class="painelDia diaamanha" data-dia="">
+            <div class="painelDia diaamanha2" data-dia="">
                 <div class="painelInfoDia">
                     <div class="painel_Dia">
                     </div>
                     <div class="painel_iconeDia">
-                        
+
                     </div>
                 </div>
                 <div class="painel_Padrao painel_colaboradores">
-                    <div class="p_colabsDisp">
+                    <div class="p_colabsDisp areaRestrita">
 
                     </div>
                 </div>
@@ -156,22 +191,25 @@
                     <div class="buscaLadoEsq">
                         <div class="input-clearable">
                             <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" name="" id="" class="pesquisarOS" placeholder="Pesquisar OS...">
+                            <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <button id="" class="exportBtn bt_padrao">Exportar ▼</button>
+                        <button class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
                     </div>
                     <div class="filtroLadoDir">
-                        <div id="filtro_prioridade_btn" class="filtroPrioridade" title="Filtrar prioridade: Alta">
+                        <div title="Trasnferir Colaboradores">
+                            <i class="fa-solid fa-arrows-turn-right bt_transferirColabs"></i>
+                        </div>
+                        <div class="filtro_prioridade_btn filtroPrioridade" title="Filtrar prioridade: Alta">
                             <i class="fa-solid fa-flag" style="cursor: pointer;"></i>
                         </div>
-                        <div id="modo_foco_btn" class="filtroFocar" title="Ativar modo foco">
+                        <div class="modo_foco_btn filtroFocar" title="Ativar modo foco">
                             <i class="fa-solid fa-eye-low-vision" style="cursor: pointer;"></i>
                         </div>
                     </div>
                 </div>
 
-                <div id="painel_daOS" class="painel_Padrao painel_dasOS scroll-container">
+                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
 
                 </div>
             </div>
@@ -181,7 +219,7 @@
     <div id="overlay_comentario"></div>
     <div id="box_comentario" style="display: none;">
         <textarea id="comentario_texto" placeholder="Escreva uma observação..."></textarea>
-        <button id="btn_salvar_comentario" class="bt_padrao">Salvar</button>
+        <button id="btn_salvar_comentario" class="bt_padrao bt_cad">Salvar</button>
         <button id="btn_fechar_comentario" class="bt_padrao bt_cancel">Fechar</button>
     </div>
     <div id="overlay_checklist"></div>
@@ -192,7 +230,7 @@
 
         <div class="novo-item">
             <input type="text" id="input_novo_item" class="tbx_pesquisarOS " placeholder="Nova tarefa..." />
-            <button id="btn_add_item" class="bt_padrao" style="width: 30px;"> + </button>
+            <button id="btn_add_item" class="bt_padrao bt_cad" style="width: 30px;"> + </button>
         </div>
 
         <button id="btn_fechar_checklist" class="bt_padrao bt_cancel" style="margin-top: 10px;">Fechar</button>
@@ -204,7 +242,7 @@
         <h4 style="margin-bottom: 10px;">Informe seu nome</h4>
         <input type="text" id="input_nome_usuario" placeholder="Seu nome..." class="tbx_pesquisarOS"
             style="height: 20px;" />
-        <button id="btn_salvar_nome" class="bt_padrao" style="margin-top: 10px;">Entrar</button>
+        <button id="btn_salvar_nome" class="bt_padrao bt_cad" style="margin-top: 10px;">Entrar</button>
     </div>
 
     <div id="loadingOverlay">
@@ -218,8 +256,18 @@
         <!--<div class="popup-option" data-type="pdf">PDF</div>-->
         <!--<div class="popup-option" data-type="excel">Excel</div>-->
     </div>
-    <div id="form_aviso"></div>
 
+    <div id="popupMenu" class="popup-menu">
+        <div id="popup-novaos" class="popup-option-menu" data-type="novaos"><i class="fa-solid fa-pen-ruler"></i>Nova OS</div>
+        <div id="popup-colaborador" class="popup-option-menu" data-type="colaborador"><i class="fa-solid fa-user-plus"></i>Colaborador</div>
+        
+        <div id="popup-logout" class="popup-option-menu" data-type="logout" style="color: rgb(170, 33, 33);"><i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>Sair</div>
+    </div>
+
+
+    <div id="form_aviso"></div>
+    <div id="form_debugws"></div>
+    <div id="form_cadColab"></div>
 </body>
 
 <script type="text/javascript" src="scripts/animacoes.js" defer></script>
@@ -228,3 +276,13 @@
 <script type="text/javascript" src="scripts/bt_acoes.js"></script>
 <script type="text/javascript" src="scripts/programacao.js"></script>
 <script type="text/javascript" src="scripts/exportar.js"></script>
+<script type="text/javascript" src="scripts/formatacao.js"></script>
+
+
+
+
+
+<script type="text/javascript" src="scripts/websocket/atualizarCliente.js"></script>
+<script type="text/javascript" src="scripts/websocket/reconectar.js"></script>
+
+<script type="text/javascript" src="scripts/nivel_acesso.js"></script>

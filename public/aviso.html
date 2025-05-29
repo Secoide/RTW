@@ -1,5 +1,5 @@
-<div id="aviso">
-    <div id="aviso-content">
+<div class="aviso">
+    <div class="aviso-content">
         <h2><i style="color: #4caf50; font-size: 30px;" class="fa-solid fa-file-circle-check"></i></h2><br>
         <p id="mensagem-aviso"></p>
 
@@ -7,7 +7,7 @@
             <div id="progress-fill"></div>
         </div>
 
-        <button id="btn-ok" onclick="$('#aviso').css({ visibility: 'hidden', opacity: 0 });">OK</button>
+        <button id="btn-ok" onclick="$('.aviso').css({ visibility: 'hidden', opacity: 0 });">OK</button>
     </div>
 </div>
 
@@ -20,7 +20,7 @@
         
         $('#mensagem-aviso').text(mensagem);
         $('#progress-fill').css('width', '0%');
-        $('#aviso').css({ visibility: 'visible', opacity: 1 });
+        $('.aviso').css({ visibility: 'visible', opacity: 1 });
 
         tempoAtual = 0;
         intervalo = setInterval(() => {
@@ -37,7 +37,7 @@
 
     function fecharAviso() {
         clearInterval(intervalo);
-        $('#aviso').css({ visibility: 'hidden', opacity: 0 });
+        $('.aviso').css({ visibility: 'hidden', opacity: 0 });
     }
 
     $('#botaoAcao').on('click', function () {

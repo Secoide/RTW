@@ -1,5 +1,19 @@
+
+
+
 $(document).on('click', '.iconeStatusDia i', function (event, data) {
     const $icon = $(this);
+    if (!(data && data.programatico)) {
+        if ($icon.hasClass('fa-file-signature')) {
+            if (!confirm("Programação finalizada para lançamento?")) {
+                return false;
+            }
+        } else if ($icon.hasClass('fa-file-circle-check')) {
+            if (!confirm("Modificar programação novamente?")) {
+                return false;
+            }
+        }
+    }
     const $wrapper = $icon.parent();
     const painelDia = $icon.closest('.painelDia');
     let status = 0;

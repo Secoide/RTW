@@ -1,0 +1,243 @@
+html,
+body {
+    overflow: hidden;
+    /* Remove scroll da janela principal */
+    height: 100%;
+    /* Garante altura total da tela */
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    padding: 0px;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+
+
+
+
+.fundo_paginaPadrao {
+    padding: 0px;
+    margin: 0;
+    background-color: var(--cor_fundotabela);
+}
+
+.naoSelecionavel {
+    -webkit-touch-callout: none;
+    /* iPhone OS, Safari */
+    -webkit-user-select: none;
+    /* Chrome, Safari 3 */
+    -khtml-user-select: none;
+    /* Safari 2 */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+ */
+    user-select: none;
+    /* Possível implementação no futuro */
+    /* cursor: default; */
+}
+
+/* Quando opção de comobox for selecionado */
+option:checked {
+    color: var(--verde_2);
+    font-weight: bold;
+}
+
+/* BOTAO PADRÃO */
+.bt_padrao {
+    background-color: var(--white);
+    border-radius: 5px;
+    border: 1px solid var(--cor_letraFundo);
+    width: 80px;
+    height: 25px;
+    cursor: pointer;
+}
+
+/* BOTAO ADICIONAR */
+.bt_cad:hover {
+    background-color: var(--verde_2);
+    color: var(--white);
+}
+
+/* BOTAO ANEXAR */
+.bt_anexar:hover {
+    background-color: var(--azul_1);
+    color: var(--white);
+}
+
+/* BOTAO BUSCAR */
+.bt_buscar:hover {
+    background-color: var(--amarelo);
+    color: var(--text_excuro);
+}
+
+/* BOTAO CANCELAR */
+.bt_cancel {
+    color: var(--vermelho);
+}
+
+.bt_cancel:hover {
+    background-color: var(--vermelho);
+    color: var(--white);
+    cursor: pointer;
+}
+
+.frm_padrao .input_obrigatorio:invalid {
+    border-color: var(--vermelho) !important;
+}
+
+.frm_padrao .input_obrigatorio:valid {
+    border-color: var(--verde_2) !important;
+}
+
+.tbx_pesquisarOS {
+    background-color: var(--white);
+    border-radius: 5px;
+    border: 1px solid var(--cor_letraFundo);
+    width: 80px;
+    height: 25px;
+    text-align: center;
+    font-size: 11px;
+}
+
+/* Fundo escuro da janelas */
+[id^="frm_fundosEscuro_"] {
+    z-index: 99;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.frm_padrao {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+}
+
+/* Primeira Tela Padrao para todas as paginas*/
+.painel_Padrao {
+    border: 1px solid var(--cor_fundotabela);
+    box-shadow: 1px 1px 1px 1px var(--cinza_tituloForm);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+}
+
+.p_infosExcluir {
+    background-color: var(--cor_fundoExcluir);
+}
+
+.linhaAvisoExcluir {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 10px;
+}
+
+.img_confirmar {
+    font-size: 20px;
+}
+
+.img_lixeira {
+    color: var(--vermelho);
+}
+
+
+/* Estilo do pop-up */
+#popup {
+    z-index: 100;
+    position: fixed;
+    top: 20px;
+    height: 20px;
+    right: -300px;
+    /* Inicialmente fora da tela */
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 5px 0 0 5px;
+    border: 1px solid gray;
+    font-size: 16px;
+    transition: right 1s ease;
+    /* Animação para deslocamento */
+}
+
+#status-popup .status_padrao SPAN:hover {
+    border: 1px solid rgb(39, 39, 39);
+}
+
+.scroll-container {
+    overflow: auto;
+    /* Permite rolagem */
+
+    /* Oculta a barra de rolagem */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE e Edge */
+}
+
+.scroll-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari e Opera */
+}
+
+
+.tb_padrao{
+    height: auto;
+    width: 100%;
+    text-align: center;
+    border: none; /* Remove todas as bordas */
+}
+
+.tb_padrao th{
+    padding: 2px 2px;
+    font-size: 10px;
+}
+
+.tb_padrao td{
+    border-left: 1px solid var(--border_cinza); /* Adiciona borda esquerda */
+    border-bottom: 1px solid var(--border_cinza);
+}
+.tb_padrao td i{
+    cursor: pointer;
+}
+.tb_padrao td i:hover{
+    color: var(--hover_verde);
+}
+
+.tb_padrao th:first-child {
+    border-left: none; /* Remove borda da primeira coluna */
+    border-radius: 4px;
+    border-radius: 4px 0 0 4px;
+}
+.tb_padrao th:last-child {
+    border-radius: 0 4px 4px 0;
+}
+
+.tb_padrao td:first-child{
+    border-left: none; /* Remove borda da primeira coluna */
+}
+
+
+.tb_padrao_cabecalho{
+    background-color: var(--fundo_noturno);
+    color: var(--branco);
+}
+
+.tb_padrao_conteudo tr{
+    height: 20px;
+    color: var(--fundo_noturno);
+}
