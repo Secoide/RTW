@@ -302,7 +302,7 @@ app.post('/listar_tb_hitorico_atestar', async (req, res) => {
       datainicio, 
       datafinal, 
       IFNULL(descricao, '') AS descricao 
-        FROM bd_cadastro.tb_func_interrupto 
+        FROM tb_func_interrupto 
           WHERE id_func = ?
   `;
 
@@ -687,9 +687,9 @@ function verificarAutenticacao(req, res, next) {
 //nodemon server.js
 
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Servidor rodando.`);
-});
+//const PORT = process.env.PORT || 3000;
+//server.listen(PORT, () => {
+//  console.log(`Servidor rodando.`);
+//});
 
 
