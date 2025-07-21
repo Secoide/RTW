@@ -27,6 +27,11 @@ $(document).ready(function () {
                 e.preventDefault();
                 e.stopPropagation();
             });
+            // Impede interações em áreas restritas
+            $(document).on('click', '.areaRestritaClick', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
             break;
 
         case 2:
@@ -41,4 +46,29 @@ $(document).ready(function () {
             mostrarElementos();
             break;
     }
+    if (Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
 });
+
+// Função para exibir uma notificação
+function mostrarNotificacao(titulo, corpo, tagdia) {
+    const som = new Audio('../notifications/notification.mp3'); // som local
+    if (Notification.permission === 'granted') {
+        const notif = new Notification(titulo, {
+            body: corpo,
+            tag: tagdia,
+            requireInteraction: true,
+            data: { rota: '../programacaoOS.html' }
+        });
+        som.play().catch(e => {
+            console.warn('Som bloqueado até interação do usuário');
+        });
+
+        notif.onclick = function (e) {
+            window.focus();
+            window.location.href = notif.data.rota;
+        };
+    }
+}
+

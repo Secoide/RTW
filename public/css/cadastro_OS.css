@@ -1,0 +1,101 @@
+.p_titulo{
+    text-align: center;
+    color: var(--texto_cinza);
+}
+.p_titulo .tituloform{
+    font-size: 14px;
+}
+
+.p_padrao{
+    background-color: var(--white);
+    border: 1px solid var(--cor_fundotabela);
+    box-shadow: 1px 1px 3px var(--cor_letraFundo);
+    border-radius: 8px;
+    margin-block: 10px;
+    padding: 10px;
+}
+
+.linha_infoOS{
+    margin-top: 0px;
+}
+.linha_observacao{
+    margin-bottom: 0px;
+}
+
+.info_padrao{
+    margin-block: 5px;
+}
+
+.linha_valorData{
+    display: flex;
+    
+    justify-content: space-between;
+}
+
+.linha_infoOS{
+    display: flex;
+    gap: 5px;
+}
+
+.dica{
+    font-size: 10px;
+    color: var(--cinza_claro);
+    padding-left: 5px;
+}
+
+.p_cadastroOS{
+    border-radius: 10px;
+    width: 350px; 
+    background-color: white;
+
+}
+
+.p_btAnexo{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.p_anexosRolante{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.p_anexoPadrao{
+    
+    color: var(--cinza_claro);
+    width: 70px;
+    height: 70px;
+    border: 1px solid var(--cor_fundotabela);
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.p_anexoPadrao:hover{
+    background-color: rgb(248, 248, 248);
+    box-shadow: 1px 1px 3px var(--cor_letraFundo);
+    border: 1px solid var(--cinza_claro);
+}
+
+
+.iconeAnexo{
+    font-size: 30px;
+    padding-block: 8px;
+}
+
+.linha_tituloAnexo p{
+    font-size: 11px;
+}
+
+.p_anexado{
+    background-color: var(--cor_fundoPainelAnexos) !important;
+    color: var(--texto_cinza) !important;
+}
+
+.p_acoes{
+    display: flex;
+    justify-content: space-between;
+}
+

@@ -3,6 +3,9 @@
     background-color: #f1f1f1;
 }
 
+.swal2-container {
+  z-index: 99999 !important;
+}
 
 .painel_menuSuperior {
     display: flex;
@@ -19,9 +22,20 @@
 }
 
 
-.bt_abrirmenu{
+#usuarios_online {
+    font-size: 10px;
+}
+
+#seletor_data {
+    width: 120px;
+    color: grey;
     cursor: pointer;
 }
+
+.bt_abrirmenu {
+    cursor: pointer;
+}
+
 
 .dark-mode {
     background-color: #272727 !important;
@@ -38,13 +52,27 @@
     color: #c0c0c0 !important;
 }
 
-.painel_Padrao {
-    margin: 8px;
+.notification-lista {
+    display: none;
+    position: absolute;
+    color: var(--texto_cinza);
+    font-size: 12px;
+    right: 0;
+    top: 40px;
+    background-color: #f1f1f1;
+    border: 1px solid var(--cor_fundotabela);
+    box-shadow: 1px 1px 5px 2px var(--cinza_tituloForm);
+    border-radius: 10px;
+    padding: 10px;
+    width: 420px;
+    z-index: 100;
 }
+
 
 .painel_semanal {
     display: flex;
     gap: 20px;
+    justify-content: center;
 }
 
 .conjuntoServidor i {
@@ -59,20 +87,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 450px;
+    gap: 8px;
+    width: 360px;
     border: 1px solid rgb(204, 204, 204);
     margin-top: 8px;
     border-radius: 10px;
-    box-shadow: 1px 1px 20px 1px #b6b6b6;
 }
 
 .painel_Dia {
     position: relative;
-    padding: 4px;
-    border-radius: 10px;
-    border: 1px solid rgb(204, 204, 204);
-    background-color: #f1f1f1;
-    top: -12px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .painelDia.bloqueado {
@@ -81,34 +106,37 @@
 }
 
 .diaanterior {
-    background-color: #dfdfdf;
+    background-color: #F8F7F8;
 }
 
 
 .diahoje {
-    background-color: #f8f8f8;
+    background-color: #F8F7F8;
 }
 
 .diaamanha,
 .diaamanha2 {
-    background-color: #e6e6e6;
+    background-color: #F8F7F8;
 }
 
 .painelInfoDia {
     display: flex;
     align-items: center;
+    margin-top: 5px;
+    padding-left: 30px;
 }
 
 .iconeStatusDia {
     position: relative;
+    font-size: 12px;
     padding: 4px;
     border-radius: 10px;
     width: 20px;
     text-align: center;
     border: 1px solid rgb(204, 204, 204);
-    background-color: #f1f1f1;
-    top: -12px;
-    right: -100px;
+    background-color: #ffffff;
+    top: -15px;
+    right: -65px;
 }
 
 .iconeStatusDia i.fa-file-signature {
@@ -132,7 +160,11 @@
 .painel_colaboradores {
     display: flex;
     flex-direction: column;
-    width: 390px;
+    width: 340px;
+    background-color: #EEEEF0;
+    border: 1px solid #E4E4E5;
+    margin-inline: 10px;
+    border-radius: 10px;
 }
 
 .p_colabsDisp {
@@ -140,9 +172,11 @@
     flex-direction: column;
     justify-content: left;
     text-align: left;
-    flex-wrap: wrap;
     max-height: 200px;
-    gap: 5px;
+    gap: 6px;
+    padding: 5px;
+    flex-wrap: wrap;
+    align-content: space-around;
 }
 
 .seta-esquerda {
@@ -157,29 +191,56 @@
 .painel_BuscaOS {
     display: flex;
     justify-content: space-between;
-    gap: 5px;
-    width: 350px;
+    width: 95%;
+    font-size: 12px;
 }
 
 .painel_BuscaOS .pesquisarOS {
-    padding: 4px 8px 4px 8px;
-    width: 100px;
+    padding: 8px 8px 8px 8px;
+    width: 120px;
     border-radius: 10px;
-    border: 1px solid gray;
+    border: 1px solid #dbdbdb;
+    background-color: #FFFFFF;
+}
+
+.buscaLadoEsq {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.buscaLadoEsq i {
+    font-size: 15px;
+    color: #9b9b9b;
+    padding: 8px 8px 8px 8px;
+    width: 20px;
+    border-radius: 10px;
+    border: 1px solid #dbdbdb;
+    text-align: center;
+    background-color: #FFFFFF;
+    margin-left: 5px;
 }
 
 .filtroLadoDir {
     display: flex;
     align-items: center;
-    gap: 10px;
 }
 
 .filtroLadoDir i {
     font-size: 15px;
-    color: #8a8a8a;
+    color: #9b9b9b;
+    padding: 8px 8px 8px 8px;
+    width: 20px;
+    border-radius: 10px;
+    border: 1px solid #dbdbdb;
+    text-align: center;
+    background-color: #FFFFFF;
+    margin-left: 5px;
 }
 
-.filtroLadoDir i:hover {
+.filtroLadoDir i:hover,
+.buscaLadoEsq i:hover {
     color: #383838;
     cursor: pointer;
 }
@@ -188,6 +249,7 @@
     display: flex;
     flex-direction: column;
     height: 500px;
+    gap: 8px;
 }
 
 .painel_OS {
@@ -196,27 +258,52 @@
     transition: all 0.3s ease;
     min-width: 340px;
     max-width: 340px;
+    border: 1px solid var(--cor_fundotabela);
+    border-radius: 10px;
+    background-color: #FEFEFF;
 }
-
-
 
 .painel_OS .p_infoOS {
     display: flex;
     justify-content: space-between;
-    gap: 15px;
-    padding: 5px;
+    font-size: 12px;
+    gap: 2px;
+    padding: 6px 8px 4px 8px;
     text-align: center;
     border-radius: 10px 10px 0px 0px;
-    background-color: var(--painel_OSinfos);
+    align-items: center;
 }
 
 .painel_OS .p_infoOS .lbl_OS {
     font-weight: bold;
+    cursor: pointer;
+    width: 18%;
+    text-align: left;
+}
+
+.painel_OS .p_infoOS .lbl_OS:hover {
+    color: #000;
+    scale: 1.1;
+}
+
+.painel_OS .p_infoOS .lbl_descricaoOS {
+    width: 64%;
+    text-align: center;
+    white-space: nowrap;/* Impede quebra de linha */
+    overflow: hidden;/* Oculta o que passar da largura */
+    text-overflow: ellipsis;/* Adiciona "..." no fim */
+}
+
+.painel_OS .p_infoOS .lbl_clienteOS {
+    width: 18%;
+    text-align: right;
+    white-space: nowrap;/* Impede quebra de linha */
+    overflow: hidden;/* Oculta o que passar da largura */
+    text-overflow: ellipsis;/* Adiciona "..." no fim */
 }
 
 .p_colabs {
     display: none;
-    background-color: var(--painel_Colabs);
 }
 
 .p_colabs:has(.colaborador),
@@ -225,11 +312,13 @@
     flex-wrap: wrap;
     max-width: 380px;
     gap: 5px;
-    padding: 10px;
+    padding: 5px;
 }
+
 .p_colabsDisp .colaborador:has(.nome.lider) {
     display: none;
 }
+
 .destino-highlight {
     background-color: var(--painel_ColabAceita) !important;
     /* verde claro */
@@ -248,68 +337,128 @@
     gap: 4px;
     padding: 4px 6px 4px 6px;
     text-align: center;
-    height: 10px;
+    height: 11px;
     width: 90px;
     border-radius: 10px;
     color: var(--branco);
-    background-color: var(--fundopadrao);
+    background-color: #373839;
+}
+
+.colaborador:hover {
+    scale: 1.05;
 }
 
 .colaborador.ferias {
     background-color: var(--ferias);
 }
+
 .colaborador.afastamento {
     background-color: var(--afastado);
 }
+
 .colaborador.saude {
     background-color: var(--saude);
 }
+
 .colaborador.paternidade {
     background-color: var(--paternidade);
 }
 
-.colaborador.afastamento .nome{
+.colaborador.afastamento .nome {
     color: var(--branco);
 }
-.colaborador.saude .nome{
+
+.colaborador.saude .nome {
     color: var(--branco);
 }
-.colaborador.ferias .nome{
+
+.colaborador.ferias .nome {
     color: var(--preto);
 }
-.colaborador.paternidade .nome{
+
+.colaborador.paternidade .nome {
     color: var(--preto) !important;
 }
 
+.colaborador.aniver {
+    position: relative;
+    overflow: hidden;
+}
+
+.colaborador.aniver::before {
+    content: "";
+    position: absolute;
+    bottom: -50%;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(0, transparent, rgba(255, 255, 255, 0.493), transparent);
+    transform: rotate(25deg);
+    animation: brilhoBottomLeft 2.5s infinite;
+}
+
+.colaborador.aniver .nome {
+    color: var(--branco);
+}
+
+.colaborador.aniver .nome::after {
+    content: "\f1fd";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--branco);
+    margin-left: 4px;
+}
+
+@keyframes brilhoBottomLeft {
+    0% {
+        transform: translate(-100%, 100%) rotate(25deg);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(100%, -100%) rotate(25deg);
+        opacity: 0;
+    }
+}
+
+
+
+
 
 .colaborador.ferias .nome::after {
-  content: "\f5ca";
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  color: var(--preto);
-  margin-left: 4px;
+    content: "\f5ca";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--preto);
+    margin-left: 4px;
 }
 
 .colaborador.afastamento .nome::after {
-  content: "\e547"; 
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  color: var(--branco);
-  margin-left: 4px;
+    content: "\e547";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--branco);
+    margin-left: 4px;
 }
+
 .colaborador.saude .nome::after {
-  content: "\e05c"; 
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  color: var(--branco);
-  margin-left: 4px;
+    content: "\e05c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--branco);
+    margin-left: 4px;
 }
+
 .colaborador.paternidade .nome::after {
-  content: "\f77c"; 
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  color: var(--preto);
-  margin-left: 4px;
+    content: "\f77c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--preto);
+    margin-left: 4px;
 }
 
 .colaborador .nome {
@@ -352,25 +501,24 @@
 
 .colaboradorEmOS {
     background-color: #afafaf;
-    width: 110px;
+    width: 90px;
 }
 
 .colaboradorEmOS .nome {
     color: var(--branco) !important;
 }
 
-.colaboradorEmOS .ocupadoEmOS DIV {
+.colaboradorEmOS .ocupadoEmOS {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     padding-inline: 5px 5px;
-    right: 8px;
     font-size: 10px;
     color: var(--texto_cinza);
+    right: 28px;
     background-color: rgb(241, 241, 241);
-    height: 16px;
-    width: 22px;
+    height: 18px;
     border: 1px solid #afafaf;
     border-radius: 10px 10px 10px 10px;
     cursor: pointer;
@@ -395,7 +543,7 @@
 .buscarColab INPUT {
     padding: 4px 8px 4px 8px;
     width: 85px;
-    height: 8px;
+    height: 9px;
     border-radius: 10px;
     border: 1px solid gray;
 }
@@ -406,6 +554,7 @@
     border-top: 1px solid rgb(226, 226, 226);
     padding: 4px 10px 2px 10px;
     border-radius: 0px 0px 10px 10px;
+    font-size: 12px;
 }
 
 .p_infoAcoes .p_totalColabs {
@@ -434,7 +583,7 @@
 
 
 .p_btAcoes {
-    color: var(--botao_acao) ;
+    color: var(--botao_acao);
 
 }
 
@@ -746,8 +895,10 @@
 .popup-option {
     padding: 8px 12px;
     cursor: pointer;
+    font-size: 12px;
 }
-.popup-menu{
+
+.popup-menu {
     display: none;
     position: absolute;
     background-color: var(--branco);
@@ -757,12 +908,14 @@
     padding: 5px 0;
     border-radius: 4px;
     width: 150px;
+    font-size: 12px;
 }
 
 .popup-option-menu {
     padding: 8px 12px;
     cursor: pointer;
 }
+
 .popup-option-menu:hover {
     background-color: #f0f0f0;
 }
@@ -865,7 +1018,10 @@
 }
 
 /* Form AVISO */
-.aviso, .debug, .cad{
+.aviso,
+.debug,
+.cad,
+.cadOS {
     position: fixed;
     top: 0;
     left: 0;
@@ -944,3 +1100,98 @@
     text-align: center;
 }
 
+.overlay-transferencia {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(75, 75, 75, 0.411);
+    /* transparente */
+    border-radius: 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.overlay-transferencia i {
+    font-size: 24px;
+    color: var(--branco);
+}
+
+
+.overlay-transferencia:not(.selecionado) i {
+    opacity: 0.7;
+    color: #aaa;
+}
+
+.overlay-transferencia:not(.selecionado) {
+    background-color: rgba(93, 131, 133, 0.089);
+}
+
+.modal-overlay-data {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    /* centraliza */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content-data {
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative;
+    min-width: 230px;
+    max-width: 90vw;
+}
+
+.modal-content-data h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.modal-content-data input[type="date"] {
+    padding: 6px 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.fechar-modal-data {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #888;
+}
+
+.fechar-modal-data:hover {
+    color: #000;
+}
+
+.fa-check-to-slot {
+    scale: 1.2;
+    color: var(--verde_2) !important;
+    transition: scale 0.2s ease, color 0.2s ease;
+}
+
+.fa-arrows-turn-right {
+    transition: scale 0.2s ease, color 0.2s ease;
+    color: var(--texto_cinza);
+    /* ou a cor original do botão */
+    scale: 1;
+}

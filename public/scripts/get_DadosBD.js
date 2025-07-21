@@ -24,11 +24,12 @@ function carregarColaboradoresDisp(painelDia) {
             const nomecompleto = colab.nome;
             const cargo = colab.funcao.toLowerCase();
             const idFunc = colab.idFunc;
+            const aniver = colab.aniver;
 
             let display = classeMotivo === '' ? 'visible;' : 'hidden;';
             let iconeClass = classeMotivo === '' ? 'i_colabLiberado' : 'i_colabBloqueado';
             return `
-                <div class="colaborador ${classeMotivo} areaRestrita" title="" draggable="true" data-status="${classeMotivo}" data-id="${idFunc}" data-nome="${nome}">
+                <div class="colaborador ${classeMotivo} ${aniver} areaRestrita" title="" draggable="true" data-status="${classeMotivo}" data-id="${idFunc}" data-nome="${nome}">
                     <i class="${iconeClass} fa-solid fa-circle areaRestrita" style="visibility: ${display}"></i>
                     <p class="nome ${cargo} areaRestrita" title="${nomecompleto}">${nome}</p>
                     <i class="bt_tirarColab fa-solid fa-x"></i>
@@ -75,11 +76,11 @@ function buscarColaboradores(paineldasOS) {
                 id_OSprimeiro = false;
                 id_OScomp = idOS
                 htmlOS = `
-                            <div class="painel_Padrao painel_OS">
+                            <div class="painel_OS">
                                 <div class="p_infoOS" data-os="${idOS}" data-cidade="${cidade}">
                                     <p class="lbl_OS">${idOS}</p>
-                                    <p class="lbl_descricaoOS">${descricao}</p>
-                                    <p class="lbl_clienteOS">${cliente}</p>
+                                    <p class="lbl_descricaoOS" title="${descricao}">${descricao}</p>
+                                    <p class="lbl_clienteOS" title="${cliente}">${cliente}</p>
                                 </div>
                                 <div class="p_colabs areaRestrita">
                         `;
@@ -108,7 +109,7 @@ function buscarColaboradores(paineldasOS) {
                                             </div>
                                         </div>
                                         <div class="p_infoAcoes">
-                                            <div class="p_totalColabs">
+                                            <div class="p_totalColabs" title="Total de Colaboradores">
                                                 <i class="fa-solid fa-people-group"></i>
                                                 <p class="lbl_total">${totalColab}</p>
                                                 <i class="bt_exportDados fa-solid fa-file-export" title="Exportar dados dos Colaboradores"></i>

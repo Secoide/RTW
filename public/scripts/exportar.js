@@ -136,7 +136,7 @@ function exportarWHATS(botaoClicado) {
     });
 
     for (const cidade in cidades) {
-        enviar += "`" + cidade + " ▼`\n" + cidades[cidade].join("") + "\n";
+        enviar += "`" + cidade + " ▼`\n" + cidades[cidade].join("");
     }
 
     enviar = semana + enviar;

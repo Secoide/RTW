@@ -12,6 +12,7 @@
     <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
     <link rel="stylesheet" type="text/css" href="css/login.css">
 
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
@@ -25,7 +26,8 @@
                 <p class="tituloLogin">Faça seu login.</p>
                 <form id="formLogin" method="POST" action="/login" autocomplete="on">
                     <label for="usuario">Usuário</label><br>
-                    <input id="username" type="text" name="username" class="" placeholder="" autocomplete="username" required>
+                    <input id="username" type="text" name="username" class="" placeholder="" autocomplete="username"
+                        required>
                     <label for="senha">Senha</label><br>
                     <input id="password" type="password" name="password" class="" placeholder=""
                         autocomplete="current-password" required>
@@ -57,6 +59,7 @@
                 if (res.sucesso) {
                     $('#formLogin')[0].reset();
                     localStorage.setItem("nome_usuario", res.nome);
+                    sessionStorage.setItem("id_usuario", res.id);
                     sessionStorage.setItem("nome_usuario", res.nome);
                     sessionStorage.setItem("nivel_acesso", res.nivel); // ← salva o nível aqui
                     meuNome = res.nome;

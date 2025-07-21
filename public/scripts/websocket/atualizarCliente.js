@@ -8,7 +8,6 @@ function registrarEventosSocket(socket) {
     socket.onmessage = function (event) {
         const data = JSON.parse(event.data);
         const acao = data.acao;
-
         switch (acao) {
             case 'atualizar_usuarios_online':
                 atualizarUsuariosOnline(data);
@@ -33,6 +32,9 @@ function registrarEventosSocket(socket) {
             case 'mudar_statusProgDia':
                 mudarStatusProgramacaoDia(data);
                 break;
+            case 'notificacao':
+                atualizarUI(data);
+                break;
 
             default:
                 console.warn('Ação desconhecida:', acao);
@@ -51,7 +53,7 @@ function alocarColaborador({ osID, nomes, data: dataDia }) {
     });
 
     const $destinoOS = $painelDia.find('.painel_OS').filter(function () {
-        return $(this).find('.lbl_OS').text().trim() === osID;
+        return $(this).find('.lbl_OS').text().trim() == osID;
     });
 
     nomes.forEach(({ id, nome }) => {
@@ -73,6 +75,7 @@ function alocarColaborador({ osID, nomes, data: dataDia }) {
             $colabBase.addClass('colaboradorEmOS');
         }
     });
+    atualizarPainel($painelDia);
 }
 
 function removerColaborador({ osID, id, data: dataDia }) {
@@ -122,7 +125,7 @@ function removerColaborador({ osID, id, data: dataDia }) {
 
 function confirmarAlocacao({ osID, nome, idNaOS }) {
     const $painel = $('.painel_OS').filter(function () {
-        return $(this).find('.lbl_OS').text().trim() === osID;
+        return $(this).find('.lbl_OS').text().trim() == osID;
     });
 
     const $colab = $painel.find('.colaborador').filter(function () {
@@ -134,7 +137,7 @@ function confirmarAlocacao({ osID, nome, idNaOS }) {
 
 function atualizarPrioridadeOS({ osID, prioridade }) {
     const $os = $('.painel_OS').filter(function () {
-        return $(this).find('.lbl_OS').text().trim() === osID;
+        return $(this).find('.lbl_OS').text().trim() == osID;
     });
 
     const $icon = $os.find('.bt_prioridade');
@@ -177,6 +180,7 @@ function mudarStatusProgramacaoDia({ statuss, dia }) {
     }
 
     if (statuss === 1) {
+        avisos += '\n\n' + novoAviso;
         if (!avisos.toLowerCase().includes(novoAviso.toLowerCase())) {
             avisos += '\n\n' + novoAviso;
         }
@@ -188,4 +192,63 @@ function mudarStatusProgramacaoDia({ statuss, dia }) {
     $painel.find('.iconeStatusDia i').trigger('click', { programatico: true });
 }
 
+const notifKey = 'notificacoes_nao_lidas';
+let notificacoes = JSON.parse(localStorage.getItem(notifKey)) || [];
+
+function atualizarUI(data) {
+
+    if (data && data.statuss === 0) {
+        return;
+    }else if(data && data.dia){
+         notificacoes.push('Programação de ' + formatarData(data.dia) + ' liberada para lançamento.');
+    }
+   
+    localStorage.setItem(notifKey, JSON.stringify(notificacoes));
+
+    const count = notificacoes.length;
+    $('#notification-count').text(count);
+    $('#notification-count').toggle(count > 0); // esconde se 0
+
+    const $list = $('#notification-list');
+    $list.empty();
+
+    notificacoes.forEach(msg => {
+        $('<div>')
+            .text(msg)
+            .css({
+                'padding': '5px',
+                'border-bottom': '1px solid #eee'
+            })
+            .appendTo($list);
+    });
+    if(data && data.dia){
+        mostrarNotificacao('Programação lançada!', 'Programação de ' + formatarData(data.dia) + ' liberada para lançamento.');
+    }
+}
+
+// Ao iniciar a página, carrega notificações existentes
+atualizarUI();
+
+$('#notification-container').on('click', function () {
+    const $list = $('#notification-list');
+    const estavaVisivel = $list.is(':visible');
+
+    $list.toggle(); // mostra/oculta a lista
+
+    if (!estavaVisivel) {
+        atualizarUI();
+    } else {
+        // se estava visível e agora vai ser fechado => limpa
+        notificacoes = [];
+        localStorage.setItem(notifKey, JSON.stringify([]));
+        $('#notification-count').hide();
+    }
+});
+
+// Esconde o dropdown se clicar fora
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('#notification-container, #notification-list').length) {
+        $('#notification-list').hide();
+    }
+});
 

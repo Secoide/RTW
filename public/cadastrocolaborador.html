@@ -1,14 +1,13 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    const nome = sessionStorage.getItem("nome_usuario");
-    const nivel = sessionStorage.getItem("nivel_acesso");
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
 
-    if (!nome || !nivel) {
-        window.location.href = "login.html"; // redireciona para a página de login
-    }
+        if (!nome || !nivel) {
+            window.location.href = "login.html"; // redireciona para a página de login
+        }
     });
 </script>
-
 
 
 <div class="cad" style="visibility: visible; opacity: 1;">
@@ -17,13 +16,13 @@
             <div class="painel_perfil">
                 <div class="subpainel_foto linha_padrao">
                     <div class="foto">
-                        <img id="fotoavatar" class="foto avatar" src="\imagens\user-default.jpg" alt="Avatar">
+                        <img id="fotoavatar" class="foto avatar" src="/imagens/user-default.jpg" alt="Avatar">
                     </div>
                     <div class="bt_foto">
                         <form id="form_foto" enctype="multipart/form-data">
-                            <input class="bt_escolherFoto" type="file" id="select_foto" name="fotoperfil"
-                                style="width: 110px;">
-                            <button class="bt_padrao bt_cad" type="submit">Salvar foto</button>
+                            <input class="bt_escolherFoto" type="file" accept="image/*" required id="select_foto"
+                                name="fotoperfil" style="width: 110px;">
+                            <button id="btn_upload" class="bt_padrao bt_cad" type="submit">Salvar foto</button>
                         </form>
                     </div>
 
@@ -54,7 +53,7 @@
                         <input id="telefone" class="tbx_pesquisarOS" type="text" name="telefone"
                             placeholder="(00) 0 0000-0000">
                         <input id="mail" class="tbx_pesquisarOS" type="email" name="email"
-                            placeholder="exemplo@email.com" autocomplete="off" required="required"
+                            placeholder="exemplo@email.com" autocomplete="off"
                             style="width: 63%; text-align: left; padding-left: 10px;">
                         <div id="email-suggestions" class="email-suggestions" style="display: none;"></div>
                     </div>
@@ -77,7 +76,7 @@
                             <option value="7">Financeiro</option>
                             <option value="9">RH</option>
                             <option value="6">Diretoria</option>
-                            
+
                         </select>
                         <div style="display: flex; align-items: center;">
                             <p class="lblcpf">CPF:</p>
@@ -94,7 +93,7 @@
                             value="Cadastrar">
                         <input id="bt_editColab" class="bt_padrao bt_cad" type="submit" name="editColab" value="Salvar"
                             style="display: none;">
-                        <input id="" class="bt_padrao bt_cancel" type="reset" value="Cancelar"
+                        <input class="bt_padrao bt_cancel" type="reset" value="Cancelar"
                             onclick="$('#form_cadColab').empty();">
                     </div>
                 </form>
@@ -143,7 +142,7 @@
                             style="width: 97%; height:50px; border: 1px solid var(--cor_letraFundo); border-radius: 5px; padding: 4px; resize: none;"></textarea>
                     </div>
                     <div class="p_acoes p_padrao linha_padrao">
-                        <input id="" class="bt_padrao bt_cad" type="submit" name="salvarAtestado" value="Salvar">
+                        <input class="bt_padrao bt_cad" type="submit" name="salvarAtestado" value="Salvar">
                     </div>
                     <input id="id" type="hidden" name="idColab" value="">
                 </form>
@@ -164,13 +163,24 @@
                         </tbody>
                     </table>
                 </div>
-
+                <div class="painel_desligarColab">
+                    <br>
+                    <div class="linha_padrao">
+                        <h5>Colaborador desligado</h5>
+                        <label class="switch">
+                            <input type="checkbox" id="checkColabDesligado">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
-
-
             <div class="painel_nivel">
-                <div class="painelLiberarAcessos">
+                <div class="indiceQtdeCliente">
+                    <p>Historico de Participações por Cliente</p>
+                    <div id="areaGraficoHist"></div>
+                </div>
+                <div class="painelLiberarAcessos" style="display: none;">
                     <p>Liberar Acessos</p>
                     <div class="LiberarAcessos">
                         <div class="blocoroigem">
@@ -191,7 +201,42 @@
 
             </div>
             <div class="painel_senha">
-                <p>Senha</p>
+                <form id="form_senha" autocomplete="off">
+                    <div class="linha_padrao linha_senhas">
+                        <div>
+                            <label for="senhaantiga">Antiga Senha</label>
+                            <div style="position: relative;">
+                                <input id="senhaantiga" class="tbx_pesquisarOS senha-input" type="password"
+                                    name="senhaantiga" style="width: 150px;" autocomplete="new-password">
+                                <i class="fa-solid fa-eye toggle-senha" data-target="senhaantiga"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="novasenha">Nova Senha</label>
+                            <div style="position: relative;">
+                                <input id="novasenha" class="tbx_pesquisarOS senha-input" type="password"
+                                    name="novasenha" style="width: 150px;" autocomplete="new-password">
+                                <i class="fa-solid fa-eye toggle-senha" data-target="novasenha"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="confirmarnovasenha">Confirmar Nova Senha</label>
+                            <div style="position: relative;">
+                                <input id="confirmarnovasenha" class="tbx_pesquisarOS senha-input" type="password"
+                                    name="confirmarnovasenha" style="width: 150px;" autocomplete="new-password">
+                                <i class="fa-solid fa-eye toggle-senha" data-target="confirmarnovasenha"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p_acoes p_padrao linha_padrao">
+                        <input class="bt_padrao bt_cad" type="submit" value="Salvar">
+                    </div>
+
+                    <input type="hidden" name="idColab" id="idColab" value="">
+                    <!-- substitua por JS se necessário -->
+                </form>
+
             </div>
         </div>
         <div class="painel_menu">
@@ -215,12 +260,12 @@
                 <i class="fa-solid fa-paperclip"></i>
                 <p class="titulo_bt_menu">Integra.</p>
             </div>
-            <div class="bt_menu" data-target=".painel_atestar">
+            <div class="bt_menu" data-target=".painel_atestar" style="display: none;">
                 <i class="fa-solid fa-calendar-days"></i>
                 <p class="titulo_bt_menu">Atestar</p>
             </div>
             <div class="push"></div>
-            <div class="bt_menu" data-target=".painel_nivel" style="display: none;">
+            <div class="bt_menu" data-target=".painel_nivel">
                 <i class="fa-solid fa-code-fork"></i>
                 <p class="titulo_bt_menu">Nível</p>
             </div>
@@ -244,16 +289,14 @@
 
 
 
-<!--<script type="text/javascript" src="scripts/extetica/linhas_cordas.js"></script>-->
 
 <script>
-
-    $('#formColaborador input[type=submit]').on('click', function () {
-        botaoClicado = $(this).attr('name');
-    });
-
     $('#formColaborador').on('submit', function (e) {
         e.preventDefault();
+
+        // Captura o botão que disparou o submit (moderno e confiável)
+        const botaoClicado = e.originalEvent.submitter?.name || '';
+
         const formData = $(this).serialize() + `&acao=${botaoClicado}`;
 
         $.ajax({
@@ -264,10 +307,12 @@
             success: function (res) {
                 if (res.sucesso) {
                     let msg = `Colaborador ${botaoClicado === 'cadColab' ? 'cadastrado' : 'atualizado'} com sucesso!`;
+
                     if (botaoClicado === 'cadColab') {
                         msg += `\n\nLogin: ${res.id}`;
                         msg += `\nSenha: ${res.senha}`;
                     }
+
                     alert(msg);
                     $('#formColaborador')[0].reset();
                     $('#bt_editColab').hide();
@@ -280,31 +325,44 @@
                 alert('Erro ao processar a solicitação.');
             }
         });
-
-        botaoClicado = null;
     });
-
-
-
 
 
 
     $('#form_foto').submit(function (e) {
         e.preventDefault();
+
         const userId = $('.painel_todos').find('#id').val();
+        const arquivo = $('#form_foto input[type="file"]').prop('files')[0];
+
+        if (!userId) {
+            alert('ID do usuário não encontrado.');
+            return;
+        }
+
+        if (!arquivo) {
+            alert('Selecione uma foto antes de enviar.');
+            return;
+        }
         var formData = new FormData(this);
         formData.append('id', userId);
+
+        // Desabilita o botão de envio se quiser
+        $('#btn_upload').prop('disabled', true).text('Enviando...');
         $.ajax({
             url: '/upload-foto',
             type: 'POST',
             data: formData,
-            processData: false,  // importante para FormData
-            contentType: false,  // importante para FormData
+            processData: false,
+            contentType: false,
             success: function (data) {
-                // Atualiza a imagem com a URL nova + timestamp para evitar cache
+                console.log('Resposta do upload:', data);
                 $('#fotoavatar').attr('src', data.novaFotoURL + '?t=' + new Date().getTime());
+                $('#btn_upload').prop('disabled', false).text('Enviar Foto');
             },
-            error: function (xhr) {
+            error: function (xhr, status, error) {
+                console.error('Erro no upload:', status, error);
+                console.error('Resposta completa:', xhr);
                 alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no upload da foto');
             }
         });
@@ -363,17 +421,48 @@
         });
     }
 
+
     $('#tb_historico_atestar').on('click', '.bt_excluirHistoricoAtestar', function () {
-        const idatestar = $(this).closest('tr').data('idatestar');
+        Swal.fire({
+            title: "Deletar?",
+            text: "Você não poderá reverter isso!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, apagar!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const idatestar = $(this).closest('tr').data('idatestar');
+                $.ajax({
+                    url: '/excluir_hitorico_atestar',
+                    type: 'POST',
+                    data: { id: idatestar },
+                    success: function (data) {
+                        Swal.fire('Deletado!', `Histórico foi excluído com sucesso.`, 'success');
+                        preencherTabelaAtestar($('.painel_todos').find('#id').val());
+                    },
+                    error: function (xhr) {
+                        alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+                    }
+                });
+            }
+        });
+    });
+
+    $('#checkColabDesligado').on('change', function () {
+        const ligado = $(this).is(':checked');
+        const userId = $('.painel_todos').find('#id').val();
+
         $.ajax({
-            url: '/excluir_hitorico_atestar',
-            type: 'POST',
-            data: { id: idatestar },
-            success: function (data) {
-                preencherTabelaAtestar($('.painel_todos').find('#id').val());
+            url: '/desligar_colab', // Substitua pelo seu backend
+            method: 'POST',
+            data: { status: ligado ? 'on' : 'off', userId },
+            success: function (resposta) {
+
             },
-            error: function (xhr) {
-                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            error: function (erro) {
+                console.error('Erro na requisição:', erro);
             }
         });
     });
@@ -403,5 +492,75 @@
 
     });
 
-    
+    $(document).ready(function () {
+        let grafico;
+        const idFuncionario = $('.painel_todos').find('#id').val();
+
+        // Primeiro cria o canvas no DOM
+        $('#areaGraficoHist').html('<canvas id="graficoHistClientes"></canvas>');
+
+        // Só depois pega o contexto
+        const ctx = document.getElementById('graficoHistClientes').getContext('2d');
+
+        // Faz a requisição AJAX
+        $.getJSON('/api/dados_colaboradores_por_os', { idFuncionario }, function (resposta) {
+            const clientes = resposta.map(r => r.cliente);
+            const quantidades = resposta.map(r => r.quantidade);
+            const total = quantidades.reduce((soma, q) => soma + q, 0);
+
+            if (window.graficoHistClientes instanceof Chart) {
+                window.graficoHistClientes.destroy();
+            }
+
+            window.graficoHistClientes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: clientes,
+                    datasets: [{
+                        label: 'Participações',
+                        data: quantidades,
+                        backgroundColor: 'rgba(75, 192, 75, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false, // ← ESSENCIAL para permitir crescer em altura
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const valor = context.parsed.x;
+                                    const perc = ((valor / total) * 100).toFixed(1);
+                                    return `${valor} participações (${perc}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: false,
+                                text: 'Quantidade'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: false,
+                                text: 'Clientes'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+
+
+
 </script>

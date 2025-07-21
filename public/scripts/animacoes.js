@@ -2,6 +2,10 @@
 
 
 $(document).on('click', '.iconeStatusDia i', function (event, data) {
+    if ((!(data && data.programatico) && sessionStorage.getItem('nivel_acesso') <= 5 )) {
+        return false;
+    }
+
     const $icon = $(this);
     if (!(data && data.programatico)) {
         if ($icon.hasClass('fa-file-signature')) {
@@ -56,4 +60,6 @@ $(document).on('click', '.iconeStatusDia i', function (event, data) {
         }, 300);
     });
 });
+
+
 

@@ -181,6 +181,7 @@ function atualizarStatusColaboradoresOS() {
             const $os = $(this);
             const osID = $os.find('.lbl_OS').text().trim();
             const descOS = $os.find('.lbl_descricaoOS').text();
+            const cliente = $os.find('.lbl_clienteOS').text();
 
             const $colabsNaOS = $os.find('.p_colabs .colaborador');
 
@@ -204,7 +205,7 @@ function atualizarStatusColaboradoresOS() {
                         $existing.text(osID);
                     } else {
                         // não existe ainda → adiciona
-                        $ocupadoBox.append(`<div title="${descOS}">${osID}</div>`);
+                        $ocupadoBox.append(`<div title="${descOS} - ${cliente}">${osID}</div>`);
                     }
 
                     $colabNaBase.addClass('colaboradorEmOS');
@@ -451,19 +452,22 @@ function montarNomesParaEnviar(ids, $painelDia) {
 
 function formatarData(dataStr) {
     const dias = [
-        'SEGUNDA-FEIRA', 'TERÇA-FEIRA', 'QUARTA-FEIRA',
-        'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO', 'DOMINGO'
+        'DOMINGO', 'SEGUNDA-FEIRA', 'TERÇA-FEIRA',
+        'QUARTA-FEIRA', 'QUINTA-FEIRA', 'SEXTA-FEIRA', 'SÁBADO'
     ];
 
-    const data = new Date(dataStr);
-    const diaSemana = dias[data.getDay()];
+    // Corrige a data para o fuso local
+    const partes = dataStr.split('-'); // ["2025", "06", "18"]
+    const data = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
 
-    const dia = String(data.getDate() + 1).padStart(2, '0');
+    const diaSemana = dias[data.getDay()];
+    const dia = String(data.getDate()).padStart(2, '0');
     const mes = String(data.getMonth() + 1).padStart(2, '0');
     const ano = data.getFullYear();
 
     return `${diaSemana}, ${dia}-${mes}-${ano}`;
 }
+
 
 
 function alterar_status_progDia(iconeClick, status) {
@@ -477,6 +481,7 @@ function alterar_status_progDia(iconeClick, status) {
             statuss: status
         }));
     }
+
 }
 
 

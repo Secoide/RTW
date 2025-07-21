@@ -3,12 +3,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    const nome = sessionStorage.getItem("nome_usuario");
-    const nivel = sessionStorage.getItem("nivel_acesso");
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
 
-    if (!nome || !nivel) {
-        window.location.href = "login.html"; // redireciona para a página de login
-    }
+        if (!nome || !nivel) {
+            window.location.href = "login.html"; // redireciona para a página de login
+        }
     });
 </script>
 
@@ -24,8 +24,14 @@
     <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
     <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
     <link rel="stylesheet" type="text/css" href="css/cadastro.css">
+    <link rel="stylesheet" type="text/css" href="css/cadastro_OS.css">
     <link rel="stylesheet" type="text/css" href="css/responsive.css">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
@@ -42,8 +48,15 @@
             </div>
         </div>
         <div class="painel_EsqBtAcoes" style="padding-right: 10px; ">
-            <i class="fa-solid fa-bell"></i>
-            <input id="seletor_data" class="tbx_pesquisarOS" type="date" value="" style="width: 120px; color:grey; cursor: pointer;">
+            <div id="notification-container" style="cursor: pointer;">
+                <i class="fa fa-bell" style="scale: 1.5; color: rgb(80, 80, 80);"></i>
+                <span id="notification-count">0</span>
+            </div>
+
+            <div id="notification-list" class="notification-lista">
+                <!-- Notificações serão inseridas aqui -->
+            </div>
+            <input id="seletor_data" class="tbx_pesquisarOS" type="date" value="">
             <button class="bt_abrirmenu"><i class="fa-solid fa-ellipsis"></i></button>
             <!--<p id="toggle-mode" class=""></p>-->
         </div>
@@ -51,7 +64,7 @@
     </div>
 
     <main id="home">
-        <div class="painel_Padrao painel_semanal">
+        <div class="painel_semanal">
             <div class="painelDia diaanterior" data-dia="">
                 <div class="painelInfoDia">
                     <div class="painel_Dia">
@@ -60,21 +73,21 @@
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_colaboradores">
+                <div class="painel_colaboradores">
                     <div class="p_colabsDisp areaRestrita">
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_BuscaOS">
+                <div class="painel_BuscaOS">
                     <div class="buscaLadoEsq">
-                        <i class="fa-solid fa-magnifying-glass"></i>
                         <div class="input-clearable">
 
-                            <input type="text" name=""  class="pesquisarOS" placeholder="Pesquisar OS...">
+                            <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <!--<button id="exportarExcel" disabled class="bt_padrao bt_cancel">Excel</button>-->
-                        <button  class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
+                        <div class="exportBtn" title="Exportar programação">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
                     </div>
                     <div class="filtroLadoDir">
                         <div title="Trasnferir Colaboradores">
@@ -89,7 +102,7 @@
                     </div>
                 </div>
 
-                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
+                <div class="painel_daOS painel_dasOS scroll-container areaRestrita">
 
                 </div>
             </div>
@@ -101,22 +114,22 @@
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_colaboradores">
+                <div class="painel_colaboradores">
                     <i class="seta-esquerda fa fa-chevron-left seta" style="display: none;"></i>
                     <div class="p_colabsDisp areaRestrita" id="scrollDiv">
 
                     </div>
-                    <!--<i class="maisProlado fa-solid fa-arrow-right"></i>-->
                     <i class="seta-direita fa fa-chevron-right seta" style="display: none;"></i>
                 </div>
-                <div class="painel_Padrao painel_BuscaOS">
+                <div class="painel_BuscaOS">
                     <div class="buscaLadoEsq">
                         <div class="input-clearable">
-                            <i class="fa-solid fa-magnifying-glass"></i>
                             <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <button class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
+                        <div class="exportBtn" title="Exportar programação">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
                     </div>
                     <div class="filtroLadoDir">
                         <div title="Trasnferir Colaboradores">
@@ -131,8 +144,8 @@
                     </div>
                 </div>
 
-                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
-                    
+                <div class="painel_daOS painel_dasOS scroll-container areaRestrita">
+
                 </div>
             </div>
             <div class="painelDia diaamanha" data-dia="">
@@ -143,19 +156,20 @@
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_colaboradores">
+                <div class="painel_colaboradores">
                     <div class="p_colabsDisp areaRestrita">
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_BuscaOS">
+                <div class="painel_BuscaOS">
                     <div class="buscaLadoEsq">
                         <div class="input-clearable">
-                            <i class="fa-solid fa-magnifying-glass"></i>
                             <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <button class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
+                        <div class="exportBtn" title="Exportar programação">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
                     </div>
                     <div class="filtroLadoDir">
                         <div title="Trasnferir Colaboradores">
@@ -170,7 +184,7 @@
                     </div>
                 </div>
 
-                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
+                <div class="painel_daOS painel_dasOS scroll-container areaRestrita">
 
                 </div>
             </div>
@@ -182,19 +196,20 @@
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_colaboradores">
+                <div class="painel_colaboradores">
                     <div class="p_colabsDisp areaRestrita">
 
                     </div>
                 </div>
-                <div class="painel_Padrao painel_BuscaOS">
+                <div class="painel_BuscaOS">
                     <div class="buscaLadoEsq">
                         <div class="input-clearable">
-                            <i class="fa-solid fa-magnifying-glass"></i>
                             <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
                             <span class="clear-btn">&times;</span>
                         </div>
-                        <button class="exportBtn bt_padrao bt_cad">Exportar ▼</button>
+                        <div class="exportBtn" title="Exportar programação">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
                     </div>
                     <div class="filtroLadoDir">
                         <div title="Trasnferir Colaboradores">
@@ -209,7 +224,47 @@
                     </div>
                 </div>
 
-                <div class="painel_daOS painel_Padrao painel_dasOS scroll-container areaRestrita">
+                <div class="painel_daOS painel_dasOS scroll-container areaRestrita">
+
+                </div>
+            </div>
+            <div class="painelDia diaamanha3" data-dia="">
+                <div class="painelInfoDia">
+                    <div class="painel_Dia">
+                    </div>
+                    <div class="painel_iconeDia">
+
+                    </div>
+                </div>
+                <div class="painel_colaboradores">
+                    <div class="p_colabsDisp areaRestrita">
+
+                    </div>
+                </div>
+                <div class="painel_BuscaOS">
+                    <div class="buscaLadoEsq">
+                        <div class="input-clearable">
+                            <input type="text" name="" class="pesquisarOS" placeholder="Pesquisar OS...">
+                            <span class="clear-btn">&times;</span>
+                        </div>
+                        <div class="exportBtn" title="Exportar programação">
+                            <i class="fa-solid fa-download"></i>
+                        </div>
+                    </div>
+                    <div class="filtroLadoDir">
+                        <div title="Trasnferir Colaboradores">
+                            <i class="fa-solid fa-arrows-turn-right bt_transferirColabs"></i>
+                        </div>
+                        <div class="filtro_prioridade_btn filtroPrioridade" title="Filtrar prioridade: Alta">
+                            <i class="fa-solid fa-flag" style="cursor: pointer;"></i>
+                        </div>
+                        <div class="modo_foco_btn filtroFocar" title="Ativar modo foco">
+                            <i class="fa-solid fa-eye-low-vision" style="cursor: pointer;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="painel_daOS painel_dasOS scroll-container areaRestrita">
 
                 </div>
             </div>
@@ -258,16 +313,37 @@
     </div>
 
     <div id="popupMenu" class="popup-menu">
-        <div id="popup-novaos" class="popup-option-menu" data-type="novaos"><i class="fa-solid fa-pen-ruler"></i>Nova OS</div>
-        <div id="popup-colaborador" class="popup-option-menu" data-type="colaborador"><i class="fa-solid fa-user-plus"></i>Colaborador</div>
-        
-        <div id="popup-logout" class="popup-option-menu" data-type="logout" style="color: rgb(170, 33, 33);"><i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>Sair</div>
+        <div id="popup-perfil" class="popup-option-menu" data-type="perfil">
+            <i class="fa-solid fa-user-pen"></i> Perfil
+        </div>
+        <div id="popup-novaos" class="popup-option-menu" data-type="novaos">
+            <i class="fa-solid fa-pen-ruler"></i> Nova OS
+        </div>
+        <div id="popup-colaborador" class="popup-option-menu" data-type="colaborador">
+            <i class="fa-solid fa-user-plus"></i> Colaborador
+        </div>
+        <div id="popup-logout" class="popup-option-menu" data-type="logout" style="color: rgb(170, 33, 33);">
+            <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> Sair
+        </div>
     </div>
+
+    <!-- Modal simples para escolher nova data -->
+    <div id="modalDataTransferencia" class="modal-overlay-data">
+        <div class="modal-content-data">
+            <span class="fechar-modal-data">&times;</span>
+            <h3>Escolha a nova data para a transferência</h3>
+            <input type="date" id="novaData">
+            <button id="confirmarTransferencia" class="bt_padrao bt_cad">Confirmar</button>
+        </div>
+    </div>
+
 
 
     <div id="form_aviso"></div>
     <div id="form_debugws"></div>
     <div id="form_cadColab"></div>
+    <div id="form_cadOS"></div>
+    <div id="form_infoOS"></div>
 </body>
 
 <script type="text/javascript" src="scripts/animacoes.js" defer></script>

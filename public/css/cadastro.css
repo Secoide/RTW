@@ -1,6 +1,6 @@
 .painel_principal {
     display: flex;
-
+    font-size: 12px;
     height: 590px;
     width: 500px;
     background-color: var(--branco);
@@ -11,6 +11,7 @@
 
 .painel_todos {
     width: 450px;
+    min-width: 450px;
     background-color: var(--branco);
     border-radius: 10px 0 0 10px;
     padding: 10px;
@@ -26,10 +27,12 @@
 }
 
 .bt_menu {
-    display: block;
+    display: flex;
     justify-items: center;
     padding: 8px;
     color: var(--branco);
+    align-items: center;
+    flex-direction: column;
 }
 
 .push {
@@ -71,22 +74,27 @@
     padding-left: 10px;
 }
 
-.dataNasc, .lblcpf, .lblrg {
-    color: grey; 
-    text-align: left; 
-    font-size: 10px; 
+.dataNasc,
+.lblcpf,
+.lblrg {
+    color: grey;
+    text-align: left;
+    font-size: 10px;
     padding-right: 2px;
 }
-.lblcpf, .lblrg {
-   padding-left: 8px; 
+
+.lblcpf,
+.lblrg {
+    padding-left: 8px;
 }
 
 
-#telefone{
-    width: 30%; 
-    text-align: left; 
+#telefone {
+    width: 30%;
+    text-align: left;
     padding-left: 10px;
 }
+
 .email-suggestions {
     position: absolute;
     background: white;
@@ -105,21 +113,22 @@
     background: #eee;
 }
 
-.linha_Setor{
+.linha_Setor {
     display: flex;
 }
 
-#categoria{
-    color: var(--texto_cinza); 
+#categoria {
+    color: var(--texto_cinza);
     width: 130px;
 }
 
-#motivo{
-    color: var(--texto_cinza); 
+#motivo {
+    color: var(--texto_cinza);
     width: 200px;
 }
 
-#cpf, #rg{
+#cpf,
+#rg {
     width: 100px;
     text-align: left;
     padding-left: 10px;
@@ -146,7 +155,51 @@
     border-radius: 0 7px 7px 0;
 }
 
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 18px;
+}
 
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+input:checked+.slider {
+    background-color: #4cd964;
+}
+
+input:checked+.slider:before {
+    transform: translateX(18px);
+}
 
 
 .painelLiberarAcessos {
@@ -159,6 +212,7 @@
     margin-left: 10px;
     margin-right: 50px;
 }
+
 
 .blocoroigem {
     display: flex;
@@ -202,4 +256,26 @@
     margin: 10px;
     border: 1px solid var(--border_cinza);
     border-radius: 10px;
+}
+
+
+.linha_senhas {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+
+#areaGraficoHist {
+    height: 100%;
+    /* Use apenas se o pai tiver altura definida */
+    min-height: 550px;
+    /* Para não ultrapassar a tela */
+    position: relative;
+}
+
+#graficoHistClientes {
+    width: 100% !important;
+    height: 100% !important;
 }

@@ -1,0 +1,340 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login.html"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+
+
+<div class="cadOS" style="visibility: visible; opacity: 1;">
+    <div id="frm_cadastrarOS" class="frm_padrao animate">
+        <form id="formOS" method="POST" action="/cad_OS">
+            <div class="p_cadastroOS">
+                <div class="p_titulo">
+                    <p class="tituloform">Cadastrar OS</p>
+                </div>
+                <div class="p_infos p_padrao">
+                    <div class="linha_infoOS linha_padrao">
+                        <input id="idOS" class="tbx_pesquisarOS input_obrigatorio" type="text" placeholder="Nº OS"
+                            name="idos" title="" maxlength="4" pattern="[0-9]{1,4}" required="required" onkeyup=""
+                            style="width: 60px;">
+                        <input id="descricaoOS" class="tbx_pesquisarOS input_obrigatorio" type="text"
+                            placeholder="Descrição do Serviço" name="descricao" title="" required="required" onkeyup=""
+                            style="width: 100%;">
+                    </div>
+                    <div class="linha_infoCliente linha_padrao">
+                        <select id="selectCliente" class="bt_padrao info_padrao opcoes input_obrigatorio" name="cliente"
+                            required="required"
+                            style="width: 100%; background-color: var(--white); color: var(--texto_cinza);">
+                        </select>
+                        <select id="selectSupervisor" class="bt_padrao info_padrao opcoes" name="supervisor"
+                            style="width: 100%; background-color: var(--white); color: var(--texto_cinza);">
+                        </select>
+                        <select id="selectCidade" class="bt_padrao info_padrao opcoes" name="cidade"
+                            style="width: 100%; background-color: var(--white); color: var(--texto_cinza);">
+                        </select>
+                    </div>
+                    <div class="linha_valorData linha_padrao">
+                        <input id="valorOrcadoOS" class="tbx_pesquisarOS input_obrigatorio valorDinheiro" type="text"
+                            placeholder="Valor Orçado (R$)" name="orcado" title="" required="required" onkeyup=""
+                            style="width: 120px;">
+                        <div style="display: flex; align-items: center;">
+                            <p style="color: grey; text-align: left; font-size: 10px; padding-right: 2px;">Previsão:</p>
+                            <input id="dataconclusaoOS" class="tbx_pesquisarOS" type="date" name="dataconclusao"
+                                title="" onkeyup="" style="width: 120px; color:grey;">
+                        </div>
+                    </div>
+                    <div class="linha_responsavel linha_padrao">
+                        <select id="selectResponsavel" class="bt_padrao opcoes" name="responsavel"
+                            style="width: 100%; background-color: var(--white); color: var(--texto_cinza);">
+
+                        </select>
+                        <p class="dica">Deixe em branco caso defina responsável mais adiante.</p>
+                    </div>
+                    <div class="linha_observacao linha_padrao">
+                        <textarea name="message" placeholder="Observações"
+                            style="width: 97%; height:100px; border: 1px solid var(--cor_letraFundo); border-radius: 5px; padding: 4px; resize: none;"></textarea>
+                    </div>
+                </div>
+                <div class="p_btAnexo">
+                    <input id="bt_analisarGraficoOS" class="bt_padrao bt_anexar bt_analisar" type="button" value="Analisar" style="display: none;">
+                    <input id="" class="bt_padrao bt_anexar" type="button" value="Anexar" onclick="abrirAnexosCadOS()">
+                </div>
+                <div id="anexoCadOS" class="p_anexos p_padrao" style="display: none;">
+                    <div class="p_anexosRolante">
+                        <div class="p_propostaComercial p_anexoPadrao p_anexado">
+                            <div class="linha_icone">
+                                <i class="iconeAnexo fa-solid fa-ruler-combined"></i>
+                            </div>
+                            <div class="linha_tituloAnexo">
+                                <p>Proposta Comercial</p>
+                            </div>
+                        </div>
+                        <div class="p_propostaTecnica p_anexoPadrao">
+                            <div class="linha_icone">
+                                <i class="iconeAnexo fa-solid fa-compass-drafting"></i>
+                            </div>
+                            <div class="linha_tituloAnexo">
+                                <p>Proposta Técnica</p>
+                            </div>
+                        </div>
+                        <div class="p_orcamentoServicos p_anexoPadrao">
+                            <div class="linha_icone">
+                                <i class="iconeAnexo fa-solid fa-file-invoice-dollar"></i>
+                            </div>
+                            <div class="linha_tituloAnexo">
+                                <p>Orçamento Serviços</p>
+                            </div>
+                        </div>
+                        <div class="p_listaMateriais p_anexoPadrao">
+                            <div class="linha_icone">
+                                <i class="iconeAnexo fa-solid fa-dolly"></i>
+                            </div>
+                            <div class="linha_tituloAnexo">
+                                <p>Lista de Materiais</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p_acoes p_padrao">
+                    <input id="bt_cadOS" class="bt_padrao bt_cad" type="submit" name="cadOS" value="Cadastrar">
+                    <input id="bt_editOS" class="bt_padrao bt_cad" type="submit" name="editOS" value="Salvar"
+                        style="display: none;">
+                    <input id="" class="bt_padrao bt_cancel" type="reset" value="Cancelar"
+                        onclick="$('#form_cadOS').empty();">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirAnexosCadOS() {
+        $("#anexoCadOS").slideToggle(100);
+    }
+    $('#formOS').on('submit', function (e) {
+        e.preventDefault();
+
+        const botaoClicado = e.originalEvent.submitter?.name || '';
+        const formData = $(this).serialize() + `&acao=${botaoClicado}`;
+
+        $.ajax({
+            url: '/cad_OS',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function (res) {
+                if (res.sucesso) {
+                    const msg = `OS ${botaoClicado === 'cadOS' ? 'cadastrada' : 'atualizada'} com sucesso!`;
+                    alert(msg);
+                } else {
+                    alert(res.mensagem);
+                }
+            },
+            error: function () {
+                alert('Erro ao processar a solicitação de OS.');
+            }
+        });
+    });
+
+
+    //Prenche combobox Clientes
+    function preencherCbxCliente() {
+        const cbx = $('#selectCliente');
+        cbx.empty(); // Limpa antes de preencher
+        $.ajax({
+            url: '/listar_cbxCliente',
+            type: 'POST',
+            success: function (data) {
+                const inicio = '<option value="" disabled selected hidden>Selecione o Cliente...</option>';
+                cbx.append(inicio);
+                data.forEach(os => {
+                    const linha = `
+                        <option value="${os.id_empresas}">${os.nome}</option>
+                        `;
+                    cbx.append(linha);
+                });
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            }
+        });
+    }
+
+    //Prenche combobox Cidade
+    function preencherCbxCidade() {
+        const cbx = $('#selectCidade');
+        cbx.empty(); // Limpa antes de preencher
+        $.ajax({
+            url: '/listar_cbxCidade',
+            type: 'POST',
+            success: function (data) {
+                const inicio = '<option value="" disabled selected hidden>Selecione a Cidade...</option>';
+                cbx.append(inicio);
+                data.forEach(os => {
+                    const linha = `
+                        <option value="${os.id_cidades}">${os.nome}</option>
+                        `;
+                    cbx.append(linha);
+                });
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            }
+        });
+    }
+
+    //Prenche combobox Supervisor
+    function preencherCbxSupervisor() {
+        const cbx = $('#selectSupervisor');
+        cbx.empty(); // Limpa antes de preencher
+        $.ajax({
+            url: '/listar_cbxSupervisor',
+            type: 'POST',
+            success: function (data) {
+                const inicio = '<option value="" disabled selected hidden>Selecione o Supervisor...</option>';
+                cbx.append(inicio);
+                data.forEach(os => {
+                    const linha = `
+                        <option value="${os.id_supervisores}">${os.nome}</option>
+                        `;
+                    cbx.append(linha);
+                });
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            }
+        });
+    }
+
+    //Prenche combobox Responsavel
+    function preencherCbxResponsavel() {
+        const cbx = $('#selectResponsavel');
+        cbx.empty(); // Limpa antes de preencher
+        $.ajax({
+            url: '/listar_cbxResponsavel',
+            type: 'POST',
+            success: function (data) {
+                const inicio = '<option value="" disabled selected hidden>Selecione o Responsável...</option>';
+                cbx.append(inicio);
+                data.forEach(os => {
+                    const linha = `
+                        <option value="${os.id}">${os.nome}</option>
+                        `;
+                    cbx.append(linha);
+                });
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+            }
+        });
+    }
+
+
+    $(document).on('click', '.bt_analisar', function (e) {
+        //GERA GRAFICO DE COLABS POR DIA
+        const osID = $('#idOS').val().trim();
+
+        $('#form_infoOS').empty().load('../infos_OS.html', function () {
+            $('#areaGrafico').html('<canvas id="graficoColaboradores" width="1100" height="300"></canvas>');
+
+            // Chamada AJAX para pegar os dados reais
+            $.getJSON('/api/historico_colaboradores_OS', { osID }, function (resposta) {
+                if (!resposta.length) {
+                    $('#titulo_OS').text(`OS ${osID} - Sem dados disponíveis.`);
+                    return;
+                }
+
+                // Cria mapa de data -> total
+                const mapa = {};
+                resposta.forEach(item => {
+                    const dataFormatada = formatarDataComDiaSemana(item.data);
+                    mapa[dataFormatada] = item.total_colaboradores;
+                });
+
+                // Define dataInicio e dataFim com base nos dados reais do MySQL
+                const dataInicio = new Date(resposta[0].data);
+                const dataFim = new Date(resposta[resposta.length - 1].data);
+
+                const todasDatas = [];
+                for (let d = new Date(dataInicio); d <= dataFim; d.setDate(d.getDate() + 1)) {
+                    todasDatas.push(formatarDataComDiaSemana(d));
+                }
+
+                const ctx = document.getElementById('graficoColaboradores').getContext('2d');
+                if (window.graficoOS) window.graficoOS.destroy();
+
+                const totais = todasDatas.map(data => mapa[data] || 0);
+                const mediaMovel = calcularMediaMovel(totais, 5);
+
+                const descricaoOS = resposta[0].descricao;
+
+                $('#titulo_OS').text(`OS ${osID} - ${descricaoOS}`);
+                window.graficoOS = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: todasDatas,
+                        datasets: [
+                            {
+                                label: `Total de Colaboradores`,
+                                data: totais,
+                                borderColor: 'green',
+                                backgroundColor: 'rgba(143, 143, 143, 0.1)',
+                                tension: 0.3,
+                                borderWidth: 1.5,
+                                pointRadius: 1.5
+                            },
+                            {
+                                label: 'Média Móvel',
+                                data: mediaMovel,
+                                borderColor: 'orange',
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                borderWidth: 1.5,
+                                pointRadius: 1.5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: {
+                            duration: 100, // desativa animação global
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    font: { size: 9 },
+                                    autoSkip: true, // false mostra todas
+                                    maxRotation: 90,
+                                    minRotation: 90,
+                                    align: 'start'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Colaboradores'
+                                },
+                                ticks: {
+                                    font: { size: 11 }
+                                }
+                            }
+                        }
+                    }
+                });
+
+
+            });
+
+        });
+    });
+
+
+</script>

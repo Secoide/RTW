@@ -175,6 +175,7 @@ $(document).on("drop", ".p_colabs", function (e) {
     const $painelDia = $(this).closest('.painelDia');
     let osID = $destinoOS.find(".lbl_OS").text().trim();
     const descOS = $destinoOS.find('.lbl_descricaoOS').text();
+    const cliente = $destinoOS.find('.lbl_clienteOS').text();
     const dataDestino = $painelDia.attr('data-dia');
 
     if (dataOrigem !== dataDestino) {
@@ -191,7 +192,7 @@ $(document).on("drop", ".p_colabs", function (e) {
 
             // Atualiza o status ocupadoEmOS na BASE
             $colabBase.find('.ocupadoEmOS div').remove();
-            $colabBase.find('.ocupadoEmOS').append(`<div title="${descOS}">${osID}</div>`);
+            $colabBase.find('.ocupadoEmOS').append(`<div title="${descOS} - ${cliente}">${osID}</div>`);
             $colabBase.addClass("colaboradorEmOS");
 
             // Verifica se já existe na OS
@@ -214,11 +215,9 @@ $(document).on("drop", ".p_colabs", function (e) {
 
         }
     });
-
     // ✅ enviar TODOS os colaboradores arrastados via WebSocket
     if (socket && socket.readyState === WebSocket.OPEN) {
         const nomesParaEnviar = montarNomesParaEnviar(ids, $painelDia); // ✅
-
         socket.send(JSON.stringify({
             acao: "alocar_colaborador",
             osID: osID,
@@ -427,7 +426,6 @@ $(document).on("click", ".bt_tirarColab", function () {
     const idColaborador = colaboradorOS.data('id'); // pega o ID único do colaborador
     const osID = painelOS.find('.p_infoOS').data('os');
     const idNaOS = colaboradorOS.data('idnaos');
-
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             acao: "excluir_colaboradorEmOS",
@@ -476,7 +474,8 @@ let indiceSelecionado = -1;
 // Cria dropdown de sugestões
 $(document).on('input', '.buscarColab input', function () {
     const input = $(this);
-    const termo = removerAcentos(input.val().toLowerCase());
+    const termoBruto = input.val();
+    const termo = removerAcentos(termoBruto.toLowerCase());
     const $pai = input.closest('.buscarColab');
     const painelDia = input.closest('.painelDia');
 
@@ -486,9 +485,31 @@ $(document).on('input', '.buscarColab input', function () {
     if (termo.length < 1) return;
 
     const disponiveis = getColaboradoresDisponiveis(painelDia);
-    const filtrados = disponiveis.filter(colab =>
-        removerAcentos(colab.nome.toLowerCase()).includes(termo)
-    );
+
+    // Verifica se é busca de líder
+    let filtrados = [];
+    const buscandoLider = termoBruto.trim().startsWith('#');
+    const termoLider = removerAcentos(termoBruto.trim().substring(1).toLowerCase());
+
+    if (buscandoLider) {
+        filtrados = disponiveis.filter(colab => {
+            const $colabEl = painelDia.find('.colaborador').filter(function () {
+                return $(this).data('id') === colab.id;
+            }).first();
+            return $colabEl.find('p.nome').hasClass('lider') &&
+                removerAcentos(colab.nome.toLowerCase()).includes(termoLider);
+        });
+    } else {
+        // busca normal (exclui líderes)
+        filtrados = disponiveis.filter(colab => {
+            const $colabEl = painelDia.find('.colaborador').filter(function () {
+                return $(this).data('id') === colab.id;
+            }).first();
+            return !$colabEl.find('p.nome').hasClass('lider') &&
+                removerAcentos(colab.nome.toLowerCase()).includes(termo);
+        });
+    }
+
     if (filtrados.length > 0) {
         const $lista = $('<div class="sugestoes"></div>');
 
@@ -499,11 +520,11 @@ $(document).on('input', '.buscarColab input', function () {
 
             if ($colab.length === 0) return;
 
-            let cor = '#28a745'; // padrão verde
+            let cor = '#28a745';
             if ($colab.attr('data-status') === 'ferias' || $colab.hasClass('ferias')) {
-                cor = '#dc3545'; // vermelho
+                cor = '#dc3545';
             } else if ($colab.find('.ocupadoEmOS div').length > 0) {
-                cor = '#ffc107'; // amarelo
+                cor = '#ffc107';
             }
 
             $lista.append(`
@@ -521,6 +542,7 @@ $(document).on('input', '.buscarColab input', function () {
         }
     }
 });
+
 // Função para remover acentuação
 function removerAcentos(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -543,7 +565,7 @@ $(document).on('click', '.itemSugestao', function () {
         return false;
     }
     // 🔄 Remove o colaborador de qualquer outra OS
-    $('.painel_OS').each(function () {
+    painelDia.find('.painel_OS').each(function () {
         const $os = $(this);
         const idOS = $os.find('.lbl_OS').text().trim();
 
@@ -551,10 +573,21 @@ $(document).on('click', '.itemSugestao', function () {
             const $colabRemovido = $os.find('.p_colabs .colaborador').filter(function () {
                 return $(this).data('id') === id;
             });
+            const destinoOS = $colabRemovido.closest('.painel_OS').find('.p_infoOS').data('os');
 
             if ($colabRemovido.length > 0) {
                 $colabRemovido.remove();
+                // 🔌 Envia via WebSocket
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    const dataDia = $osNova.closest('.painelDia').attr('data-dia');
 
+                    socket.send(JSON.stringify({
+                        acao: 'remover_colaborador',
+                        osID: destinoOS,
+                        id,
+                        data: dataDia
+                    }));
+                }
                 const total = $os.find('.p_colabs .colaborador').length;
                 $os.find('.lbl_total').text(total);
 
@@ -690,7 +723,6 @@ $('#seletor_data').on('change', function () {
         // Atualiza o atributo data-dia 
         $(this).attr('data-dia', dataFormatada);
         $(this).find('.painel_Dia').text(formatarData(dataFormatada));
-
     });
     $('.painelDia').each(function () {
         carregarColaboradoresDisp($(this));
@@ -769,6 +801,10 @@ let botaoClicado = null;
 $(document).on('dblclick', '.p_colabsDisp .colaborador', function () {
     const id = $(this).data('id');
 
+    if (!id) {
+        alert('ID do colaborador não encontrado!');
+        return;
+    }
     $.ajax({
         url: '/get_dadosColab',
         type: 'POST',
@@ -783,6 +819,9 @@ $(document).on('dblclick', '.p_colabsDisp .colaborador', function () {
                         $('#bt_editColab').show(); // Também remove o display: none
                         $('#bt_cadColaborador').hide();
                         const dados = res.dados;
+
+                        $('.bt_menu[data-target=".painel_atestar"]').show();
+
 
                         $('#id').val(dados.id);
                         $('#idColaborador').val(dados.id);
@@ -814,6 +853,12 @@ $(document).on('dblclick', '.p_colabsDisp .colaborador', function () {
         }
     });
 });
+
+
+
+
+
+
 
 
 // exemplo de como extrair a data yyyy-MM-dd
@@ -856,20 +901,87 @@ $('.popup-option-menu').on('click', function () {
     const type = $(this).data('type');
 
     switch (type) {
-        case 'novaos':
-            break;
-        case 'colaborador':
+        case 'perfil':
             $('#form_cadColab').empty().load('../cadastrocolaborador.html', function () {
                 // Mostrar só o painel Perfil inicialmente
                 // Oculta todos os painéis
                 $('.painel_perfil, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_apoio, .painel_senha').hide();
+                const id = sessionStorage.getItem('id_usuario');
+
+                $.ajax({
+                    url: '/get_dadosColab',
+                    type: 'POST',
+                    contentType: 'application/json', // define o tipo do corpo da requisição
+                    data: JSON.stringify({ id: id }), // converte o objeto para JSON
+                    success: function (res) {
+                        if (res.sucesso) {
+                            $('#form_cadColab').empty().load('../cadastrocolaborador.html', function (response, status, xhr) {
+                                if (status === "success") {
+                                    $('.painel_perfil, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_apoio, .painel_senha').hide();
+                                    $('.painel_perfil').show();
+                                    $('#bt_editColab').show(); // Também remove o display: none
+                                    $('#bt_cadColaborador').hide();
+
+                                    $('.bt_menu[data-target=".painel_senha"], .bt_menu[data-target=".painel_vestimentas"]').show();
+
+
+                                    const dados = res.dados;
+
+                                    $('#id').val(dados.id);
+                                    $('#idColab').val(dados.id);
+
+                                    $('#idColaborador').val(dados.id);
+                                    $('#nome').val(dados.nome);
+                                    $('#sexo').val(dados.sexo);
+                                    $('#nascimento').val(formatDateToInput(dados.nascimento));
+                                    $('#endereco').val(dados.endereco);
+                                    $('#telefone').val(dados.telefone);
+                                    $('#mail').val(dados.mail);
+                                    $('#sobremim').val(dados.sobre);
+                                    $('#categoria').val(dados.categoria);
+                                    $('#cpf').val(dados.cpf);
+                                    $('#rg').val(dados.rg);
+                                    $('#datainicio').val(formatDateToInput(dados.datainicio));
+                                    $('#datafinal').val(formatDateToInput(dados.datafinal));
+                                    $('#motivo').val(dados.motivo);
+                                    $('#fotoavatar').attr('src', dados.fotoperfil + '?t=' + new Date().getTime());
+                                    preencherTabelaAtestar(dados.id);
+                                } else {
+                                    alert("Erro ao carregar o formulário: " + xhr.status + " " + xhr.statusText);
+                                }
+                            });
+                        } else {
+                            alert(res.mensagem); // Mensagem de erro ao logar
+                        }
+                    },
+                    error: function () {
+                        alert('Erro ao logar. Tente novamente.');
+                    }
+                });
+            });
+            break;
+        case 'novaos':
+            $('#form_cadOS').empty().load('../cadastro_os.html', function (response, status, xhr) {
+                if (status === "success") {
+                    preencherCbxCliente();
+                    preencherCbxSupervisor();
+                    preencherCbxCidade();
+                    preencherCbxResponsavel();
+                } else {
+                    alert("Erro ao carregar o formulário: " + xhr.status + " " + xhr.statusText);
+                }
+            });
+            break;
+        case 'colaborador':
+            $('#form_cadColab').empty().load('../cadastrocolaborador.html', function () {
+                $('.painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_apoio, .painel_senha').hide();
 
                 $('.painel_perfil').show();
             });
             break;
         case 'logout':
-                desconectandoPorLogout = true;
-                socket.send(JSON.stringify({ acao: 'logout' }));
+            desconectandoPorLogout = true;
+            socket.send(JSON.stringify({ acao: 'logout' }));
             break;
 
         default:
@@ -878,3 +990,231 @@ $('.popup-option-menu').on('click', function () {
     $('#popupMenu').hide();
 });
 
+
+let modoTransferencia = false;
+
+$('.bt_transferirColabs').on('click', function () {
+    const $btn = $(this);
+
+    if ($btn.hasClass('fa-check-to-slot')) {
+        // Finalizar transferência
+        const selecionados = [];
+        $('.overlay-transferencia.selecionado').each(function () {
+            const $painel = $(this).closest('.painel_OS');
+            const idOS = $painel.find('.p_infoOS').data('os');
+
+            $painel.find('.p_colabs [data-id]').each(function () {
+                const idColab = $(this).data('id');
+                selecionados.push({ idColab, idOS });
+            });
+        });
+
+        if (selecionados.length === 0) {
+            $('.overlay-transferencia').remove();
+            $btn.removeClass('fa-check-to-slot').addClass('fa-arrows-turn-right');
+            return;
+        }
+
+        // Armazena os dados globalmente para uso no modal
+        window.transferenciaColabs = selecionados;
+
+        // Exibe a modal centralizada
+        $('#modalDataTransferencia').css('display', 'flex');
+    } else {
+        // Ativar modo de seleção
+        modoTransferencia = true;
+        const painelDia = $btn.closest('.painelDia');
+
+        painelDia.find('.painel_OS').each(function () {
+            const $painel = $(this);
+            if ($painel.find('.p_colabs').children().length > 1) {
+                const $overlay = $(`
+                    <div class="overlay-transferencia">
+                        <i class="fa-solid fa-circle"></i>
+                    </div>
+                `);
+                $painel.css('position', 'relative').append($overlay);
+            }
+        });
+
+        $btn.removeClass('fa-arrows-turn-right').addClass('fa-check-to-slot');
+    }
+});
+
+
+$(document).on('click', '.overlay-transferencia', function (e) {
+    e.stopPropagation();
+
+    $(this).toggleClass('selecionado');
+    const $icon = $(this).find('i');
+
+    if ($(this).hasClass('selecionado')) {
+        $icon.removeClass('fa-circle').addClass('fa-circle-check');
+    } else {
+        $icon.removeClass('fa-circle-check').addClass('fa-circle');
+    }
+});
+
+
+$('.fechar-modal-data').on('click', function () {
+
+    $('.overlay-transferencia').remove();
+    $('.bt_transferirColabs').removeClass('fa-check-to-slot').addClass('fa-arrows-turn-right');
+    $('#modalDataTransferencia').fadeOut();
+});
+
+$('#confirmarTransferencia').on('click', function () {
+    const novaData = $('#novaData').val();
+    const nomesPorOS = {}; // Agrupar por OS
+
+    $('.overlay-transferencia.selecionado').each(function () {
+        const $painel = $(this).closest('.painel_OS');
+        const idOS = $painel.find('.p_infoOS').data('os');
+
+        $painel.find('.p_colabs [data-id]').each(function () {
+            const id = $(this).data('id');
+            const nome = $(this).text().trim(); // ou outro seletor para obter o nome
+
+            if (!nomesPorOS[idOS]) nomesPorOS[idOS] = [];
+            nomesPorOS[idOS].push({ id, nome });
+        });
+    });
+
+    if (!novaData || Object.keys(nomesPorOS).length === 0) {
+        alert('Informe a nova data e selecione ao menos uma OS com colaboradores.');
+        return;
+    }
+
+    // Cria estrutura para enviar ao servidor HTTP
+    const colabs = [];
+    for (const [idOS, nomes] of Object.entries(nomesPorOS)) {
+        for (const { id } of nomes) {
+            colabs.push({ idColab: id, idOS: parseInt(idOS) });
+        }
+    }
+
+    fetch('/transferir-colaboradores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ colabs, novaData })
+    })
+        .then(res => res.json())
+        .then(response => {
+            if (response.sucesso) {
+
+                // Envia via WebSocket um por um, no formato esperado pelo servidor
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    for (const [osID, nomes] of Object.entries(nomesPorOS)) {
+                        const osIDint = parseInt(osID);
+
+                        // ✅ Atualiza sua interface imediatamente
+                        alocarColaborador({
+                            osID: osIDint,
+                            nomes,
+                            data: novaData
+                        });
+
+                        // ✅ Envia para o servidor e outros usuários
+                        socket.send(JSON.stringify({
+                            acao: 'alocar_colaborador',
+                            osID: osIDint,
+                            data: novaData,
+                            nomes
+                        }));
+                    }
+                }
+
+                $('.overlay-transferencia').remove();
+                $('.bt_transferirColabs').removeClass('fa-check-to-slot').addClass('fa-arrows-turn-right');
+                $('#modalDataTransferencia').fadeOut();
+                alert("OS com os mesmos colaboradores transferidos para data escolhida.")
+
+                return;
+            } else {
+                alert(response.mensagem || 'Erro ao transferir colaboradores.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erro inesperado na transferência.');
+        });
+
+    $('.overlay-transferencia').remove();
+});
+
+
+$(document).on('click', '.lbl_OS', function (e) {
+
+    // ABRIR Form OS com os dados do cliente clicado
+    const id = $(this).text();
+
+    if (!id) {
+        alert('OS não encontrado!');
+        return;
+    }
+    $.ajax({
+        url: '/get_dadosOS',
+        type: 'POST',
+        contentType: 'application/json', // define o tipo do corpo da requisição
+        data: JSON.stringify({ id: id }), // converte o objeto para JSON
+        success: function (res) {
+            if (res.sucesso) {
+                $('#form_cadOS').empty().load('../cadastro_os.html', function (response, status, xhr) {
+                    if (status === "success") {
+                        preencherCbxCliente();
+                        preencherCbxSupervisor();
+                        preencherCbxCidade();
+                        preencherCbxResponsavel();
+                        $('#bt_editOS').show(); // Também remove o display: none
+                        $('#bt_analisarGraficoOS').show()
+                        $('#bt_cadOS').hide();
+                        const dados = res.dados;
+                        setTimeout(() => {
+                            $('#idOS').val(dados.id);
+                            $('#descricaoOS').val(dados.descricao);
+                            $('#selectCliente').val(dados.empresa);
+                            $('#selectSupervisor').val(dados.supervisor);
+                            $('#selectResponsavel').val(dados.responsavel);
+                            $('#selectCidade').val(dados.cidade);
+
+                            $('#valorOrcadoOS').val(dados.orcado);
+                            $('#dataconclusaoOS').val(formatDateToInput(dados.dataExp));
+
+                        }, 300);
+
+                    } else {
+                        alert("Erro ao carregar o dados: " + xhr.status + " " + xhr.statusText);
+                    }
+                });
+            } else {
+                alert(res.mensagem); // Mensagem de erro ao logar
+            }
+        },
+        error: function () {
+            alert('Erro ao carregar dados da OS. Tente novamente.');
+        }
+    });
+});
+
+// Função que calcula a média móvel
+function calcularMediaMovel(dados, janela) {
+    const resultado = [];
+    for (let i = 0; i < dados.length; i++) {
+        if (i < janela - 1) {
+            resultado.push(null); // não há dados suficientes no início
+        } else {
+            const soma = dados.slice(i - janela + 1, i + 1).reduce((a, b) => a + b, 0);
+            resultado.push(soma / janela);
+        }
+    }
+    return resultado;
+}
+
+function formatarDataComDiaSemana(dataISO) {
+    const data = new Date(dataISO);
+    const dias = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+    const dia = data.getDate().toString().padStart(2, '0');
+    const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+    const diaSemana = dias[data.getDay()];
+    return `${dia}/${mes} (${diaSemana})`;
+}
