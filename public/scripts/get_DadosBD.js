@@ -9,88 +9,90 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
+//Atualizado para Async Await
 function carregarColaboradoresDisp(painelDia) {
     const colabDisp = painelDia.find('.p_colabsDisp');
     const dia = painelDia.attr('data-dia');
-    $.get('/api/colaboradores', {
-            dataDia: dia
-        },
-        function (colaboradores) {
-        $(colabDisp).empty();
-        const htmlColabs = colaboradores.map(colab => {
-            const classeMotivo = colab.motivo.toLowerCase();
-            const nome = colab.nome_formatado;
-            const nomecompleto = colab.nome;
-            const cargo = colab.funcao.toLowerCase();
-            const idFunc = colab.idFunc;
-            const aniver = colab.aniver;
 
-            let display = classeMotivo === '' ? 'visible;' : 'hidden;';
-            let iconeClass = classeMotivo === '' ? 'i_colabLiberado' : 'i_colabBloqueado';
-            return `
-                <div class="colaborador ${classeMotivo} ${aniver} areaRestrita" title="" draggable="true" data-status="${classeMotivo}" data-id="${idFunc}" data-nome="${nome}">
-                    <i class="${iconeClass} fa-solid fa-circle areaRestrita" style="visibility: ${display}"></i>
-                    <p class="nome ${cargo} areaRestrita" title="${nomecompleto}">${nome}</p>
-                    <i class="bt_tirarColab fa-solid fa-x"></i>
-                    <p class="ocupadoEmOS areaRestrita" title=""></p>
-                </div>
-            `;
-        }).join('');
+    return new Promise((resolve, reject) => {
+        $.get('/api/colaboradores', { dataDia: dia }, function (colaboradores) {
+            $(colabDisp).empty();
 
-        colabDisp.append(htmlColabs);
+            const htmlColabs = colaboradores.map(colab => {
+                const classeMotivo = colab.motivo.toLowerCase();
+                const nome = colab.nome_formatado;
+                const nomecompleto = colab.nome;
+                const cargo = colab.funcao.toLowerCase();
+                const idFunc = colab.idFunc;
+                const aniver = colab.aniver;
+
+                const display = classeMotivo === '' ? 'visible;' : 'hidden;';
+                const iconeClass = classeMotivo === '' ? 'i_colabLiberado' : 'i_colabBloqueado';
+
+                return `
+                    <div class="colaborador ${classeMotivo} ${aniver} areaRestrita" title="" draggable="true" data-status="${classeMotivo}" data-id="${idFunc}" data-nome="${nome}">
+                        <i class="${iconeClass} fa-solid fa-circle areaRestrita" style="visibility: ${display}"></i>
+                        <p class="nome ${cargo} areaRestrita" title="${nomecompleto}">${nome}</p>
+                        <i class="bt_tirarColab fa-solid fa-x"></i>
+                        <p class="ocupadoEmOS areaRestrita" title=""></p>
+                    </div>
+                `;
+            }).join('');
+
+            colabDisp.append(htmlColabs);
+            resolve(); // Finalizou com sucesso
+        }).fail(function (err) {
+            console.error('Erro ao carregar colaboradores disponíveis:', err);
+            reject(err);
+        });
     });
 }
 
+//Atualizado para Async Await, com new promise
 function buscarColaboradores(paineldasOS) {
-
-    let resultTotal = 0;
-    const painelDIa = paineldasOS.closest('.painelDia').attr('data-dia');
-
-
+    const painelDia = paineldasOS.closest('.painelDia').attr('data-dia');
     paineldasOS.empty();
 
-    $.get('/api/colaboradorEmOS', {
-        dataDia: painelDIa
-    }, function (os) {
-        // resposta da API
-        resultTotal += 1;
-        let cont = 0;
-        let id_OScomp = 0;
-        let id_OSprimeiro = true;
-        let htmlOS = '';
+    return new Promise((resolve, reject) => {
+        $.get('/api/colaboradorEmOS', { dataDia: painelDia }, function (os) {
+            let cont = 0;
+            let id_OScomp = 0;
+            let id_OSprimeiro = true;
+            let htmlOS = '';
 
-        os.forEach(colab => {
-            const idOS = colab.id_OSs;
-            const descricao = colab.descricao;
-            const cliente = colab.nomeEmpresa;
-            const cidade = colab.nomeCidade;
-            const status = colab.statuss;
-            const nome = colab.nome_formatado;
-            const nomecompleto = colab.nome;
-            const cargo = colab.funcao;
-            const idFunc = colab.idfuncionario;
-            const idNaOS = colab.idNaOS;
-            const totalColab = colab.total_colaboradores;
-            if (id_OSprimeiro) {
-                id_OSprimeiro = false;
-                id_OScomp = idOS
-                htmlOS = `
-                            <div class="painel_OS">
-                                <div class="p_infoOS" data-os="${idOS}" data-cidade="${cidade}">
-                                    <p class="lbl_OS">${idOS}</p>
-                                    <p class="lbl_descricaoOS" title="${descricao}">${descricao}</p>
-                                    <p class="lbl_clienteOS" title="${cliente}">${cliente}</p>
-                                </div>
-                                <div class="p_colabs areaRestrita">
-                        `;
-            }
+            os.forEach(colab => {
+                const {
+                    id_OSs: idOS,
+                    descricao,
+                    nomeEmpresa: cliente,
+                    nomeCidade: cidade,
+                    statuss: status,
+                    nome_formatado: nome,
+                    nome: nomecompleto,
+                    funcao: cargo,
+                    idfuncionario: idFunc,
+                    idNaOS,
+                    total_colaboradores: totalColab
+                } = colab;
 
-            if (!id_OSprimeiro && cont <= totalColab && nome.length > 0) {
-                cont += 1;
-                
-                // Verifica se já existe para não duplicar
-                htmlColbasRest = `
+                if (id_OSprimeiro) {
+                    id_OSprimeiro = false;
+                    id_OScomp = idOS;
+                    htmlOS = `
+                        <div class="painel_OS">
+                            <div class="p_infoOS" data-os="${idOS}" data-cidade="${cidade}">
+                                <p class="lbl_OS">${idOS}</p>
+                                <p class="lbl_descricaoOS" title="${descricao}">${descricao}</p>
+                                <p class="lbl_clienteOS" title="${cliente}">${cliente}</p>
+                            </div>
+                            <div class="p_colabs areaRestrita">
+                    `;
+                }
+
+                if (!id_OSprimeiro && cont <= totalColab && nome.length > 0) {
+                    cont += 1;
+
+                    htmlColbasRest = `
                         <div class="colaborador areaRestrita" draggable="true" data-status="" data-id="${idFunc}" data-nome="${nome}" data-idnaos="${idNaOS}">
                             <i class="i_colabLiberado fa-solid fa-circle areaRestrita"></i>
                             <p class="nome ${cargo} areaRestrita" title="${nomecompleto}">${nome}</p>
@@ -98,44 +100,46 @@ function buscarColaboradores(paineldasOS) {
                             <p class="ocupadoEmOS areaRestrita" title=""></p>
                         </div>
                     `;
-                htmlOS += htmlColbasRest;
+                    htmlOS += htmlColbasRest;
+                }
 
-            }
-            if (cont === totalColab || totalColab === 0) {
-                id_OSprimeiro = true;
-                cont = 0;
-                const fecharHtml = `<div class="buscarColab">
-                                                <input type="text" title="Buscar colaborador" placeholder="Buscar..."> 
-                                            </div>
-                                        </div>
-                                        <div class="p_infoAcoes">
-                                            <div class="p_totalColabs" title="Total de Colaboradores">
-                                                <i class="fa-solid fa-people-group"></i>
-                                                <p class="lbl_total">${totalColab}</p>
-                                                <i class="bt_exportDados fa-solid fa-file-export" title="Exportar dados dos Colaboradores"></i>
-                                            </div>
-                                            <div class="p_statusOS">
-                                                <div class="p_barraCronograma">
-                                                </div>
-                                            </div>
-                                            <div class="p_btAcoes">
-                                                <i class="bt_fixar fa-solid fa-thumbtack-slash" title="Fixar OS"></i>
-                                                <i class="bt_prioridade fa-solid fa-flag" title="Prioridade: Normal"></i>
+                if (cont === totalColab || totalColab === 0) {
+                    id_OSprimeiro = true;
+                    cont = 0;
+                    const fecharHtml = `
+                        <div class="buscarColab">
+                            <input type="text" title="Buscar colaborador" placeholder="Buscar..."> 
+                        </div>
+                    </div>
+                    <div class="p_infoAcoes">
+                        <div class="p_totalColabs" title="Total de Colaboradores">
+                            <i class="fa-solid fa-people-group"></i>
+                            <p class="lbl_total">${totalColab}</p>
+                            <i class="bt_exportDados fa-solid fa-file-export" title="Exportar dados dos Colaboradores"></i>
+                        </div>
+                        <div class="p_statusOS">
+                            <div class="p_barraCronograma"></div>
+                        </div>
+                        <div class="p_btAcoes">
+                            <i class="bt_fixar fa-solid fa-thumbtack-slash" title="Fixar OS"></i>
+                            <i class="bt_prioridade fa-solid fa-flag" title="Prioridade: Normal"></i>
+                            <i class="icone-olho fa-solid fa-eye" title="Mostrar/Esconder colaboradores"></i>
+                        </div>
+                    </div>
+                </div>`;
+                    const htmlGeral = htmlOS + fecharHtml;
+                    paineldasOS.append(htmlGeral);
+                }
+            });
 
-                                                <!--<i class="bt_checklist fa-solid fa-list-check" title="Checklist"></i>-->
-                                                <!--<i class="bt_comentario fa-solid fa-comment" title="Adicionar observação"></i>-->
-                                                <i class="icone-olho fa-solid fa-eye" title="Mostrar/Esconder colaboradores"></i>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                const htmlGeral = htmlOS + fecharHtml
-                paineldasOS.append(htmlGeral);
-            };
+            resolve(true); // finalizou com sucesso
+        }).fail(function () {
+            console.error('Erro ao buscar colaboradores para OS', painelDia);
+            reject(); // para que o .catch possa agir, se necessário
         });
-    }).fail(function () {
-        console.error('Erro ao buscar colaboradores para OS', idOS);
     });
 }
+
 
 function atualizarStatusDia(painelDia) {
     const diaPainel = painelDia.attr('data-dia');

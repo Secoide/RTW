@@ -8,19 +8,32 @@ $(document).ready(function () {
 });
 
 
-function carregarOSComColaboradores() {
-    $('.painelDia').each(function () {
-        const painelDia = $(this);
-        painelDia.find('.painel_dasOS').each(function () {
-            const paineldasOS = $(this);
-            const deveContinuar = buscarColaboradores(paineldasOS);
-            if (deveContinuar === false) {
-                return false; // Interrompe o each
+
+//Atualizado para Async Await
+async function carregarOSComColaboradores() {
+    const painéis = $('.painelDia').toArray();
+
+    for (const painelDiaEl of painéis) {
+        const painelDia = $(painelDiaEl);
+        const osList = painelDia.find('.painel_dasOS').toArray();
+
+        for (const osEl of osList) {
+            const paineldasOS = $(osEl);
+
+            try {
+                const deveContinuar = await buscarColaboradores(paineldasOS);
+                if (deveContinuar === false) {
+                    break; // Interrompe o loop interno
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar colaboradores de OS:', err);
             }
-        });
-        atualizarStatusDia($(this));
-    });
+        }
+
+        atualizarStatusDia(painelDia);
+    }
 }
+
 
 
 function mostrarTotalColabPorOS() {
@@ -65,9 +78,9 @@ function adicionarColaboradorNaOS(id, nome, $destinoOS) {
 }
 
 
-
-
-function restaurarOSFixadas() {
+//NOTE: Função para fixar OS antes fixadas manualmente
+// - Atualizado para Async Await
+async function restaurarOSFixadas() {
     let fixadas = [];
     try {
         fixadas = JSON.parse(localStorage.getItem("osFixadas")) || [];
@@ -75,6 +88,7 @@ function restaurarOSFixadas() {
         localStorage.removeItem("osFixadas");
         console.warn("Corrigido localStorage corrompido: osFixadas");
     }
+
     fixadas.forEach(id => {
         const $os = $('.painel_OS').filter(function () {
             return $(this).find('.lbl_OS').text().trim() === id;
@@ -88,7 +102,11 @@ function restaurarOSFixadas() {
     });
 }
 
-function restaurarOSOcultas() {
+
+
+//NOTE: Função para ocultar colaboradores em OS que foi ocultada manualmente
+// - Atualizado para Async Await
+async function restaurarOSOcultas() {
     let ocultas = [];
     try {
         ocultas = JSON.parse(localStorage.getItem("osOcultas")) || [];
@@ -130,7 +148,10 @@ function aplicarDestaquesComentarios() {
     });
 }
 
-function restaurarOSPrioridade() {
+
+
+//Atualizado para Async Await
+async function restaurarOSPrioridade() {
     $('.painel_OS').each(function () {
         const osID = $(this).find('.lbl_OS').text().trim();
         const prioridade = localStorage.getItem("prioridade_OS_" + osID);
@@ -142,9 +163,10 @@ function restaurarOSPrioridade() {
             $(this).find('.bt_prioridade').attr('title', 'Sem prioridade');
         }
     });
-};
+}
 
-function atualizarPainel($painelDia) {
+
+async function atualizarPainel($painelDia) {
     const $painelOS = $painelDia.find('.painel_dasOS');
 
     const buscadas = $painelOS.find('.painel_OS.matchOS').detach().toArray();
@@ -165,7 +187,7 @@ function atualizarPainel($painelDia) {
 
 
 
-function atualizarStatusColaboradoresOS() {
+async function atualizarStatusColaboradoresOS() {
     $('.painelDia').each(function () {
         const $painelDia = $(this);
         const dia = $painelDia.attr('data-dia');
@@ -348,8 +370,9 @@ function ordenarColaboradoresNasOS() {
     });
 }
 
-//ESCONDE PAINEL OS sem Colaborador
-function esconderPainelOSsemColab() {
+//NOTE: ESCONDE PAINEL OS sem Colaborador
+
+async function esconderPainelOSsemColab() {
     $('.painel_OS').each(function () {
         const $os = $(this);
         const total = $os.find('.p_colabs .colaborador').length;

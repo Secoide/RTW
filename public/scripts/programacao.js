@@ -710,40 +710,49 @@ setTimeout(() => {
 
 
 
+//NOTE: Função que ao escolher uma data, atualiza toda a programação com o dia correspondente
+// - Atualizado apra ser usar async await 
+$('#seletor_data').on('change', async function () {
+    $('#loadingOverlay').show();                // mostra o overlay
+    $('body').css('cursor', 'wait');            // mostra o cursor de carregando
 
-$('#seletor_data').on('change', function () {
-    const dataBase = new Date($(this).val()); // data escolhida
-    if (isNaN(dataBase.getTime())) return; // Evita erro se data inválida
+    try {
+        const dataBase = new Date($(this).val());
+        if (isNaN(dataBase.getTime())) return;
 
-    $('.painelDia').each(function (index) {
-        const novaData = new Date(dataBase);
-        novaData.setDate(dataBase.getDate() + (index - 1)); // -1, 0, +1, +2
-
-        const dataFormatada = novaData.toISOString().split('T')[0]; // yyyy-mm-dd
-        // Atualiza o atributo data-dia 
-        $(this).attr('data-dia', dataFormatada);
-        $(this).find('.painel_Dia').text(formatarData(dataFormatada));
-    });
-    $('.painelDia').each(function () {
-        carregarColaboradoresDisp($(this));
-    });
-    carregarOSComColaboradores();
-    setTimeout(() => {
-        restaurarOSOcultas();
-        restaurarOSPrioridade();
-        restaurarOSFixadas();
-        //aplicarDestaquesComentarios();
-        $('.painelDia').each(function () {
-            atualizarPainel($(this));
+        $('.painelDia').each(function (index) {
+            const novaData = new Date(dataBase);
+            novaData.setDate(dataBase.getDate() + (index - 1));
+            const dataFormatada = novaData.toISOString().split('T')[0];
+            $(this).attr('data-dia', dataFormatada);
+            $(this).find('.painel_Dia').text(formatarData(dataFormatada));
         });
 
-        //escondeXdoColab();
-    }, 200);
-    setTimeout(() => {
-        atualizarStatusColaboradoresOS();
-        esconderPainelOSsemColab();
-    }, 400);
+        await Promise.all($('.painelDia').map(function () {
+            return carregarColaboradoresDisp($(this));
+        }).get());
+
+        await carregarOSComColaboradores();
+        await restaurarOSOcultas();
+        await restaurarOSPrioridade();
+        await restaurarOSFixadas();
+        await atualizarStatusColaboradoresOS();
+        await Promise.all($('.painelDia').map(function () {
+            return atualizarPainel($(this));
+        }).get());
+
+        await esconderPainelOSsemColab();
+    } catch (err) {
+        console.error('Erro ao atualizar os painéis:', err);
+        alert('Ocorreu um erro ao atualizar os dados. Tente novamente.');
+    } finally {
+        $('#loadingOverlay').hide();             // esconde o overlay mesmo em caso de erro
+        $('body').css('cursor', 'default');      // restaura o cursor
+    }
 });
+
+
+
 
 
 $(function () {
