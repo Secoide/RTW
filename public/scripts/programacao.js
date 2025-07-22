@@ -713,7 +713,6 @@ setTimeout(() => {
 //NOTE: Função que ao escolher uma data, atualiza toda a programação com o dia correspondente
 // - Atualizado apra ser usar async await 
 $('#seletor_data').on('change', async function () {
-    $('#loadingProgramacao').show();                // mostra o overlay
     $('body').css('cursor', 'wait');            // mostra o cursor de carregando
 
     try {
@@ -746,7 +745,6 @@ $('#seletor_data').on('change', async function () {
         console.error('Erro ao atualizar os painéis:', err);
         alert('Ocorreu um erro ao atualizar os dados. Tente novamente.');
     } finally {
-        $('#loadingProgramacao').hide();             // esconde o overlay mesmo em caso de erro
         $('body').css('cursor', 'default');      // restaura o cursor
     }
 });
