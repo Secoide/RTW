@@ -98,8 +98,9 @@ export function get_carregarPerfilUsuario(funcId) {
                     $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
                     $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
                     $('#fotoavatar')
-                        .attr('src', dados.novaFotoURL + '?t=' + Date.now())
+                        .attr('src', dados.fotoperfil + '?t=' + Date.now())
                         .on('error', function () {
+                            console.warn("⚠️ Imagem de perfil não encontrada, usando padrão.");
                             $(this).attr('src', '/imagens/fotoperfil/user-default.jpg');
                         });
                     $('#id').val(dados.id);
