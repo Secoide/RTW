@@ -258,169 +258,173 @@ async function buscarColaboradoresDisponiveis(dataDia) {
 
 // Buscar por Data
 async function buscarColaboradoresEmOS(dataDia) {
-  const sql = `WITH params AS (
-  SELECT DATE(?) AS ref_date
-),
+  const sql = `
+  WITH params AS (
+    SELECT DATE(?) AS ref_date
+  ),
 
-ultimos_exames AS (
-  SELECT 
-    fce.idfuncionario,
-    e.idexame,
-    LOWER(e.nome) AS nome_exame,
-    fce.data,
-    fce.vencimento,
-    ROW_NUMBER() OVER (
-      PARTITION BY fce.idfuncionario, e.idexame
-      ORDER BY fce.data DESC, fce.id DESC
-    ) AS rn
-  FROM funcionarios_contem_exames fce
-  JOIN exames e ON e.idexame = fce.idexame
-),
-
-periodicos AS (
-  SELECT
-    ue.idfuncionario,
-    ue.nome_exame,
-    ue.data,
-    ue.vencimento,
-    DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH) AS dt_venc
-  FROM ultimos_exames ue
-  WHERE ue.rn = 1
-    AND ue.nome_exame NOT IN ('admissional','demissional')
-    AND COALESCE(ue.vencimento,0) > 0
-),
-
-periodicos_class AS (
-  SELECT
-    p.*,
-    CASE
-      WHEN p.dt_venc <  (SELECT ref_date FROM params) THEN 2
-      WHEN p.dt_venc <= DATE_ADD((SELECT ref_date FROM params), INTERVAL 30 DAY) THEN 1
-      ELSE 0
-    END AS status_item
-  FROM periodicos p
-),
-
-exame_critico AS (
-  SELECT idfuncionario, nome_exame AS nome_exame_critico, dt_venc AS dt_venc_critico, status_item AS status_score
-  FROM (
-    SELECT
-      pc.*,
+  ultimos_exames AS (
+    SELECT 
+      fce.idfuncionario,
+      e.idexame,
+      LOWER(e.nome) AS nome_exame,
+      fce.data,
+      fce.vencimento,
       ROW_NUMBER() OVER (
-        PARTITION BY pc.idfuncionario
-        ORDER BY pc.status_item DESC, pc.dt_venc ASC
+        PARTITION BY fce.idfuncionario, e.idexame
+        ORDER BY fce.data DESC, fce.id DESC
       ) AS rn
-    FROM periodicos_class pc
-  ) t
-  WHERE t.rn = 1
-),
+    FROM funcionarios_contem_exames fce
+    JOIN exames e ON e.idexame = fce.idexame
+  ),
 
--- integração (última por funcionário/empresa)
-ultima_integracao AS (
-  SELECT 
-      f1.idfuncionario,
-      f1.idempresa,
-      f1.datarealizado,
-      f1.vencimento,
-      DATE_ADD(f1.datarealizado, INTERVAL f1.vencimento MONTH) AS data_final,
+  periodicos AS (
+    SELECT
+      ue.idfuncionario,
+      ue.nome_exame,
+      ue.data,
+      ue.vencimento,
+      DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH) AS dt_venc
+    FROM ultimos_exames ue
+    WHERE ue.rn = 1
+      AND ue.nome_exame NOT IN ('admissional','demissional')
+      AND COALESCE(ue.vencimento,0) > 0
+  ),
+
+  periodicos_class AS (
+    SELECT
+      p.*,
       CASE
-          WHEN f1.id IS NULL THEN 'Pendente'
-          WHEN DATE_ADD(f1.datarealizado, INTERVAL f1.vencimento MONTH) < (SELECT ref_date FROM params) THEN 'Vencido'
-          WHEN DATE_ADD(f1.datarealizado, INTERVAL f1.vencimento MONTH) <= DATE_ADD((SELECT ref_date FROM params), INTERVAL 30 DAY) THEN 'Atenção'
-          ELSE 'Integrado'
-      END AS status_integracao
-  FROM funcionarios_contem_integracao f1
-  WHERE f1.id IN (
-      SELECT MAX(f2.id)
-      FROM funcionarios_contem_integracao f2
-      GROUP BY f2.idfuncionario, f2.idempresa
+        WHEN p.dt_venc <  (SELECT ref_date FROM params) THEN 2
+        WHEN p.dt_venc <= DATE_ADD((SELECT ref_date FROM params), INTERVAL 30 DAY) THEN 1
+        ELSE 0
+      END AS status_item
+    FROM periodicos p
+  ),
+
+  exame_critico AS (
+    SELECT idfuncionario, nome_exame AS nome_exame_critico, dt_venc AS dt_venc_critico, status_item AS status_score
+    FROM (
+      SELECT
+        pc.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY pc.idfuncionario
+          ORDER BY pc.status_item DESC, pc.dt_venc ASC
+        ) AS rn
+      FROM periodicos_class pc
+    ) t
+    WHERE t.rn = 1
+  ),
+
+  ultima_integracao AS (
+    SELECT 
+        f1.idfuncionario,
+        f1.idempresa,
+        f1.datarealizado,
+        f1.vencimento,
+        DATE_ADD(f1.datarealizado, INTERVAL f1.vencimento MONTH) AS data_final,
+        CASE
+            WHEN f1.id IS NULL THEN 'Pendente'
+            WHEN DATE_ADD(f1.datarealizado, INTERVAL f1.vencimento MONTH) < (SELECT ref_date FROM params) THEN 'Vencido'
+            WHEN DATE_ADD(f1.datarealizado, INTERVAL f1.vencimento MONTH) <= DATE_ADD((SELECT ref_date FROM params), INTERVAL 30 DAY) THEN 'Atenção'
+            ELSE 'Integrado'
+        END AS status_integracao
+    FROM funcionarios_contem_integracao f1
+    WHERE f1.id IN (
+        SELECT MAX(f2.id)
+        FROM funcionarios_contem_integracao f2
+        GROUP BY f2.idfuncionario, f2.idempresa
+    )
   )
-)
 
-SELECT 
-    fno.id AS idNaOS, 
-    o.id_OSs,
-    CASE o.statuss 
-        WHEN 0 THEN 'Sem responsavel' 
-        WHEN 1 THEN 'Aguardando' 
-        WHEN 2 THEN 'Em execução' 
-        WHEN 3 THEN 'Parado' 
-        WHEN 4 THEN 'Concluído' 
-        WHEN 5 THEN 'Em espera' 
-        WHEN 6 THEN 'Cancelado' 
-        ELSE '' 
-    END AS status_OS, 
-    o.descricao, 
-    e.nome AS nomeEmpresa,
-    IFNULL(c.nome, 'VERIFICAR GERÊNCIA') AS nomeCidade, 
-    IFNULL(f.id, '') AS idfuncionario, 
-    IF(f.id IS NOT NULL, CONCAT(SUBSTRING_INDEX(f.nome, ' ', 1), ' ', LEFT(SUBSTRING_INDEX(f.nome, ' ', -1), 1), '.'), '') AS nome_formatado, 
-    IF(DATE_FORMAT(f.nascimento,'%M %D') = DATE_FORMAT((SELECT ref_date FROM params),'%M %D'), 'aniver', '') AS aniver,
-    IFNULL(f.nome, '') AS nome, 
+  SELECT 
+      ANY_VALUE(fno.id) AS idNaOS, 
+      o.id_OSs,
+      ANY_VALUE(CASE o.statuss 
+          WHEN 0 THEN 'Sem responsavel' 
+          WHEN 1 THEN 'Aguardando' 
+          WHEN 2 THEN 'Em execução' 
+          WHEN 3 THEN 'Parado' 
+          WHEN 4 THEN 'Concluído' 
+          WHEN 5 THEN 'Em espera' 
+          WHEN 6 THEN 'Cancelado' 
+          ELSE '' 
+      END) AS status_OS, 
+      ANY_VALUE(o.descricao) AS descricao, 
+      ANY_VALUE(e.nome) AS nomeEmpresa,
+      ANY_VALUE(IFNULL(c.nome, 'VERIFICAR GERÊNCIA')) AS nomeCidade, 
+      ANY_VALUE(IFNULL(f.id, '')) AS idfuncionario, 
+      ANY_VALUE(
+        IF(f.id IS NOT NULL, CONCAT(SUBSTRING_INDEX(f.nome, ' ', 1), ' ', LEFT(SUBSTRING_INDEX(f.nome, ' ', -1), 1), '.'), '')
+      ) AS nome_formatado, 
+      ANY_VALUE(
+        IF(DATE_FORMAT(f.nascimento,'%M %D') = DATE_FORMAT((SELECT ref_date FROM params),'%M %D'), 'aniver', '')
+      ) AS aniver,
+      ANY_VALUE(IFNULL(f.nome, '')) AS nome, 
 
-    CASE nv.id_catnvl 
-        WHEN 10 THEN 'encarregado' 
-        WHEN 5  THEN 'lider' 
-        WHEN 6  THEN 'lider' 
-        WHEN 1  THEN 'producao' 
-        WHEN 12 THEN 'terceiro' 
-        ELSE '' 
-    END AS funcao, 
+      ANY_VALUE(
+        CASE nv.id_catnvl 
+          WHEN 10 THEN 'encarregado' 
+          WHEN 5  THEN 'lider' 
+          WHEN 6  THEN 'lider' 
+          WHEN 1  THEN 'producao' 
+          WHEN 12 THEN 'terceiro' 
+          ELSE '' 
+        END
+      ) AS funcao, 
 
-    CASE fno.supervisor 
-        WHEN 0 THEN '' 
-        WHEN 1 THEN 'supervisor' 
-        ELSE '' 
-    END AS supervisor,
+      ANY_VALUE(
+        CASE fno.supervisor 
+          WHEN 0 THEN '' 
+          WHEN 1 THEN 'supervisor' 
+          ELSE '' 
+        END
+      ) AS supervisor,
 
-    ec.nome_exame_critico AS nome_exame,
+      ANY_VALUE(ec.nome_exame_critico) AS nome_exame,
 
-    CASE
-        WHEN ec.status_score IS NULL THEN 'falta'
-        WHEN ec.status_score = 2 THEN 'vencido'
-        WHEN ec.status_score = 1 THEN 'alerta'
-        ELSE 'ok'
-    END AS status_alerta,
+      ANY_VALUE(
+        CASE
+          WHEN ec.status_score IS NULL THEN 'falta'
+          WHEN ec.status_score = 2 THEN 'vencido'
+          WHEN ec.status_score = 1 THEN 'alerta'
+          ELSE 'ok'
+        END
+      ) AS status_alerta,
 
-    -- usa a data de referência para calcular o status da integração
-    CASE 
-        WHEN e.integracao = 1 THEN 
-            COALESCE(ui.status_integracao, 'Pendente')
-        ELSE NULL
-    END AS status_integracao,
+      ANY_VALUE(
+        CASE 
+          WHEN e.integracao = 1 THEN COALESCE(ui.status_integracao, 'Pendente')
+          ELSE NULL
+        END
+      ) AS status_integracao,
 
-    (
-        SELECT COUNT(*) 
-        FROM funcionario_na_os fno2 
-        WHERE fno2.id_OS = o.id_OSs 
-          AND fno2.data = (SELECT ref_date FROM params)
-    ) AS total_colaboradores 
+      COUNT(fno2.id) AS total_colaboradores
 
-FROM tb_obras o 
-JOIN tb_empresa e           ON e.id_empresas = o.id_empresa 
-LEFT JOIN tb_cidades c      ON c.id_cidades = o.id_cidade 
-LEFT JOIN funcionario_na_os fno 
-       ON fno.id_OS = o.id_OSs 
-      AND fno.data  = (SELECT ref_date FROM params)
-LEFT JOIN funcionarios f     ON fno.idfuncionario = f.id 
-LEFT JOIN tb_categoria_nvl_acesso nv ON f.idnvlacesso = nv.id_catnvl
-LEFT JOIN exame_critico ec   ON ec.idfuncionario = f.id
-LEFT JOIN ultima_integracao ui ON ui.idfuncionario = f.id AND ui.idempresa = e.id_empresas
+  FROM tb_obras o 
+  JOIN tb_empresa e           ON e.id_empresas = o.id_empresa 
+  LEFT JOIN tb_cidades c      ON c.id_cidades = o.id_cidade 
+  LEFT JOIN funcionario_na_os fno 
+         ON fno.id_OS = o.id_OSs 
+        AND fno.data  = (SELECT ref_date FROM params)
+  LEFT JOIN funcionarios f     ON fno.idfuncionario = f.id 
+  LEFT JOIN tb_categoria_nvl_acesso nv ON f.idnvlacesso = nv.id_catnvl
+  LEFT JOIN exame_critico ec   ON ec.idfuncionario = f.id
+  LEFT JOIN ultima_integracao ui ON ui.idfuncionario = f.id AND ui.idempresa = e.id_empresas
+  LEFT JOIN funcionario_na_os fno2 ON fno2.id_OS = o.id_OSs AND fno2.data = (SELECT ref_date FROM params)
 
-WHERE 
-      ( (SELECT ref_date FROM params) <  CURDATE() AND fno.id IS NOT NULL )
-   OR ( (SELECT ref_date FROM params) >= CURDATE() AND o.statuss <> 4 )
+  WHERE 
+        ( (SELECT ref_date FROM params) <  CURDATE() AND fno.id IS NOT NULL )
+     OR ( (SELECT ref_date FROM params) >= CURDATE() AND o.statuss <> 4 )
 
-GROUP BY 
-    o.id_OSs, f.id
+  GROUP BY 
+      o.id_OSs, f.id
 
-ORDER BY 
-    fno.id_OS DESC, 
-    FIELD(nv.id_catnvl, 10, 5, 6, 1, 12), 
-    f.nome, 
-    o.id_OSs DESC;
-
-`;
+  ORDER BY 
+      o.id_OSs DESC,
+      FIELD(nv.id_catnvl, 10, 5, 6, 1, 12),
+      f.nome;
+  `;
 
   const [rows] = await connection.query(sql, [dataDia]);
   return rows;
