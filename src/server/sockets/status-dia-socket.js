@@ -1,4 +1,4 @@
-export function emitirStatusProgDia(wss, dia, statuss, remetenteWs = null) {
+function emitirStatusProgDia(wss, dia, statuss, remetenteWs = null) {
   const payload = {
     acao: "mudar_statusProgDia",
     dia,
@@ -16,3 +16,5 @@ export function emitirStatusProgDia(wss, dia, statuss, remetenteWs = null) {
     }
   });
 }
+
+module.exports = { emitirStatusProgDia };
