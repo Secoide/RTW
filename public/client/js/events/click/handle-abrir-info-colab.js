@@ -100,7 +100,7 @@ export function get_carregarPerfilUsuario(funcId) {
                     $('#fotoavatar')
                         .attr('src', dados.novaFotoURL + '?t=' + Date.now())
                         .on('error', function () {
-                            $(this).attr('src', '/client/assets/img/fotoperfil/user-default.jpg');
+                            $(this).attr('src', '/imagens/fotoperfil/user-default.jpg');
                         });
                     $('#id').val(dados.id);
                     $('#idColaborador').val(dados.id);
