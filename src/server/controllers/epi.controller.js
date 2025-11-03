@@ -11,14 +11,28 @@ async function getEPIs(req, res) {
 
 // GET /api/epis/:id
 async function getEPI(req, res) {
-    try {
-        const epi = await EPIService.buscarEPI(req.params.id);
-        if (!epi) return res.status(404).json({ erro: 'Não encontrado' });
-        res.json(epi);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar EPI' });
+  try {
+    const { id } = req.params;
+    console.log("📦 [DEBUG] Iniciando busca de EPI. ID recebido:", id);
+
+    const epi = await EPIService.buscarEPI(id);
+
+    if (!epi) {
+      console.warn("⚠️ [AVISO] Nenhum EPI encontrado para ID:", id);
+      return res.status(404).json({ erro: "EPI não encontrado" });
     }
+
+    console.log("✅ [SUCESSO] EPI encontrado:", epi);
+    res.json(epi);
+  } catch (err) {
+    console.error("❌ [ERRO getEPI]:", err);
+    res.status(500).json({
+      erro: "Erro ao buscar EPI",
+      detalhe: err.message || err,
+    });
+  }
 }
+
 
 
 // POST /api/epis
