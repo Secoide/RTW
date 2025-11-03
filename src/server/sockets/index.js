@@ -1,4 +1,4 @@
-const initColaboradoresSocket = require("./colaboradores.socket");
+const { initColaboradoresSocket } = require("./colaboradores.socket");
 const initNotifySocket = require("./notify.socket");
 const initChatSocket = require("./chat.socket");
 const initUsuariosSocket = require("./usuarios.socket");

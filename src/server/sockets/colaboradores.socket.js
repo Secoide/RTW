@@ -225,4 +225,4 @@ function sendError(ws, mensagem, err) {
   ws.send(JSON.stringify({ acao: "erro", mensagem: `${mensagem}: ${err.message}` }));
 }
 
-module.exports = initColaboradoresSocket;
+module.exports = { initColaboradoresSocket };
