@@ -229,11 +229,11 @@
                     <div class="painel_integra">
                         <p>Integração</p>
                         <div id="carregarIntegracoesAqui" class="painel_vencimento_integracoes scroll-container">
-                            
+
                         </div>
                         <div class="p_acoes linha_padrao">
-                            <input type="button" id="bt_anexarIntegracao_noPerfil" class="bt_teste glass" name="anexarIntegracao"
-                                value="Anexar Integração">
+                            <input type="button" id="bt_anexarIntegracao_noPerfil" class="bt_teste glass"
+                                name="anexarIntegracao" value="Anexar Integração">
                         </div>
                     </div>
                     <div class="painel_atestar">
@@ -571,7 +571,13 @@
                     contentType: false
                 });
 
-                $('#fotoavatar').attr('src', resp.novaFotoURL + '?t=' + Date.now());
+                $('#fotoavatar')
+                    .attr('src', resp.novaFotoURL + '?t=' + Date.now())
+                    .on('error', function () {
+                        console.warn("⚠️ Imagem de perfil não encontrada, usando padrão.");
+                        $(this).attr('src', '/client/assets/img/fotoperfil/user-default.jpg');
+                    });
+
                 closeCropModal();
             } catch (err) {
                 alert(err?.responseJSON?.error || err?.responseText || 'Erro no upload da foto');

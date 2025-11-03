@@ -57,7 +57,6 @@ async function deleteEPI(req, res) {
 async function getEPIsByColaborador(req, res) {
   try {
     const { idFunc } = req.params;
-    console.log("📦 [DEBUG] Iniciando busca de EPIs do colaborador. ID recebido:", idFunc);
 
     const epi = await EPIService.buscarEPIsByColaborador(idFunc);
 
@@ -66,7 +65,6 @@ async function getEPIsByColaborador(req, res) {
       return res.status(404).json({ erro: "Nenhum EPI encontrado" });
     }
 
-    console.log("✅ [SUCESSO] EPIs encontrados:", epi);
     res.json(epi);
   } catch (err) {
     console.error("❌ [ERRO getEPIsByColaborador]:", err);

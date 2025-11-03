@@ -97,8 +97,11 @@ export function get_carregarPerfilUsuario(funcId) {
                     $('#cargoResumo').text(dados.nomeCargo);
                     $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
                     $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
-                    $('#fotoavatar').attr('src', dados.fotoperfil + '?t=' + new Date().getTime());
-
+                    $('#fotoavatar')
+                        .attr('src', resp.novaFotoURL + '?t=' + Date.now())
+                        .on('error', function () {
+                            $(this).attr('src', '/client/assets/img/fotoperfil/user-default.jpg');
+                        });
                     $('#id').val(dados.id);
                     $('#idColaborador').val(dados.id);
                     $('#nome').val(dados.nome);
