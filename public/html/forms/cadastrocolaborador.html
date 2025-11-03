@@ -572,7 +572,7 @@
                 });
 
                 $('#fotoavatar')
-                    .attr('src', resp.fotoperfil + '?t=' + Date.now())
+                    .attr('src', resp.novaFotoURL + '?t=' + Date.now())
                     .on('error', function () {
                         console.warn("⚠️ Imagem de perfil não encontrada, usando padrão.");
                         $(this).attr('src', '/imagens/fotoperfil/user-default.jpg');
