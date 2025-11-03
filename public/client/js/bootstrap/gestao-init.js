@@ -1,3 +1,9 @@
+
+import {
+  preencherCbxCliente,
+  preencherCbxResponsavel
+} from "../events/forms/populate-combobox.js";
+
 let lastCols = [];
 
 export function initGestao() {
@@ -771,6 +777,19 @@ export function initGestao() {
 
     // ======== Criação inline ========
     async function criarNovoRegistro() {
+        if (entidadeAtual === "OS") {
+            $('#form_cadOS').empty().load('../html/forms/cadastro_os.html', function (response, status, xhr) {
+                if (status === "success") {
+                    preencherCbxResponsavel();
+                    const $wrap = $('#frm_cadastrarOS');
+                    preencherCbxCliente($wrap);
+
+                } else {
+                    alert("Erro ao carregar o formulário: " + xhr.status + " " + xhr.statusText);
+                }
+            });
+            return;
+        }
         if ($tbody.find("tr.novo-registro").length) {
             Toast.fire({
                 icon: "error",

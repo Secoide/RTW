@@ -98,7 +98,7 @@ export function get_carregarPerfilUsuario(funcId) {
                     $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
                     $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
                     $('#fotoavatar')
-                        .attr('src', resp.novaFotoURL + '?t=' + Date.now())
+                        .attr('src', dados.novaFotoURL + '?t=' + Date.now())
                         .on('error', function () {
                             $(this).attr('src', '/client/assets/img/fotoperfil/user-default.jpg');
                         });
