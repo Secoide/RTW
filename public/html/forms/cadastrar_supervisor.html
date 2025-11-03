@@ -1,0 +1,58 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="cadSupervisor" style="visibility: visible; opacity: 1;">
+    <div class="">
+        <div class="painel_dadosAnexo">
+            <form id="formCadSupervisor" class="form_padrao">
+                <div class="p_titulo">
+                    <p class="tituloform">Cadastrar Supervisor</p>
+                </div>
+                <div class="linha_infoColab linha_padrao">
+                    <input id="nomesupervisor" class="tbx_teste glass input_obrigatorio" type="text"
+                        placeholder="Nome do Supervisor" name="nomesupervisor" title="" required="required"
+                        style="width: 94%;">
+                    <div class="linha_contatoColab linha_padrao">
+                        <input id="telefoneSup" class="tbx_teste glass" type="text" name="telefoneSup" placeholder="(00) 0 0000-0000">
+                        <input id="emailSup" class="tbx_teste glass" type="email" name="emailSup" placeholder="exemplo@email.com" autocomplete="off"
+                            style="text-align: left; padding-left: 10px;">
+                        <div id="email-suggestions" class="email-suggestions" style="display: none;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <select id="selectCliente" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                            name="idCliente" required placeholder="Selecione a Empresa...">
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" name="idSupervisor" id="idSupervisor">
+
+                <div class="p_acoes linha_padrao">
+                    <input id="bt_anexarExame" class="bt_teste glass btn btn-primary" type="submit" name="cadSup"
+                        value="Cadastrar">
+                    <input id="bt_fechar_cadSupervisor" class="bt_teste glass" type="reset" value="Cancelar">
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).on("click", "#bt_fechar_cadSupervisor", function () {
+        $('#form_cadSupervisor').empty();
+    });
+
+
+</script>

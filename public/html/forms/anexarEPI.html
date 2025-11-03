@@ -1,0 +1,96 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="anexoepi" style="visibility: visible; opacity: 1;">
+    <div class="">
+        <div class="painel_dadosAnexo">
+            <form id="formAnexarEPI" class="form_padrao" method="POST">
+                <div class="linha_infoColab linha_padrao">
+                    <select id="selectEPI" class="cbx_teste glass info_padrao opcoes input_obrigatorio" name="epi"
+                        required placeholder="Selecione o EPI..." style="width: 100%;">
+                    </select>
+
+                    <div style="display: flex; justify-content: space-between;">
+                        <select id="selectColaborador" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                            name="idColab" required placeholder="Selecione o colaborador..." style="width: 100%;">
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; align-items: center;">
+                            <p class="dataNasc">Data Entregue</p>
+                            <input id="dataentregueEPI" class="tbx_teste glass" type="date" name="dataentregueEPI"
+                                style="width: 140px;">
+                        </div>
+                    </div>
+                    <!-- Campo para anexar o PDF -->
+                    <div style="display: none; margin-top: 10px;">
+                        <label for="documento" style="display:block; margin-bottom:4px;">Anexar registro EPI (PDF)</label>
+                        <input type="file" id="documento" name="documento" accept="application/pdf">
+                    </div>
+                </div>
+                <input type="hidden" name="idColaborador" id="idColaborador">
+                <!-- Barra de progresso (Bootstrap) -->
+                <div id="uploadProgressWrapper" class="mt-3" style="display:none;">
+                    <div class="progress">
+                        <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            style="border-radius: 10px; background: #447cad57; text-align: center; width: 0%;"
+                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                </div>
+                <div class="p_acoes linha_padrao">
+                    <input id="bt_anexarExame" class="bt_teste glass btn btn-primary" type="submit" name="anexarExame"
+                        value="Anexar">
+                    <input id="bt_fechar_formAnexarCurso" class="bt_teste glass" type="reset" value="Cancelar">
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).on("click", "#bt_fechar_formAnexarCurso", function () {
+        $('#form_anexarEPI').empty();
+    });
+
+
+    $('#formAnexarEPI').on('submit', function (e) {
+        e.preventDefault();
+
+        const fd = new FormData(this);
+        const payload = Object.fromEntries(fd.entries());
+
+        $.ajax({
+            url: '/anexar_epi',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            dataType: 'json',
+            success: function (res) {
+                alert(res.message || 'EPI anexado com sucesso!');
+                e.target.reset();
+                preencherTabelaColaboradoresRH();
+            },
+            error: function (xhr) {
+                const msg = xhr?.responseJSON?.error || xhr?.responseText || 'Erro ao anexar EPI.';
+                alert(msg);
+            }
+        });
+    });
+</script>

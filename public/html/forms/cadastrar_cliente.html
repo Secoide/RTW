@@ -1,0 +1,48 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="cadCliente" style="visibility: visible; opacity: 1;">
+    <div class="">
+        <div class="painel_dadosAnexo">
+            <form id="formCadCliente" class="form_padrao">
+                <div class="p_titulo">
+                    <p class="tituloform">Cadastrar Empresa</p>
+                </div>
+                <div class="linha_infoColab linha_padrao">
+                    <input id="nomecliente" class="tbx_teste glass input_obrigatorio" type="text"
+                        placeholder="Nome do Cliente" name="nomecliente" title="" required="required"
+                        style="width: 94%;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <select id="selectCidade" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                            name="idCid" required placeholder="Selecione a Cidade...">
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" name="idCliente" id="idCliente">
+
+                <div class="p_acoes linha_padrao">
+                    <input id="bt_anexarExame" class="bt_teste glass btn btn-primary" type="submit" name="anexarExame"
+                        value="Cadastrar">
+                    <input id="bt_fechar_cadCliente" class="bt_teste glass" type="reset" value="Cancelar">
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).on("click", "#bt_fechar_cadCliente", function () {
+        $('#form_cadCliente').empty();
+    });
+</script>

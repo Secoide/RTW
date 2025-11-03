@@ -1,0 +1,51 @@
+/project-root
+├─ /public/                            # Tudo que pode ser servido direto ao navegador
+│  ├─ /client/                         # FRONTEND (HTML, CSS, JS de origem)
+│  │  ├─ /assets/
+│  │  │  ├─ /css/                      # CSS de origem (será empacotado p/ /public/dist)
+│  │  │  ├─ /fonts/ 
+│  │  │  └─ /img/ 
+│  │  ├─ /pages/                       # HTML de origem (multi-páginas) OU templates
+│  │  │  └─ login.html│  │  │  └─ /fonts/
+│  │  └─ /js/                          # JS do frontend (organizado em camadas)
+│  │     ├─ /events/                   # Lida com eventos da UI (handlers)
+│  │     │  ├─ change/                 
+│  │     │  ├─ forms/                  
+│  │     │  ├─ navigation/              
+│  │     │  ├─ click/             
+│  │     │  ├─ controls/               
+│  │     │  └─ dragdrop/                 
+│  │     ├─ /services/                 # Chama APIs/WS; abstrai backend
+│  │     │  ├─ api/                    # chamadas HTTP REST
+│  │     │  ├─ sockets/                # comunicação WebSocket
+│  │     │  └─ ui/
+│  │     ├─ /utils/                    # utilitários de front (puros, sem DOM pesado)
+│  │     │  ├─ validators/             # validações (email, CPF, senha, extensões)
+│  │     │  ├─ formatters/             # formatações (data, número, máscara)
+│  │     │  ├─ dom/                    # helpers de DOM (seletores, toggle, templates)
+│  │     │  ├─ storage/                # localStorage/sessionStorage
+│  │     │  └─ net/                    # fetch wrapper, retry, debounce/throttle
+│  │     ├─ /state/                    # (opcional) estado global do front
+│  │     ├─ /components/               # (se usar HTML parcial/templating)
+│  │     ├─ /bootstrap/                
+│  │     └─ main.js                    
+│  ├─ favicon.ico
+│  └─ index.html
+│
+├─ /src/                               # CÓDIGO-FONTE (não exposto diretamente)
+│  └─ /server/                         # BACKEND (Node.js)
+│     ├─ /config/                      # config de ambiente, DB, CORS, rate-limit
+│     ├─ /models/                      # acesso a dados (queries/ORM)
+│     ├─ /services/                    # regras de negócio do servidor
+│     ├─ /controllers/                 # recebe req/res e orquestra services
+│     ├─ /routes/                      # define endpoints
+│     ├─ /middlewares/                 # auth, validação, erros, logs
+│     ├─ /sockets/                     # namespaces e eventos WS no servidor
+│     ├─ /schemas/                       # utilidades do backend
+│     ├─ /utils/                       # utilidades do backend
+│     └─ app.js                        # monta Express + middlewares + rotas + WS
+│
+├─ .env
+├─ package.json
+├─ server.js                     # sobe o servidor HTTP
+└─ README.md

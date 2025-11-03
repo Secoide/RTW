@@ -7,17 +7,17 @@
             <div id="progress-fill"></div>
         </div>
 
-        <button id="btn-ok" onclick="$('.aviso').css({ visibility: 'hidden', opacity: 0 });">OK</button>
+        <button id="btn-ok">OK</button>
     </div>
 </div>
 
 <script>
-    let tempoTotal = 10; // segundos (2 minutos)
-    let intervalo;
-    let tempoAtual = 0;
-    
+
+
     function mostrarAviso(mensagem) {
-        
+        let tempoTotal = 10; // segundos (2 minutos)
+        let intervalo;
+        let tempoAtual = 0;
         $('#mensagem-aviso').text(mensagem);
         $('#progress-fill').css('width', '0%');
         $('.aviso').css({ visibility: 'visible', opacity: 1 });
@@ -35,13 +35,13 @@
         }, 1000);
     }
 
-    function fecharAviso() {
-        clearInterval(intervalo);
-        $('.aviso').css({ visibility: 'hidden', opacity: 0 });
-    }
-
     $('#botaoAcao').on('click', function () {
         mostrarAviso('Ação concluída com sucesso!');
+    });
+
+
+    $('#btn-ok').on('click', function () {
+        $('.aviso').css({ visibility: 'hidden', opacity: 0 });
     });
 
 

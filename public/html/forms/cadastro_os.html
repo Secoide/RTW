@@ -1,0 +1,349 @@
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+
+
+<div class="cadOS" style="visibility: visible; opacity: 1;">
+    <div class="painel_principal">
+        <div class="p_titulo">
+            <p class="tituloform">Ordem de Serviço</p>
+        </div>
+        <div class="painel_dadosOS">
+            <div class="painel_todosOS">
+                <div class="glass menu_Colab">
+                    <a class="bt_menu ativo" data-target=".painel_info">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span class="menu-text">Informações</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_status">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span class="menu-text">Status</span>
+                    </a>
+                    <div class="push"></div>
+                    <a class="bt_menu" data-target=".painel_estatistica">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        <span class="menu-text">Estatística</span>
+                    </a>
+                    <a id="bt_sair_os" class="bt_menu bt_sair" title="Fechar Dados">
+                        <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>
+                        <span class="menu-text">Sair</span>
+                    </a>
+                </div>
+                <div class="painel_Paineis">
+                    <div class="painel_info">
+                        <p>Informações OS</p>
+                        <div id="frm_cadastrarOS" class=" animate">
+                            <form id="formOS" class="form__os" method="POST">
+                                <div>
+                                    <div>
+                                        <div class="linha_infoOS linha_padrao">
+                                            <input id="idOS" class="tbx_teste glass input_obrigatorio" type="text"
+                                                placeholder="Nº OS" name="idos" title="" maxlength="4"
+                                                pattern="[0-9]{1,4}" required="required" style="width: 60px;">
+                                            <input id="descricaoOS" class="tbx_teste glass input_obrigatorio"
+                                                type="text" placeholder="Descrição do Serviço" name="descricao" title=""
+                                                required="required" style="width: 100%;">
+                                        </div>
+                                        <div class="linha_infoCliente linha_padrao">
+                                            <div class="linha_valorData">
+                                                <select id="selectCliente" class="cbx_teste glass info_padrao opcoes"
+                                                    name="cliente" style="margin-right: 10px;"
+                                                    required="required"></select>
+                                                <!--<input id="bt_cad_cliente" class="bt_teste bt_solo glass"
+                                                    title="Cadastrar Cliente" type="button" value="+"
+                                                    style="width: 30px;"> -->
+                                            </div>
+                                            <div class="linha_valorData">
+                                                <select id="selectSupervisor" class="cbx_teste glass info_padrao opcoes"
+                                                    name="supervisor" style="margin-right: 10px;"></select>
+                                                <!--<input id="bt_cad_supervisor" class="bt_teste bt_solo glass"
+                                                    title="Cadastrar Supervisor" type="button" value="+"
+                                                    style="width: 30px;">-->
+                                            </div>
+                                            <div style="padding: 0 0 10px 10px ; color: rgb(163, 163, 163);">
+                                                <p id="telefoneSupervisor">Telefone: -</p>
+                                                <p id="emailSupervisor">E-mail: -</p>
+                                            </div>
+                                            <div class="linha_valorData">
+                                                <select id="selectCidade" class="cbx_teste glass info_padrao opcoes"
+                                                    name="cidade" style="margin-right: 10px;"
+                                                    required="required"></select>
+                                                <!--<input id="bt_cad_cidade" class="bt_teste bt_solo glass"
+                                                    title="Cadastrar Cidade" type="button" value="+"
+                                                    style="width: 30px;">-->
+                                            </div>
+                                        </div>
+                                        <div class="linha_valorData linha_padrao">
+                                            <input id="valorOrcadoOS"
+                                                class="tbx_teste glass input_obrigatorio valorDinheiro" type="text"
+                                                placeholder="Valor Orçado (R$)" name="orcado" title=""
+                                                required="required" style="width: 120px;">
+                                            <div style="display: flex; align-items: center;">
+                                                <p
+                                                    style="color: grey; text-align: left; font-size: 10px; padding-right: 2px;">
+                                                    Previsão:</p>
+                                                <input id="dataconclusaoOS" class="tbx_teste glass" type="date"
+                                                    name="dataconclusao" title="" style="width: 120px;">
+                                            </div>
+                                        </div>
+                                        <div class="linha_responsavel linha_padrao">
+                                            <select id="selectResponsavel" class="cbx_teste glass opcoes"
+                                                name="responsavel">
+                                            </select>
+                                            <p class="dica">Deixe em branco caso defina responsável mais adiante.</p>
+                                        </div>
+                                        <div class="linha_observacao linha_padrao">
+                                            <textarea name="message" placeholder="Observações" class="glass"
+                                                style="width: 97%; height:100px; border: 1px solid var(--cor_letraFundo); border-radius: 5px; padding: 4px; resize: none;"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="p_btAnexo">
+                                        <input id="bt_analisarGraficoOS" class="bt_teste glass" type="button"
+                                            value="Analisar" style="display: none;">
+                                        <input id="" class="bt_teste glass" type="button" value="Anexar" onclick=""
+                                            style="display: none;">
+                                    </div>
+                                    <div id="anexoCadOS" class="p_anexos p_padrao" style="display: none;">
+                                        <div class="p_anexosRolante">
+                                            <div class="p_propostaComercial p_anexoPadrao p_anexado">
+                                                <div class="linha_icone">
+                                                    <i class="iconeAnexo fa-solid fa-ruler-combined"></i>
+                                                </div>
+                                                <div class="linha_tituloAnexo">
+                                                    <p>Proposta Comercial</p>
+                                                </div>
+                                            </div>
+                                            <div class="p_propostaTecnica p_anexoPadrao">
+                                                <div class="linha_icone">
+                                                    <i class="iconeAnexo fa-solid fa-compass-drafting"></i>
+                                                </div>
+                                                <div class="linha_tituloAnexo">
+                                                    <p>Proposta Técnica</p>
+                                                </div>
+                                            </div>
+                                            <div class="p_orcamentoServicos p_anexoPadrao">
+                                                <div class="linha_icone">
+                                                    <i class="iconeAnexo fa-solid fa-file-invoice-dollar"></i>
+                                                </div>
+                                                <div class="linha_tituloAnexo">
+                                                    <p>Orçamento Serviços</p>
+                                                </div>
+                                            </div>
+                                            <div class="p_listaMateriais p_anexoPadrao">
+                                                <div class="linha_icone">
+                                                    <i class="iconeAnexo fa-solid fa-dolly"></i>
+                                                </div>
+                                                <div class="linha_tituloAnexo">
+                                                    <p>Lista de Materiais</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p_acoes p_padrao">
+                                        <input id="bt_cadOS" class="bt_teste glass" type="submit" name="cadOS"
+                                            value="Cadastrar">
+                                        <input id="bt_editOS" class="bt_teste glass" type="submit" name="editOS"
+                                            value="Salvar" style="display: none;">
+                                        <input id="bt_fechar_form_OS" class="bt_teste glass" type="reset"
+                                            value="Cancelar">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="painel_status">
+                        <p>Status</p>
+                        <form id="formStatusOS" method="POST">
+                            <div class="linha_Setor linha_padrao">
+                                <select id="statusOS" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                    name="statusOS" required="required">
+                                    <option value="" disabled selected hidden>Selecione o Status Atual da OS...</option>
+                                    <option value="0">Sem responsavel</option>
+                                    <option value="1">Aguardando</option>
+                                    <option value="2">Em execução</option>
+                                    <option value="3">Parado</option>
+                                    <option value="4">Concluído</option>
+                                    <option value="5">Em espera</option>
+                                    <option value="6">Cancelado</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="idOS_status" id="idOS_status">
+                            <div class="p_acoes linha_padrao">
+                                <input id="bt_editStatusOS" class="bt_teste glass" type="submit" name="editStatusOS"
+                                    value="Salvar">
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+
+    function abrirAnexosCadOS() {
+        $("#anexoCadOS").slideToggle(100);
+    }
+
+    $(document).on("click", "#bt_sair_os", function () {
+        $('#form_cadOS').empty();
+    });
+
+    // ao abrir formulario Cadastro OS
+
+    $(document).on('click', '#bt_fechar_form_OS', function (e) {
+        $('#form_cadOS').empty();
+    });
+
+
+
+    $(document).on('click', '#bt_analisarGraficoOS', function (e) {
+        //GERA GRAFICO DE COLABS POR DIA
+        const osID = $('#idOS').val().trim();
+
+        $('#form_infoOS').empty().load('../infos_OS.html', function () {
+            $('#areaGrafico').html('<canvas id="graficoColaboradores" width="1100" height="300"></canvas>');
+
+            // Chamada AJAX para pegar os dados reais
+            $.getJSON('/api/historico_colaboradores_OS', { osID }, function (resposta) {
+                if (!resposta.length) {
+                    $('#titulo_OS').text(`OS ${osID} - Sem dados disponíveis.`);
+                    return;
+                }
+
+                // Cria mapa de data -> total
+                const mapa = {};
+                resposta.forEach(item => {
+                    const dataFormatada = formatarDataComDiaSemana(item.data);
+                    mapa[dataFormatada] = item.total_colaboradores;
+                });
+
+                // Define dataInicio e dataFim com base nos dados reais do MySQL
+                const dataInicio = new Date(resposta[0].data);
+                const dataFim = new Date(resposta[resposta.length - 1].data);
+
+                const todasDatas = [];
+                for (let d = new Date(dataInicio); d <= dataFim; d.setDate(d.getDate() + 1)) {
+                    todasDatas.push(formatarDataComDiaSemana(d));
+                }
+
+                const ctx = document.getElementById('graficoColaboradores').getContext('2d');
+                if (window.graficoOS) window.graficoOS.destroy();
+
+                const totais = todasDatas.map(data => mapa[data] || 0);
+                const mediaMovel = calcularMediaMovel(totais, 5);
+
+                const descricaoOS = resposta[0].descricao;
+
+                $('#titulo_OS').text(`OS ${osID} - ${descricaoOS}`);
+                window.graficoOS = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: todasDatas,
+                        datasets: [
+                            {
+                                label: `Total de Colaboradores`,
+                                data: totais,
+                                borderColor: 'green',
+                                backgroundColor: 'rgba(143, 143, 143, 0.1)',
+                                tension: 0.3,
+                                borderWidth: 1.5,
+                                pointRadius: 1.5
+                            },
+                            {
+                                label: 'Média Móvel',
+                                data: mediaMovel,
+                                borderColor: 'orange',
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                borderWidth: 1.5,
+                                pointRadius: 1.5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: {
+                            duration: 100,
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    font: { size: 9 },
+                                    color: 'white',   // 🔹 cor dos números do eixo X
+                                    autoSkip: true,
+                                    maxRotation: 90,
+                                    minRotation: 90,
+                                    align: 'start'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Colaboradores',
+                                    color: 'white'     // 🔹 cor do título do eixo Y
+                                },
+                                ticks: {
+                                    font: { size: 11 },
+                                    color: 'darkred' // 🔹 cor dos números do eixo Y
+                                }
+                            }
+                        }
+                    }
+                });
+
+
+
+            });
+
+        });
+    });
+
+    // Oculta todos os painéis
+    $('.painel_status').hide();
+    // Controle dos botões do menu
+    $('.bt_menu').on('click', function () {
+        const target = $(this).data('target');
+
+        $('.bt_menu').removeClass('ativo');
+        $(this).addClass('ativo');
+
+        // Se o painel for exames, chama a função
+        if (target === '.painel_exames') {
+            const idFunc = $('#idColaborador').val();
+            load_exames_colaborador(idFunc, $('#carregarExamesAqui'));
+        }
+
+        // Se o painel for epi, chama a função
+        if (target === '.painel_vestimentas') {
+            const idFunc = $('#idColaborador').val();
+            load_epis_colaborador(idFunc, $('#carregarEPIAqui'));
+        }
+        // Se o painel for cursos, chama a função
+        if (target === '.painel_cursos') {
+            const idFunc = $('#idColaborador').val();
+            load_cursos_colaborador(idFunc, $('#carregarCursosAqui'));
+
+        }
+        // Oculta todos os painéis
+        $('.painel_info, .painel_status').hide();
+
+        // Mostra o painel clicado
+        $(target).fadeIn(200);
+    });
+</script>

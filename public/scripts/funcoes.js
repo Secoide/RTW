@@ -46,14 +46,19 @@ function mostrarTotalColabPorOS() {
 
 
 
-function adicionarColaboradorNaOS(id, nome, $destinoOS) {
-    const $painelDia = $destinoOS.closest('.painelDia');
-    const $colabNaBase = $painelDia.find('.painel_colaboradores .p_colabsDisp .colaborador').filter(function () {
-        return $(this).data('id') === id;
-    }).first();
+function adicionarColaboradorNaOS(id, nome, $destinoOS, dataOrigem) {
+    // se o dia de origem for informado, pega o painel correspondente
+    const $painelDia = dataOrigem
+        ? $(`.painelDia[data-dia="${dataOrigem}"]`)
+        : $destinoOS.closest('.painelDia');
+
+    const $colabNaBase = $painelDia.find('.painel_colaboradores .p_colabsDisp .colaborador')
+        .filter(function () {
+            return String($(this).data('id')) == String(id);
+        }).first();
 
     if ($colabNaBase.length === 0) {
-        console.warn('Colaborador não encontrado para adicionar na OS:', id, nome);
+        console.warn("⚠️ Colaborador base não encontrado no painel:", dataOrigem, id);
         return;
     }
 
@@ -61,8 +66,9 @@ function adicionarColaboradorNaOS(id, nome, $destinoOS) {
     novoColab.removeAttr('data-idnaos');
     novoColab.removeClass("colaboradorEmOS");
     novoColab.find('.ocupadoEmOS').remove();
-    //novoColab.find('.bt_tirarColab').css("visibility", "visible");
     novoColab.attr("draggable", true);
+
+    $destinoOS.removeClass("os_semColab");
 
     novoColab.addClass("highlighted");
     setTimeout(() => novoColab.removeClass("highlighted"), 200);
@@ -75,12 +81,17 @@ function adicionarColaboradorNaOS(id, nome, $destinoOS) {
 
     $colabsContainer.slideDown(150);
     $destinoOS.find('.icone-olho').removeClass('fa-eye-slash').addClass('fa-eye');
+
+    $(document).trigger("colaboradorRenderizado", {
+        id,
+        osID: $destinoOS.find(".lbl_OS").text().trim()
+    });
 }
 
 
+
 //NOTE: Função para fixar OS antes fixadas manualmente
-// - Atualizado para Async Await
-async function restaurarOSFixadas() {
+function restaurarOSFixadas() {
     let fixadas = [];
     try {
         fixadas = JSON.parse(localStorage.getItem("osFixadas")) || [];
@@ -105,8 +116,7 @@ async function restaurarOSFixadas() {
 
 
 //NOTE: Função para ocultar colaboradores em OS que foi ocultada manualmente
-// - Atualizado para Async Await
-async function restaurarOSOcultas() {
+function restaurarOSOcultas() {
     let ocultas = [];
     try {
         ocultas = JSON.parse(localStorage.getItem("osOcultas")) || [];
@@ -149,24 +159,22 @@ function aplicarDestaquesComentarios() {
 }
 
 
-
-//Atualizado para Async Await
-async function restaurarOSPrioridade() {
+function restaurarOSPrioridade() {
     $('.painel_OS').each(function () {
         const osID = $(this).find('.lbl_OS').text().trim();
         const prioridade = localStorage.getItem("prioridade_OS_" + osID);
-
         if (prioridade === 'prioridade-alta') {
             $(this).addClass('prioridade-alta fixadaPorPrioridade');
             $(this).find('.bt_prioridade').addClass('alta').attr('title', 'Prioridade: Alta');
         } else {
-            $(this).find('.bt_prioridade').attr('title', 'Sem prioridade');
+            $(this).removeClass('prioridade-alta fixadaPorPrioridade');
+            $(this).find('.bt_prioridade').removeClass('alta').attr('title', 'Sem prioridade');
         }
     });
 }
 
 
-async function atualizarPainel($painelDia) {
+function atualizarPainel2($painelDia) {
     const $painelOS = $painelDia.find('.painel_dasOS');
 
     const buscadas = $painelOS.find('.painel_OS.matchOS').detach().toArray();
@@ -183,8 +191,6 @@ async function atualizarPainel($painelDia) {
     // Em vez de apagar tudo, só reorganiza
     $painelOS.append([...buscadas, ...grupo1, ...grupo2, ...grupo3, ...grupo4, ...grupo5]);
 }
-
-
 
 
 async function atualizarStatusColaboradoresOS() {
@@ -371,8 +377,7 @@ function ordenarColaboradoresNasOS() {
 }
 
 //NOTE: ESCONDE PAINEL OS sem Colaborador
-
-async function esconderPainelOSsemColab() {
+function esconderPainelOSsemColab() {
     $('.painel_OS').each(function () {
         const $os = $(this);
         const total = $os.find('.p_colabs .colaborador').length;
@@ -493,20 +498,58 @@ function formatarData(dataStr) {
 
 
 
-function alterar_status_progDia(iconeClick, status) {
-    const painelDia = iconeClick.closest('.painelDia');
-    const dataOrigem = painelDia.attr('data-dia');
 
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-            acao: 'mudar_statusProgDia',
-            dia: dataOrigem,
-            statuss: status
-        }));
+// ABRIR Form anexar Exame ao Colaborador
+async function open_form_AnexarExame(idColab, idExame) {
+    const $wrap = $('#form_anexarExame');
+
+    try {
+        // carrega HTML
+        const html = await $.get('../html/forms/anexarExame.html');
+        $wrap.empty().html(html);
+        $('.anexoexame', $wrap).show();
+
+        // espera preencher os combos
+        await preencherCbxColaborador();
+        await preencherCbxExame();
+
+        // agora seleciona o colaborador
+        if (idColab != null) {
+            $('#selectColaborador').val(String(idColab)).trigger('change');
+        }
+        if (idExame != null) {
+            $('#selectExame').val(String(idExame)).trigger('change');
+        }
+    } catch (err) {
+        alert(`Erro ao carregar janela: ${err.status || ''} ${err.statusText || err.message}`);
     }
-
 }
 
+// ABRIR Form anexar Curso ao Colaborador
+async function open_form_AnexarCurso(idColab, idExame) {
+    const $wrap = $('#form_anexarCurso');
+
+    try {
+        // carrega HTML
+        const html = await $.get('../html/forms/anexarCurso.html');
+        $wrap.empty().html(html);
+        $('.anexocurso', $wrap).show();
+
+        // espera preencher os combos
+        await preencherCbxColaborador();
+        await preencherCbxCurso();
+
+        // agora seleciona o colaborador
+        if (idColab != null) {
+            $('#selectColaborador').val(String(idColab)).trigger('change');
+        }
+        if (idExame != null) {
+            $('#selectCurso').val(String(idCurso)).trigger('change');
+        }
+    } catch (err) {
+        alert(`Erro ao carregar janela: ${err.status || ''} ${err.statusText || err.message}`);
+    }
+}
 
 
 

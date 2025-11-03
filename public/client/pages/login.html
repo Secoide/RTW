@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+  <title>RTW - Login</title>
+
+  <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
+  <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
+  <link rel="stylesheet" type="text/css" href="css/padrao/thema.css">
+  <link rel="stylesheet" type="text/css" href="css/login.css">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <!-- Agora só carrega o main.js -->
+  <script type="module" src="/client/js/main.js"></script>
+</head>
+
+<body>
+  <div class="fundo_img">
+    <div class="painel_login centralizada glass">
+      <div class="form_login">
+        <p class="tituloLogin">Faça seu login.</p>
+        <form id="formLogin" method="POST" autocomplete="on">
+          <label for="username">Usuário</label><br>
+          <input id="username" type="text" name="username" autocomplete="username" required>
+          
+          <label for="password">Senha</label><br>
+          <input id="password" type="password" name="password" autocomplete="current-password" required>
+          
+          <a class="esquecisenha" href="#">Esqueci minha senha</a>
+          <div class="divbutton">
+            <input class="botao-degrade" type="submit" value="Entrar">
+            <a class="semconta" href="#">Ainda não tenho uma conta</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="versao">v1.1.0.0</div>
+  </div>
+  
+  <!-- Inatividade separado -->
+  <script type="text/javascript" src="scripts/websocket/inatividade.js"></script>
+</body>
+</html>

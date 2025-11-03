@@ -1,0 +1,51 @@
+<header>
+  <h1>Painel Único — Gestão de Cadastros</h1>
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-entity="EPI">EPI</div>
+    <div class="tab" data-entity="Exame">Exame</div>
+    <div class="tab" data-entity="Curso">Curso</div>
+    <div class="tab" data-entity="Empresa">Empresa</div>
+    <div class="tab" data-entity="Supervisor">Supervisor</div>
+    <div class="tab" data-entity="Cidade">Cidade</div>
+    <div class="tab" data-entity="OS">OS</div>
+  </div>
+</header>
+
+<main id="gestao">
+
+  <!-- Cards de resumo (exibidos apenas na aba OS) -->
+  <div id="resumo" class="resumo" style="display:none;"></div>
+  <!-- Barra de botões -->
+  <div class="toolbar">
+    <div class="left">
+      <button class="primary bt_padrao bt_cad" id="btnNovo">+ Novo</button>
+      <button id="btnReload" class="bt_padrao bt_atualizar">Atualizar</button>
+      <button id="btnToggleChart" class="bt_padrao bt_toggle">📉 Mostrar Gráfico</button>
+    </div>
+    <div class="right">
+      <input type="search" id="search" placeholder="Buscar em qualquer coluna...">
+    </div>
+  </div>
+  <!-- Gráfico de Timeline (exibido apenas na aba OS) -->
+  <div id="osChartContainer" class="chart-container" style="display:none;">
+    <div id="osChartsRow">
+      <div id="osPieContainer">
+        <canvas id="osPieChart"></canvas>
+      </div>
+      <div id="osTimelineContainer">
+        <canvas id="osTimelineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Div da tabela -->
+  <div class="table-container">
+    <table id="dataTable">
+      <thead>
+        <tr id="theadRow"></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="empty" class="empty" style="display:none;">Nenhum dado encontrado.</div>
+  </div>
+</main>

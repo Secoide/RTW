@@ -1,0 +1,122 @@
+<main id="rh">
+    <div class="painel_Esquerda class">
+        <div class="painel_colaboradoresResumo">
+            <div class="painelSubMenu">
+                <div class="painelAcoes">
+                    <div class="bt_submenu">
+                        <input type="button" name="" value="Cadastrar Colaborador" title="Cadastrar Colaborador"
+                            class="bt_padrao bt_cad bt_form_cad_colab">
+                    </div>
+                    <div class="bt_submenu">
+                        <input type="button" name="" value="Registrar EPI" title="Registrar EPI"
+                            class="bt_padrao bt_form_anexar_epi">
+                    </div>
+                    <div class="bt_submenu">
+                        <input type="button" name="" value="Anexar Exame" title="Anexar Exame"
+                            class="bt_padrao bt_form_anexar_exame">
+                    </div>
+                    <div class="bt_submenu">
+                        <input type="button" name="" value="Anexar Curso" title="Anexar Curso"
+                            class="bt_padrao bt_form_anexar_curso">
+                    </div>
+                </div>
+                <div class="painelBuscar">
+                    <div class="bt_submenu">
+                        <i title="Filtro Avançado" class="iconeBusca fa-solid fa-filter"></i>
+                    </div>
+                    <div class="bt_submenu">
+                        <label style="font-size: 11px; width: 150px;">
+                            <input type="checkbox" id="chkDesligados">
+                            Mostrar desligados
+                        </label>
+                    </div>
+                    <div class="bt_submenu">
+                        <input id="myInputPesquisaNomeRH" class="tbx_teste glass" type="text" name=""
+                            placeholder="Pesquisar Colaborador..." title="pesquisa_nomeRH" class="pesquisa_nomeRH"
+                            style="background-color: rgb(209, 209, 209);">
+                    </div>
+                </div>
+            </div>
+            <div class="painelBuscaAvancada" id="buscaAvancado" style="display: none;">
+                <form action="" style="display: flex; justify-content: space-between; width: 100%;">
+                    <div class="buscaEsq">
+                        <div class="bt_submenu">
+                            <input type="checkbox" id="chkOSResponsável" name="OSResponsável" value="Bike">
+                            <label for="chkOSResponsável" class="naoSelecionavel">OS Sem Responsável</label><br>
+                        </div>
+                        <div class="bt_submenu">
+                            <input type="checkbox" id="chkOSParada" name="OSParada" value="Bike">
+                            <label for="chkOSParada" class="naoSelecionavel">OS Parada</label><br>
+                        </div>
+                        <div class="bt_submenu">
+                            <input type="checkbox" id="chkOSAguardando" name="OSAguardando" value="Bike">
+                            <label for="chkOSAguardando" class="naoSelecionavel">OS Aguardando</label><br>
+                        </div>
+                        <div class="bt_submenu">
+                            <input type="checkbox" id="chkOSExecucao" name="OSExecucao" value="Bike">
+                            <label for="chkOSExecucao" class="naoSelecionavel">OS Em execucao</label><br>
+                        </div>
+                        <div class="bt_submenu">
+                            <input type="checkbox" id="chkOSConcluida" name="OSConcluida" value="OS">
+                            <label for="chkOSConcluida" class="naoSelecionavel">OS Concluida</label><br>
+                        </div>
+                    </div>
+                    <div class="buscaDir">
+                        <div class="bt_submenu">
+                            <select id="selectClienteBuscar" name="clientes" class="bt_padrao opcoes"
+                                style="width: 150px; background-color: var(--white); color: var(--texto_cinza); margin-left: 4px;">
+                                <option value="" disabled selected hidden>Selecione o Cliente</option>
+                            </select>
+                            <select id="selectResponsavelBuscar" name="responsavel" class="bt_padrao opcoes"
+                                style="width: 200px; background-color: var(--white); color: var(--texto_cinza); margin-left: 4px;">
+                                <option value="" disabled selected hidden>Selecione o Responsável...</option>
+                            </select>
+                            <input id="btnBuscaAvancada" class="bt_padrao bt_buscar" type="button" value="Buscar">
+                        </div>
+                        <div class="bt_submenu">
+                            <input id="btnLimpar" class="bt_padrao bt_cancel" type="button" name="" value="Limpar"
+                                title="Limpar">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="painel_tabelaFunc">
+                <div class="tb_padraoGeral">
+                    <table id="tb_colaboradoresRH" class="tb_zebrada">
+                        <thead class="tb_cabecalho">
+                            <tr>
+                                <th>ID</th>
+                                <th>NOME COMPLETO</th>
+                                <th>NASCIMENTO</th>
+                                <th>CARGO</th>
+                                <th>SETOR</th>
+                                <th>EPIS</th>
+                                <th>INTEGRAÇÕES</th>
+                                <th>EXAMES</th>
+                                <th>CURSOS (NR)</th>
+                                <th>STATUS</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="tb_padrao_conteudo">
+                            <!-- Linhas serão adicionadas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="painel_Direita class">
+        <div class="painel_Exames">
+
+        </div>
+        <div class="painel_EPI">
+
+        </div>
+        <div class="painel_Integracoes">
+
+        </div>
+    </div>
+
+</main>

@@ -1,0 +1,841 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="cad" style="visibility: visible; opacity: 1;">
+
+    <div class="painel_principal">
+        <div class="painel_fundoResumo">
+            <div class="painel_resumoColab">
+                <div class="painel_foto">
+                    <img id="fotoavatar" class="foto avatar" src="/imagens/user-default.jpg" alt="Avatar">
+                    <div class="statusIcon"></div>
+                </div>
+                <div class="resumoDados">
+                    <span id="nomeCompletoResumo" class="nomeCompleto"></span>
+                    <span id="cargoResumo" class="cargo"></span>
+                </div>
+            </div>
+        </div>
+        <div class="painel_dadosColab">
+            <div class="painel_todos">
+                <div class="glass menu_Colab">
+                    <a class="bt_menu ativo" data-target=".painel_perfil">
+                        <i class="fa-solid fa-user"></i>
+                        <span class="menu-text">Dados Pessoal</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_profissional">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="menu-text">Dados Profissional</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_vestimentas">
+                        <i class="fa-solid fa-shirt"></i>
+                        <span class="menu-text">Vestimentas (EPIs)</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_exames">
+                        <i class="fa-solid fa-suitcase-medical"></i>
+                        <span class="menu-text">Exames</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_cursos">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span class="menu-text">Cursos</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_integra">
+                        <i class="fa-solid fa-paperclip"></i>
+                        <span class="menu-text">Integrações</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_atestar">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span class="menu-text">Atestar</span>
+                    </a>
+                    <div class="push"></div>
+                    <a class="bt_menu" data-target=".painel_estatistica">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        <span class="menu-text">Estatística</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_nivel">
+                        <i class="fa-solid fa-chart-diagram"></i>
+                        <span class="menu-text">Nível</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_apoio" style="display: none;">
+                        <i class="fa-solid fa-handshake-simple"></i>
+                        <span class="menu-text">Apoio</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_senha">
+                        <i class="fa-solid fa-lock"></i>
+                        <span class="menu-text">Senha</span>
+                    </a>
+                    <a id="bt_sair_perfil" class="bt_menu bt_sair" title="Fechar Dados">
+                        <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>
+                        <span class="menu-text">Sair</span>
+                    </a>
+                </div>
+                <div class="painel_Paineis">
+                    <div class="painel_perfil">
+                        <p>Dados Pessoal</p>
+                        <div class="bt_foto">
+                            <form id="form_foto" enctype="multipart/form-data">
+                                <!-- input file escondido -->
+                                <input type="file" id="select_foto" name="fotoperfil" accept="image/*"
+                                    style="display:none;">
+                                <!-- botão único -->
+                                <button id="btn_upload" class="bt_teste glass" type="button">Carregar foto</button>
+                            </form>
+                        </div>
+                        <form id="formColaborador" method="POST">
+                            <div class="linha_infoColab linha_padrao">
+                                <input id="nome" class="tbx_teste glass input_obrigatorio" type="text"
+                                    placeholder="Nome Completo" name="nome" title="" required="required"
+                                    style="width: 97%; text-align: left; padding-left: 10px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <select id="sexo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                        name="genero" required="required" style="width: 150px;">
+                                        <option value="" disabled selected hidden>Gênero...</option>
+                                        <option value="1">Masculino</option>
+                                        <option value="0">Feminino</option>
+                                        <option value="2">Outro</option>
+                                    </select>
+                                    <div style="display: flex; align-items: center;">
+                                        <p class="dataNasc">Data de Nascimento:</p>
+                                        <input id="nascimento" class="tbx_teste glass" type="date" name="dataNascimento"
+                                            title="" style="width: 140px;">
+                                    </div>
+                                </div>
+                                <input id="endereco" class="tbx_teste glass" type="text" placeholder="Endereço"
+                                    name="endereco" title="" style="width: 97%; text-align: left; padding-left: 10px;">
+                            </div>
+                            <div class="linha_contatoColab linha_padrao">
+                                <input id="telefone" class="tbx_teste glass" type="text" name="telefone"
+                                    placeholder="(00) 0 0000-0000">
+                                <input id="mail" class="tbx_teste glass" type="email" name="email"
+                                    placeholder="exemplo@email.com" autocomplete="off"
+                                    style="text-align: left; padding-left: 10px;">
+                                <div id="email-suggestions" class="email-suggestions" style="display: none;"></div>
+                            </div>
+                            <div class="linha_sobreMim linha_padrao">
+                                <textarea id="sobremim" class="glass" name="sobre" placeholder="Sobre mim"
+                                    style="width: 97%; height:50px; border-radius: 20px; padding: 4px; resize: none;"></textarea>
+                            </div>
+                            <div class="linha_Setor linha_padrao">
+                                <div style="display: flex; align-items: center;">
+                                    <p class="lblcpf">CPF:</p>
+                                    <input id="cpf" class="tbx_teste glass input_obrigatorio input_cpf" type="text"
+                                        placeholder="CPF" name="cpf" title="" maxlength="14">
+                                    <p class="lblrg">RG:</p>
+                                    <input id="rg" class="tbx_teste glass input_obrigatorio" type="text"
+                                        placeholder="RG" name="rg" title="" maxlength="10">
+                                </div>
+                            </div>
+                            <input type="hidden" name="idColaborador" id="idColaborador">
+                            <div class="p_acoes linha_padrao">
+                                <input id="bt_cadColaborador" class="bt_teste glass" type="submit" name="cadColab"
+                                    value="Cadastrar">
+                                <input id="bt_editColab" class="bt_teste glass" type="submit" name="editColab"
+                                    value="Salvar" style="display: none;">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="painel_profissional">
+                        <p>Dados Profissional</p>
+                        <form id="formColaboradorProfissional" method="POST">
+                            <div class="linha_infoColab linha_padrao">
+                                <div class="painel_checkBokCNH">
+                                    <p>Categoria CNH...</p>
+                                    <input type="checkbox" id="cat_cnh_A" name="vehicle" value="A">
+                                    <label for="cat_cnh_A">A</label><br>
+                                    <input type="checkbox" id="cat_cnh_B" name="vehicle" value="B">
+                                    <label for="cat_cnh_B">B</label><br>
+                                    <input type="checkbox" id="cat_cnh_C" name="vehicle" value="C">
+                                    <label for="cat_cnh_C">C</label><br>
+                                    <input type="checkbox" id="cat_cnh_D" name="vehicle" value="D">
+                                    <label for="cat_cnh_D">D</label><br>
+                                    <!-- Campo oculto para armazenar os valores concatenados -->
+                                    <input type="hidden" name="vehicles_selected" id="vehicles_selected">
+                                </div>
+                            </div>
+                            <div class="linha_Setor linha_padrao">
+                                <select id="empresacontrato"
+                                    class="cbx_teste glass info_padrao opcoes input_obrigatorio" name="empresacontrato"
+                                    required="required" style="width: 200px;">
+                                    <option value="" disabled selected hidden>Empresa contratante...</option>
+                                    <option value="RTW">RTW</option>
+                                    <option value="V8i">V8i</option>
+                                </select>
+                            </div>
+
+                            <div class="linha_Setor linha_padrao">
+                                <select id="categoria" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                    name="setor" required="required">
+                                    <option value="" disabled selected hidden>Selecione o setor...</option>
+                                    <option value="0">Estágio</option>
+                                    <option value="1">Produção</option>
+                                    <option value="2">Almoxarifado</option>
+                                    <option value="4">Compras</option>
+                                    <option value="5">Engenharia</option>
+                                    <option value="6">Gerência</option>
+                                    <option value="7">Financeiro</option>
+                                    <option value="8">RH</option>
+                                    <option value="9">Orçamento</option>
+                                    <option value="10">Diretoria</option>
+                                    <option value="12">Terceirizado</option>
+                                </select>
+                                <select id="cargo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                    name="cargo" required="required">
+                                    <option value="" disabled selected hidden>Selecione o cargo...</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="idColaboradorPro" id="idColaboradorPro">
+                            <div class="p_acoes linha_padrao">
+                                <input id="bt_editColabProf" class="bt_teste glass" type="submit" name="editColabProf"
+                                    value="Salvar">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="painel_vestimentas">
+                        <p>Vestimentas</p>
+                        <div id="carregarEPIAqui" class="painel_epiGeral"
+                            style="display: flex; justify-content: center;">
+
+                        </div>
+                    </div>
+                    <div class="painel_exames">
+                        <p>Exames</p>
+                        <div id="carregarExamesAqui" class="painel_vencimento_exames">
+
+                        </div>
+                        <div class="p_acoes linha_padrao">
+                            <input type="button" id="bt_anexarExame_noPerfil" class="bt_teste glass" name="anexarExame"
+                                value="Anexar Exame">
+                        </div>
+                    </div>
+                    <div class="painel_cursos">
+                        <p>Cursos</p>
+                        <div id="carregarCursosAqui" class="painel_vencimento_cursos">
+
+                        </div>
+                        <div class="p_acoes linha_padrao">
+                            <input type="button" id="bt_anexarCurso_noPerfil" class="bt_teste glass" name="anexarCurso"
+                                value="Anexar Curso">
+                        </div>
+                    </div>
+                    <div class="painel_integra">
+                        <p>Integração</p>
+                        <div id="carregarIntegracoesAqui" class="painel_vencimento_integracoes scroll-container">
+                            
+                        </div>
+                        <div class="p_acoes linha_padrao">
+                            <input type="button" id="bt_anexarIntegracao_noPerfil" class="bt_teste glass" name="anexarIntegracao"
+                                value="Anexar Integração">
+                        </div>
+                    </div>
+                    <div class="painel_atestar">
+                        <p>Atestar Colaborador</p>
+                        <form id="form_atestar" method="POST">
+                            <div class="linha_padrao">
+                                <select id="motivo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                    name="atestado" required="required">
+                                    <option value="" disabled selected hidden>Selecione o Atestado...</option>
+                                    <option value="Ferias">Férias</option>
+                                    <option value="Saude">Atestado Saúde</option>
+                                    <option value="Paternidade">Licença Paternidade</option>
+                                    <option value="Afastamento">Afastamento</option>
+                                </select>
+                                <br>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <label for="datainicio">Data Inicial</label>
+                                        <input id="datainicio" class="tbx_teste glass" type="date" name="periodoinicial"
+                                            title="" style="width: 120px;">
+                                    </div>
+                                    <div>
+                                        <label for="datafinal">Data Final</label>
+                                        <input id="datafinal" class="tbx_teste glass" type="date" name="periodofinal"
+                                            title="" style="width: 120px;">
+                                    </div>
+                                </div>
+                                <textarea id="descricao" class="tbx_teste glass" name="descricaoatest"
+                                    placeholder="Descreva algo, se necessário"
+                                    style="width: 97%; height:50px; padding: 4px; resize: none;"></textarea>
+                            </div>
+                            <div class="p_acoes p_padrao linha_padrao">
+                                <input class="bt_teste glass" type="submit" name="salvarAtestado" value="Salvar">
+                            </div>
+                            <input id="id" type="hidden" name="idColab" value="">
+                        </form>
+                        <h4>Historico de Licenças</h4>
+                        <div class="tb_padraoGeral">
+                            <table id="tb_historico_atestar" class="linha_padrao tb_zebrada">
+                                <thead class="tb_padrao_conteudo">
+                                    <tr class="rh_tb_lin_colob">
+                                        <th style="display:none;">ID</th>
+                                        <th>Motivo</th>
+                                        <th>Data Inicio</th>
+                                        <th>Data Final</th>
+                                        <th>Descrição</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="tb_padrao_conteudo">
+                                    <!-- Linhas serão adicionadas via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="painel_desligarColab">
+                            <br>
+                            <div class="linha_padrao">
+                                <h5>Colaborador desligado</h5>
+                                <label class="switch">
+                                    <input type="checkbox" id="checkColabDesligado">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="painel_estatistica">
+                        <div class="indiceQtdeCliente">
+                            <p>Historico de Participações por Cliente</p>
+                            <div id="areaGraficoHist"></div>
+                        </div>
+                        <div class="painelLiberarAcessos" style="display: none;">
+                            <p>Liberar Acessos</p>
+                            <div class="LiberarAcessos">
+                                <div class="blocoroigem">
+                                    <div id="origem" class="bloco origem" data-id="230701">Guilherme S.</div>
+                                </div>
+                                <div class="blocos">
+                                    <div class="bloco destino" id="dest1" data-nivel="0">Home</div>
+                                    <div class="bloco destino" id="dest2" data-nivel="1">Programação</div>
+                                    <div class="bloco destino" id="dest3" data-nivel="2">Projetos</div>
+                                    <div class="bloco destino" id="dest4" data-nivel="3">Recursos Humanos</div>
+                                    <div class="bloco destino" id="dest5" data-nivel="4">Administrativo</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="painel_nivel">
+                        <p>Status</p>
+                    </div>
+                    <div class="painel_apoio">
+                        <p>Apoio</p>
+                    </div>
+                    <div class="painel_senha">
+                        <form id="form_senha" autocomplete="off">
+                            <div class="linha_padrao linha_senhas">
+                                <form id="form_senha" autocomplete="off">
+                                    <form id="form_senha" autocomplete="off">
+                                        <!-- campo oculto para username (para evitar warning do navegador) -->
+                                        <input type="hidden" name="username" id="username" value="usuario_atual"
+                                            autocomplete="username">
+
+                                        <div>
+                                            <label for="senhaantiga">Antiga Senha</label>
+                                            <div style="position: relative;">
+                                                <input id="senhaantiga" class="tbx_pesquisarOS senha-input"
+                                                    type="password" name="senhaantiga" style="width: 150px;"
+                                                    autocomplete="current-password">
+                                                <i class="fa-solid fa-eye toggle-senha" data-target="senhaantiga"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="novasenha">Nova Senha</label>
+                                            <div style="position: relative;">
+                                                <input id="novasenha" class="tbx_pesquisarOS senha-input"
+                                                    type="password" name="novasenha" style="width: 150px;"
+                                                    autocomplete="new-password">
+                                                <i class="fa-solid fa-eye toggle-senha" data-target="novasenha"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="confirmarnovasenha">Confirmar Nova Senha</label>
+                                            <div style="position: relative;">
+                                                <input id="confirmarnovasenha" class="tbx_pesquisarOS senha-input"
+                                                    type="password" name="confirmarnovasenha" style="width: 150px;"
+                                                    autocomplete="new-password">
+                                                <i class="fa-solid fa-eye toggle-senha"
+                                                    data-target="confirmarnovasenha"></i>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                </form>
+
+                            </div>
+
+                            <div class="p_acoes p_padrao linha_padrao">
+                                <input class="bt_padrao bt_cad" type="submit" value="Salvar">
+                            </div>
+
+                            <input type="hidden" name="idColab" id="idColab" value="">
+                            <!-- substitua por JS se necessário -->
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="crop-modal" hidden>
+    <div class="crop-panel">
+        <div id="crop-area"></div>
+        <div class="crop-ctrls">
+            <button type="button" id="rotLeft" class="bt_teste glass">⟲</button>
+            <button type="button" id="rotRight" class="bt_teste glass">⟳</button>
+            <button type="button" id="btn_cancel_crop" class="bt_teste glass">Cancelar</button>
+            <!-- NOVO: botão para salvar -->
+            <button type="button" id="btn_save_crop" class="bt_teste glass">Salvar</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+
+
+
+<script>
+    $(document).on("click", "#bt_sair_perfil", function () {
+        $('#form_cadColab').empty();
+    });
+
+
+    $('#formColaborador').on('submit', function (e) {
+        e.preventDefault();
+
+        // Captura o botão que disparou o submit
+        const botaoClicado = e.originalEvent.submitter?.name || '';
+
+        // Serializa dados do form
+        const formData = $(this).serialize();
+
+        if (botaoClicado === 'cadColab') {
+            // 🔹 Cadastrar
+            $.ajax({
+                url: '/api/colaboradores/cadastrar',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function (res) {
+                    if (res.sucesso) {
+                        let msg = `Colaborador cadastrado com sucesso!`;
+                        msg += `\n\nLogin: ${res.id}`;
+                        msg += `\nSenha: ${res.senhaPadrao}`;
+                        $('#idColaborador').val(res.id);
+                        $('#idColaboradorPro').val(res.id);
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Atenção",
+                            theme: "dark",
+                            text: msg
+                        });
+                        $('#bt_editColab').show();
+                        $('#bt_cadColaborador').hide();
+                        $('[data-target=".painel_profissional"]').show();
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Erro",
+                            theme: "dark",
+                            text: res.mensage
+                        });
+                    }
+                },
+                error: function () {
+                    alert('Erro ao processar a solicitação.');
+                }
+            });
+        } else if (botaoClicado === 'editColab') {
+            // 🔹 Editar
+            const idColaborador = $('#idColaborador').val(); // pega do input hidden
+
+            $.ajax({
+                url: `/api/colaboradores/editar/${idColaborador}`,
+                type: 'PUT',
+                data: formData,
+                dataType: 'json',
+                success: function (res) {
+                    if (res.sucesso) {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Atenção",
+                            theme: "dark",
+                            text: 'Colaborador atualizado com sucesso!'
+                        });
+                    } else {
+                        alert(res.mensagem);
+                    }
+                },
+                error: function () {
+                    alert('Erro ao atualizar colaborador.');
+                }
+            });
+        }
+    });
+
+
+
+
+
+
+    //SALVAR FOTO
+    (function () {
+        if (window.__avatarUploadInit) return;
+        window.__avatarUploadInit = true;
+
+        let croppie = null;
+
+        function openCropModal() {
+            document.getElementById('crop-modal').hidden = false;
+            document.body.classList.add('modal-open');
+            const el = document.getElementById('crop-area');
+            if (croppie) { croppie.destroy(); croppie = null; }
+            el.innerHTML = '';
+            croppie = new Croppie(el, {
+                viewport: { width: 220, height: 220, type: 'circle' },
+                boundary: { width: 280, height: 280 },
+                enableExif: true,
+                enableZoom: true
+            });
+        }
+        function closeCropModal() {
+            document.getElementById('crop-modal').hidden = true;
+            document.body.classList.remove('modal-open');
+            if (croppie) { croppie.destroy(); croppie = null; }
+            $('#select_foto').val('');
+            $('#crop-area').empty();
+        }
+
+        // 1) Botão "Carregar..." -> abrir seletor
+        $(document).on('click', '#btn_upload[type="button"]', function () {
+            $('#select_foto').trigger('click');
+        });
+
+        // 2) Selecionar arquivo -> abrir modal e carregar imagem
+        $(document).on('change', '#select_foto', function (e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                openCropModal();
+                croppie.bind({ url: ev.target.result });
+                // não mudar o #btn_upload; ele segue “Carregar...”
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // 3) Controles do modal
+        $(document).on('click', '#rotLeft', () => { if (croppie) croppie.rotate(-90); });
+        $(document).on('click', '#rotRight', () => { if (croppie) croppie.rotate(90); });
+        $(document).on('click', '#btn_cancel_crop', closeCropModal);
+
+        // 4) SALVAR (dentro do modal)
+        $(document).on('click', '#btn_save_crop', async function () {
+            const userId = $('#idColaborador').val() || $('#form_atestar #id').val();
+            if (!userId) { alert('ID do usuário não encontrado.'); return; }
+            if (!$('#select_foto')[0].files.length) { alert('Selecione uma foto.'); return; }
+
+            // feedback no botão
+            const $btn = $(this);
+            const prevText = $btn.text();
+            $btn.prop('disabled', true).text('Enviando...');
+
+            try {
+                const blob = await croppie.result({
+                    type: 'blob',
+                    format: 'png',
+                    size: 'viewport' // 220x220 e já circular por causa do viewport
+                });
+
+                // FormData direto (não depende do <form> agora)
+                const formData = new FormData();
+                formData.append('fotoperfil', blob, 'avatar.png'); // name deve bater com multer.single('fotoperfil')
+                formData.append('id', userId);
+
+                const resp = await $.ajax({
+                    url: '/api/colaboradores/upload-foto',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                });
+
+                $('#fotoavatar').attr('src', resp.novaFotoURL + '?t=' + Date.now());
+                closeCropModal();
+            } catch (err) {
+                alert(err?.responseJSON?.error || err?.responseText || 'Erro no upload da foto');
+            } finally {
+                $btn.prop('disabled', false).text(prevText);
+            }
+        });
+    })();
+
+
+    cargosPorSetor = {
+        "0": [
+            { value: "0", label: "Estagiário" }
+        ],
+        "1": [
+            { value: "1", label: "Auxiliar Eletricista" },
+            { value: "2", label: "Eletricista Junior I" },
+            { value: "3", label: "Eletricista Junior II" },
+            { value: "4", label: "Eletricista Junior III" },
+            { value: "5", label: "Eletricista Pleno I" },
+            { value: "6", label: "Eletricista Pleno II" },
+            { value: "7", label: "Eletricista Pleno III" },
+            { value: "8", label: "Eletricista Senior I" },
+            { value: "9", label: "Eletricista Senior II" },
+            { value: "10", label: "Eletricista Senior III" },
+            { value: "11", label: "Painelista" },
+            { value: "12", label: "Encarregado" },
+            { value: "13", label: "Gerente de Produção" }
+        ],
+        "2": [
+            { value: "19", label: "Estoquista" }
+        ],
+        "4": [
+            { value: "20", label: "Comprador" }
+        ],
+        "5": [
+            { value: "14", label: "Projetista Junior" },
+            { value: "15", label: "Projetista Pleno" },
+            { value: "16", label: "Projetista Senior" },
+            { value: "17", label: "Engenheiro Eletricista" },
+            { value: "18", label: "Gerente de Engenharia" }
+        ],
+        "6": [
+            { value: "13", label: "Gerente de Produção" },
+            { value: "18", label: "Gerente de Engenharia" },
+            { value: "21", label: "Gerente Financeiro" }
+        ],
+        "7": [
+            { value: "22", label: "Analista Financeiro" },
+            { value: "23", label: "Assistente Financeiro" }
+        ],
+        "8": [
+            { value: "24", label: "Assistente de RH" },
+            { value: "25", label: "Analista de RH" }
+        ],
+        "9": [
+            { value: "26", label: "Orçamentista" }
+        ],
+        "10": [
+            { value: "27", label: "Diretor" }
+        ],
+        "12": [
+            { value: "29", label: "Terceiro" }
+        ]
+    };
+
+
+    $(function () {
+        const $categoria = $("#categoria");
+        const $cargo = $("#cargo");
+
+        function preencherCargos(setor, manterValorSelecionado = false) {
+            const placeholder = '<option value="" disabled selected hidden>Selecione o cargo...</option>';
+            const valorAnterior = manterValorSelecionado ? $cargo.val() : "";
+
+            const chave = String(setor).trim();
+            const lista = cargosPorSetor[chave] || [];
+
+            // Limpa e desabilita por padrão
+            $cargo.html(placeholder).prop("disabled", true);
+
+            if (!lista.length) {
+                console.warn("[preencherCargos] Setor sem mapeamento ou vazio:", { setor, chave, lista });
+                return; // fica só com placeholder e desabilitado
+            }
+
+            // Popula
+            $.each(lista, function (i, item) {
+                // Defesa contra itens malformados
+                if (!item || typeof item.value === "undefined" || typeof item.label === "undefined") {
+                    console.warn("[preencherCargos] Item inválido na lista:", item);
+                    return;
+                }
+                $cargo.append($("<option>", { value: item.value, text: item.label }));
+            });
+
+            // Habilita
+            $cargo.prop("disabled", false);
+
+            // Restaura seleção, se válida
+            if (manterValorSelecionado && valorAnterior) {
+                const existe = $cargo.find("option[value='" + valorAnterior + "']").length > 0;
+                if (existe) $cargo.val(valorAnterior);
+            }
+        }
+
+        // Change de categoria
+        $categoria.on("change", function () {
+            const val = $(this).val();
+            preencherCargos(val);
+        });
+
+        // Inicialização (se vier preenchido do servidor)
+        if ($categoria.val()) {
+            preencherCargos($categoria.val(), true);
+        } else {
+            // Garantir que cargo inicie desabilitado até escolher setor
+            $cargo.prop("disabled", true);
+        }
+    });
+
+    $(document).ready(function () {
+        $("input[name='vehicle']").change(function () {
+            // Pega todos os checkboxes marcados
+            var selecionados = $("input[name='vehicle']:checked")
+                .map(function () { return this.value; })
+                .get()
+                .join(",");
+
+            // Joga para o campo oculto
+            $("#vehicles_selected").val(selecionados);
+        });
+    });
+
+
+
+
+
+    $('#checkColabDesligado').on('change', function () {
+        const ligado = $(this).is(':checked');
+        const userId = $('.painel_todos').find('#id').val();
+
+        $.ajax({
+            url: '/desligar_colab', // Substitua pelo seu backend
+            method: 'POST',
+            data: { status: ligado ? 'on' : 'off', userId },
+            success: function (resposta) {
+
+            },
+            error: function (erro) {
+                console.error('Erro na requisição:', erro);
+            }
+        });
+    });
+
+
+
+
+    // Controle dos botões do menu
+    $('.bt_menu').on('click', function () {
+        const target = $(this).data('target');
+
+        $('.bt_menu').removeClass('ativo');
+        $(this).addClass('ativo');
+
+        // Se o painel for exames, chama a função
+        if (target === '.painel_exames') {
+            const idFunc = $('#idColaborador').val();
+            load_exames_colaborador(idFunc, $('#carregarExamesAqui'));
+        }
+
+        // Se o painel for epi, chama a função
+        if (target === '.painel_vestimentas') {
+            const idFunc = $('#idColaborador').val();
+            load_epis_colaborador(idFunc, $('#carregarEPIAqui'));
+        }
+        // Se o painel for cursos, chama a função
+        if (target === '.painel_cursos') {
+            const idFunc = $('#idColaborador').val();
+            load_cursos_colaborador(idFunc, $('#carregarCursosAqui'));
+        }
+        // Se o painel for integracoes, chama a função
+        if (target === '.painel_integra') {
+            const idFunc = $('#idColaborador').val();
+            load_integracoes_colaborador(idFunc, $('#carregarIntegracoesAqui'));
+
+        }
+
+        // Oculta todos os painéis
+        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
+
+        // Mostra o painel clicado
+        $(target).fadeIn(200);
+    });
+
+    $(document).ready(function () {
+        let grafico;
+        const idFuncionario = $('.painel_todos').find('#id').val();
+        if (idFuncionario == '') { return false };
+        // Primeiro cria o canvas no DOM
+        $('#areaGraficoHist').html('<canvas id="graficoHistClientes"></canvas>');
+
+        // Só depois pega o contexto
+        const ctx = document.getElementById('graficoHistClientes').getContext('2d');
+
+        // Faz a requisição AJAX
+        $.getJSON(`/api/colaboradores/historico-empresas/${idFuncionario}`, function (resposta) {
+            const clientes = resposta.map(r => r.cliente);
+            const quantidades = resposta.map(r => r.quantidade);
+            const total = quantidades.reduce((soma, q) => soma + q, 0);
+
+            if (window.graficoHistClientes instanceof Chart) {
+                window.graficoHistClientes.destroy();
+            }
+
+            window.graficoHistClientes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: clientes,
+                    datasets: [{
+                        label: 'Participações',
+                        data: quantidades,
+                        backgroundColor: 'rgba(75, 192, 75, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false, // ← ESSENCIAL para permitir crescer em altura
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const valor = context.parsed.x;
+                                    const perc = ((valor / total) * 100).toFixed(1);
+                                    return `${valor} participações (${perc}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: false,
+                                text: 'Quantidade'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: false,
+                                text: 'Clientes'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+
+
+
+</script>

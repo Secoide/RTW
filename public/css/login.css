@@ -1,7 +1,7 @@
 .fundo_img {
     margin: 0;
     height: 100vh;
-    background: url(../telafundo.jpeg);
+    background: url(../fundos.png);
     background-size: 105%;
     /* Substitua pelo caminho da imagem */
     background-size: cover;
@@ -68,7 +68,7 @@ label {
     border: none;
     margin-top: 20px;
     border-radius: 8px;
-    background-image: linear-gradient(to bottom left, #2fd0db, #3ad461, #e9e630);
+    background: linear-gradient(35deg, #8a3bbe, #feb47b, #57c1cf);
     cursor: pointer;
     transition: opacity 0.3s ease;
 }
@@ -104,4 +104,12 @@ a:hover {
 
 .divbutton .semconta {
     margin-top: 20px;
+}
+
+.versao{
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    font-size: small;
+    color: #b8f823;
 }

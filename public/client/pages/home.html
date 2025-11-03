@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTW Engenharia Elétrica</title>
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/padrao/cores.css">
+    <link rel="stylesheet" href="css/padrao/tabelas.css">
+    <link rel="stylesheet" href="css/programacao.css">
+    <link rel="stylesheet" href="css/padrao/padrao.css">
+    <link rel="stylesheet" href="css/padrao/thema.css">
+    <link rel="stylesheet" href="css/cadastro.css">
+    <link rel="stylesheet" href="css/cadastro_OS.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/rh.css">
+    <link rel="stylesheet" href="css/forms/anexoExames.css">
+    <link rel="stylesheet" href="css/cadastrosList.css">
+
+    <!-- Libs externas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/croppie/croppie.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" defer></script>
+    <script src="https://unpkg.com/croppie/croppie.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js" defer></script>
+
+    <!-- Seus scripts locais -->
+    <script src="scripts/funcoes.js" defer></script>
+    <script src="scripts/mouse_direito.js" defer></script>
+    <script src="scripts/get_DadosBD.js" defer></script>
+    <script type="module" src="scripts/bt_acoes.js" defer'></script>
+    <!-- <script src="scripts/programacao.js" defer></script>-->
+    <script src="scripts/formatacao.js" defer></script>
+    <script src="scripts/nivel_acesso.js" defer></script>
+    <script src="scripts/websocket/inatividade.js" defer></script>
+
+    <!-- Inicialização modular -->
+    <script type="module" src="/client/js/main.js"></script>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background: var(--bg-gradiente-padrao);
+        }
+
+        header,
+        #conteudo {
+            max-width: 96.5%;
+            margin: auto;
+        }
+
+        #conteudo {
+            margin-left: 50px;
+            margin-top: 50px;
+            border-radius: 8px;
+            min-height: 300px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            padding-bottom: 20px;
+        }
+
+        #conteudo .textoHome {
+            margin: 10px;
+        }
+
+        .visivel {
+            opacity: 1 !important;
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 500;
+            padding: 6px 0;
+            font-size: 15px;
+        }
+
+        details[open] summary {
+            color: #4ec93e;
+        }
+
+        ul {
+            margin-left: 60px;
+            line-height: 1.4;
+            font-size: 13px;
+        }
+
+        .article {
+            margin-left: 60px;
+            font-size: 13px;
+        }
+
+        .release-notes {
+            margin-left: 40px;
+            font-size: 13px;
+        }
+
+        .release-notes h1,
+        .release-notes h2 {
+            color: #111;
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menu"></div>
+    <div id="menuperfil"></div>
+
+    <div id="conteudo" class="glass">
+
+    </div>
+
+    <!-- Containers para formulários carregados dinamicamente -->
+    <div id="form_cadColab"></div>
+    <div id="form_cadOS"></div>
+    <div id="form_anexarExame"></div>
+    <div id="form_anexarCurso"></div>
+    <div id="form_anexarEPI"></div>
+    <div id="form_anexarIntegracao"></div>
+    <div id="form_cadCliente"></div>
+    <div id="form_cadSupervisor"></div>
+    <div id="form_cadCidade"></div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Quando o home for carregado, injeta inicio.html dentro de #conteudo
+            $("#conteudo").load("/client/pages/inicio.html", function () {
+                // Após carregar, exibe com fade-in
+                $("#conteudo").addClass("visivel");
+            });
+        });
+    </script>
+</body>
+
+</html>

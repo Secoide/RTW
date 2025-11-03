@@ -1,3 +1,6 @@
+import { conectarSocket } from "../client/js/services/sockets/socket-service.js";
+
+import { atualizarPainel } from "../client/js/utils/dom/atualizar-painel.js";
 
 
 //FUNÇÕES DE CLICAR EM BOTÃO AÇÕES
@@ -133,7 +136,7 @@ $(document).on('click', '.bt_prioridade', function () {
     const $os = $(this).closest('.painel_OS');
     const osID = $os.find('.lbl_OS').text().trim();
     const $icon = $(this);
-
+    
     const jaAlta = $os.hasClass('prioridade-alta');
 
     if (jaAlta) {
@@ -146,6 +149,7 @@ $(document).on('click', '.bt_prioridade', function () {
         $icon.addClass('alta').attr('title', 'Prioridade: Alta');
         localStorage.setItem("prioridade_OS_" + osID, 'prioridade-alta');
     }
+    const socket = conectarSocket(); // 🔗 cria ou retorna o mesmo socket
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             acao: 'atualizar_prioridade_os',
@@ -153,7 +157,7 @@ $(document).on('click', '.bt_prioridade', function () {
             prioridade: !jaAlta  // true = está marcando como alta
         }));
     }
-
+    restaurarOSPrioridade();
     $('.painelDia').each(function () {
         atualizarPainel($(this));
     }); // 🟢 Reorganiza ao mudar a prioridade

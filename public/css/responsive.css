@@ -240,6 +240,10 @@
         display: flex;
     }
 
+    .colaborador:hover {
+        scale: none;
+    }
+
     .p_colabs .colaborador .nome {
         font-size: 12px;
         min-width: 73px;
@@ -253,7 +257,7 @@
     }
 
     .colaboradorEmOS .ocupadoEmOS {
-        height: 36px;
+        height: 34px;
         width: 22px;
         right: -1px;
         text-align: center;

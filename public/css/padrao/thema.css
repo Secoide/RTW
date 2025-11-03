@@ -1,0 +1,166 @@
+
+:root {
+  transition: all 1s ease;
+}
+
+:root[data-theme='dark'] {
+  /* ---------- BÁSICO ---------- */
+  --cor-fundo: #181818;
+  --cor-superficie: #272727;
+  --cor-borda: #474747;
+  --cor-texto: #f1f1f1;
+  --cor-texto-secundario: #c0c0c0;
+  --cor-texto-invertido: #000000;
+
+  /* ---------- CINZAS (invertidos) ---------- */
+  --cor-cinza-100: #272727;
+  --cor-cinza-200: #373839;
+  --cor-cinza-300: #474747;
+  --cor-cinza-400: #727272;
+  --cor-cinza-500: #9b9b9b;
+  --cor-cinza-600: #c0c0c0;
+  --cor-cinza-700: #dbdbdb;
+  --cor-cinza-800: #f1f1f1;
+
+  /* ---------- STATUS ---------- */
+  --cor-verde: #69c769;
+  --cor-vermelho: #ff6b5e;
+  --cor-laranja: #ff9b33;
+  --cor-amarelo: #ffde4d;
+  --cor-azul: #00c0da;
+  --cor-azul-destaque: #4da3ff;
+  --cor-roxo: #9b7fff;
+
+  /* ---------- BACKGROUND ---------- */
+  --bg-padrao: #181818;
+  --bg-card: #272727;
+  --bg-bloco: #373839;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+
+  --bg-gradiente-escuro: linear-gradient(35deg, #2e2e2e, #313131, #3a3a3a);
+
+  /* ---------- TEXTO ---------- */
+  --texto-principal: #f1f1f1;
+  --texto-secundario: #c0c0c0;
+  --texto-claro: #9b9b9b;
+  --texto-invertido: #000000;
+
+  /* ---------- BOTÃO AÇAO OS ---------- */
+  --bt-acao-os: rgb(168, 168, 168);
+  --bt-salvar: #388321;
+  --bt-hover: #636363;
+  --bt-bg: #2e2e2e;
+
+  /* ---------- COMPONENTES ---------- */
+  --input-bg: #373839;
+  --input-borda: #474747;
+  --botao-bg: #69c769;
+  --botao-bg-hover: #43a047;
+  --popup-bg: rgba(39, 39, 39, 0.95);
+  --badge-bg: #9b7fff;
+
+
+  --tb-hover: #3a3a3a;
+
+  --botao-ativado-txt: #04aa33;
+}
+
+
+
+
+:root[data-theme='light'] {
+  /* ---------- BÁSICO ---------- */
+  --cor-fundo: #ffffff;
+  --cor-superficie: #f1f1f1;
+  --cor-borda: #dbdbdb;
+  --cor-texto: #181818;
+  --cor-texto-secundario: #666;
+  --cor-texto-invertido: #ffffff;
+
+  /* ---------- CINZAS ---------- */
+  --cor-cinza-100: #f1f1f1;
+  --cor-cinza-200: #dbdbdb;
+  --cor-cinza-300: #c0c0c0;
+  --cor-cinza-400: #9b9b9b;
+  --cor-cinza-500: #727272;
+  --cor-cinza-600: #474747;
+  --cor-cinza-700: #373839;
+  --cor-cinza-800: #272727;
+
+  /* ---------- STATUS ---------- */
+  --cor-verde: #4caf50;
+  --cor-vermelho: #e74c3c;
+  --cor-laranja: #ff8800;
+  --cor-amarelo: #ffce00;
+  --cor-azul: #0d6efd;
+  --cor-azul-destaque: #00c0da;
+  --cor-roxo: #7b5cff;
+
+  /* ---------- BACKGROUND ---------- */
+  --bg-padrao: #f1f1f1;
+  --bg-card: #ffffff;
+  --bg-bloco: #fbfbfb;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+
+  --bg-gradiente-claro: linear-gradient(35deg, #f7f7f7, #f1f1f1, #e8e8e8);
+  
+
+  /* ---------- TEXTO ---------- */
+  --texto-principal: #181818;
+  --texto-secundario: #666;
+  --texto-claro: #6d6d6d;
+  --texto-invertido: #ffffff;
+
+  /* ---------- BOTÃO AÇAO OS ---------- */
+  --bt-acao-os: #e4e4e4;
+  --bt-salvar: #388321;
+  --bt-hover: #cfcfcf;
+  --bt-bg: #e4e4e4;
+
+  /* ---------- COMPONENTES ---------- */
+  --input-bg: #ffffff;
+  --input-borda: #dbdbdb;
+  --botao-bg: #4caf50;
+  --botao-bg-hover: #43a047;
+  --popup-bg: rgba(255, 255, 255, 0.95);
+  --badge-bg: #7b5cff;
+
+
+  --tb-hover: #d1d1d1;
+  
+
+  --botao-ativado-txt: #04aa33;
+}
+
+
+/* Tema escuro — mantém o vidro translúcido claro */
+:root[data-theme='dark'] .glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--texto-principal);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Tema claro — inverte o contraste */
+:root[data-theme='light'] .glass {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--texto-principal);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+:root[data-theme='light'] {
+  --bg-gradiente-padrao: var(--bg-gradiente-claro);
+  --hover-bg: rgba(0, 0, 0, 0.08);
+  --bg_fundo_form: rgba(255, 255, 255, 0.8);
+  --border-form: #333333e7;
+}
+:root[data-theme='dark'] {
+  --bg-gradiente-padrao: var(--bg-gradiente-escuro);
+  --bg_fundo_form: rgba(0, 0, 0, 0.8);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --border-form: #ffffff00;
+}

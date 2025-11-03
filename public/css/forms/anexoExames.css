@@ -1,0 +1,10 @@
+.painel_dadosAnexo{
+    display: flex;
+    justify-content: center;
+    width: 400px;
+    border-radius: 10px;    
+    background: var(--bg-padrao);
+    color: var(--texto-principal);
+    padding-block: 10px;
+    border: 1px solid var(--border-form);
+}

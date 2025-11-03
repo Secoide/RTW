@@ -1,0 +1,75 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="anexoexame" style="visibility: visible; opacity: 1;">
+    <div class="">
+        <div class="painel_dadosAnexo">
+            <form id="formAnexarExame" method="POST" enctype="multipart/form-data">
+                <div class="linha_infoColab linha_padrao">
+                    <select id="selectExame" class="cbx_teste glass info_padrao opcoes input_obrigatorio" name="exame"
+                        required placeholder="Selecione o Exame..." style="width: 100%;">
+                    </select>
+
+                    <div style="display: flex; justify-content: space-between;">
+                        <select id="selectColaborador" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                            name="idColab" required placeholder="Selecione o colaborador..." style="width: 100%;">
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; align-items: center;">
+                            <p class="dataNasc">Data Realizado</p>
+                            <input id="datarealizadaExame" class="tbx_teste glass" type="date" name="datarealizadaExame"
+                                style="width: 140px;">
+
+                            <p class="dataNasc">Vencimento</p>
+                            <input class="tbx_teste glass" type="number" value="0" id="vencimentoExame"
+                                name="vencimento" step="1" required
+                                title="Deixe em zero quando não há prazo de vencimento." style="width: 50px;">
+                        </div>
+                    </div>
+                    <!-- Campo para anexar o PDF -->
+                    <div style="margin-top: 10px;">
+                        <label for="documento" style="display:block; margin-bottom:4px;">Anexar Exame (PDF)</label>
+                        <input type="file" id="documento" name="documento" accept="application/pdf">
+                    </div>
+                </div>
+                <!-- Barra de progresso (Bootstrap) -->
+                <div id="uploadProgressWrapper" class="mt-3" style="display:none;">
+                    <div class="progress">
+                        <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            style="border-radius: 10px; background: #447cad57; text-align: center; width: 0%;"
+                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                </div>
+                <div class="p_acoes linha_padrao">
+                    <input id="bt_anexarExame" class="bt_teste glass btn btn-primary" type="submit" name="anexarExame"
+                        value="Anexar">
+                    <input id="bt_fechar_formAnexarCurso" class="bt_teste glass" type="reset" value="Cancelar">
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).on("click", "#bt_fechar_formAnexarCurso", function () {
+        $('#form_anexarExame').empty();
+    });
+</script>

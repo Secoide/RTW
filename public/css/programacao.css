@@ -1,18 +1,24 @@
+
+
 .painel_pagina {
+    position: relative;
+    z-index: auto;
     color: #181818;
     background-color: #f1f1f1;
+    margin-bottom: 10px;
 }
 
 .swal2-container {
-  z-index: 99999 !important;
+    z-index: 99999 !important;
 }
 
 .painel_menuSuperior {
     display: flex;
-    justify-content: space-between;
-
+    justify-content: flex-start;
     font-size: 13px;
     align-items: center;
+    padding: 5px;
+    gap: 10px;
 }
 
 .painel_EsqBtAcoes {
@@ -21,6 +27,10 @@
     gap: 10px;
 }
 
+.direitaflex {
+    margin-left: auto;
+    /* empurra os seguintes para a direita */
+}
 
 #usuarios_online {
     font-size: 10px;
@@ -28,7 +38,6 @@
 
 #seletor_data {
     width: 120px;
-    color: grey;
     cursor: pointer;
 }
 
@@ -52,27 +61,17 @@
     color: #c0c0c0 !important;
 }
 
-.notification-lista {
-    display: none;
-    position: absolute;
-    color: var(--texto_cinza);
-    font-size: 12px;
-    right: 0;
-    top: 40px;
-    background-color: #f1f1f1;
-    border: 1px solid var(--cor_fundotabela);
-    box-shadow: 1px 1px 5px 2px var(--cinza_tituloForm);
-    border-radius: 10px;
-    padding: 10px;
-    width: 420px;
-    z-index: 100;
-}
+
 
 
 .painel_semanal {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     justify-content: center;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    position: relative;
+    flex-wrap: wrap;
 }
 
 .conjuntoServidor i {
@@ -89,8 +88,7 @@
     align-items: center;
     gap: 8px;
     width: 360px;
-    border: 1px solid rgb(204, 204, 204);
-    margin-top: 8px;
+    margin-top: 20px;
     border-radius: 10px;
 }
 
@@ -106,20 +104,24 @@
 }
 
 .diaanterior {
-    background-color: #F8F7F8;
+    background-color: #7272728a;
 }
 
 
 .diahoje {
-    background-color: #F8F7F8;
+    background-color: #436c808f;
 }
 
 .diaamanha,
-.diaamanha2 {
-    background-color: #F8F7F8;
+.diaamanha2,
+.diaamanha3 {
+    background-color: #43805c5d;
 }
 
 .painelInfoDia {
+    position: relative;
+    z-index: 1000;
+    /* maior que 888 */
     display: flex;
     align-items: center;
     margin-top: 5px;
@@ -127,7 +129,10 @@
 }
 
 .iconeStatusDia {
-    position: relative;
+    position: absolute;
+    z-index: 1001 !important;
+    display: inline-block;
+    transition: transform 0.3s ease;
     font-size: 12px;
     padding: 4px;
     border-radius: 10px;
@@ -137,6 +142,7 @@
     background-color: #ffffff;
     top: -15px;
     right: -65px;
+
 }
 
 .iconeStatusDia i.fa-file-signature {
@@ -160,23 +166,20 @@
 .painel_colaboradores {
     display: flex;
     flex-direction: column;
-    width: 340px;
-    background-color: #EEEEF0;
-    border: 1px solid #E4E4E5;
     margin-inline: 10px;
-    border-radius: 10px;
 }
 
 .p_colabsDisp {
     display: flex;
-    flex-direction: column;
-    justify-content: left;
+    flex-direction: row;
+    justify-content: space-evenly;
     text-align: left;
-    max-height: 200px;
-    gap: 6px;
-    padding: 5px;
+    max-height: 195px;
+    gap: 8px;
     flex-wrap: wrap;
-    align-content: space-around;
+    align-content: flex-start;
+    scroll-behavior: smooth;
+    position: relative;
 }
 
 .seta-esquerda {
@@ -193,6 +196,7 @@
     justify-content: space-between;
     width: 95%;
     font-size: 12px;
+    padding-block: 10px;
 }
 
 .painel_BuscaOS .pesquisarOS {
@@ -235,13 +239,13 @@
     border-radius: 10px;
     border: 1px solid #dbdbdb;
     text-align: center;
-    background-color: #FFFFFF;
+    background-color: var(--branco);
     margin-left: 5px;
 }
 
 .filtroLadoDir i:hover,
 .buscaLadoEsq i:hover {
-    color: #383838;
+    color: var(--fundo_noturno);
     cursor: pointer;
 }
 
@@ -253,14 +257,14 @@
 }
 
 .painel_OS {
+    z-index: 1;
     display: block;
     padding: 0px !important;
     transition: all 0.3s ease;
     min-width: 340px;
     max-width: 340px;
-    border: 1px solid var(--cor_fundotabela);
-    border-radius: 10px;
-    background-color: #FEFEFF;
+    border: 2px solid var(--cor_fundotabela);
+    border-radius: 10px
 }
 
 .painel_OS .p_infoOS {
@@ -272,6 +276,7 @@
     text-align: center;
     border-radius: 10px 10px 0px 0px;
     align-items: center;
+    background-image: linear-gradient(180deg, #00000038, #fbfbfb00);
 }
 
 .painel_OS .p_infoOS .lbl_OS {
@@ -289,17 +294,23 @@
 .painel_OS .p_infoOS .lbl_descricaoOS {
     width: 64%;
     text-align: center;
-    white-space: nowrap;/* Impede quebra de linha */
-    overflow: hidden;/* Oculta o que passar da largura */
-    text-overflow: ellipsis;/* Adiciona "..." no fim */
+    white-space: nowrap;
+    /* Impede quebra de linha */
+    overflow: hidden;
+    /* Oculta o que passar da largura */
+    text-overflow: ellipsis;
+    /* Adiciona "..." no fim */
 }
 
 .painel_OS .p_infoOS .lbl_clienteOS {
     width: 18%;
     text-align: right;
-    white-space: nowrap;/* Impede quebra de linha */
-    overflow: hidden;/* Oculta o que passar da largura */
-    text-overflow: ellipsis;/* Adiciona "..." no fim */
+    white-space: nowrap;
+    /* Impede quebra de linha */
+    overflow: hidden;
+    /* Oculta o que passar da largura */
+    text-overflow: ellipsis;
+    /* Adiciona "..." no fim */
 }
 
 .p_colabs {
@@ -331,18 +342,21 @@
     transition: background-color 0.2s ease;
 }
 
+
 .colaborador {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 6px 4px 6px;
+    padding: 6px 6px 6px 6px;
     text-align: center;
-    height: 11px;
+    height: 13px;
+    border: 1px solid #373839;
     width: 90px;
     border-radius: 10px;
     color: var(--branco);
     background-color: #373839;
 }
+
 
 .colaborador:hover {
     scale: 1.05;
@@ -364,6 +378,10 @@
     background-color: var(--paternidade);
 }
 
+.colaborador.falta-indevida {
+    background-color: var(--faltaindevida);
+}
+
 .colaborador.afastamento .nome {
     color: var(--branco);
 }
@@ -383,6 +401,42 @@
 .colaborador.aniver {
     position: relative;
     overflow: hidden;
+}
+
+
+.colaborador.falta-indevida {
+    color: var(--branco) !important;
+}
+
+.colaborador.status-integracao-vencido{
+    background: linear-gradient(90deg, #790f0faf, red);
+    border-left: 2px solid var(--vermelho);
+    border-top: 1px solid #373839;
+    border-bottom: 1px solid #373839;
+    border-right: 1px solid #373839;
+}
+
+.colaborador.status-integracao-atenção{
+    background: linear-gradient(90deg, #373839, #373839, #ff8800);
+    border-left: 2px solid #ff8800;
+    border-top: 1px solid #373839;
+    border-bottom: 1px solid #373839;
+    border-right: 1px solid #373839;
+}
+
+.colaborador.status-integracao-pendente{
+    background: linear-gradient(90deg, #373839, #373839, #d1d1d150);
+    border-left: 2px solid #d1d1d1;
+    border-top: 1px solid #373839;
+    border-bottom: 1px solid #373839;
+    border-right: 1px solid #373839;
+}
+
+.colaborador.status-integracao-integrado{
+    border-left: 2px solid rgb(0, 190, 0);
+    border-top: 1px solid #373839;
+    border-bottom: 1px solid #373839;
+    border-right: 1px solid #373839;
 }
 
 .colaborador.aniver::before {
@@ -425,8 +479,25 @@
     }
 }
 
+.colaborador .exame_ok {
+    color: var(--verde_2);
+}
 
+.colaborador .exame_falta {
+    color: rgb(255, 255, 255)
+}
 
+.colaborador .exame_alerta {
+    color: rgb(255, 136, 0)
+}
+
+.colaborador .exame_vencido {
+    color: var(--vermelho);
+}
+
+.colaborador .exame_demissional {
+    color: var(--preto);
+}
 
 
 .colaborador.ferias .nome::after {
@@ -458,6 +529,14 @@
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
     color: var(--preto);
+    margin-left: 4px;
+}
+
+.colaborador.falta-indevida .nome::after {
+    content: "\3f";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--branco);
     margin-left: 4px;
 }
 
@@ -500,7 +579,7 @@
 }
 
 .colaboradorEmOS {
-    background-color: #afafaf;
+    background-color: #c2c2c280;
     width: 90px;
 }
 
@@ -517,9 +596,8 @@
     font-size: 10px;
     color: var(--texto_cinza);
     right: 28px;
-    background-color: rgb(241, 241, 241);
-    height: 18px;
-    border: 1px solid #afafaf;
+    background-color: rgb(214, 214, 214);
+    height: 25px;
     border-radius: 10px 10px 10px 10px;
     cursor: pointer;
 }
@@ -541,11 +619,12 @@
 }
 
 .buscarColab INPUT {
-    padding: 4px 8px 4px 8px;
+    padding: 6px 8px 6px 8px;
     width: 85px;
     height: 9px;
     border-radius: 10px;
     border: 1px solid gray;
+    background-color: rgba(255, 255, 255, 0.459);
 }
 
 .p_infoAcoes {
@@ -555,12 +634,14 @@
     padding: 4px 10px 2px 10px;
     border-radius: 0px 0px 10px 10px;
     font-size: 12px;
+
+    background-image: linear-gradient(360deg, #00000038, #fbfbfb14);
 }
 
 .p_infoAcoes .p_totalColabs {
     display: flex;
     gap: 3px;
-    color: rgb(168, 168, 168);
+    color: var(--bt-acao-os);
 }
 
 .i_statusOSexecutando {
@@ -573,17 +654,17 @@
 
 .bt_exportDados {
     padding-left: 10px;
-    color: var(--botao_acao);
+    color: var(--bt-acao-os);
 }
 
 .bt_exportDados:hover {
-    color: var(botao_acao_hover);
+    color: var(--botao_acao_hover);
     cursor: pointer;
 }
 
 
 .p_btAcoes {
-    color: var(--botao_acao);
+    color: var(--bt-acao-os);
 
 }
 
@@ -599,9 +680,9 @@
 .matchOS {
     background-color: #e6f7ff !important;
     /* leve azul de destaque */
-    transform: scale(1.02);
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.4) !important;
     z-index: 1;
+    color: var(--preto) !important;
 }
 
 .noMatchOS {
@@ -725,6 +806,15 @@
     flex: 1;
 }
 
+.os_semColab {
+    opacity: 0.4;
+}
+
+.os_semColab:hover {
+    opacity: 1 !important;
+}
+
+
 .check-item .remover {
     color: red;
     cursor: pointer;
@@ -747,12 +837,13 @@
 
 
 .painel_OS.prioridade-alta {
-    border-left: 6px solid rgb(231, 76, 76);
+    border: 1px solid rgb(231, 76, 76) !important;
+    border-left: 6px solid rgb(231, 76, 76) !important;
 }
 
 .bt_prioridade {
     cursor: pointer;
-    color: var(--botao_acao);
+    color: var(--bt-acao-os);
 }
 
 .bt_prioridade.alta {
@@ -773,8 +864,21 @@
     background: var(--branco);
     border: 1px solid #ccc;
     border-radius: 0 0 10px 10px;
-    z-index: 99;
+    z-index: 999;
     width: 100px;
+    overflow-y: auto;
+
+    max-height: 250px;
+    /* Oculta a barra de rolagem nos principais navegadores */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
+}
+
+.sugestoes::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Edge */
 }
 
 .itemSugestao {
@@ -828,23 +932,75 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
+.status_daOSnaOS {
+    margin-left: 2px;
+    display: inline-block;
+    position: absolute;
+    font-size: 14px;
+    text-shadow: 1px -1px 3px black;
+    top: 9px;
+    left: 35px;
+    z-index: 22;
+    transform-origin: top left; /* 🔹 fixa o ponto de rotação */
+}
 
+.status_daOSnaOS:hover {
+    left: 38px;
+    cursor: pointer;
+    scale: 1.2;
+    opacity: 1;
+}
 
-/* Carregamento do Sistema */
-#loadingOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgb(36, 36, 36);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-family: 'Arial', sans-serif;
+/* Efeito de balanço com leve flutuação e fade */
+@keyframes balancarSuave {
+    
+    0%  { transform: rotate(-3deg) translateY(0px); opacity: 1; }
+    10%  { transform: rotate(3deg) translateY(0px); opacity: 0.9; }
+    20%  { transform: rotate(-2deg) translateY(-0px); opacity: 1; }
+    30% { transform: rotate(0deg) translateY(0px); opacity: 0.95; }
+    40%  { transform: rotate(-3deg) translateY(0px); opacity: 1; }
+    50%  { transform: rotate(3deg) translateY(0px); opacity: 0.9; }
+    55%  { transform: rotate(-2deg) translateY(-0px); opacity: 1; }
+    60% { transform: rotate(0deg) translateY(0px); opacity: 0.95; }
+    70%  { transform: rotate(-3deg) translateY(0px); opacity: 1; }
+    80%  { transform: rotate(3deg) translateY(0px); opacity: 0.9; }
+    90%  { transform: rotate(-2deg) translateY(-0px); opacity: 1; }
+    100% { transform: rotate(0deg) translateY(0px); opacity: 0.95; }
+}
+
+@keyframes aumentar {
+    
+    0%  { transform:  scale(1.1)}
+    100% { transform:  scale(1.0)}
+}
+
+.status_daOSnaOS.semresponsavel {
+    color: var(--status_projetoSemResp);
+}
+
+.status_daOSnaOS.parado {
+    color: var(--status_projetoParado);
+    animation: aumentar 1.5s ease-in-out infinite;
+}
+
+.status_daOSnaOS.aguardando {
+    color: var(--status_projetoAguardando);
+}
+
+.status_daOSnaOS.emexecução {
+    color: var(--status_projetoExecutando);
+}
+
+.status_daOSnaOS.concluído {
+    color: var(--status_projetoConcluido);
+}
+
+.status_daOSnaOS.cancelado {
+    color: var(--status_projetoCancelado);
+}
+
+.status_daOSnaOS.emespera {
+    color: var(--status_projetoEmEspera);
 }
 
 .logoLoading {
@@ -890,6 +1046,7 @@
     padding: 5px 0;
     border-radius: 4px;
     width: 150px;
+    color: var(--preto);
 }
 
 .popup-option {
@@ -901,14 +1058,11 @@
 .popup-menu {
     display: none;
     position: absolute;
-    background-color: var(--branco);
-    border: 1px solid #ccc;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 100;
+    z-index: 900;
     padding: 5px 0;
     border-radius: 4px;
-    width: 150px;
     font-size: 12px;
+    background-color: rgba(255, 255, 255, 0.37) !important;
 }
 
 .popup-option-menu {
@@ -917,7 +1071,10 @@
 }
 
 .popup-option-menu:hover {
-    background-color: #f0f0f0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+    cursor: pointer;
+    color: var(--preto);
 }
 
 
@@ -954,10 +1111,6 @@
     color: #666;
 }
 
-.iconeStatusDia {
-    display: inline-block;
-    transition: transform 0.3s ease;
-}
 
 .rotate {
     animation: rotateIcon 0.3s linear;
@@ -1021,13 +1174,20 @@
 .aviso,
 .debug,
 .cad,
-.cadOS {
+.cadOS,
+.anexoexame,
+.anexocurso,
+.anexoepi,
+.anexointegracao,
+.cadCliente,
+.cadSupervisor,
+.cadCidade {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--bg_fundo_form);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1100,6 +1260,37 @@
     text-align: center;
 }
 
+.icone-calendario {
+    position: relative;
+    border: none;
+    background: #eee;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.icone-calendario::after {
+    content: attr(data-count);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 12px;
+    border-radius: 999px;
+    padding: 0 4px;
+    background: #7b5cff;
+    color: #fff;
+}
+
+.icone-calendario[data-count=""]::after {
+    display: none;
+}
+
+
 .overlay-transferencia {
     position: absolute;
     top: 0;
@@ -1132,18 +1323,16 @@
 }
 
 .modal-overlay-data {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    /* centraliza */
-    justify-content: center;
+    display: flex;
+    /* centralização */
     align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
     z-index: 9999;
 }
+
 
 .modal-content-data {
     background-color: #fff;
@@ -1152,14 +1341,14 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     position: relative;
-    min-width: 230px;
-    max-width: 90vw;
+    width: 200px;
 }
 
 .modal-content-data h3 {
     margin-top: 0;
     margin-bottom: 15px;
-    font-size: 14px;
+    color: rgb(63, 63, 63);
+    font-size: 11px;
 }
 
 .modal-content-data input[type="date"] {
@@ -1194,4 +1383,40 @@
     color: var(--texto_cinza);
     /* ou a cor original do botão */
     scale: 1;
+}
+
+
+
+.p_colabs .colaborador.supervisor {
+    border: 1px dashed gold;
+    position: relative;
+}
+
+.p_colabs .colaborador.supervisor::before {
+    content: "⭐";
+    font-size: 11px;
+    position: absolute;
+    left: 2px;
+}
+
+.menuMouseDir {
+    position: absolute;
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    background: var(--bg-card);
+    color: var(--texto-principal);
+}
+
+.menuMouseDir .opcao-menu:hover {
+    background-color: var(--bt-hover);
+    cursor: pointer;
+}
+
+.menuMouseDir .opcao-menu {
+    padding: 8px 8px;
+    border-radius: 6px;
 }

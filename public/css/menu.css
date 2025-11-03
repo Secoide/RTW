@@ -1,0 +1,159 @@
+html:not(.auth-ok) #menu {
+  visibility: hidden;
+}
+
+html.auth-ok #menu {
+  visibility: visible;
+}
+
+
+.menu {
+  height: 100%;
+  width: 35px;
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  transition: width 0.3s ease-in-out;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.menu:hover,
+.menu_Colab:hover {
+  width: 140px;
+}
+
+.menu a,
+.menu_Colab a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  font-size: 12px;
+  text-decoration: none;
+  width: 100%;
+  transition: background 0.3s, transform 0.3s;
+  border-radius: 30px 0 0 30px;
+  /* arredondado para dentro */
+  text-decoration: none;
+  color: var(--texto-principal);
+}
+
+.menu a:hover,
+.menu_Colab a:hover {
+  background-color: var(--hover-bg);
+  color: var(--texto-invertido);
+  transform: translateX(5px);
+  cursor: pointer;
+}
+
+
+.menu i,
+.menu_Colab i {
+  font-size: 22px;
+  margin-right: 10px;
+  transition: transform 0.3s;
+}
+
+.menu-text {
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.menu:hover .menu-text,
+.menu_Colab:hover .menu-text {
+  opacity: 1;
+}
+
+
+
+.menu i,
+.menu_Perfil i,
+.menu_Colab i {
+  font-size: small;
+  cursor: pointer;
+}
+
+
+.menu_Perfil {
+  margin-block: 5px;
+  height: 30px;
+  width: 200px;
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px;
+  border-radius: 10px 0 0 10px;
+  padding-left: 20px;
+}
+
+.menu_Perfil a,
+.notif {
+  padding-right: 4px;
+  text-decoration: none;
+  color: var(--texto-principal);
+  display: block;
+}
+
+#iconeNotif i {
+  font-size: 18px;
+}
+
+.menuSuperiorDir {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.menuSuperiorDir .notif {
+  font-size: 18px;
+}
+
+.menuInferior a {
+  padding-right: 4px;
+  text-decoration: none;
+  color: rgb(202, 36, 36);
+}
+
+.nomePerfil {
+  font-size: 11px;
+}
+
+.menu_Perfil a:hover {
+  color: var(--white);
+  scale: 1.1;
+}
+
+.menu_Perfil i:hover {
+  color: var(--white);
+  scale: 1.1;
+}
+
+.notification-lista {
+  display: none;
+  position: absolute;
+  font-size: 12px;
+  right: 0;
+  top: 40px;
+  background: var(--bg-gradiente-padrao) !important;
+  border-radius: 10px;
+  padding: 10px;
+  width: auto;
+  min-width: 150px;
+  z-index: 100;
+  color: var(--texto-principal) !important;
+}

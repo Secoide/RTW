@@ -1,6 +1,6 @@
 :root {
     --azul_1: #0C80C1;
-    --verde_1: #05BA37;
+    --verde_1: #04aa33;
     --verde_2: #258E43;
     --amarelo: #F0C428;
     --laranja_1: #FF8A00;
@@ -17,14 +17,17 @@
     --menu_2: #202020;
     --text_excuro: #121212;
     --pagina: #d1d1d1;
+    --roxo: #5b158a;
 
-
-    --status_projetoSemResp: #505050;
+    --status_projetoSemResp: #bbbbbb;
     --status_projetoParado: #c53838;
     --status_projetoAguardando: #CD6702;
     --status_projetoExecutando: #007B97;
     --status_projetoConcluido: #00972A;
     --status_projetoEmEspera: #dfe224;
+    --status_projetoCancelado: #1d1d1d;
+
+
 
     --borda_barraQuaseBranca: #eeeeee;
     --cor_letraFundo: #e4e4e4;
@@ -56,6 +59,7 @@
     --afastado: #c92828;
     --saude: #e25d15;
     --paternidade: #3debf1;
+    --faltaindevida: #964df5;
 
     --aniver: #2adf33;
 

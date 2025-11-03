@@ -1,0 +1,47 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="cadCidade" style="visibility: visible; opacity: 1;">
+    <div class="">
+        <div class="painel_dadosAnexo">
+            <form id="formCadCidade" class="form_padrao">
+                <div class="p_titulo">
+                    <p class="tituloform">Cadastrar Cidade</p>
+                </div>
+                <div class="linha_infoColab linha_padrao">
+                    <input id="nomeCidade" class="tbx_teste glass input_obrigatorio" type="text"
+                        placeholder="Nome da Cidade" name="nomeCidade" title="" required="required"
+                        style="width: 94%;">
+                </div>
+                <input type="hidden" name="idCidade" id="idCidade">
+
+                <div class="p_acoes linha_padrao">
+                    <input id="bt_cadCidade" class="bt_teste glass btn btn-primary" type="submit" name="cadCidade"
+                        value="Cadastrar">
+                    <input id="bt_fechar_cadCidade" class="bt_teste glass" type="reset" value="Cancelar">
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+
+    $(document).on("click", "#bt_fechar_cadCidade", function () {
+        $('#form_cadCidade').empty();
+    });
+
+</script>

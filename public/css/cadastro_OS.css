@@ -5,6 +5,10 @@
 .p_titulo .tituloform{
     font-size: 14px;
 }
+.form__os{
+    width: 100%;
+}
+
 
 .p_padrao{
     background-color: var(--white);
@@ -17,6 +21,8 @@
 
 .linha_infoOS{
     margin-top: 0px;
+    display: flex;
+    gap: 5px;
 }
 .linha_observacao{
     margin-bottom: 0px;
@@ -28,13 +34,7 @@
 
 .linha_valorData{
     display: flex;
-    
     justify-content: space-between;
-}
-
-.linha_infoOS{
-    display: flex;
-    gap: 5px;
 }
 
 .dica{
@@ -42,13 +42,22 @@
     color: var(--cinza_claro);
     padding-left: 5px;
 }
-
-.p_cadastroOS{
-    border-radius: 10px;
-    width: 350px; 
-    background-color: white;
-
+.painel_dadosOS {
+    display: flex;
+    font-size: 12px;
+    width: 600px;
+    border-radius: 10px;    
+    background: var(--bg-padrao);
+    color: var(--texto-principal);
+    max-height: 700px;
+    min-height: 700px;
 }
+.painel_todosOS {
+    width: 700px;
+    border-radius: 0 0 10px 10px;
+    padding: 10px;
+}
+
 
 .p_btAnexo{
     display: flex;
@@ -94,8 +103,11 @@
     color: var(--texto_cinza) !important;
 }
 
-.p_acoes{
+.p_acoes {
     display: flex;
+    gap: 30px;
     justify-content: space-between;
+    background: linear-gradient(35deg, #8a3bbe31, #feb47b49, #86dce75e);
+    border-radius: 10px;
 }
 
