@@ -5,7 +5,29 @@ Todos os formatos de mudanças importantes neste projeto serão documentados nes
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+
 ## [Não lançado]
+## [1.1.1] - 2025-11-10
+### Adicionado
+- Apague curso, exame, integração utilizando o mouse direito em cima do painel correspondente dentro do formulario do colaborador;
+- 
+
+### Alterado
+- 
+
+### Corrigido
+- Exportar programação para whatsapp, mostrava data de um dia antes;
+- Painel de integrações no perfil do Colaborador retornava Null no final da consulta geral das empresas;
+- Cores de temas claros nao sendo alterados em algumas partes do programa;
+
+### Removido
+- 
+
+### Obsoleto
+- 
+
+## [Não lançado]
+## [1.1.0] - 2025-11-01
 ### Adicionado
 - Colaborador pode ser selecionado como supervisor de uma OS em uma data especifica, clique com o botão direito do mouse em cima do colaborador no painel da OS e defina como colaborador.
 - Colaborador da empresa somente sera visivel no Painel de colaboradores dispponiveis na sua data de Admissão e até o momento de sua Demissão, caso houver.

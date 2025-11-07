@@ -47,7 +47,7 @@ async function deletarIntegracao(id) {
 async function buscarIntegracoesByColaborador(idFunc) {
   return await IntegracaoModel.getIntegracoesByColaborador(idFunc);
 }
-deletarIntegracao
+
 async function salvarIntegracao({ datarealizadaIntegracao, vencimento, idColab, integracao, file }) {
   const idfuncionario = parseInt(idColab, 10);
   const idintegracao = parseInt(integracao, 10);

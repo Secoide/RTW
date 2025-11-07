@@ -51,6 +51,11 @@ async function deletarCurso(id) {
   return await CursoModel.deleteCurso(id);
 }
 
+// Deletar
+async function deletarCursosByColaborador(id) {
+  return await CursoModel.deleteCursosByColaborador(id);
+}
+
 // Buscar um
 async function buscarCursosByColaborador(idFunc) {
   return await CursoModel.getCursosByColaborador(idFunc);
@@ -94,6 +99,7 @@ module.exports = {
   atualizarCurso,
   deletarCurso,
   buscarCursosByColaborador,
+  deletarCursosByColaborador,
   salvarCurso,
   baixarCurso
 };

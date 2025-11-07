@@ -33,7 +33,7 @@ $(document).on("click", ".mini_curso", function (e) {
     get_carregarPerfilUsuario(funcID);
     setTimeout(() => {
         $('.cad a.bt_menu[data-target=".painel_cursos"]').trigger('click');
-    }, 400);
+    }, 1000);
 });
 
 $(document).on("click", ".mini_exame", function (e) {
@@ -42,7 +42,7 @@ $(document).on("click", ".mini_exame", function (e) {
     get_carregarPerfilUsuario(funcID);
     setTimeout(() => {
         $('.cad a.bt_menu[data-target=".painel_exames"]').trigger('click');
-    }, 400);
+    }, 1000);
 });
 
 $(document).on("click", ".mini_integracao", function (e) {
@@ -51,7 +51,7 @@ $(document).on("click", ".mini_integracao", function (e) {
     get_carregarPerfilUsuario(funcID);
     setTimeout(() => {
         $('.cad a.bt_menu[data-target=".painel_integra"]').trigger('click');
-    }, 400);
+    }, 1000);
 });
 
 $(document).on("click", ".text-danger", function (e) {
@@ -60,7 +60,7 @@ $(document).on("click", ".text-danger", function (e) {
     get_carregarPerfilUsuario(funcID);
     setTimeout(() => {
         $('.cad a.bt_menu[data-target=".painel_vestimentas"]').trigger('click');
-    }, 400);
+    }, 1000);
 });
 
 $(document).on("click", "#chkDesligados", function (e) {

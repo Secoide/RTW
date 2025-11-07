@@ -55,6 +55,17 @@ async function deleteExame(req, res) {
   }
 }
 
+// DELETE /api/curso/:id
+async function deleteExameByColaborador(req, res) {
+    try {
+        const ok = await ExameService.deletarExameByColaborador(req.params.id);
+        if (!ok) return res.status(404).json({ erro: 'Não encontrado' });
+        res.json({ sucesso: true });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao deletar Exame' });
+    }
+}
+
 // GET /api/exame/:id
 async function getExamesByColaborador(req, res) {
   try {
@@ -147,6 +158,7 @@ module.exports = {
   updateExame,
   deleteExame,
   getExamesByColaborador,
+  deleteExameByColaborador,
   uploadExame,
   downloadExame,
   checkExame

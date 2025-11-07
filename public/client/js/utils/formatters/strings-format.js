@@ -42,7 +42,12 @@ export function formatarCPF(cpf = "") {
 export function copiarTexto(texto, msg = "Texto copiado!") {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(texto)
-      .then(() => alert(msg))
+      .then(() => Swal.fire({
+        icon: "success",
+        title: "Programação",
+        theme: "dark",
+        text: msg
+      }))
       .catch(() => fallbackCopy(texto, msg));
   } else {
     fallbackCopy(texto, msg);
@@ -60,7 +65,12 @@ function fallbackCopy(texto, msg) {
 
   try {
     document.execCommand("copy");
-    alert(msg);
+    Swal.fire({
+      icon: "success",
+      title: "Sucesso",
+      theme: "dark",
+      text: msg
+    });
   } catch (err) {
     alert("Erro ao copiar: " + err);
   }

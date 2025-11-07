@@ -7,56 +7,79 @@
 
             <article aria-labelledby="v108-title">
                 <header>
-                    <h3 id="v108-title">Versão 1.1.0.0
+                    <h3 id="v108-title">Versão 1.1.1.0
         </h2>
         <p>Data: <time datetime="2025-11">11/2025</time></p>
         </header>
-
+        <!-- v1.1.0.0 -->
         <details>
-            <summary>🆕 Adicionado</summary>
-            <ul>
-                <li>Agora é possível definir um colaborador como <strong>Supervisor</strong> de uma OS em uma
-                    data específica. Basta clicar com o <strong>botão direito do mouse</strong> sobre o
-                    colaborador no painel da OS e selecionar <em>“Definir como Supervisor”</em>.</li>
-                <li>Colaboradores da empresa são exibidos no painel de disponíveis apenas entre as datas de
-                    <strong>admissão</strong> e <strong>demissão</strong> (quando houver).
-                </li>
-                <li>O <strong>círculo à esquerda do nome</strong> do colaborador indica o status dos seus
-                    documentos (exames e treinamentos):
+            <summary>v1.1.0.0</summary>
+
+            <details>
+                <summary>🆕 Adicionado</summary>
+                <ul>
+                    <li>Apague curso, exame, integração utilizando o mouse direito em cima do painel correspondente
+                        dentro do formulário do colaborador.</li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>🐞 Corrigido</summary>
+                <ul>
+                    <li>Exportar programação para WhatsApp mostrava data de um dia antes;</li>
+                    <li>Painel de integrações no perfil do colaborador retornava <code>Null</code> no final da consulta
+                        geral das
+                        empresas;</li>
+                    <li>Cores de temas claros não sendo alteradas em algumas partes do programa.</li>
+                </ul>
+            </details>
+        </details>
+
+        <!-- v1.1.1.0 -->
+        <details>
+            <summary>v1.1.1.0</summary>
+
+            <details>
+                <summary>🆕 Adicionado</summary>
+                <ul>
+                    <li>Agora é possível definir um colaborador como <strong>Supervisor</strong> de uma OS em uma data
+                        específica. Basta clicar com o <strong>botão direito do mouse</strong> sobre o colaborador no
+                        painel da OS e selecionar <em>“Definir como Supervisor”</em>.</li>
+                    <li>Colaboradores da empresa são exibidos no painel de disponíveis apenas entre as datas de
+                        <strong>admissão</strong> e <strong>demissão</strong> (quando houver).</li>
+                    <li>O <strong>círculo à esquerda do nome</strong> do colaborador indica o status dos seus documentos
+                        (exames e treinamentos):</li>
                     <ul>
                         <li>🟢 Documentos em dia;</li>
                         <li>🟡 Documento próximo do vencimento;</li>
                         <li>🔴 Documento vencido;</li>
                         <li>⚪ Documento pendente.</li>
                     </ul>
-                </li>
-                <li>Clique com o <strong>botão direito</strong> sobre o colaborador e selecione <em>“Abrir
-                        Perfil”</em> para visualizar suas informações completas.</li>
-                <li>Usuários sem conexão com o servidor por mais de <strong>3 minutos</strong> serão
-                    desconectados automaticamente.</li>
-                <li>Usuários inativos por mais de <strong>10 minutos</strong> também serão desconectados
-                    automaticamente para maior segurança dos dados.</li>
-                <li>Nova aba <strong>“Dados Profissionais”</strong> no perfil de colaboradores, com campos para
-                    <em>categoria da CNH</em>, <em>setor</em> e <em>cargo na empresa</em>.
-                </li>
-                <li>Nova aba <strong>“Exames”</strong> no perfil de colaboradores, exibindo todos os exames
-                    realizados, prazos e datas de vencimento.</li>
-                <li>Nova aba <strong>“EPI”</strong> no perfil de colaboradores, mostrando todos os EPIs
-                    entregues e seus respectivos status.</li>
-                <li>Formulário adicionado para cadastro de <strong>Empresa, Supervisor e Cidade</strong>.</li>
-                <li>Ao selecionar um <strong>Supervisor</strong>, o sistema exibe automaticamente seus
-                    <em>contatos (telefone e e-mail)</em>.
-                </li>
-                <li>Nova <strong>tela para o RH</strong>, com visão unificada de todos os colaboradores e seus
-                    principais indicadores: exames, EPIs, integrações e cursos.</li>
-                <li>Nova aba <strong>“Cursos”</strong> no perfil de colaboradores, exibindo os cursos realizados
-                    e seus prazos de vencimento.</li>
-                <li>Os <strong>acessos e permissões</strong> de cada usuário agora são definidos automaticamente
-                    conforme o <em>setor vinculado</em> ao colaborador.</li>
-                <li>Adicionada nova aba <strong>“Status”</strong> nas informações da OS, permitindo a <strong>alteração
-                        direta do status</strong>.</li>
-                <li>Cada painel de <strong>OS na programação</strong> agora exibe uma <strong>tag colorida</strong> que
-                    indica o status da OS:
+                    <li>Clique com o <strong>botão direito</strong> sobre o colaborador e selecione <em>“Abrir
+                            Perfil”</em> para visualizar suas informações completas.</li>
+                    <li>Usuários sem conexão com o servidor por mais de <strong>3 minutos</strong> serão desconectados
+                        automaticamente.</li>
+                    <li>Usuários inativos por mais de <strong>10 minutos</strong> também serão desconectados
+                        automaticamente para maior segurança dos dados.</li>
+                    <li>Nova aba <strong>“Dados Profissionais”</strong> no perfil de colaboradores, com campos para
+                        <em>categoria da CNH</em>, <em>setor</em> e <em>cargo na empresa</em>.</li>
+                    <li>Nova aba <strong>“Exames”</strong> no perfil de colaboradores, exibindo todos os exames
+                        realizados, prazos e datas de vencimento.</li>
+                    <li>Nova aba <strong>“EPI”</strong> no perfil de colaboradores, mostrando todos os EPIs entregues e
+                        seus respectivos status.</li>
+                    <li>Formulário adicionado para cadastro de <strong>Empresa, Supervisor e Cidade</strong>.</li>
+                    <li>Ao selecionar um <strong>Supervisor</strong>, o sistema exibe automaticamente seus <em>contatos
+                            (telefone e e-mail)</em>.</li>
+                    <li>Nova <strong>tela para o RH</strong>, com visão unificada de todos os colaboradores e seus
+                        principais indicadores: exames, EPIs, integrações e cursos.</li>
+                    <li>Nova aba <strong>“Cursos”</strong> no perfil de colaboradores, exibindo os cursos realizados e
+                        seus prazos de vencimento.</li>
+                    <li>Os <strong>acessos e permissões</strong> de cada usuário agora são definidos automaticamente
+                        conforme o <em>setor vinculado</em> ao colaborador.</li>
+                    <li>Adicionada nova aba <strong>“Status”</strong> nas informações da OS, permitindo a
+                        <strong>alteração direta do status</strong>.</li>
+                    <li>Cada painel de <strong>OS na programação</strong> agora exibe uma <strong>tag colorida</strong>
+                        que indica o status da OS:</li>
                     <ul>
                         <li>⚪ – Sem responsável;</li>
                         <li>🟠 – Aguardando;</li>
@@ -65,58 +88,61 @@
                         <li>🟡 – Em espera;</li>
                         <li>⚫ – Cancelado.</li>
                     </ul>
-                </li>
-                <li>Nova tela Gestão: analise todos os dados de cadatros geriais (EPI, Exames, Cursos, Empresa,
-                    Supervisor, Cidade). Adicione, edite ou apaga os registros em um unico local;</li>
-                <li>Clique com o botão direito para visualizar integração (caso colaborador esteja com sinal de atenção
-                    ou vencido);</li>
-                <li>Aba exclusiva de OS para visualizar, editar e apagar. Com Integração de gráficos e contadores de
-                    status (Tela Gestão);</li>
-            </ul>
+                    <li>Nova tela <strong>Gestão</strong>: analise todos os dados de cadastros gerais (EPI, Exames,
+                        Cursos, Empresa, Supervisor, Cidade). Adicione, edite ou apague os registros em um único local;
+                    </li>
+                    <li>Clique com o botão direito para visualizar integração (caso colaborador esteja com sinal de
+                        atenção ou vencido);</li>
+                    <li>Aba exclusiva de OS para visualizar, editar e apagar. Com integração de gráficos e contadores de
+                        status (Tela Gestão);</li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>⚙️ Alterado</summary>
+                <ul>
+                    <li>Agora é possível <strong>selecionar múltiplos dias</strong> para transferir colaboradores entre
+                        OSs de forma simultânea.</li>
+                    <li>Ao selecionar uma <strong>empresa</strong> no cadastro de OS, se houver <em>supervisor</em> e
+                        <em>cidade</em> vinculados, os campos correspondentes são <strong>preenchidos
+                            automaticamente</strong>.</li>
+                    <li>Ao selecionar um dia, o sistema exibe apenas as <strong>OSs com colaboradores alocados</strong>
+                        em datas anteriores, melhorando significativamente o <em>desempenho</em> da comunicação com o
+                        servidor.</li>
+                    <li>Ao mudar status da programação, os usuários conectados irão atualizar a programação
+                        automaticamente;</li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>🐞 Corrigido</summary>
+                <ul>
+                    <li>Correção do <strong>nome duplicado</strong> de usuários online na tela principal.</li>
+                    <li>O botão de <strong>Filtrar prioridade Alta</strong> e o <strong>Modo Foco</strong> afetavam
+                        outros dias do painel — agora atuam apenas no dia correspondente.</li>
+                    <li>Corrigido erro que permitia adicionar em uma OS colaboradores com <strong>afastamento, atestado
+                            ou licença-paternidade</strong>.</li>
+                    <li>Correção de exibição incorreta de <strong>datas de aniversário</strong> e
+                        <strong>atestados</strong> (eram mostrados com um dia de diferença).</li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>🗑️ Removido</summary>
+                <ul>
+                    <li>Ação de <strong>duplo clique</strong> sobre o nome do colaborador disponível.</li>
+                    <li>Função <strong>“Fixar OS”</strong>.</li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>🕰️ Obsoleto</summary>
+                <p>Nenhum item listado nesta versão.</p>
+            </details>
         </details>
 
-        <details>
-            <summary>⚙️ Alterado</summary>
-            <ul>
-                <li>Agora é possível <strong>selecionar múltiplos dias</strong> para transferir colaboradores
-                    entre OSs de forma simultânea.</li>
-                <li>Ao selecionar uma <strong>empresa</strong> no cadastro de OS, se houver <em>supervisor</em>
-                    e <em>cidade</em> vinculados, os campos correspondentes são <strong>preenchidos
-                        automaticamente</strong>.</li>
-                <li>Ao selecionar um dia, o sistema exibe apenas as <strong>OSs com colaboradores
-                        alocados</strong> em datas anteriores, melhorando significativamente o
-                    <em>desempenho</em> da comunicação com o servidor.
-                </li>
-                <li>Ao mudar status da programação, os usuarios conectados irão atualizar a programação automaticamente;</li>
-            </ul>
-        </details>
 
-        <details>
-            <summary>🐞 Corrigido</summary>
-            <ul>
-                <li>Correção do <strong>nome duplicado</strong> de usuários online na tela principal.</li>
-                <li>O botão de <strong>Filtrar prioridade Alta</strong> e o <strong>Modo Foco</strong> afetavam
-                    outros dias do painel — agora atuam apenas no dia correspondente.</li>
-                <li>Corrigido erro que permitia adicionar em uma OS colaboradores com <strong>afastamento,
-                        atestado ou licença-paternidade</strong>.</li>
-                <li>Correção de exibição incorreta de <strong>datas de aniversário</strong> e
-                    <strong>atestados</strong> (eram mostrados com um dia de diferença).
-                </li>
-            </ul>
-        </details>
 
-        <details>
-            <summary>🗑️ Removido</summary>
-            <ul>
-                <li>Ação de <strong>duplo clique</strong> sobre o nome do colaborador disponível.</li>
-                <li>Função <strong>“Fixar OS”</strong>.</li>
-            </ul>
-        </details>
-
-        <details>
-            <summary>🕰️ Obsoleto</summary>
-            <p>Nenhum item listado nesta versão.</p>
-        </details>
         </article>
     </section>
 </div>

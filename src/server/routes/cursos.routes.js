@@ -22,5 +22,6 @@ router.get('/:id', verificarAutenticacao, cursoController.getCurso);
 router.put('/:id', verificarAutenticacao, cursoController.updateCurso);
 
 router.delete('/excluir/:id', verificarAutenticacao, cursoController.deleteCurso);
+router.delete('/excluir/colaborador/:id', verificarAutenticacao, cursoController.deleteCursoByColaborador);
 
 module.exports = router;

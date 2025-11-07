@@ -110,6 +110,8 @@ a:hover {
     position: fixed;
     right: 0;
     bottom: 0;
-    font-size: small;
+    font-size: medium;
+    font-weight: bold;
+    padding: 10px;
     color: #b8f823;
 }

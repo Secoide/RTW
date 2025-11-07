@@ -94,8 +94,6 @@ export function handleAlocarColaborador({ osID, nomes, dataDia }) {
 }
 
 export function handleTransferenciaConcluida({ colaboradores, datas }) {
-  console.log("✅ Transferência concluída:", colaboradores, datas);
-
   datas.forEach((dia) => {
     const $painelDia = $(`.painelDia[data-dia="${dia}"]`);
     if ($painelDia.length === 0) return;

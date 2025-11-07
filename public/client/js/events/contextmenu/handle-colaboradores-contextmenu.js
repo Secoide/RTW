@@ -5,6 +5,7 @@ import { open_form_AnexarCurso } from "../forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../forms/anexarExame.js";
 import { open_form_AnexarEPI } from "../forms/anexarEPI.js";
 import { open_form_AnexarIntegracao } from "../forms/anexarIntegracao.js";
+import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
 
 // ========================================================
 // 🔧 Funções utilitárias globais
@@ -279,7 +280,59 @@ export function initColaboradoresContextMenu(socket) {
           }
         }
       },
-      "SEPARADOR"
+      "SEPARADOR",
+      {
+        label: "❌ Apagar Exame",
+        action: async () => {
+          if (!idFuncionarioExame) return;
+
+          const result = await Swal.fire({
+            title: "Apagar?",
+            text: "Deseja realmente apagar este Exame?",
+            icon: "warning",
+            theme: "dark",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, apagar!"
+          });
+
+          if (result.isConfirmed) {
+            try {
+              const res = await fetch(`/api/exame/excluir/colaborador/${idFuncionarioExame}`, {
+                method: "DELETE",
+                credentials: "include"
+              });
+
+              if (res.ok) {
+
+                preencherTabelaColaboradoresRH();
+                document.querySelector('.bt_menu[data-target=".painel_exames"]').click();
+                Swal.fire({
+                  icon: "success",
+                  title: "Excluído!",
+                  theme: "dark",
+                  text: "Exame excluído!"
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Falha",
+                  theme: "dark",
+                  text: "Não foi possível excluir o Exame."
+                });
+              }
+            } catch (err) {
+              Swal.fire({
+                icon: "error",
+                title: "Erro",
+                theme: "dark",
+                text: err.message
+              });
+            }
+          }
+        }
+      }
     ];
 
     criarMenuContextual(e, opcoesMenu);
@@ -315,7 +368,59 @@ export function initColaboradoresContextMenu(socket) {
           }
         }
       },
-      "SEPARADOR"
+      "SEPARADOR",
+      {
+        label: "❌ Apagar Curso",
+        action: async () => {
+          if (!idFuncionarioCurso) return;
+
+          const result = await Swal.fire({
+            title: "Apagar?",
+            text: "Deseja realmente apagar este curso?",
+            icon: "warning",
+            theme: "dark",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, apagar!"
+          });
+
+          if (result.isConfirmed) {
+            try {
+              const res = await fetch(`/api/curso/excluir/colaborador/${idFuncionarioCurso}`, {
+                method: "DELETE",
+                credentials: "include"
+              });
+
+              if (res.ok) {
+
+                preencherTabelaColaboradoresRH();
+                document.querySelector('.bt_menu[data-target=".painel_cursos"]').click();
+                Swal.fire({
+                  icon: "success",
+                  title: "Excluído!",
+                  theme: "dark",
+                  text: "Curso excluído!"
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Falha",
+                  theme: "dark",
+                  text: "Não foi possível excluir o curso."
+                });
+              }
+            } catch (err) {
+              Swal.fire({
+                icon: "error",
+                title: "Erro",
+                theme: "dark",
+                text: err.message
+              });
+            }
+          }
+        }
+      }
     ];
 
     criarMenuContextual(e, opcoesMenu);
@@ -351,9 +456,207 @@ export function initColaboradoresContextMenu(socket) {
           }
         }
       },
-      "SEPARADOR"
+      "SEPARADOR", {
+        label: "❌ Apagar Integração",
+        action: async () => {
+          if (!idFuncionarioIntegracao) return;
+
+          const result = await Swal.fire({
+            title: "Apagar?",
+            text: "Deseja realmente apagar esta integração?",
+            icon: "warning",
+            theme: "dark",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, apagar!"
+          });
+
+          if (result.isConfirmed) {
+            try {
+              const res = await fetch(`/api/integracao/excluir/${idFuncionarioIntegracao}`, {
+                method: "DELETE",
+                credentials: "include"
+              });
+
+              if (res.ok) {
+
+                preencherTabelaColaboradoresRH();
+                document.querySelector('.bt_menu[data-target=".painel_integra"]').click();
+                Swal.fire({
+                  icon: "success",
+                  title: "Excluído!",
+                  theme: "dark",
+                  text: "Integração excluída!"
+                });
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Falha",
+                  theme: "dark",
+                  text: "Não foi possível excluir a integração."
+                });
+              }
+            } catch (err) {
+              Swal.fire({
+                icon: "error",
+                title: "Erro",
+                theme: "dark",
+                text: err.message
+              });
+            }
+          }
+        }
+      }
     ];
 
     criarMenuContextual(e, opcoesMenu);
   });
+
+
+  // --------------------------------------------------------
+  // MENU: Painel de EPI
+  // --------------------------------------------------------
+  $(document).on("contextmenu", ".painel_epiGeral .status_EPI", function (e) {
+    e.preventDefault();
+
+    const idColab = $("#idColaboradorPro").val();
+    const idFuncionarioEPI = $(this).data("idfcepi");
+
+    // 🔹 Obtém o nome e formata (somente a primeira letra maiúscula)
+    let epi = $(this).find(".nomeEPI").text().trim().toLowerCase();
+    epi = epi.charAt(0).toUpperCase() + epi.slice(1);
+
+    // 🔹 Define ícone conforme o tipo de EPI
+    let icone = "🧤"; // padrão
+    if ($(this).hasClass("status_fone")) icone = "🎧";
+    else if ($(this).hasClass("status_capacete")) icone = "🪖";
+    else if ($(this).hasClass("status_oculos")) icone = "👓";
+    else if ($(this).hasClass("status_luva")) icone = "🧤";
+    else if ($(this).hasClass("status_bota")) icone = "🥾";
+    else if ($(this).hasClass("status_mascara")) icone = "😷";
+    else if ($(this).hasClass("status_colete")) icone = "🦺";
+
+    // 🔹 Verifica o status do EPI (texto dentro do span .statusEPI)
+    const statusTexto = $(this).find(".statusEPI").text().trim().toLowerCase();
+    // 🔹 Define opções do menu conforme o status
+    const opcoesMenu = [];
+
+    if (statusTexto.includes("não entregue!")) {
+      // Somente Registrar
+      opcoesMenu.push({
+        label: `${icone} Registrar ${epi}`,
+        action: () => {
+          open_form_AnexarEPI(idColab);
+        }
+      });
+    } else if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!")) {
+      // Somente Atualizar
+      opcoesMenu.push({
+        label: `${icone} Atualizar ${epi}`,
+        action: () => {
+          open_form_AnexarEPI(idColab);
+        }
+      });
+    } else {
+      // Padrão — se surgir outro status, mostra ambos
+      opcoesMenu.push(
+        {
+          label: `${icone} Registrar ${epi}`, action: () => {
+            open_form_AnexarEPI(idColab);
+          }
+        },
+        {
+          label: `🔄 Atualizar ${epi}`, action: () => {
+            open_form_AnexarEPI(idColab);
+          }
+        }
+      );
+    }
+
+    // 🔹 Sempre mostra Visualizar e Apagar (se aplicável)
+    if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!")) {
+      opcoesMenu.push(
+        "SEPARADOR",
+        {
+          label: `🧾 Visualizar Registro`,
+          action: async () => {
+            if (!idFuncionarioEPI) return;
+            try {
+              const res = await fetch(`/api/integracao/download/${idFuncionarioEPI}`, {
+                method: "HEAD",
+                credentials: "include"
+              });
+              if (!res.ok) {
+                let msg = "Erro ao visualizar integração.";
+                if (res.status === 400) msg = "Nenhum PDF anexado para esta integração.";
+                if (res.status === 404) msg = "Integração ou arquivo não encontrado.";
+                return Swal.fire({ icon: "warning", title: "Atenção", theme: "dark", text: msg });
+              }
+              window.open(`/api/integracao/download/${idFuncionarioEPI}`, "_blank");
+            } catch (err) {
+              Swal.fire({ icon: "error", title: "Erro", theme: "dark", text: err.message });
+            }
+          }
+        },
+        "SEPARADOR",
+        {
+          label: `❌ Apagar ${epi}`,
+          action: async () => {
+            if (!idFuncionarioEPI) return;
+
+            const result = await Swal.fire({
+              title: "Apagar?",
+              text: `Deseja realmente apagar ${epi} do EPI?`,
+              icon: "warning",
+              theme: "dark",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "Sim, apagar!"
+            });
+
+            if (result.isConfirmed) {
+              try {
+                const res = await fetch(`/api/epi/excluir/${idFuncionarioEPI}`, {
+                  method: "DELETE",
+                  credentials: "include"
+                });
+
+                if (res.ok) {
+                  preencherTabelaColaboradoresRH();
+                  document.querySelector('.bt_menu[data-target=".painel_epi"]').click();
+                  Swal.fire({
+                    icon: "success",
+                    title: "Excluído!",
+                    theme: "dark",
+                    text: "EPI excluído!"
+                  });
+                } else {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Falha",
+                    theme: "dark",
+                    text: "Não foi possível excluir EPI."
+                  });
+                }
+              } catch (err) {
+                Swal.fire({
+                  icon: "error",
+                  title: "Erro",
+                  theme: "dark",
+                  text: err.message
+                });
+              }
+            }
+          }
+        }
+      );
+    }
+
+    criarMenuContextual(e, opcoesMenu);
+  });
+
+
+
 }

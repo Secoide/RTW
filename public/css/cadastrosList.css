@@ -240,7 +240,7 @@ h1 {
 
 #gestao .inline-add select {
     min-width: 220px;
-    background: #3f3f3f;
+    background: var(--input-bg);
     color: var(--texto-principal);
     border: 1px solid #4b4b4b;
     border-radius: 8px;
@@ -252,7 +252,7 @@ h1 {
     font-size: 12px;
     border-radius: 6px;
     background: var(--bt-salvar);
-    color: #08110f;
+    color: var(--texto-principal);
     cursor: pointer;
 }
 
@@ -261,7 +261,7 @@ h1 {
     font-size: 12px;
     border-radius: 6px;
     background: #ef4444;
-    color: #1a0b0b;
+    color: var(--texto-principal);
     cursor: pointer;
 }
 

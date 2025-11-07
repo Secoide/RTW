@@ -43,9 +43,14 @@ async function deletarExame(id) {
   return await ExameModel.deleteExame(id);
 }
 
+// Deletar
+async function deletarExameByColaborador(id) {
+  return await ExameModel.deleteExameByColaborador(id);
+}
+
 // Buscar um
 async function buscarExamesByColaborador(idFunc) {
-  return await ExameModel.getExamesByColaborador(idFunc);
+  return await ExameModel.getExameByColaborador(idFunc);
 }
 
 async function salvarExame({ datarealizadaExame, vencimento, idColab, exame, file }) {
@@ -84,6 +89,7 @@ module.exports = {
   atualizarExame,
   deletarExame,
   buscarExamesByColaborador,
+  deletarExameByColaborador,
   salvarExame,
   baixarExame
 };

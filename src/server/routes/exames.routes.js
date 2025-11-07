@@ -23,5 +23,6 @@ router.get('/', verificarAutenticacao, exameController.getExames);
 router.get('/:id', verificarAutenticacao, exameController.getExame);
 
 router.delete('/excluir/:id', verificarAutenticacao, exameController.deleteExame);
+router.delete('/excluir/colaborador/:id', verificarAutenticacao, exameController.deleteExameByColaborador)
 
 module.exports = router;

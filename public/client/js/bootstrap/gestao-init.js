@@ -1,7 +1,7 @@
 
 import {
-  preencherCbxCliente,
-  preencherCbxResponsavel
+    preencherCbxCliente,
+    preencherCbxResponsavel
 } from "../events/forms/populate-combobox.js";
 
 let lastCols = [];
@@ -523,8 +523,8 @@ export function initGestao() {
                     .css({
                         width: "100%",
                         padding: "4px 6px",
-                        background: "#3f3f3f",
-                        color: "#fff",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
                         border: "1px solid #555",
                         borderRadius: "4px",
                         fontSize: "12px"
@@ -538,8 +538,8 @@ export function initGestao() {
                     .css({
                         width: "100%",
                         padding: "4px 6px",
-                        background: "#3f3f3f",
-                        color: "#fff",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
                         border: "1px solid #555",
                         borderRadius: "4px",
                         fontSize: "12px"
@@ -598,8 +598,8 @@ export function initGestao() {
                     .css({
                         width: "100%",
                         padding: "4px 6px",
-                        background: "#3f3f3f",
-                        color: "#fff",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
                         border: "1px solid #555",
                         borderRadius: "4px",
                         fontSize: "12px"
@@ -658,8 +658,8 @@ export function initGestao() {
                     .css({
                         width: "100%",
                         padding: "4px 6px",
-                        background: "#3f3f3f",
-                        color: "#fff",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
                         border: "1px solid #555",
                         borderRadius: "4px",
                         fontSize: "12px"
@@ -822,8 +822,8 @@ export function initGestao() {
                         .css({
                             width: "100%",
                             padding: "4px 6px",
-                            background: "#3f3f3f",
-                            color: "#fff",
+                            background: "var(--input-bg)",
+                            color: "var(--texto-principal)",
                             border: "1px solid #555",
                             borderRadius: "4px",
                             fontSize: "12px"
@@ -837,8 +837,8 @@ export function initGestao() {
                         .css({
                             width: "100%",
                             padding: "4px 6px",
-                            background: "#3f3f3f",
-                            color: "#fff",
+                            background: "var(--input-bg)",
+                            color: "var(--texto-principal)",
                             border: "1px solid #555",
                             borderRadius: "4px",
                             fontSize: "12px"
@@ -1537,8 +1537,8 @@ export function initGestao() {
                     };
                     const $sel = $("<select>")
                         .css({
-                            background: "#3f3f3f",
-                            color: "#fff",
+                            background: "var(--input-bg)",
+                            color: "var(--texto-principal)",
                             border: "1px solid #555",
                             borderRadius: "4px",
                             fontSize: "12px",

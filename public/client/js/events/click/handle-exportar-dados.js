@@ -1,6 +1,6 @@
 import { get_dadosColab } from "../../services/api/colaboradores-api.js";
 import { formatarCPF, copiarTexto } from "../../utils/formatters/strings-format.js";
-import { formatarData } from "../../utils/formatters/date-format.js"; 
+import { formatarData } from "../../utils/formatters/date-format.js";
 
 export function initExportarDados() {
   // Botão "Exportar Dados" simples (RG/CPF)
@@ -62,7 +62,12 @@ async function exportarDADOS($btn) {
   try {
     const dadosColab = await get_dadosColab(dataDia, osID);
     if (!dadosColab || dadosColab.length === 0) {
-      alert("Nenhum colaborador encontrado.");
+      Swal.fire({
+        icon: "warning",
+        title: "Atenção!",
+        theme: "dark",
+        text: "Nenhum colaborador encontrado."
+      });
       return;
     }
 
@@ -74,7 +79,12 @@ async function exportarDADOS($btn) {
     copiarTexto(texto, `Dados dos colaboradores na OS ${osID} exportados`);
   } catch (err) {
     console.error("Erro ao exportar dados:", err);
-    alert("Erro ao exportar dados.");
+    Swal.fire({
+        icon: "error",
+        title: "Erro",
+        theme: "dark",
+        text: "Erro ao exportar dados."
+      });
   }
 }
 
@@ -124,13 +134,13 @@ function exportarWHATS($btn) {
       }
 
       if ($(this).hasClass("supervisor")) {
-        colaboradores += "```" + `   └ ${nome} ★` + "```\n";
+        colaboradores += "```" + `  └ ${nome} ★` + "```\n";
       } else if ($(this).hasClass("aniver")) {
-        colaboradores += "```" + `   └ ${nome} 🎉` + "```\n";
+        colaboradores += "```" + `  └ ${nome} 🎉` + "```\n";
       } else if ($(this).find(".nome").hasClass("lider")) {
-        colaboradores += "```" + `   └ Eng. ${nome}` + "```\n";
+        colaboradores += "```" + `  └ Eng. ${nome}` + "```\n";
       } else {
-        colaboradores += "```" + `   └ ${nome}` + "```\n";
+        colaboradores += "```" + `  └ ${nome}` + "```\n";
       }
     });
 

@@ -60,7 +60,8 @@
 }
 
 #rh .tb_zebrada .Ferias {
-  background-color: rgba(255, 250, 185, 0.726);
+  background-color: rgba(255, 247, 131, 0.445);
+  color: var(--preto);
 }
 
 #rh .tb_zebrada .Paternidade {

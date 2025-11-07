@@ -39,6 +39,12 @@ export function formatarDataISO(dataISO) {
 }
 
 export function formatarData(dataISO) {
-  const d = new Date(dataISO);
-  return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit" });
+  const [ano, mes, dia] = dataISO.split('-').map(Number);
+  const d = new Date(ano, mes - 1, dia); // mês é 0-based
+  return d.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
 }

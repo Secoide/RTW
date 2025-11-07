@@ -198,25 +198,33 @@ function load_integracoes_colaborador(idFunc, $box) {
                 return;
             }
 
-            const html = integracoes.map(integracao => {
-                const status = String(integracao.status_alerta || '').toUpperCase(); // VENCIDO | ATENÇÃO | INTEGRADO | PENDENTE | ''
-                const statusK = status ? status.toLowerCase() : 'ok';            // chave p/ classe css
+            // 🔹 Filtra apenas integrações válidas (idempresa não nulo)
+            const html = integracoes
+                .filter(integracao => integracao.idempresa !== null)
+                .map(integracao => {
+                    const status = String(integracao.status_alerta || '').toUpperCase(); // VENCIDO | ATENÇÃO | INTEGRADO | PENDENTE | ''
+                    const statusK = status ? status.toLowerCase() : 'ok';                 // chave p/ classe css
 
-                const diasTxt =
-                    status === 'VENCIDO' ? '-' :
-                        (integracao.dias_restantes != null ? `Vence em ${integracao.dias_restantes} dias` : '-');
+                    const diasTxt =
+                        status === 'VENCIDO' ? '-' :
+                            (integracao.dias_restantes != null ? `Vence em ${integracao.dias_restantes} dias` : '-');
 
-                return `
-          <div class="bloco_integracao status-${statusK}" data-status="${status}" data-idempresa="${integracao.idempresa}" data-idfci="${integracao.idfci}">
-            <span class="integra">${integracao.NomeEmpresa}</span>
-            <div class="integracoes_status">
-              <span class="integracao_nome status-${statusK}">${status ?? ''}</span>
-              <span class="integracao_dias status-${statusK}">${diasTxt}</span>
-              <span class="integracao_data">${integracao.datarealizado} - ${integracao.DataFinal}</span>
-            </div>
-          </div>
-        `;
-            }).join('');
+                    return `
+                        <div class="bloco_integracao status-${statusK}" 
+                             data-status="${status}" 
+                             data-idempresa="${integracao.idempresa}" 
+                             data-idfci="${integracao.idfci}">
+                             
+                            <span class="integra">${integracao.NomeEmpresa}</span>
+                            <div class="integracoes_status">
+                                <span class="integracao_nome status-${statusK}">${status ?? ''}</span>
+                                <span class="integracao_dias status-${statusK}">${diasTxt}</span>
+                                <span class="integracao_data">${integracao.datarealizado} - ${integracao.DataFinal}</span>
+                            </div>
+                        </div>
+                    `;
+                })
+                .join('');
 
             $box.html(html);
         })
@@ -225,6 +233,7 @@ function load_integracoes_colaborador(idFunc, $box) {
             $box.html('<div class="erro">Não foi possível carregar os integracoes.</div>');
         });
 }
+
 
 // Carrega resumo colorido de integrações do colaborador (com tooltip e animação)
 function load_miniintegracoes_colaborador(idFunc, $box) {
@@ -258,18 +267,18 @@ function load_miniintegracoes_colaborador(idFunc, $box) {
             const regexP = /(\d+)P/;
             const regexO = /\(em (\d+)O\)/;
 
-            const integrados   = Number((texto.match(regexI) || [])[1] || 0);
-            const atencao      = Number((texto.match(regexA) || [])[1] || 0);
-            const vencidas     = Number((texto.match(regexV) || [])[1] || 0);
-            const pendentes    = Number((texto.match(regexP) || [])[1] || 0);
+            const integrados = Number((texto.match(regexI) || [])[1] || 0);
+            const atencao = Number((texto.match(regexA) || [])[1] || 0);
+            const vencidas = Number((texto.match(regexV) || [])[1] || 0);
+            const pendentes = Number((texto.match(regexP) || [])[1] || 0);
             const obrigatorias = Number((texto.match(regexO) || [])[1] || 0);
 
             // Monta os spans coloridos conforme os grupos existentes
             const partes = [];
             if (integrados) partes.push(`<span class="resumo-item i" title="Integrados">${integrados}I</span>`);
-            if (atencao)    partes.push(`<span class="resumo-item a" title="A Vencer">${atencao}A</span>`);
-            if (vencidas)   partes.push(`<span class="resumo-item v" title="Vencidas">${vencidas}V</span>`);
-            if (pendentes)  partes.push(`<span class="resumo-item p" title="Pendentes">${pendentes}P</span>`);
+            if (atencao) partes.push(`<span class="resumo-item a" title="A Vencer">${atencao}A</span>`);
+            if (vencidas) partes.push(`<span class="resumo-item v" title="Vencidas">${vencidas}V</span>`);
+            if (pendentes) partes.push(`<span class="resumo-item p" title="Pendentes">${pendentes}P</span>`);
 
             let htmlTexto = partes.join(', ');
             if (obrigatorias)
@@ -278,9 +287,9 @@ function load_miniintegracoes_colaborador(idFunc, $box) {
             // Tooltip com texto descritivo (feminino)
             const tooltipParts = [];
             if (integrados) tooltipParts.push(`${integrados} integrado${integrados > 1 ? 's' : ''}`);
-            if (atencao)    tooltipParts.push(`${atencao} em atenção`);
-            if (vencidas)   tooltipParts.push(`${vencidas} vencida${vencidas > 1 ? 's' : ''}`);
-            if (pendentes)  tooltipParts.push(`${pendentes} pendente${pendentes > 1 ? 's' : ''}`);
+            if (atencao) tooltipParts.push(`${atencao} em atenção`);
+            if (vencidas) tooltipParts.push(`${vencidas} vencida${vencidas > 1 ? 's' : ''}`);
+            if (pendentes) tooltipParts.push(`${pendentes} pendente${pendentes > 1 ? 's' : ''}`);
 
             const title = tooltipParts.length > 0
                 ? `${tooltipParts.join(', ')} — em ${obrigatorias} empresa${obrigatorias > 1 ? 's' : ''} obrigatória${obrigatorias > 1 ? 's' : ''}`

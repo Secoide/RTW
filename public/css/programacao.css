@@ -353,8 +353,8 @@
     border: 1px solid #373839;
     width: 90px;
     border-radius: 10px;
-    color: var(--branco);
-    background-color: #373839;
+    color: var(--texto-principal);
+    background-color: var(--bg-bloco);
 }
 
 
@@ -414,26 +414,25 @@
     border-top: 1px solid #373839;
     border-bottom: 1px solid #373839;
     border-right: 1px solid #373839;
+    color: var(--branco);
 }
 
 .colaborador.status-integracao-atenção{
-    background: linear-gradient(90deg, #373839, #373839, #ff8800);
-    border-left: 2px solid #ff8800;
+    background: linear-gradient(270deg, #ff8800 0% 1%, var(--bg-bloco) 18% 100%);
     border-top: 1px solid #373839;
     border-bottom: 1px solid #373839;
     border-right: 1px solid #373839;
 }
 
 .colaborador.status-integracao-pendente{
-    background: linear-gradient(90deg, #373839, #373839, #d1d1d150);
-    border-left: 2px solid #d1d1d1;
+    background: linear-gradient(270deg, var(--cor-cinza-700) 0% 1%, var(--bg-bloco) 18% 100%);
     border-top: 1px solid #373839;
     border-bottom: 1px solid #373839;
     border-right: 1px solid #373839;
 }
 
 .colaborador.status-integracao-integrado{
-    border-left: 2px solid rgb(0, 190, 0);
+    background: linear-gradient(270deg, rgb(0, 190, 0) 0% 1%, var(--bg-bloco) 18% 100%);
     border-top: 1px solid #373839;
     border-bottom: 1px solid #373839;
     border-right: 1px solid #373839;
@@ -484,11 +483,11 @@
 }
 
 .colaborador .exame_falta {
-    color: rgb(255, 255, 255)
+    color: rgb(255, 255, 255);
 }
 
 .colaborador .exame_alerta {
-    color: rgb(255, 136, 0)
+    color: rgb(255, 136, 0);
 }
 
 .colaborador .exame_vencido {

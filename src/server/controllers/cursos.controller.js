@@ -69,6 +69,17 @@ async function deleteCurso(req, res) {
     }
 }
 
+// DELETE /api/curso/:id
+async function deleteCursoByColaborador(req, res) {
+    try {
+        const ok = await CursoService.deletarCursosByColaborador(req.params.id);
+        if (!ok) return res.status(404).json({ erro: 'Não encontrado' });
+        res.json({ sucesso: true });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao deletar curso' });
+    }
+}
+
 // GET /api/cursos/:id
 async function getCursosByColaborador(req, res) {
     try {
@@ -162,6 +173,7 @@ module.exports = {
     updateCurso,
     deleteCurso,
     getCursosByColaborador,
+    deleteCursoByColaborador,
     uploadCurso,
     downloadCurso,
     checkCurso

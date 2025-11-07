@@ -133,6 +133,12 @@ async function deleteCurso(id) {
     return result.affectedRows > 0;
 }
 
+// Deletar
+async function deleteCursosByColaborador(id) {
+    const [result] = await connection.query('DELETE FROM funcionarios_contem_cursos WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+}
+
 //Anexar curso em colaborador
 async function inserirCurso(data, vencimento, nomeArquivo, idfuncionario, idcurso) {
   const [result] = await connection.query(
@@ -167,6 +173,7 @@ module.exports = {
     updateCurso,
     deleteCurso,
     getCursosByColaborador,
+    deleteCursosByColaborador,
     inserirCurso,
     buscarCursoPorId
 };

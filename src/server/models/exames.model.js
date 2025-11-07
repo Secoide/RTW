@@ -22,7 +22,7 @@ async function getExameById(id) {
 }
 
 // Buscar supervisor por ID da empresa
-async function getExamesByColaborador(idFunc) {
+async function getExameByColaborador(idFunc) {
     const [rows] = await connection.query(`
       WITH ultimos AS (
           SELECT
@@ -131,6 +131,12 @@ async function deleteExame(id) {
     return result.affectedRows > 0;
 }
 
+// Deletar curso por funcionario
+async function deleteExameByColaborador(id) {
+    const [result] = await connection.query('DELETE FROM funcionarios_contem_exames WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+}
+
 //Anexar exame em colaborador
 async function inserirExame(data, vencimento, nomeArquivo, idfuncionario, idexame) {
   const [result] = await connection.query(
@@ -165,7 +171,8 @@ module.exports = {
     createExame,
     updateExame,
     deleteExame,
-    getExamesByColaborador,
+    getExameByColaborador,
+    deleteExameByColaborador,
     inserirExame,
     buscarExamePorId
 };

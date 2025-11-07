@@ -152,7 +152,7 @@ async function updateIntegracao(id, data) {
 
 // Deletar
 async function deleteIntegracao(id) {
-    const [result] = await connection.query('DELETE FROM integracoes WHERE idintegracao = ?', [id]);
+    const [result] = await connection.query('DELETE FROM funcionarios_contem_integracao WHERE id = ?', [id]);
     return result.affectedRows > 0;
 }
 
