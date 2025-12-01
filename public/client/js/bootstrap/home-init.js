@@ -205,8 +205,6 @@ async function carregarAvisos() {
           usuarioId == item.criado_por ||
           usuarioNivel == 5 ||
           usuarioNivel == 99;
-          console.log(usuarioNivel);
-          console.log(podeEditarOuExcluir)
         el.innerHTML += `
           <div class="item-comunicado ${cat.nome}">
               <div class="item-icon">${item.icone || "📄"}</div>
@@ -360,7 +358,6 @@ const observer = new MutationObserver(() => {
   const lista = document.querySelectorAll("#iconeLista span");
 
   if (lista.length > 0) {
-    console.log("Ícones encontrados — listeners adicionados!");
 
     lista.forEach(el => {
       el.addEventListener("click", () => {
