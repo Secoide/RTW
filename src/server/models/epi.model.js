@@ -25,48 +25,47 @@ async function getEPIById(id) {
 async function getEPIsByColaborador(idFunc) {
   const [rows] = await connection.query(`
     WITH obrig AS (
-      SELECT id, nome
-      FROM tb_epi
-      WHERE obrigatorio = 1
-    ),
-    ultimas AS (
-      SELECT 
-        fce.idepi,
-        fce.id,
-        fce.idFuncionario, 
-        fce.assinado, 
-        fce.assinatura_path,
-        MAX(fce.dataEntregue) AS ultimaEntrega, 
-        ANY_VALUE(fce.numero_ca) AS numero_ca
-      FROM funcionarios_contem_epi fce
-      WHERE fce.idFuncionario = ?
-      GROUP BY fce.idepi, fce.idFuncionario
-    )
-    SELECT 
-      f.id AS idFuncionario,
-      f.nome as nomeColab,
-      u.id AS idfcepi,
-      o.id  AS idepi,
-      o.nome,
-      u.assinado,
-      u.assinatura_path,
-      -- se null, deixa em branco
-      IFNULL(u.numero_ca, '') AS numero_ca,
-      -- data formatada ou vazio se null
-      IFNULL(DATE_FORMAT(u.ultimaEntrega, '%d/%m/%Y'), '') AS ultimaEntrega,
-      CASE
-        WHEN u.ultimaEntrega IS NULL THEN 'FALTANDO'
-        WHEN u.ultimaEntrega <= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) THEN 'TROCAR'
-        WHEN u.ultimaEntrega <= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) THEN 'AVALIAR'
-        ELSE 'OK'
-      END AS situacao
-    FROM funcionarios f
-    JOIN obrig o
-    LEFT JOIN ultimas u 
-          ON u.idepi = o.id 
-          AND u.idFuncionario = f.id
-    WHERE f.id = ? 
-    ORDER BY situacao DESC, o.nome;
+  SELECT id, nome
+  FROM tb_epi
+  WHERE obrigatorio = 1
+),
+ultimas AS (
+  SELECT fce.*
+  FROM funcionarios_contem_epi fce
+  INNER JOIN (
+    SELECT idepi, idFuncionario, MAX(dataEntregue) AS maxEntrega
+    FROM funcionarios_contem_epi
+    WHERE idFuncionario = ?
+    GROUP BY idepi, idFuncionario
+  ) AS x
+    ON x.idepi = fce.idepi
+   AND x.idFuncionario = fce.idFuncionario
+   AND x.maxEntrega = fce.dataEntregue
+)
+SELECT 
+  f.id AS idFuncionario,
+  f.nome AS nomeColab,
+  u.id AS idfcepi,
+  o.id AS idepi,
+  o.nome,
+  u.assinado,
+  u.assinatura_path,
+  IFNULL(u.numero_ca, '') AS numero_ca,
+  IFNULL(DATE_FORMAT(u.dataEntregue, '%d/%m/%Y'), '') AS ultimaEntrega,
+  CASE
+    WHEN u.dataEntregue IS NULL THEN 'FALTANDO'
+    WHEN u.dataEntregue <= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) THEN 'TROCAR'
+    WHEN u.dataEntregue <= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) THEN 'AVALIAR'
+    ELSE 'OK'
+  END AS situacao
+FROM funcionarios f
+JOIN obrig o
+LEFT JOIN ultimas u
+       ON u.idepi = o.id
+      AND u.idFuncionario = f.id
+WHERE f.id = ?
+ORDER BY situacao DESC, o.nome;
+
   `, [idFunc, idFunc]);
 
   return rows || []; // sempre retorna array
