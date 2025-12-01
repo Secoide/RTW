@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assinatura de EPI</title>
+
+    <!-- Jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- SignaturePad -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.10/dist/signature_pad.umd.min.js"></script>
+
+    <style>
+        body {
+            background: #f7f7f7;
+            /* fundo claro */
+            color: #333;
+            /* texto escuro */
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #0d47a1;
+            /* azul escuro corporativo */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 15px;
+            display: block;
+            color: #333;
+            /* texto escuro */
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            background: #ffffff;
+            /* branco */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            color: #333;
+            /* texto escuro */
+        }
+
+        #signature-container {
+            background: #ffffff;
+            /* fundo branco */
+            border: 2px solid #1565c0;
+            /* azul */
+            border-radius: 5px;
+            width: 100%;
+            height: 240px;
+            position: relative;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        /* Canvas transparente */
+        #signature-pad {
+            width: 100%;
+            height: 100%;
+            background: transparent !important;
+        }
+
+        /* Linha de referência */
+        .signature-line {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 1.6px;
+            background: #777;
+            /* cinza médio, visível */
+            opacity: 0.7;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 14px;
+            width: 100%;
+            background: #1976d2;
+            /* azul */
+            color: white;
+            border: none;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #0d47a1;
+            /* azul mais escuro */
+        }
+
+        #reenviarassinatura {
+            background: #3949ab;
+            /* azul arroxeado */
+        }
+
+        #reenviarassinatura:hover {
+            background: #283593;
+        }
+
+        #clearSignature {
+            background: #757575;
+            /* cinza */
+        }
+
+        #clearSignature:hover {
+            background: #616161;
+        }
+
+        #baixarPDF {
+            background: #2e7d32;
+            /* verde */
+        }
+
+        #baixarPDF:hover {
+            background: #1b5e20;
+            /* verde escuro */
+        }
+
+        /* LOADING OVERLAY */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.75);
+            /* claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #loadingOverlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loadingBox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Spinner Material/Apple adaptado para tema claro */
+        .modernSpinner {
+            width: 55px;
+            height: 55px;
+            border: 6px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #1976d2;
+            /* azul */
+            border-radius: 50%;
+            animation: modernSpin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes modernSpin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.1);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loadingText {
+            margin-top: 15px;
+            color: #333;
+            font-size: 18px;
+            font-weight: 500;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+        }
+
+        /* Toast de sucesso (tema claro) */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e7d32;
+            /* verde */
+            color: white;
+            padding: 14px 20px;
+            border-radius: 6px;
+            display: none;
+            animation: fadeInOut 3s ease forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+        }
+
+        /* WRAPPER PARA DAR MARGENS EM TELAS GRANDES */
+        .page-wrapper {
+            max-width: 720px;
+            /* largura ideal para leitura */
+            margin: 0 auto;
+            /* centraliza horizontalmente */
+            padding: 0 25px;
+            /* margem interna lateral */
+        }
+
+        /* No mobile, usar tela toda */
+        @media (max-width: 768px) {
+            .page-wrapper {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper">
+
+        <h2>Assinatura de Entrega de EPI</h2>
+
+        <div id="loading">Carregando dados...</div>
+
+        <form id="epiForm" style="display:none;">
+
+            <label>Nome</label>
+            <input type="text" id="nome" readonly>
+
+            <label>EPI entregue</label>
+            <input type="text" id="epi" readonly>
+
+            <label>Nº CA</label>
+            <input type="text" id="numero_ca" readonly>
+
+            <label>Data de entrega</label>
+            <input type="text" id="dataEntrega" readonly>
+
+            <label>Assinatura do colaborador</label>
+
+            <div id="statusAssinatura" style="margin-top:10px; display:none;">
+                <span style="color:#4caf50; font-size:20px; font-weight:bold;">
+                    ✔ Assinado
+                </span>
+            </div>
+
+            <div id="signature-container">
+                <canvas id="signature-pad"></canvas>
+                <div class="signature-line"></div>
+            </div>
+            <button type="button" id="clearSignature">Limpar assinatura</button>
+            <button type="submit" id="btnEnviar">Enviar Assinatura</button>
+            <button type="button" id="reenviarassinatura">Reenviar Assinatura</button>
+
+            <button type="button" id="baixarPDF">Baixar Comprovante em PDF</button>
+        </form>
+
+        <!-- Loading overlay -->
+        <div id="loadingOverlay">
+            <div class="loadingBox">
+                <div class="modernSpinner"></div>
+                <p class="loadingText">Enviando assinatura…</p>
+            </div>
+        </div>
+
+        <!-- Toast feedback -->
+        <div id="toast">Assinatura enviada com sucesso!</div>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const idfcepi = urlParams.get("idfcepi");
+
+            const canvas = document.getElementById("signature-pad");
+            let signaturePad = null;
+
+            function showToast() {
+                $("#toast").fadeIn(200);
+                setTimeout(() => $("#toast").fadeOut(400), 2800);
+            }
+
+            function showLoading() {
+                $("#loadingOverlay").addClass("show");
+            }
+
+            function hideLoading() {
+                $("#loadingOverlay").removeClass("show");
+            }
+
+
+            function resizeCanvas() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear();
+            }
+
+            async function carregarAssinaturaExistente() {
+                const res = await fetch(`/api/epi/assinatura/${idfcepi}`);
+                if (!res.ok) return;
+
+                const dados = await res.json();
+
+                if (dados.url) {
+                    $("#assinaturaExistente").remove();
+                    $("#epiForm").append(`
+                    <img id="assinaturaExistente" 
+                        src="${dados.url}" 
+                        style="width:100%;border:2px solid #61a8ff;margin-top:10px;border-radius:5px;background: #ffffff;">
+                `);
+                }
+            }
+
+            $(document).ready(function () {
+
+                signaturePad = new SignaturePad(canvas);
+
+                $("#reenviarassinatura").hide();
+
+                function carregarDados() {
+                    $.get(`/api/epi/colaborador_contem/${idfcepi}`)
+                        .done(async function (dados) {
+                            const item = dados[0];
+                            $("#nome").val(item.colaborador);
+                            $("#epi").val(item.epi);
+                            $("#numero_ca").val(item.numero_ca);
+                            $("#dataEntrega").val(item.dataentregue ? item.dataentregue.split("T")[0] : "");
+
+                            $("#loading").hide();
+                            $("#epiForm").show();
+
+                            if (item.assinado == '1') {
+
+                                $("#signature-container").hide();
+                                $("#clearSignature").hide();
+                                $("#btnEnviar").hide();
+
+                                $("#reenviarassinatura").show();
+                                $("#statusAssinatura").show();
+
+                                await carregarAssinaturaExistente();
+
+                            } else {
+                                resizeCanvas();
+                                $("#reenviarassinatura").hide();
+                            }
+                        })
+                        .fail(function () {
+                            $("#loading").text("Erro ao carregar dados.");
+                        });
+                }
+
+                carregarDados();
+                $(window).on("resize", resizeCanvas);
+
+                $("#clearSignature").on("click", function () {
+                    signaturePad.clear();
+                });
+
+                $("#reenviarassinatura").on("click", function () {
+                    $("#assinaturaExistente").remove();
+
+                    $("#signature-container").show();
+                    $("#clearSignature").show();
+                    $("#btnEnviar").show();
+
+                    $("#reenviarassinatura").hide();
+                    $("#statusAssinatura").hide();
+
+                    signaturePad.clear();
+                    resizeCanvas();
+                });
+
+                function getNormalizedSignature() {
+
+                    const rawData = signaturePad.toDataURL("image/png");
+
+                    // Criar imagem temporária
+                    const img = new Image();
+                    img.src = rawData;
+
+                    return new Promise((resolve) => {
+                        img.onload = () => {
+
+                            // Criar canvas fixo (TAMANHO PADRÃO)
+                            const width = 350;   // largura padronizada
+                            const height = 120;  // altura padronizada
+
+                            const tempCanvas = document.createElement("canvas");
+                            tempCanvas.width = width;
+                            tempCanvas.height = height;
+
+                            const ctx = tempCanvas.getContext("2d");
+
+                            // fundo transparente
+                            ctx.clearRect(0, 0, width, height);
+
+                            // Manter proporção original da assinatura dentro deste retângulo
+                            const scale = Math.min(width / img.width, height / img.height);
+
+                            const imgWidth = img.width * scale;
+                            const imgHeight = img.height * scale;
+
+                            const offsetX = (width - imgWidth) / 2;
+                            const offsetY = (height - imgHeight) / 2;
+
+                            // desenhar assinatura no tamanho padronizado
+                            ctx.drawImage(img, offsetX, offsetY, imgWidth, imgHeight);
+
+                            resolve(tempCanvas.toDataURL("image/png"));
+                        };
+                    });
+                }
+
+
+
+
+                $("#epiForm").on("submit", async function (e) {
+                    e.preventDefault();
+
+                    if (signaturePad.isEmpty()) {
+                        alert("Por favor, assine antes de enviar.");
+                        return;
+                    }
+
+                    showLoading();
+
+                    const assinaturaBase64 = await getNormalizedSignature();
+
+                    const envio = {
+                        idfcepi: idfcepi,
+                        assinaturaBase64: assinaturaBase64
+                    };
+
+                    try {
+                        const response = await fetch("/api/epi/por-colaborador/assinatura", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(envio)
+                        });
+
+                        hideLoading();
+
+                        if (response.ok) {
+
+                            showToast();
+
+                            $("#signature-container").hide();
+                            $("#clearSignature").hide();
+                            $("#btnEnviar").hide();
+
+                            $("#reenviarassinatura").show();
+                            $("#statusAssinatura").show();
+
+                            await carregarAssinaturaExistente();
+                        }
+
+                    } catch (error) {
+                        hideLoading();
+                        alert("Falha de conexão.");
+                    }
+                });
+
+                $("#baixarPDF").on("click", function () {
+                    const url = `/api/epi/assinatura/pdf/${idfcepi}`;
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.target = "_blank";
+                    a.download = `comprovante_assinatura_${idfcepi}.pdf`;
+                    a.click();
+                });
+            });
+        </script>
+
+    </div>
+</body>
+
+</html>

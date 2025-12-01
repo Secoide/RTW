@@ -1,6 +1,6 @@
 const ExameService = require('../services/exames.service');
-const path = require('path');
-const fs = require('fs');
+const supabase = require("../config/supabase");
+
 
 // GET /api/exame
 async function getExames(req, res) {
@@ -99,35 +99,28 @@ async function uploadExame(req, res) {
 }
 
 async function downloadExame(req, res) {
-  try {
-    const { id } = req.params;
-    const exame = await ExameService.baixarExame(id);
+  const { id } = req.params;
+  const exame = await ExameService.baixarExame(id);
 
-    if (!exame) return res.status(404).json({ error: "Exame não encontrado" });
-    if (!exame.anexoExamePDF) return res.status(400).json({ error: "Nenhum PDF anexado para este exame." });
+  if (!exame) return res.status(404).json({ error: "Exame não encontrado" });
+  if (!exame.anexoExamePDF) return res.status(400).json({ error: "Nenhum PDF anexado" });
 
-    const filePath = path.join(__dirname, "..", "storage", "exames", exame.anexoExamePDF);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Arquivo não encontrado" });
+  const { data, error } = await supabase.storage
+    .from("exames")
+    .download(exame.anexoExamePDF);
 
-    const nomeColab = exame.colaborador.replace(/\s+/g, "_");
-    const nomeExame = exame.exame.replace(/\s+/g, "_");
-    const data = new Date(exame.datarealizada);
-    const dataFinal = `${String(data.getDate()).padStart(2, "0")}-${String(data.getMonth() + 1).padStart(2, "0")}-${data.getFullYear()}`;
-    const nomeFinal = `${nomeColab}_${nomeExame}_${dataFinal}.pdf`;
-
-    // headers certos
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${nomeFinal}"`);
-
-    // stream manual → garante o filename
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
-
-  } catch (err) {
-    console.error("Erro ao baixar exame:", err);
-    res.status(500).json({ error: "Erro interno ao baixar exame." });
+  if (error || !data) {
+    return res.status(404).json({ error: "Arquivo não encontrado no Supabase" });
   }
+
+  const buffer = Buffer.from(await data.arrayBuffer());
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${exame.anexoExamePDF}"`);
+
+  res.send(buffer);
 }
+
 
 async function checkExame(req, res) {
   try {
@@ -137,16 +130,22 @@ async function checkExame(req, res) {
     if (!exame) return res.sendStatus(404);
     if (!exame.anexoExamePDF) return res.sendStatus(400);
 
-    const filePath = path.join(__dirname, "..", "storage", "exames", exame.anexoExamePDF);
-    if (!fs.existsSync(filePath)) return res.sendStatus(404);
+    // Testa existência no Supabase
+    const { data, error } = await supabase.storage
+      .from("exames")
+      .list("", { search: exame.anexoExamePDF });
 
-    // Se chegou aqui, está OK
+    if (error || !data || data.length === 0) {
+      return res.sendStatus(404);
+    }
+
     return res.sendStatus(200);
   } catch (err) {
     console.error("Erro no HEAD do exame:", err);
     return res.sendStatus(500);
   }
 }
+
 
 
 

@@ -329,7 +329,7 @@ function load_exames_colaborador(idFunc, $box) {
                 $box.html('<div class="vazio">Nenhum exame encontrado.</div>');
                 return;
             }
-
+            
             const html = exames.map(exame => {
                 const status = String(exame.status_alerta || '').toUpperCase(); // VENCIDO | ALERTA | OK | NAO_APLICA | ''
                 const statusK = status ? status.toLowerCase() : 'ok';            // chave p/ classe css
@@ -339,15 +339,16 @@ function load_exames_colaborador(idFunc, $box) {
                         (exame.dias_restantes != null ? `Vence em ${exame.dias_restantes} dias` : '—');
 
                 return `
-          <div class="bloco_exame status-${statusK}" data-status="${status}" data-idexame="${exame.idexame}"  data-idfce="${exame.idfce}" title="${exame.descricao ?? ''}">
-            <i class="${exame.icone ?? ''}"></i>
-            <div class="exames_status">
-              <span class="exame_nome">${exame.nome ?? ''}</span>
-              <span class="exame_dias status-${statusK}">${diasTxt}</span>
-              <span class="exame_data">${exame.data_realizacao ?? ''}</span>
-            </div>
-          </div>
-        `;
+                <div class="bloco_exame status-${statusK}" data-status="${status}" data-idexame="${exame.idexame}"  data-idfce="${exame.idfce}" title="${exame.descricao ?? ''}">
+                    <span class="${exame.contemPDF}" title="PDF anexado">PDF</span>  
+                    <i class="${exame.icone ?? ''}"></i>
+                    <div class="exames_status">
+                    <span class="exame_nome">${exame.nome ?? ''}</span>
+                    <span class="exame_dias status-${statusK}">${diasTxt}</span>
+                    <span class="exame_data">${exame.data_realizacao ?? ''}</span>
+                    </div>
+                </div>
+                `;
             }).join('');
 
             $box.html(html);
@@ -357,7 +358,6 @@ function load_exames_colaborador(idFunc, $box) {
             $box.html('<div class="erro">Não foi possível carregar os exames.</div>');
         });
 }
-
 
 
 // Carrega dados dos exames do Colaborador em mini icones na tabela
@@ -403,7 +403,6 @@ function load_miniexames_colaborador(idFunc, $box) {
 // Carrega dados dos cursos do Colaborador em mini icones na tabela
 function load_minicursos_colaborador(idFunc, $box) {
     if (!$box || !$box.length) {
-        console.warn('Container de Cusos não encontrado.');
         return;
     }
 
@@ -501,6 +500,7 @@ function load_cursos_colaborador(idFunc, $box) {
                 return `
                         <div class="bloco_curso curso_nr status-${statusK}" data-idfcc="${curso.idfcc}" data-status="${status}"
                             data-idcurso="${curso.idcurso}">
+                            <span class="${curso.contemPDF}" title="PDF anexado">PDF</span>
                             <span class="norma">${curso.nome.replace("ANUÊNCIA", "AN.") ?? ''}</span>
                             <div class="exames_status">
                                 <span class="exame_nome">${curso.descricao}</span>
@@ -562,6 +562,8 @@ function load_epis_colaborador(idFunc, $box) {
                         (epi.situacao === 'AVALIAR' ? 'Avaliar!' :
                             (epi.situacao === 'TROCAR' ? 'Realizar troca!' : 'Apto para uso!'));
 
+                let fichaepi = epi.assinado == '1' ? '✍🏻 Assinado' : (epi.assinado == '0' ? '‼️ Não assinado' : '');
+                let classfichaepi = epi.assinado == '1' ? 'fichaepi_assinado' : (epi.assinado == '0' ? 'fichaepi_nao_assinado' : '');
                 return `
                     <div class="painel_Imganes_EPI">
                         <div class="img_${classEpi}">
@@ -570,13 +572,14 @@ function load_epis_colaborador(idFunc, $box) {
                                      src="../../imagens/epi/${classEpi}.png" 
                                      alt="epi">
                             </div>
-                            <div class="status_EPI status_${classEpi}">
+                            <div class="status_EPI status_${classEpi}" data-idfcepi="${epi.idfcepi}" data-idepi="${epi.idepi}">
                                 <span class="nomeEPI">
                                     ${classEpi === 'fone' ? 'PROTETOR AURICULAR' :
                         (classEpi === 'luvadecouro' ? 'LUVA DE CORTE' : classEpi.toUpperCase())}
                                 </span>
-                                <span class="tamanhoEPI">Tamanho: ${epi.tamanho || '-'}</span>
+                                <span class="tamanhoEPI">Nº CA: ${epi.numero_ca || '-'}</span>
                                 <span class="entregueEPI">Entregue: ${epi.ultimaEntrega || '-'}</span>
+                                <span class="${classfichaepi}">${fichaepi}</span>
                                 <div class="linha_${classEpi}1"></div>
                                 <span class="statusEPI status-${situacao}">${situacaoTxt}</span>
                                 <div class="linha_${classEpi}2"></div>

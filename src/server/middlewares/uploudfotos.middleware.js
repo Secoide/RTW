@@ -1,23 +1,6 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-// caminho ABSOLUTO para a pasta dentro de /public
-const uploadDir = path.join(__dirname, '..', '..', '..', 'public', 'client', 'assets', 'img', 'fotoperfil');
-
-// garante que a pasta existe
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const nome = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-    cb(null, nome);
-  }
-});
+const storage = multer.memoryStorage(); // <— importante!
 
 const upload = multer({
   storage,

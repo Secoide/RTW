@@ -135,11 +135,11 @@
                                 </div>
                             </div>
                             <input type="hidden" name="idColaborador" id="idColaborador">
-                            <div class="p_acoes linha_padrao">
-                                <input id="bt_cadColaborador" class="bt_teste glass" type="submit" name="cadColab"
+                            <div class="div_botoesAcao">
+                                <input id="bt_cadColaborador" class="bt_padrao bt_cad" type="submit" name="cadColab"
                                     value="Cadastrar">
-                                <input id="bt_editColab" class="bt_teste glass" type="submit" name="editColab"
-                                    value="Salvar" style="display: none;">
+                                <input id="bt_editColab" class="bt_padrao bt_cad" type="submit"
+                                    name="editColab" value="Salvar" style="display: none;">
                             </div>
                         </form>
                     </div>
@@ -193,9 +193,9 @@
                                 </select>
                             </div>
                             <input type="hidden" name="idColaboradorPro" id="idColaboradorPro">
-                            <div class="p_acoes linha_padrao">
-                                <input id="bt_editColabProf" class="bt_teste glass" type="submit" name="editColabProf"
-                                    value="Salvar">
+                            <div class="div_botoesAcao">
+                                <input id="bt_editColabProf" class="bt_padrao bt_cad" type="submit"
+                                    name="editColabProf" value="Salvar">
                             </div>
                         </form>
                     </div>
@@ -205,6 +205,11 @@
                             style="display: flex; justify-content: center;">
 
                         </div>
+                        <div class="div_botoesAcao">
+                            <input id="gerarFichaCompletaEPI" class="bt_padrao bt_buscar" type="button"
+                                value="Gerar Ficha Completa">
+                        </div>
+
                     </div>
                     <div class="painel_exames">
                         <p>Exames</p>
@@ -407,6 +412,21 @@
 <script>
     $(document).on("click", "#bt_sair_perfil", function () {
         $('#form_cadColab').empty();
+    });
+    $(document).on("click", "#gerarFichaCompletaEPI", function () {
+        const idColaborador = $('#idColaborador').val();
+
+        const link = document.createElement("a");
+        link.href = `/api/epi/ficha-completa/${idColaborador}`;
+        link.target = "_blank";
+        link.click();
+
+        Swal.fire({
+            icon: "success",
+            title: "Ficha EPI",
+            text: "Ficha completa de Entrega gerada.",
+            theme: "dark"
+        });
     });
 
 

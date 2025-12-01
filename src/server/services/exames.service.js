@@ -1,6 +1,5 @@
 const ExameModel = require('../models/exames.model');
-const path = require('path');
-const fs = require('fs');
+const supabase = require("../config/supabase");
 
 // Listar todos
 async function listarExames() {
@@ -58,21 +57,41 @@ async function salvarExame({ datarealizadaExame, vencimento, idColab, exame, fil
   const idexame = parseInt(exame, 10);
   const venc = parseInt(vencimento, 10);
 
-  if (Number.isNaN(idfuncionario) || Number.isNaN(idexame) || Number.isNaN(venc)) {
-    throw new Error('IDs e vencimento devem ser numéricos.');
-  }
+  let nomeArquivo = null; // assume que pode não ter arquivo
 
-  let nomeArquivo = null;
-  if (file) {
-    // renomeia para padrão {idfuncionario}_{idexame}_{timestamp}.pdf
+  // Se veio arquivo, faz upload
+  if (file && file.buffer) {
     nomeArquivo = `${idfuncionario}_${idexame}_${Date.now()}.pdf`;
-    const novoCaminho = path.join(file.destination, nomeArquivo);
-    fs.renameSync(file.path, novoCaminho);
+
+    const buffer = file.buffer;
+
+    // Upload para Supabase
+    const { data, error } = await supabase.storage
+      .from("exames")
+      .upload(nomeArquivo, buffer, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error(error);
+      throw new Error("Erro ao enviar PDF ao Supabase.");
+    }
   }
 
-  const insertId = await ExameModel.inserirExame(datarealizadaExame, venc, nomeArquivo, idfuncionario, idexame);
+  // Salva no banco (com ou sem arquivo)
+  const insertId = await ExameModel.inserirExame(
+    datarealizadaExame,
+    venc,
+    nomeArquivo, // será null se não enviou arquivo
+    idfuncionario,
+    idexame
+  );
+
   return { id: insertId, arquivo: nomeArquivo };
 }
+
+
 
 async function baixarExame(id) {
   const exame = await ExameModel.buscarExamePorId(id);

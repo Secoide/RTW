@@ -3,7 +3,7 @@ const connection = require('../config/db');
 // Listar todos
 async function getColaboradores() {
   const [rows] = await connection.query(`
-    SELECT id, nome, sexo, nascimento, cpf, rg, fotoperfil, statuss
+    SELECT id, nome, sexo, nascimento, cpf, rg, fotoperfil
     FROM funcionarios
     WHERE id <> 0
     ORDER BY nome ASC
@@ -76,7 +76,6 @@ async function getStatusIntegracaoByColab(idfuncionario, idOS, dataDia) {
   const [rows] = await connection.query(sql, [dataDia, idfuncionario, idOS]);
   return rows?.[0]?.status_integracao || "";
 }
-
 
 async function createColaborador(data) {
   const sql = `
@@ -446,6 +445,34 @@ async function getColaboradoresCBX() {
   return rows;
 }
 
+async function getColaboradoresAniversariantes() {
+  const sql = `
+
+    WITH dem AS (
+        SELECT fce.idfuncionario
+        FROM funcionarios_contem_exames fce
+        JOIN exames e ON e.idexame = fce.idexame
+        WHERE LOWER(e.nome) = 'demissional'
+        GROUP BY fce.idfuncionario
+    )
+
+    SELECT 
+        f.id,
+        f.nome,
+        f.nascimento,
+        f.fotoperfil,
+        CASE WHEN d.idfuncionario IS NOT NULL THEN 'desligado' ELSE '' END AS contrato
+    FROM funcionarios f
+    LEFT JOIN dem d ON d.idfuncionario = f.id
+    WHERE d.idfuncionario IS NULL        -- ❌ exclui desligados
+      AND f.id <> 999                      -- ❌ ignora user técnico
+    ORDER BY f.nome ASC;
+  `;
+
+  const [rows] = await connection.query(sql);
+  return rows;
+}
+
 async function excluirColaboradorNaOS(idNaOS) {
   const sql = "DELETE FROM funcionario_na_os WHERE id = ?";
   const [result] = await connection.query(sql, [idNaOS]);
@@ -560,6 +587,7 @@ module.exports = {
   buscarColaboradoresEmOS,
   getColaboradoresResponsavelOS,
   getColaboradoresCBX,
+  getColaboradoresAniversariantes,
   excluirColaboradorNaOS,
   alocarColaboradorNaOS,
   definirSupervisor,

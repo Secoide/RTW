@@ -6,6 +6,7 @@ import { open_form_AnexarExame } from "../forms/anexarExame.js";
 import { open_form_AnexarEPI } from "../forms/anexarEPI.js";
 import { open_form_AnexarIntegracao } from "../forms/anexarIntegracao.js";
 import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
+import { formatarTelefoneParaWhatsApp } from "../../utils/formatters/number-format.js"; 
 
 // ========================================================
 // 🔧 Funções utilitárias globais
@@ -104,11 +105,9 @@ function removerDaOS($colab, socket, osID, funcID, fnoID, dataDia) {
   }
 }
 
-function abrirIntegracao(funcID) {
-  get_carregarPerfilUsuario(funcID);
-  setTimeout(() => {
+async function abrirIntegracao(funcID) {
+  await get_carregarPerfilUsuario(funcID);
     $('.cad a.bt_menu[data-target=".painel_integra"]').trigger("click");
-  }, 400);
 }
 
 function removerSupervisor(osID, dataDia, $colab) {
@@ -521,7 +520,9 @@ export function initColaboradoresContextMenu(socket) {
     e.preventDefault();
 
     const idColab = $("#idColaboradorPro").val();
+    const telefone = $("#telefone").val();
     const idFuncionarioEPI = $(this).data("idfcepi");
+    const idEPI = $(this).data("idepi");
 
     // 🔹 Obtém o nome e formata (somente a primeira letra maiúscula)
     let epi = $(this).find(".nomeEPI").text().trim().toLowerCase();
@@ -533,9 +534,11 @@ export function initColaboradoresContextMenu(socket) {
     else if ($(this).hasClass("status_capacete")) icone = "🪖";
     else if ($(this).hasClass("status_oculos")) icone = "👓";
     else if ($(this).hasClass("status_luva")) icone = "🧤";
-    else if ($(this).hasClass("status_bota")) icone = "🥾";
+    else if ($(this).hasClass("status_sapato")) icone = "🥾";
     else if ($(this).hasClass("status_mascara")) icone = "😷";
     else if ($(this).hasClass("status_colete")) icone = "🦺";
+    else if ($(this).hasClass("status_calca")) icone = "👖";
+    else if ($(this).hasClass("status_jaleco")) icone = "👕";
 
     // 🔹 Verifica o status do EPI (texto dentro do span .statusEPI)
     const statusTexto = $(this).find(".statusEPI").text().trim().toLowerCase();
@@ -547,15 +550,15 @@ export function initColaboradoresContextMenu(socket) {
       opcoesMenu.push({
         label: `${icone} Registrar ${epi}`,
         action: () => {
-          open_form_AnexarEPI(idColab);
+          open_form_AnexarEPI(idColab, idEPI);
         }
       });
-    } else if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!")) {
+    } else if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!") || statusTexto.includes("avaliar!")) {
       // Somente Atualizar
       opcoesMenu.push({
         label: `${icone} Atualizar ${epi}`,
         action: () => {
-          open_form_AnexarEPI(idColab);
+          open_form_AnexarEPI(idColab, idEPI);
         }
       });
     } else {
@@ -563,37 +566,91 @@ export function initColaboradoresContextMenu(socket) {
       opcoesMenu.push(
         {
           label: `${icone} Registrar ${epi}`, action: () => {
-            open_form_AnexarEPI(idColab);
+            open_form_AnexarEPI(idColab, idEPI);
           }
         },
         {
           label: `🔄 Atualizar ${epi}`, action: () => {
-            open_form_AnexarEPI(idColab);
+            open_form_AnexarEPI(idColab, idEPI);
           }
         }
       );
     }
 
     // 🔹 Sempre mostra Visualizar e Apagar (se aplicável)
-    if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!")) {
+    if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!") || statusTexto.includes("avaliar!")) {
       opcoesMenu.push(
+
+
         "SEPARADOR",
         {
-          label: `🧾 Visualizar Registro`,
+          label: `✍🏻 Solicitar Assinatura`,
+          action: async () => {
+
+            if (!idFuncionarioEPI) {
+              Swal.fire({
+                icon: "warning",
+                title: "ID inválido",
+                text: "ID do registro EPI não encontrado.",
+                theme: "dark"
+              });
+              return;
+            }
+
+            // Gera a URL automática
+            const assinaturaURL = `${window.location.origin}/assinar-epi?idfcepi=${idFuncionarioEPI}`;
+
+
+            // Copiar para a área de transferência
+            try {
+              await navigator.clipboard.writeText(assinaturaURL);
+            } catch (err) {
+              console.warn("Falha ao copiar automaticamente:", err);
+            }
+
+            // TELEFONE DO COLABORADOR
+            const telefoneColaborador = formatarTelefoneParaWhatsApp(telefone);
+            // formato: DDI + DDD + número (sem espaços)
+
+            // Mensagem pronta para enviar pelo WhatsApp
+            const mensagem = encodeURIComponent(
+              `Olá! Por favor assine sua ficha de EPI no link abaixo:\n\n${assinaturaURL}`
+            );
+
+            const whatsappURL = `https://wa.me/${telefoneColaborador}?text=${mensagem}`;
+
+            // Abre o WhatsApp
+            //window.open(whatsappURL, "_blank");
+            
+            // Feedback visual
+            Swal.fire({
+              icon: "success",
+              title: "Link criado!",
+              html: `
+                <p>Envie para o colaborador assinar digitalmente:</p>
+                <p style="margin-top:10px; font-weight:bold; color:#4caf50">${assinaturaURL}</p>
+              `,
+              theme: "dark"
+            });
+          }
+        }
+        ,
+        {
+          label: `🧾 Visualizar Registros`,
           action: async () => {
             if (!idFuncionarioEPI) return;
             try {
-              const res = await fetch(`/api/integracao/download/${idFuncionarioEPI}`, {
+              const res = await fetch(`/api/epi/download/${idFuncionarioEPI}`, {
                 method: "HEAD",
                 credentials: "include"
               });
               if (!res.ok) {
-                let msg = "Erro ao visualizar integração.";
-                if (res.status === 400) msg = "Nenhum PDF anexado para esta integração.";
-                if (res.status === 404) msg = "Integração ou arquivo não encontrado.";
+                let msg = "Erro ao visualizar EPI.";
+                if (res.status === 400) msg = "Nenhum PDF anexado para esta EPI.";
+                if (res.status === 404) msg = "EPI ou arquivo não encontrado.";
                 return Swal.fire({ icon: "warning", title: "Atenção", theme: "dark", text: msg });
               }
-              window.open(`/api/integracao/download/${idFuncionarioEPI}`, "_blank");
+              window.open(`/api/epi/download/${idFuncionarioEPI}`, "_blank");
             } catch (err) {
               Swal.fire({ icon: "error", title: "Erro", theme: "dark", text: err.message });
             }
@@ -618,14 +675,14 @@ export function initColaboradoresContextMenu(socket) {
 
             if (result.isConfirmed) {
               try {
-                const res = await fetch(`/api/epi/excluir/${idFuncionarioEPI}`, {
+                const res = await fetch(`/api/epi/excluir/colaborador/${idFuncionarioEPI}`, {
                   method: "DELETE",
                   credentials: "include"
                 });
 
                 if (res.ok) {
                   preencherTabelaColaboradoresRH();
-                  document.querySelector('.bt_menu[data-target=".painel_epi"]').click();
+                  document.querySelector('.bt_menu[data-target=".painel_vestimentas"]').click();
                   Swal.fire({
                     icon: "success",
                     title: "Excluído!",

@@ -20,21 +20,30 @@
                     </select>
 
                     <div style="display: flex; justify-content: space-between;">
-                        <select id="selectColaborador" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
-                            name="idColab" required placeholder="Selecione o colaborador..." style="width: 100%;">
-                        </select>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; align-items: center;">
+                            <input id="nca" class="tbx_teste glass input_obrigatorio" type="text" placeholder="Nº CA"
+                                name="nca" title="" maxlength="15" pattern="[0-9]{1,15}" required="required"
+                                style="width: 120px;">
+                        </div>
                         <div style="display: flex; align-items: center;">
                             <p class="dataNasc">Data Entregue</p>
                             <input id="dataentregueEPI" class="tbx_teste glass" type="date" name="dataentregueEPI"
                                 style="width: 140px;">
                         </div>
                     </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <select id="selectColaborador" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                            name="idColab" required placeholder="Selecione o colaborador..." style="width: 100%;">
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between;">
+
+                    </div>
                     <!-- Campo para anexar o PDF -->
                     <div style="display: none; margin-top: 10px;">
-                        <label for="documento" style="display:block; margin-bottom:4px;">Anexar registro EPI (PDF)</label>
+                        <label for="documento" style="display:block; margin-bottom:4px;">Anexar registro EPI
+                            (PDF)</label>
                         <input type="file" id="documento" name="documento" accept="application/pdf">
                     </div>
                 </div>
@@ -53,7 +62,7 @@
                 <div class="p_acoes linha_padrao">
                     <input id="bt_anexarExame" class="bt_teste glass btn btn-primary" type="submit" name="anexarExame"
                         value="Anexar">
-                    <input id="bt_fechar_formAnexarCurso" class="bt_teste glass" type="reset" value="Cancelar">
+                    <input id="bt_fechar_formAnexarEPI" class="bt_teste glass" type="reset" value="Cancelar">
                 </div>
             </form>
 
@@ -65,32 +74,8 @@
 
 
 <script>
-    $(document).on("click", "#bt_fechar_formAnexarCurso", function () {
+    $(document).on("click", "#bt_fechar_formAnexarEPI", function () {
         $('#form_anexarEPI').empty();
     });
 
-
-    $('#formAnexarEPI').on('submit', function (e) {
-        e.preventDefault();
-
-        const fd = new FormData(this);
-        const payload = Object.fromEntries(fd.entries());
-
-        $.ajax({
-            url: '/anexar_epi',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            dataType: 'json',
-            success: function (res) {
-                alert(res.message || 'EPI anexado com sucesso!');
-                e.target.reset();
-                preencherTabelaColaboradoresRH();
-            },
-            error: function (xhr) {
-                const msg = xhr?.responseJSON?.error || xhr?.responseText || 'Erro ao anexar EPI.';
-                alert(msg);
-            }
-        });
-    });
 </script>

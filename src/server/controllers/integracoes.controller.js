@@ -1,6 +1,5 @@
 const IntegracaoService = require('../services/integracoes.service');
-const path = require('path');
-const fs = require('fs');
+const supabase = require("../config/supabase");
 
 // GET /api/integracao
 async function getIntegracoes(req, res) {
@@ -88,35 +87,28 @@ async function uploadIntegracao(req, res) {
 }
 
 async function downloadIntegracao(req, res) {
-  try {
-    const { id } = req.params;
-    const integracao = await IntegracaoService.baixarIntegracao(id);
+  const { id } = req.params;
+  const integracao = await IntegracaoService.baixarIntegracao(id);
 
-    if (!integracao) return res.status(404).json({ error: "Integracao não encontrado" });
-    if (!integracao.anexoIntegracaoPDF) return res.status(400).json({ error: "Nenhum PDF anexado para este integracao." });
+  if (!integracao) return res.status(404).json({ error: "Integracao não encontrado" });
+  if (!integracao.anexoIntegracaoPDF) return res.status(400).json({ error: "Nenhum PDF anexado" });
 
-    const filePath = path.join(__dirname, "..", "storage", "integracoes", integracao.anexoIntegracaoPDF);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Arquivo não encontrado" });
+  const { data, error } = await supabase.storage
+    .from("integracoes")
+    .download(integracao.anexoIntegracaoPDF);
 
-    const nomeColab = integracao.colaborador.replace(/\s+/g, "_");
-    const nomeIntegracao = integracao.integracao.replace(/\s+/g, "_");
-    const data = new Date(integracao.datarealizada);
-    const dataFinal = `${String(data.getDate()).padStart(2, "0")}-${String(data.getMonth() + 1).padStart(2, "0")}-${data.getFullYear()}`;
-    const nomeFinal = `${nomeColab}_${nomeIntegracao}_${dataFinal}.pdf`;
-
-    // headers certos
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${nomeFinal}"`);
-
-    // stream manual → garante o filename
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
-
-  } catch (err) {
-    console.error("Erro ao baixar integracao:", err);
-    res.status(500).json({ error: "Erro interno ao baixar integracao." });
+  if (error || !data) {
+    return res.status(404).json({ error: "Arquivo não encontrado no Supabase" });
   }
+
+  const buffer = Buffer.from(await data.arrayBuffer());
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${integracao.anexoIntegracaoPDF}"`);
+
+  res.send(buffer);
 }
+
 
 async function checkIntegracao(req, res) {
   try {
@@ -126,10 +118,15 @@ async function checkIntegracao(req, res) {
     if (!integracao) return res.sendStatus(404);
     if (!integracao.anexoIntegracaoPDF) return res.sendStatus(400);
 
-    const filePath = path.join(__dirname, "..", "storage", "integracoes", integracao.anexoIntegracaoPDF);
-    if (!fs.existsSync(filePath)) return res.sendStatus(404);
+    // Testa existência no Supabase
+    const { data, error } = await supabase.storage
+      .from("integracoes")
+      .list("", { search: integracao.anexoIntegracaoPDF });
 
-    // Se chegou aqui, está OK
+    if (error || !data || data.length === 0) {
+      return res.sendStatus(404);
+    }
+
     return res.sendStatus(200);
   } catch (err) {
     console.error("Erro no HEAD do integracao:", err);

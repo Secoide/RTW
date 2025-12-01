@@ -1,6 +1,5 @@
 const IntegracaoModel = require('../models/integracoes.model');
-const path = require('path');
-const fs = require('fs');
+const supabase = require("../config/supabase");
 
 // Listar todos
 async function listarIntegracoes() {
@@ -48,26 +47,45 @@ async function buscarIntegracoesByColaborador(idFunc) {
   return await IntegracaoModel.getIntegracoesByColaborador(idFunc);
 }
 
+
 async function salvarIntegracao({ datarealizadaIntegracao, vencimento, idColab, integracao, file }) {
   const idfuncionario = parseInt(idColab, 10);
   const idintegracao = parseInt(integracao, 10);
   const venc = parseInt(vencimento, 10);
 
-  if (Number.isNaN(idfuncionario) || Number.isNaN(idintegracao) || Number.isNaN(venc)) {
-    throw new Error('IDs e vencimento devem ser numéricos.');
-  }
+  let nomeArquivo = null; // agora pode não ter arquivo
 
-  let nomeArquivo = null;
-  if (file) {
-    // renomeia para padrão {idfuncionario}_{idintegracao}_{timestamp}.pdf
+  // Se o arquivo for enviado, faz upload
+  if (file && file.buffer) {
     nomeArquivo = `${idfuncionario}_${idintegracao}_${Date.now()}.pdf`;
-    const novoCaminho = path.join(file.destination, nomeArquivo);
-    fs.renameSync(file.path, novoCaminho);
+
+    const buffer = file.buffer;
+
+    const { data, error } = await supabase.storage
+      .from("integracoes")
+      .upload(nomeArquivo, buffer, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error(error);
+      throw new Error("Erro ao enviar PDF ao Supabase.");
+    }
   }
 
-  const insertId = await IntegracaoModel.inserirIntegracao(datarealizadaIntegracao, venc, nomeArquivo, idfuncionario, idintegracao);
+  // Salva no banco com ou sem arquivo
+  const insertId = await IntegracaoModel.inserirIntegracao(
+    datarealizadaIntegracao,
+    venc,
+    nomeArquivo, // será null caso não haja arquivo
+    idfuncionario,
+    idintegracao
+  );
+
   return { id: insertId, arquivo: nomeArquivo };
 }
+
 
 async function baixarIntegracao(id) {
   const integracao = await IntegracaoModel.buscarIntegracaoPorId(id);

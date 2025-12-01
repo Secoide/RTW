@@ -2,7 +2,7 @@ const ColabModel = require('../models/colaboradores.model');
 const bcrypt = require('bcrypt');
 const fsPromises = require('fs').promises;
 const path = require('path');
-
+const supabase = require('../config/supabase');
 
 
 // Listar todos
@@ -193,6 +193,13 @@ async function listarColaboradoresCBX() {
   }
 }
 
+
+async function listarColaboradoresAniversariantes() {
+    return await ColabModel.getColaboradoresAniversariantes();
+}
+
+
+
 async function setarSupervisor(idFno, osID, dataDia) {
   await ColabModel.removerSupervisorAtual(osID, dataDia);
   const updated = await ColabModel.definirSupervisor(idFno);
@@ -233,34 +240,35 @@ async function buscarHistoricoColabPorEmpresa(id) {
   return await ColabModel, ColabModel.getHistoricoColabPorEmpresa(id);
 }
 
-
-const uploadDir = path.join(__dirname, '..', '..', '..', 'public', 'client', 'assets', 'img', 'fotoperfil');
-
 async function salvarFotoPerfil(userId, file) {
   if (!file || !userId) {
     throw { status: 400, mensagem: 'Arquivo ou ID ausente.' };
   }
 
   const ext = path.extname(file.originalname).toLowerCase();
-  const nomeFinal = `${userId}${ext}`;
-  const caminhoFinal = path.join(uploadDir, nomeFinal);
+  const nomeArquivo = `${userId}${ext}`;
+  const caminhoSupabase = `avatars/${nomeArquivo}`;
 
-  // Apaga foto antiga, se existir
-  const files = await fsPromises.readdir(uploadDir);
-  for (const f of files) {
-    const baseName = path.parse(f).name;
-    if (baseName === String(userId)) {
-      await fsPromises.unlink(path.join(uploadDir, f));
-    }
+  // Upload para Supabase
+  const { error } = await supabase.storage
+    .from('fotos-perfil')
+    .upload(caminhoSupabase, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true // sobrescreve se já existir
+    });
+
+  if (error) {
+    console.error('Erro Supabase Upload:', error);
+    throw { status: 500, mensagem: 'Erro ao enviar para o Supabase.' };
   }
 
-  // Renomeia para o padrão
-  await fsPromises.rename(file.path, caminhoFinal);
+  // URL pública
+  const publicURL = `${process.env.SUPABASE_URL}/storage/v1/object/public/fotos-perfil/${caminhoSupabase}`;
 
-  const caminhoParaSalvar = `/client/assets/img/fotoperfil/${nomeFinal}`;
-  await ColabModel.atualizarFotoPerfil(userId, caminhoParaSalvar);
+  // Atualiza no banco
+  await ColabModel.atualizarFotoPerfil(userId, publicURL);
 
-  return caminhoParaSalvar;
+  return publicURL;
 }
 
 module.exports = {
@@ -277,6 +285,7 @@ module.exports = {
   alocarColaboradores,
   listarColaboradoresResponsavelOS,
   listarColaboradoresCBX,
+  listarColaboradoresAniversariantes,
   setarSupervisor,
   removerSupervisorAtual,
   buscarHistoricoAtestar,

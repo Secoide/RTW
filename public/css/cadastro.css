@@ -366,12 +366,17 @@ body.modal-open {
     flex-direction: column;
     position: absolute;
     text-align: left;
-    width: 114px;
+    width: 114px;border-radius: 8px;
+    padding: 10px;
+}
+
+.status_EPI:hover{
+    background: var(--bg-card);
 }
 
 
 .status_capacete {
-    top: -45px;
+    top: -50px;
     left: -90px;
 }
 
@@ -389,8 +394,8 @@ body.modal-open {
 }
 
 .status_fone {
-    top: -45px;
-    right: -95px;
+    top: -60px;
+    right: -103px;
 }
 
 .linha_fone1 {
@@ -407,8 +412,8 @@ body.modal-open {
 }
 
 .status_oculos {
-    top: 45px;
-    left: -109px;
+    top: 30px;
+    left: -115px;
 }
 
 .linha_oculos1 {
@@ -426,7 +431,7 @@ body.modal-open {
 
 .status_jaleco {
     top: 45px;
-    right: -120px;
+    right: -125px;
 }
 
 .linha_jaleco1 {
@@ -444,7 +449,7 @@ body.modal-open {
 
 .status_calca {
     top: 220px;
-    right: -95px;
+    right: -100px;
 }
 
 .linha_calca1 {
@@ -461,8 +466,8 @@ body.modal-open {
 }
 
 .status_sapato {
-    top: 350px;
-    right: -110px;
+    top: 330px;
+    right: -115px;
 }
 
 .linha_sapato1 {
@@ -479,8 +484,8 @@ body.modal-open {
 }
 
 .status_luva {
-    top: 150px;
-    left: -123px;
+    top: 130px;
+    left: -125px;
 }
 
 .linha_luva1 {
@@ -499,7 +504,7 @@ body.modal-open {
 
 .status_luvadecouro {
     top: 130px;
-    right: -123px;
+    right: -130px;
 }
 
 .linha_luvadecouro1 {
@@ -542,6 +547,21 @@ body.modal-open {
     width: 58px;
 }
 
+.painel_Paineis > div, .painel_Paineis form, .painel_Paineis{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.div_botoesAcao{
+    margin-top: auto;
+    padding: 5px;
+}
+
+.div_botoesAcao input{
+    min-width: 100px;
+}
+
 .nomeEPI {
     font-weight: bold;
 }
@@ -550,6 +570,16 @@ body.modal-open {
 .entregueEPI {
     font-size: 11px;
     color: gray;
+}
+
+.fichaepi_assinado {
+    font-size: 11px;
+    color: rgb(59, 114, 216);
+}
+
+.fichaepi_nao_assinado {
+    font-size: 11px;
+    color: rgb(216, 59, 59);
 }
 
 /* TELA EXAME */
@@ -565,6 +595,7 @@ body.modal-open {
 }
 
 .bloco_exame {
+    position: relative;
     height: 130px;
     width: 110px;
     border-radius: 10px;
@@ -582,6 +613,20 @@ body.modal-open {
     margin-top: 14px;
     color: var(--branco);
 }
+
+.pdf_anexado{
+    position: absolute;
+    right: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    font-stretch: condensed;
+    top: 5px;
+}
+
+.sem_pdf{
+    display: none;
+}
+
 
 .exames_status {
     display: flex;
@@ -649,6 +694,7 @@ body.modal-open {
 }
 
 .bloco_curso {
+    position: relative;
     height: 130px;
     width: 110px;
     border-radius: 10px;
@@ -661,7 +707,7 @@ body.modal-open {
     max-height: 130px;
 }
 
-.bloco_curso>span {
+.bloco_curso .norma {
     font-size: 18px;
     font-weight: bold;
     margin-top: 14px;

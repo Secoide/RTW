@@ -16,6 +16,7 @@ router.get("/dadosCPFRG/:osID/:dataDia", verificarAutenticacao, colaboradoresCon
 router.post('/atestar', verificarAutenticacao, colaboradoresController.cadastrarAtestado);
 router.get("/historico-empresas/:idFuncionario", verificarAutenticacao, colaboradoresController.getHistoricoColabPorEmpresas);
 router.get("/cbx", verificarAutenticacao, colaboradoresController.getColaboradorCBX);
+router.get("/aniversariantes", verificarAutenticacao, colaboradoresController.getColaboradoresAniversariantes);
 
 // Upload de foto
 router.post('/upload-foto', verificarAutenticacao, upload.single('fotoperfil'), colaboradoresController.uploadFoto);

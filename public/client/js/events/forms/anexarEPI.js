@@ -1,3 +1,5 @@
+import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
+
 import {
   preencherCbxColaborador,
   preencherCbxEPI
@@ -30,10 +32,10 @@ async function open_form_AnexarEPI(idColab, idEPI) {
 }
 
 function initSubmit() {    
-    $(document).off("submit", "#formAnexarExame");
+    $(document).off("submit", "#formAnexarEPI");
 
     // delega o evento ao document
-    $(document).on("submit", "#formAnexarExame", function (e) {
+    $(document).on("submit", "#formAnexarEPI", function (e) {
         e.preventDefault();
 
         const form = this;
@@ -47,7 +49,7 @@ function initSubmit() {
             .text('0%');
 
         $.ajax({
-            url: '/api/exame/upload',
+            url: '/api/epi/upload',
             type: 'POST',
             data: fd,
             processData: false,
@@ -100,7 +102,7 @@ function initSubmit() {
                     $('#uploadProgressWrapper').fadeOut();
                 }, 1000);
                 preencherTabelaColaboradoresRH();
-                document.querySelector('.bt_menu[data-target=".painel_exames"]').click();
+                document.querySelector('.bt_menu[data-target=".painel_vestimentas"]').click();
             },
 
             error: function (xhr) {

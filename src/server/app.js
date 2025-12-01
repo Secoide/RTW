@@ -47,6 +47,9 @@ app.use("/api/cidade", cidadesRoutes);
 const atestadosRoutes = require("./routes/atestados.routes");
 app.use("/api/atestado", atestadosRoutes);
 
+const comunicadosRoutes = require("./routes/comunicados.routes");
+app.use("/api/comunicados", comunicadosRoutes);
+
 
 const rhRoutes = require("./routes/rh.routes");
 app.use("/api/rh", rhRoutes);

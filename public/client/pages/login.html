@@ -12,6 +12,7 @@
   <link rel="stylesheet" type="text/css" href="css/padrao/thema.css">
   <link rel="stylesheet" type="text/css" href="css/login.css">
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
@@ -27,10 +28,10 @@
         <form id="formLogin" method="POST" autocomplete="on">
           <label for="username">Usuário</label><br>
           <input id="username" type="text" name="username" autocomplete="username" required>
-          
+
           <label for="password">Senha</label><br>
           <input id="password" type="password" name="password" autocomplete="current-password" required>
-          
+
           <a class="esquecisenha" href="#">Esqueci minha senha</a>
           <div class="divbutton">
             <input class="botao-degrade" type="submit" value="Entrar">
@@ -39,10 +40,58 @@
         </form>
       </div>
     </div>
-    <div class="versao">v1.1.1.0</div>
+    <div class="versao"></div>
   </div>
-  
+  <!-- POPUP DE ATUALIZAÇÃO DO SISTEMA -->
+  <div id="popupAtualizacao" class="atualizacao-overlay">
+    <div class="atualizacao-box">
+
+      <h2>🚀 Nova Atualização lançada!</h2>
+      <p><strong>Versão:</strong> <span id="versaoAtual"></span></p>
+
+      <div class="changelog-container">
+
+        <details open>
+          <summary>Assinatura Digital ✍🏻</summary>
+
+          <details>
+            <summary>🆕 Adicionado</summary>
+            <ul>
+              <li>Assinatura de EPIs entregues com assinatura digital via link (Em teste);</li>
+              <li>Indicador “PDF” no painel de exames/cursos informando documento anexado;</li>
+              <li>Novas informações na pagina de inicio</li>
+              <li>Painel indicativo de Aniversariantes do mês, e proximo aniversários</li>
+              <li>Mural de informações, separados por alguumas categorias (Avisos do RH, Treinamentos Futuros, Comunicados da Diretoria e Avisos de Segurança)</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>⚙️ Alterado</summary>
+            <ul>
+              <li>Pequenas alterações no visual e enquadros no formulario do Colaborador.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>🐞 Corrigido</summary>
+            <ul>
+              <li>Arquivos anexados (PDFs e fotos) eram perdidos após atualização do sistema;</li>
+              <li>Mini ícone às vezes não abria a aba correta do colaborador;</li>
+              <li>Varios pequenos bugs;</li>
+            </ul>
+          </details>
+
+        </details>
+
+      </div>
+
+
+      <button id="btnPopupOk">OBRIGADO</button>
+    </div>
+  </div>
+
   <!-- Inatividade separado -->
   <script type="text/javascript" src="scripts/websocket/inatividade.js"></script>
 </body>
+
 </html>

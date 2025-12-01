@@ -5,6 +5,26 @@ import { conectarSocket } from "./services/sockets/socket-service.js";
 
 $(document).ready(function () {
   if ($("#formLogin").length) {
+    // 🟦 DEFINA AQUI SUA VERSÃO ATUAL DO SISTEMA
+    const versaoSistema = "1.2.4";
+
+    // Preenche o texto no popup
+    $("#versaoAtual").text(versaoSistema);
+    $(".versao").text(versaoSistema);
+
+    // Versão salva no navegador
+    const versaoVista = localStorage.getItem("versao_sistema_vista");
+
+    // Se for diferente → mostrar popup
+    if (versaoVista !== versaoSistema) {
+      $("#popupAtualizacao").css("display", "flex");
+    }
+
+    // Botão OK
+    $("#btnPopupOk").click(function () {
+      $("#popupAtualizacao").fadeOut(200);
+      localStorage.setItem("versao_sistema_vista", versaoSistema);
+    });
     initLoginForm();
   }
 
@@ -20,5 +40,12 @@ $(document).ready(function () {
 
     $("#conteudo").addClass("visivel");
   }
+
+  $(document).ready(function () {
+
+
+});
+
+
 });
 

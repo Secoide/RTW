@@ -1,6 +1,5 @@
 const CursoService = require('../services/cursos.service');
-const path = require('path');
-const fs = require('fs');
+const supabase = require("../config/supabase");
 
 // GET /api/curso
 async function getCursos(req, res) {
@@ -113,35 +112,28 @@ async function uploadCurso(req, res) {
 }
 
 async function downloadCurso(req, res) {
-  try {
-    const { id } = req.params;
-    const curso = await CursoService.baixarCurso(id);
+  const { id } = req.params;
+  const curso = await CursoService.baixarCurso(id);
 
-    if (!curso) return res.status(404).json({ error: "Curso não encontrado" });
-    if (!curso.anexoCursoPDF) return res.status(400).json({ error: "Nenhum PDF anexado para este curso." });
+  if (!curso) return res.status(404).json({ error: "Curso não encontrado" });
+  if (!curso.anexoCursoPDF) return res.status(400).json({ error: "Nenhum PDF anexado" });
 
-    const filePath = path.join(__dirname, "..", "storage", "cursos", curso.anexoCursoPDF);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Arquivo não encontrado" });
+  const { data, error } = await supabase.storage
+    .from("cursos")
+    .download(curso.anexoCursoPDF);
 
-    const nomeColab = curso.colaborador.replace(/\s+/g, "_");
-    const nomeCurso = curso.curso.replace(/\s+/g, "_");
-    const data = new Date(curso.datarealizada);
-    const dataFinal = `${String(data.getDate()).padStart(2, "0")}-${String(data.getMonth() + 1).padStart(2, "0")}-${data.getFullYear()}`;
-    const nomeFinal = `${nomeColab}_${nomeCurso}_${dataFinal}.pdf`;
-
-    // headers certos
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${nomeFinal}"`);
-
-    // stream manual → garante o filename
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
-
-  } catch (err) {
-    console.error("Erro ao baixar curso:", err);
-    res.status(500).json({ error: "Erro interno ao baixar curso." });
+  if (error || !data) {
+    return res.status(404).json({ error: "Arquivo não encontrado no Supabase" });
   }
+
+  const buffer = Buffer.from(await data.arrayBuffer());
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${curso.anexoCursoPDF}"`);
+
+  res.send(buffer);
 }
+
 
 async function checkCurso(req, res) {
   try {
@@ -151,10 +143,15 @@ async function checkCurso(req, res) {
     if (!curso) return res.sendStatus(404);
     if (!curso.anexoCursoPDF) return res.sendStatus(400);
 
-    const filePath = path.join(__dirname, "..", "storage", "cursos", curso.anexoCursoPDF);
-    if (!fs.existsSync(filePath)) return res.sendStatus(404);
+    // Testa existência no Supabase
+    const { data, error } = await supabase.storage
+      .from("cursos")
+      .list("", { search: curso.anexoCursoPDF });
 
-    // Se chegou aqui, está OK
+    if (error || !data || data.length === 0) {
+      return res.sendStatus(404);
+    }
+
     return res.sendStatus(200);
   } catch (err) {
     console.error("Erro no HEAD do curso:", err);

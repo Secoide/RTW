@@ -65,93 +65,115 @@ export function initAbrirInfoColabClick() {
 
 // ABRIR Form Colaborador com os dados do colaborador clicado
 export function get_carregarPerfilUsuario(funcId) {
-    initColabForm();
-    const id = funcId;
-    if (!id) {
-        alert('ID do colaborador não encontrado!');
-        return;
-    }
-    $.ajax({
-        url: `/api/colaboradores/${id}`,
-        type: 'GET',
-        contentType: 'application/json', // define o tipo do corpo da requisição
-        success: function (res) {
-            const dados = res;
+    return new Promise((resolve, reject) => {
+        initColabForm();
+        const id = funcId;
 
-            if (!dados || !dados.id) {
-                alert("Colaborador não encontrado.");
-                return;
-            }
+        if (!id) {
+            alert('ID do colaborador não encontrado!');
+            return reject("ID não encontrado");
+        }
 
-            $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function (response, status, xhr) {
-                if (status === "success") {
-                    $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
-                    $('.painel_perfil').show();
-                    $('#bt_editColab').show();
-                    $('#bt_cadColaborador').hide();
+        $.ajax({
+            url: `/api/colaboradores/${id}`,
+            type: 'GET',
+            contentType: 'application/json',
 
-                    $('.bt_menu[data-target=".painel_atestar"]').show();
+            success: function (res) {
+                const dados = res;
 
-                    const statusPerfil = dados.motivo?.toLowerCase() || "ativo";
-                    $('#nomeCompletoResumo').text(dados.nome);
-                    $('#cargoResumo').text(dados.nomeCargo);
-                    $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
-                    $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
-                    $('#fotoavatar')
-                        .attr('src', dados.fotoperfil + '?t=' + Date.now())
-                        .on('error', function () {
-                            console.warn("⚠️ Imagem de perfil não encontrada, usando padrão.");
+                if (!dados || !dados.id) {
+                    alert("Colaborador não encontrado.");
+                    return reject("Colaborador não encontrado");
+                }
+
+                $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function (response, status, xhr) {
+
+                    if (status === "success") {
+
+                        // 🔥 IMPORTANTE:
+                        // Só chamaremos resolve() DEPOIS que TUDO estiver carregado.
+
+                        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
+                        $('.painel_perfil').show();
+                        $('#bt_editColab').show();
+                        $('#bt_cadColaborador').hide();
+                        $('.bt_menu[data-target=".painel_atestar"]').show();
+
+                        const statusPerfil = dados.motivo?.toLowerCase() || "ativo";
+                        $('#nomeCompletoResumo').text(dados.nome);
+                        $('#cargoResumo').text(dados.nomeCargo);
+                        $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
+                        $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
+
+                        const fotoURL = dados.fotoperfil;
+
+                        if (fotoURL && fotoURL.startsWith("http")) {
+                            $('#fotoavatar').attr('src', fotoURL + '?t=' + Date.now());
+                        } else {
+                            $('#fotoavatar').attr('src', '/imagens/fotoperfil/user-default.jpg');
+                        }
+
+                        $('#fotoavatar').on('error', function () {
+                            console.warn("⚠️ Foto do perfil não encontrada. Carregando padrão.");
                             $(this).attr('src', '/imagens/fotoperfil/user-default.jpg');
                         });
-                    $('#id').val(dados.id);
-                    $('#idColaborador').val(dados.id);
-                    $('#nome').val(dados.nome);
-                    $('#sexo').val(dados.sexo);
-                    $('#nascimento').val(formatDateToInput(dados.nascimento));
-                    $('#endereco').val(dados.endereco);
-                    $('#telefone').val(dados.telefone);
-                    $('#mail').val(dados.mail);
-                    $('#sobremim').val(dados.sobre || "");
-                    $('#cpf').val(dados.cpf);
-                    $('#rg').val(dados.rg);
-                    $('#datainicio').val(formatDateToInput(dados.datainicio));
-                    $('#datafinal').val(formatDateToInput(dados.datafinal));
-                    $('#motivo').val(dados.motivo);
 
-                    // CNH → array
-                    let arr = [];
-                    if (Array.isArray(dados.cnh)) {
-                        arr = dados.cnh;
-                    } else if (typeof dados.cnh === 'string') {
-                        arr = dados.cnh.split(/[,\s;]+/).filter(Boolean);
+                        $('#id').val(dados.id);
+                        $('#idColaborador').val(dados.id);
+                        $('#nome').val(dados.nome);
+                        $('#sexo').val(dados.sexo);
+                        $('#nascimento').val(formatDateToInput(dados.nascimento));
+                        $('#endereco').val(dados.endereco);
+                        $('#telefone').val(dados.telefone);
+                        $('#mail').val(dados.mail);
+                        $('#sobremim').val(dados.sobre || "");
+                        $('#cpf').val(dados.cpf);
+                        $('#rg').val(dados.rg);
+                        $('#datainicio').val(formatDateToInput(dados.datainicio));
+                        $('#datafinal').val(formatDateToInput(dados.datafinal));
+                        $('#motivo').val(dados.motivo);
+
+                        let arr = [];
+                        if (Array.isArray(dados.cnh)) {
+                            arr = dados.cnh;
+                        } else if (typeof dados.cnh === 'string') {
+                            arr = dados.cnh.split(/[,\s;]+/).filter(Boolean);
+                        }
+                        const validos = new Set(['A', 'B', 'C', 'D']);
+                        arr = arr.filter(v => validos.has(v.toUpperCase())).map(v => v.toUpperCase());
+                        $("input[name='vehicle']").prop("checked", false);
+                        arr.forEach(v => {
+                            $("input[name='vehicle'][value='" + v + "']").prop("checked", true);
+                        });
+                        $("#vehicles_selected").val(arr.join(','));
+
+                        $('#empresacontrato').val(dados.empresaContrato);
+                        $('#idColaboradorPro').val(dados.id);
+                        $('#categoria').val(dados.setor).trigger('change');
+
+                        setTimeout(() => { $('#cargo').val(dados.cargo); }, 100);
+
+                        preencherTabelaAtestar(dados.id);
+
+                        // 🔥 Tudo terminou, liberamos o resolve()
+                        resolve(dados);
+
+                    } else {
+                        alert("Erro ao carregar formulário.");
+                        reject("Erro ao carregar formulário");
                     }
-                    const validos = new Set(['A', 'B', 'C', 'D']);
-                    arr = arr.filter(v => validos.has(v.toUpperCase())).map(v => v.toUpperCase());
-                    $("input[name='vehicle']").prop("checked", false);
-                    arr.forEach(v => {
-                        $("input[name='vehicle'][value='" + v + "']").prop("checked", true);
-                    });
-                    $("#vehicles_selected").val(arr.join(','));
+                });
+            },
 
-                    $('#empresacontrato').val(dados.empresaContrato);
-                    $('#idColaboradorPro').val(dados.id);
-                    $('#categoria').val(dados.setor).trigger('change');
-
-                    setTimeout(() => {
-                        $('#cargo').val(dados.cargo);
-                    }, 100);
-
-                    preencherTabelaAtestar(dados.id);
-                } else {
-                    alert("Erro ao carregar formulário.");
-                }
-            });
-        },
-        error: function () {
-            alert('Erro ao logar. Tente novamente.');
-        }
+            error: function (err) {
+                alert('Erro ao logar. Tente novamente.');
+                reject(err);
+            }
+        });
     });
 }
+
 
 export function open_form_cad_colaborador() {
     $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function () {

@@ -38,7 +38,12 @@ function securityConfig(app) {
             "https://fonts.gstatic.com",
             "https://ka-f.fontawesome.com"
           ],
-          "img-src": ["'self'", "data:", "blob:"],
+          "img-src": [
+            "'self'",
+            "data:",
+            "blob:",
+            "https://*.supabase.co"
+          ],
           "connect-src": [
             "'self'",
             "wss:",
@@ -103,7 +108,7 @@ function securityConfig(app) {
     legacyHeaders: false,
   });
 
-  app.use('/api/colaboradores',generalLimiter); // aplica para todas as rotas
+  app.use('/api/colaboradores', generalLimiter); // aplica para todas as rotas
   app.use('/login', loginLimiter); // aplica somente para login
 }
 

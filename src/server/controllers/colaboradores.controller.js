@@ -156,6 +156,17 @@ async function getColaboradorCBX(req, res) {
   }
 }
 
+async function getColaboradoresAniversariantes(req, res) {
+    try {
+        const colaboradores = await ColabService.listarColaboradoresAniversariantes();
+        res.json(colaboradores);
+    } catch (err) {
+        console.error("Erro ao buscar aniversariantes:", err.message);
+        res.status(500).json({ erro: "Erro ao buscar aniversariantes" });
+    }
+}
+
+
 async function setColaboradorSupervisor(req, res, next) {
   try {
     const { idFno } = req.params;   // aqui pega só o valor
@@ -261,6 +272,7 @@ module.exports = {
     excluirColaboradorEmos,
     getColaboradorResponsavelOS,
     getColaboradorCBX,
+    getColaboradoresAniversariantes,
     setColaboradorSupervisor,
     removerSupervisorAtual,
     getHistoricoAtestar,

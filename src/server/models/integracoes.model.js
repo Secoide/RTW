@@ -171,7 +171,7 @@ async function buscarIntegracaoPorId(id) {
     const [rows] = await connection.query(
         `SELECT f.nome AS colaborador,
              e.nome AS integracao,
-             fe.data AS datarealizada,
+             fe.datarealizado AS datarealizada,
              fe.anexoIntegracaoPDF
       FROM funcionarios_contem_integracao fe
       JOIN funcionarios f ON f.id = fe.idfuncionario

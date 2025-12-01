@@ -17,4 +17,9 @@ router.get('/carregamento', (req, res) => {
 router.get('/inicio', (req, res) => {
   res.sendFile(path.resolve('public/client/pages/inicio.html'));
 });
+
+router.get('/assinar-epi', (req, res) => {
+  res.sendFile(path.resolve('public/client/pages/ass_epi.html'));
+});
+
 module.exports = router;

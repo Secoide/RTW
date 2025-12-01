@@ -19,7 +19,8 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Exportar programação para whatsapp, mostrava data de um dia antes;
 - Painel de integrações no perfil do Colaborador retornava Null no final da consulta geral das empresas;
 - Cores de temas claros nao sendo alterados em algumas partes do programa;
-
+- 
+- 
 ### Removido
 - 
 

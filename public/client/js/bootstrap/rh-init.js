@@ -1,5 +1,5 @@
 import { get_carregarPerfilUsuario } from "../events/click/handle-abrir-info-colab.js";
-import {open_form_AnexarCurso} from "../events/forms/anexarCurso.js";
+import { open_form_AnexarCurso } from "../events/forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../events/forms/anexarExame.js";
 import { open_form_AnexarEPI } from "../events/forms/anexarEPI.js";
 
@@ -26,42 +26,25 @@ $(document).on("click", ".bt_form_anexar_curso", function (e) {
     open_form_AnexarCurso();
 });
 
+function bindMiniClick(selector, painelTarget) {
+    $(document).on("click", selector, async function () {
+        const funcID = $(this).closest('.rh_tb_lin_colob').data("id");
 
-$(document).on("click", ".mini_curso", function (e) {
-    const $colaborador = $(this);
-    const funcID = $colaborador.closest('.rh_tb_lin_colob').data("id");
-    get_carregarPerfilUsuario(funcID);
-    setTimeout(() => {
-        $('.cad a.bt_menu[data-target=".painel_cursos"]').trigger('click');
-    }, 1000);
-});
+        if (!funcID) {
+            console.error("ID do colaborador não encontrado");
+            return;
+        }
 
-$(document).on("click", ".mini_exame", function (e) {
-    const $colaborador = $(this);
-    const funcID = $colaborador.closest('.rh_tb_lin_colob').data("id");
-    get_carregarPerfilUsuario(funcID);
-    setTimeout(() => {
-        $('.cad a.bt_menu[data-target=".painel_exames"]').trigger('click');
-    }, 1000);
-});
+        await get_carregarPerfilUsuario(funcID);
 
-$(document).on("click", ".mini_integracao", function (e) {
-    const $colaborador = $(this);
-    const funcID = $colaborador.closest('.rh_tb_lin_colob').data("id");
-    get_carregarPerfilUsuario(funcID);
-    setTimeout(() => {
-        $('.cad a.bt_menu[data-target=".painel_integra"]').trigger('click');
-    }, 1000);
-});
+        $(`.cad a.bt_menu[data-target="${painelTarget}"]`).trigger('click');
+    });
+}
 
-$(document).on("click", ".text-danger", function (e) {
-    const $colaborador = $(this);
-    const funcID = $colaborador.closest('.rh_tb_lin_colob').data("id");
-    get_carregarPerfilUsuario(funcID);
-    setTimeout(() => {
-        $('.cad a.bt_menu[data-target=".painel_vestimentas"]').trigger('click');
-    }, 1000);
-});
+bindMiniClick(".mini_curso", ".painel_cursos");
+bindMiniClick(".mini_exame", ".painel_exames");
+bindMiniClick(".mini_integracao", ".painel_integra");
+bindMiniClick(".text-danger", ".painel_vestimentas");
 
 $(document).on("click", "#chkDesligados", function (e) {
     toggleDesligados($(this))
@@ -115,7 +98,11 @@ export function preencherTabelaColaboradoresRH() {
                 const linha = `
                         <tr class="rh_tb_lin_colob ${colab.exames} ${colab.contrato === "desligado" ? colab.contrato : colab.motivo}" style="font-size: 13px;" data-id="${colab.idFunc}">
                             <td>${colab.idFunc}</td>
-                            <td><img class="tb_fotoColab" src="${colab.fotoperfil + '?t=' + new Date().getTime()}"></img>${colab.nome}</td>
+                           <td>
+                            <img class="tb_fotoColab" 
+                                src="${colab.fotoperfil ? colab.fotoperfil + '?t=' + Date.now() : '/imagens/fotoperfil/user-default.jpg'}"
+                                onerror="this.src='/imagens/fotoperfil/user-default.jpg'">
+                            </img>${colab.nome}</td>
                             <td>${colab.nascimento_idade}</td>
                             <td>${colab.cargo}</td>
                             <td>${colab.categoria}</td>

@@ -1,148 +1,594 @@
-<div>
-    <h2 class="textoHome">Bem-vindo à página inicial!</h2>
-    <p class="textoHome">Esta página está em desenvolvimento.</p>
-    <p class="textoHome">Escolha uma seção no menu à direita para navegar.</p><br><br>
-    <section aria-labelledby="release-notes-title" class="release-notes">
-        <h2 id="release-notes-title">📦 Registro de Alterações – Atualização do Sistema</h1>
+<style>
+    /* ============================================================
+   LAYOUT PRINCIPAL (DIV PAI COM LADO ESQUERDO + DIREITA)
+============================================================ */
 
-            <article aria-labelledby="v108-title">
-                <header>
-                    <h3 id="v108-title">Versão 1.1.1.0
-        </h2>
-        <p>Data: <time datetime="2025-11">11/2025</time></p>
-        </header>
-        <!-- v1.1.0.0 -->
-        <details>
-            <summary>v1.1.0.0</summary>
+    .painel_inicio {
+        display: flex;
+        flex-direction: row;
+        height: 92vh;
+        width: 100%;
+        overflow: hidden;
+    }
 
-            <details>
-                <summary>🆕 Adicionado</summary>
-                <ul>
-                    <li>Apague curso, exame, integração utilizando o mouse direito em cima do painel correspondente
-                        dentro do formulário do colaborador.</li>
-                </ul>
-            </details>
+    /* ============================================================
+   CONTEÚDO CENTRAL (ESQUERDA)
+============================================================ */
 
-            <details>
-                <summary>🐞 Corrigido</summary>
-                <ul>
-                    <li>Exportar programação para WhatsApp mostrava data de um dia antes;</li>
-                    <li>Painel de integrações no perfil do colaborador retornava <code>Null</code> no final da consulta
-                        geral das
-                        empresas;</li>
-                    <li>Cores de temas claros não sendo alteradas em algumas partes do programa.</li>
-                </ul>
-            </details>
-        </details>
+    #conteudo-central {
+        flex: 1;
+        padding: 20px;
+    }
 
-        <!-- v1.1.1.0 -->
-        <details>
-            <summary>v1.1.1.0</summary>
+    /* ============================================================
+   PAINEL DE ANIVERSÁRIANTES (DIREITA)
+============================================================ */
 
-            <details>
-                <summary>🆕 Adicionado</summary>
-                <ul>
-                    <li>Agora é possível definir um colaborador como <strong>Supervisor</strong> de uma OS em uma data
-                        específica. Basta clicar com o <strong>botão direito do mouse</strong> sobre o colaborador no
-                        painel da OS e selecionar <em>“Definir como Supervisor”</em>.</li>
-                    <li>Colaboradores da empresa são exibidos no painel de disponíveis apenas entre as datas de
-                        <strong>admissão</strong> e <strong>demissão</strong> (quando houver).</li>
-                    <li>O <strong>círculo à esquerda do nome</strong> do colaborador indica o status dos seus documentos
-                        (exames e treinamentos):</li>
-                    <ul>
-                        <li>🟢 Documentos em dia;</li>
-                        <li>🟡 Documento próximo do vencimento;</li>
-                        <li>🔴 Documento vencido;</li>
-                        <li>⚪ Documento pendente.</li>
-                    </ul>
-                    <li>Clique com o <strong>botão direito</strong> sobre o colaborador e selecione <em>“Abrir
-                            Perfil”</em> para visualizar suas informações completas.</li>
-                    <li>Usuários sem conexão com o servidor por mais de <strong>3 minutos</strong> serão desconectados
-                        automaticamente.</li>
-                    <li>Usuários inativos por mais de <strong>10 minutos</strong> também serão desconectados
-                        automaticamente para maior segurança dos dados.</li>
-                    <li>Nova aba <strong>“Dados Profissionais”</strong> no perfil de colaboradores, com campos para
-                        <em>categoria da CNH</em>, <em>setor</em> e <em>cargo na empresa</em>.</li>
-                    <li>Nova aba <strong>“Exames”</strong> no perfil de colaboradores, exibindo todos os exames
-                        realizados, prazos e datas de vencimento.</li>
-                    <li>Nova aba <strong>“EPI”</strong> no perfil de colaboradores, mostrando todos os EPIs entregues e
-                        seus respectivos status.</li>
-                    <li>Formulário adicionado para cadastro de <strong>Empresa, Supervisor e Cidade</strong>.</li>
-                    <li>Ao selecionar um <strong>Supervisor</strong>, o sistema exibe automaticamente seus <em>contatos
-                            (telefone e e-mail)</em>.</li>
-                    <li>Nova <strong>tela para o RH</strong>, com visão unificada de todos os colaboradores e seus
-                        principais indicadores: exames, EPIs, integrações e cursos.</li>
-                    <li>Nova aba <strong>“Cursos”</strong> no perfil de colaboradores, exibindo os cursos realizados e
-                        seus prazos de vencimento.</li>
-                    <li>Os <strong>acessos e permissões</strong> de cada usuário agora são definidos automaticamente
-                        conforme o <em>setor vinculado</em> ao colaborador.</li>
-                    <li>Adicionada nova aba <strong>“Status”</strong> nas informações da OS, permitindo a
-                        <strong>alteração direta do status</strong>.</li>
-                    <li>Cada painel de <strong>OS na programação</strong> agora exibe uma <strong>tag colorida</strong>
-                        que indica o status da OS:</li>
-                    <ul>
-                        <li>⚪ – Sem responsável;</li>
-                        <li>🟠 – Aguardando;</li>
-                        <li>🔴 – Parada;</li>
-                        <li>🔵 – Em execução;</li>
-                        <li>🟡 – Em espera;</li>
-                        <li>⚫ – Cancelado.</li>
-                    </ul>
-                    <li>Nova tela <strong>Gestão</strong>: analise todos os dados de cadastros gerais (EPI, Exames,
-                        Cursos, Empresa, Supervisor, Cidade). Adicione, edite ou apague os registros em um único local;
-                    </li>
-                    <li>Clique com o botão direito para visualizar integração (caso colaborador esteja com sinal de
-                        atenção ou vencido);</li>
-                    <li>Aba exclusiva de OS para visualizar, editar e apagar. Com integração de gráficos e contadores de
-                        status (Tela Gestão);</li>
-                </ul>
-            </details>
+    #painel-aniversarios {
+        width: 280px;
+        padding: 15px;
+        background: var(--bg-bloco);
+        color: var(--texto-principal);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        border-left: 1px solid rgba(255, 255, 255, .1);
+    }
 
-            <details>
-                <summary>⚙️ Alterado</summary>
-                <ul>
-                    <li>Agora é possível <strong>selecionar múltiplos dias</strong> para transferir colaboradores entre
-                        OSs de forma simultânea.</li>
-                    <li>Ao selecionar uma <strong>empresa</strong> no cadastro de OS, se houver <em>supervisor</em> e
-                        <em>cidade</em> vinculados, os campos correspondentes são <strong>preenchidos
-                            automaticamente</strong>.</li>
-                    <li>Ao selecionar um dia, o sistema exibe apenas as <strong>OSs com colaboradores alocados</strong>
-                        em datas anteriores, melhorando significativamente o <em>desempenho</em> da comunicação com o
-                        servidor.</li>
-                    <li>Ao mudar status da programação, os usuários conectados irão atualizar a programação
-                        automaticamente;</li>
-                </ul>
-            </details>
+    #painel-aniversarios h4 {
+        text-align: center;
+        font-size: 16px;
+        color: var(--texto-principal);
+        margin: 0;
+    }
 
-            <details>
-                <summary>🐞 Corrigido</summary>
-                <ul>
-                    <li>Correção do <strong>nome duplicado</strong> de usuários online na tela principal.</li>
-                    <li>O botão de <strong>Filtrar prioridade Alta</strong> e o <strong>Modo Foco</strong> afetavam
-                        outros dias do painel — agora atuam apenas no dia correspondente.</li>
-                    <li>Corrigido erro que permitia adicionar em uma OS colaboradores com <strong>afastamento, atestado
-                            ou licença-paternidade</strong>.</li>
-                    <li>Correção de exibição incorreta de <strong>datas de aniversário</strong> e
-                        <strong>atestados</strong> (eram mostrados com um dia de diferença).</li>
-                </ul>
-            </details>
+    /* Áreas com scroll oculto */
+    .area-cards {
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
 
-            <details>
-                <summary>🗑️ Removido</summary>
-                <ul>
-                    <li>Ação de <strong>duplo clique</strong> sobre o nome do colaborador disponível.</li>
-                    <li>Função <strong>“Fixar OS”</strong>.</li>
-                </ul>
-            </details>
+    .area-cards::-webkit-scrollbar {
+        display: none;
+    }
 
-            <details>
-                <summary>🕰️ Obsoleto</summary>
-                <p>Nenhum item listado nesta versão.</p>
-            </details>
-        </details>
+    /* Divisão 70/30 do painel */
+    #lista-aniversarios {
+        flex: 7;
+    }
+
+    #lista-proximos {
+        flex: 3;
+    }
+
+    /* ============================================================
+   CARDS DOS ANIVERSARIANTES
+============================================================ */
+
+    .card-aniver {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: var(--bg-card);
+        border: 1px solid rgb(59, 59, 59);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        transition: 0.2s ease;
+        overflow: hidden;
+        font-size: 13px;
+    }
+
+    .card-aniver:hover {
+        background: #383838;
+        transform: scale(1.02);
+    }
+
+    .card-aniver img {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .card-hoje {
+        border: 1px solid #ffae0062 !important;
+    }
+
+    /* ============================================================
+   CONFETES PARA ANIVERSARIANTE DO DIA
+============================================================ */
+
+    .confetti-container {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .confetti {
+        position: absolute;
+        width: 6px;
+        height: 10px;
+        opacity: 0.9;
+        animation: confettiFall linear infinite;
+    }
+
+    @keyframes confettiFall {
+        0% {
+            transform: translateY(-10px) rotate(0deg);
+        }
+
+        100% {
+            transform: translateY(140px) rotate(360deg);
+        }
+    }
+
+    /* ============================================================
+   CARDS INFORMATIVOS (BARRA INFERIOR)
+============================================================ */
+
+    #painel-infos-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 280px;
+        /* espaço do painel da direita */
+        padding: 10px 20px;
+        background: var(--bg-bloco);
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        align-items: center;
+        z-index: 900;
+        flex-wrap: wrap;
+        width: 97.8%;
+        border-radius: 8px;
+    }
+
+    .card-info-bottom {
+        display: flex;
+        align-items: center;
+        background: #2b2b2b;
+        padding: 10px 14px;
+        border-radius: 10px;
+        box-shadow: 0 0 8px #00000055;
+        border-left: 3px solid #ffd700;
+        min-width: 180px;
+        transition: 0.2s;
+    }
+
+    .card-info-bottom:hover {
+        background: #383838;
+        transform: scale(1.04);
+        box-shadow: 0 0 14px #00000088;
+    }
+
+    .card-info-bottom .icon {
+        font-size: 28px;
+        margin-right: 12px;
+    }
+
+    .card-info-bottom .titulo {
+        font-weight: bold;
+        font-size: 12px;
+        color: #38c415;
+    }
+
+    .card-info-bottom .valor {
+        font-size: 13px;
+        color: #e0e0e0;
+    }
 
 
 
-        </article>
-    </section>
+    /* Painéis de comunicados (4 categorias) */
+    #painel-avisos {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        /* 4 colunas */
+        gap: 20px;
+        padding: 0 40px;
+        margin-top: 20px;
+        width: 97%;
+    }
+
+    /* Cada painel individual */
+    .painel-comunicado {
+        background: var(--bg-bloco);
+        border-radius: 10px;
+        padding: 12px;
+        box-shadow: 0 0 6px #00000055;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        height: 60vh;
+        /* limite vertical */
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
+
+    .painel-comunicado::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Título menor */
+    .painel-comunicado h3 {
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: var(--texto-principal);
+        text-align: center;
+    }
+
+    /* Item interno menor */
+    .item-comunicado {
+        display: flex;
+        gap: 8px;
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        border-left: 3px solid #ffd700;
+        border-top: 1px solid var(--cor-cinza-300);
+        border-bottom: 1px solid var(--cor-cinza-300);
+        border-right: 1px solid var(--cor-cinza-300);
+        font-size: 12px;
+    }
+
+    /* Ícone menor */
+    .item-icon {
+        font-size: 17px;
+        margin-top: 2px;
+    }
+
+    .item-titulo {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--texto-principal);
+        padding-bottom: 5px;
+    }
+
+    .item-texto {
+        font-size: 12px;
+        color: var(--cor-cinza-700);
+        line-height: 15px;
+    }
+
+    /* Cores por categoria */
+    .rh {
+        border-left-color: #00c3ff;
+        background: #006a8a18;
+    }
+
+    .treinamentos {
+        border-left-color: #4dff88;
+        background: #00802b18;
+    }
+
+    .diretoria {
+        border-left-color: #ffae00;
+        background: #855b0018;
+    }
+
+    .seguranca {
+        border-left-color: #ff4747;
+        background: #80000018;
+    }
+
+    .btn-novo-aviso {
+        font-size: 14px;
+        margin: 5px 5px 5px 40px;
+    }
+
+    /* Modal fundo */
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Modal box */
+    .modal-conteudo {
+        width: 350px;
+        background: #1e1e1e;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #444;
+        box-shadow: 0 0 15px #000000aa;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-conteudo h2 {
+        margin-top: 0;
+        color: var(--cor-verde);
+    }
+
+    /* Campos */
+    .modal-conteudo label {
+        display: block;
+        margin-top: 12px;
+        color: #ccc;
+        font-size: 14px;
+    }
+
+    .modal-conteudo input,
+    .modal-conteudo textarea,
+    .modal-conteudo select {
+        width: 95%;
+        padding: 8px;
+        margin-top: 4px;
+        border-radius: 6px;
+        border: 1px solid #555;
+        background: #2b2b2b;
+        color: #eee;
+    }
+
+    .modal-conteudo textarea {
+        height: 80px;
+        resize: none;
+    }
+
+    /* Ícones */
+    .lista-icones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .lista-icones span {
+        padding: 6px;
+        font-size: 21px;
+        cursor: pointer;
+        background: #262626;
+        border-radius: 6px;
+        transition: 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .lista-icones span:hover {
+        background: #3a3a3a;
+        transform: scale(1.1);
+    }
+
+    .lista-icones .ativo {
+        border: 1px solid var(--cor-verde);
+        color: black;
+    }
+
+    /* Botões */
+    .modal-botoes {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .modal-botoes button {
+        padding: 8px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.92);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .painel-acoes {
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 270px;
+        flex-direction: row-reverse;
+    }
+
+    .painel-acoes span {
+        cursor: pointer;
+        margin-right: 2px;
+        opacity: 0.5;
+    }
+
+    .painel-acoes span:hover {
+        opacity: 1;
+    }
+</style>
+
+
+<div class="painel_inicio">
+    <div id="conteudo-central">
+
+        <div>
+
+            <h2 class="textoHome">Bem-vindo à página inicial!</h2>
+            <p class="textoHome">Escolha uma seção no menu à direita para navegar.</p><br><br>
+
+            <section aria-labelledby="release-notes-title" class="release-notes">
+                <h2 id="release-notes-title">📦 Atualização do Sistema</h2>
+                <article aria-labelledby="v108-title">
+                    <header>
+                        <h2 id="v108-title" style="color: rgb(251, 255, 0);text-shadow: 1px 1px 2px #1a1a1a;">Versão
+                            1.2.4</h2>
+                    </header>
+                </article>
+            </section>
+        </div>
+        <!-- BOTÃO NOVO AVISO -->
+        <button id="btnNovoAviso" class="btn-novo-aviso bt_padrao bt_cad">+ Novo aviso</button>
+        <div id="painel-avisos">
+
+            <div class="painel-comunicado">
+                <h3>🧑‍💼 Avisos do RH</h3>
+                <div class="panel-rh"></div>
+            </div>
+            <div class="painel-comunicado">
+                <h3>📢 Comunicados da Diretoria</h3>
+                <div class="panel-diretoria"></div>
+            </div>
+            <div class="painel-comunicado">
+                <h3>⛑️ Avisos de Segurança</h3>
+                <div class="panel-seguranca"></div>
+            </div>
+            <div class="painel-comunicado">
+                <h3>🎓 Treinamentos Futuros</h3>
+                <div class="panel-treinamentos"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL -->
+    <div id="modalAviso" class="modal">
+        <div class="modal-conteudo">
+
+            <h2 id="modalTitulo">Novo Aviso</h2>
+
+            <label>Categoria:</label>
+            <select id="avisoCategoria">
+                <option value="rh">Avisos do RH</option>
+                <option value="diretoria">Comunicados da Diretoria</option>
+                <option value="seguranca">Avisos de Segurança</option>
+                <option value="treinamentos">Treinamentos Futuros</option>
+            </select>
+
+            <label>Ícone:</label>
+            <div id="iconeLista" class="lista-icones">
+                <span data-icone="📝">📝</span>
+                <span data-icone="📂">📂</span>
+                <span data-icone="📊">📊</span>
+                <span data-icone="📈">📈</span>
+
+                <!-- Elétrica -->
+                <span data-icone="⚡">⚡</span>
+                <span data-icone="🔌">🔌</span>
+                <span data-icone="💡">💡</span>
+                <span data-icone="🧰">🧰</span>
+                <span data-icone="🔧">🔧</span>
+
+                <!-- Engenharia / Construção -->
+                <span data-icone="📐">📐</span>
+                <span data-icone="🧱">🧱</span>
+                <span data-icone="🛠️">🛠️</span>
+
+                <!-- Gestão / Administração / RH -->
+                <span data-icone="🧑‍💼">🧑‍💼</span>
+                <span data-icone="📆">📆</span>
+                <span data-icone="⏱️">⏱️</span>
+                <span data-icone="💼">💼</span>
+                <span data-icone="💬">💬</span>
+                <span data-icone="🧾">🧾</span>
+
+                <!-- Saude -->
+                <span data-icone="🩺">🩺</span>
+                <span data-icone="💉">💉</span>
+                <span data-icone="💊">💊</span>
+
+                <!-- Saude -->
+                <span data-icone="💸">💸</span>
+                <span data-icone="💲">💲</span>
+
+                <!-- Segurança -->
+                <span data-icone="🦺">🦺</span>
+                <span data-icone="🔒">🔒</span>
+                <span data-icone="📌">📌</span>
+                <span data-icone="⚠️">⚠️</span>
+
+                <!-- Veículos -->
+                <span data-icone="🚗">🚗</span>
+                <span data-icone="🚚">🚚</span>
+                <span data-icone="🚌">🚌</span>
+                <span data-icone="🏍️">🏍️</span>
+
+                <!-- Outros -->
+                <span data-icone="💎">💎</span>
+                <span data-icone="🎗️">🎗️</span>
+                <span data-icone="🏆">🏆</span>
+                <span data-icone="🐈">🐈</span>
+            </div>
+
+            <label>Título:</label>
+            <input type="text" id="avisoTitulo">
+
+            <label>Texto:</label>
+            <textarea id="avisoTexto"></textarea>
+
+            <div class="modal-botoes">
+                <button id="btnSalvarAviso" class="bt_padrao bt_cad">Salvar</button>
+                <button id="btnCancelarAviso" class="bt_padrao bt_cancel">Cancelar</button>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- CARDS INFORMATIVOS (EM BAIXO) -->
+    <div id="painel-infos-bottom" class="glass" style="display: none;">
+
+        <div class="card-info-bottom">
+            <div class="icon">👷</div>
+            <div>
+                <div class="titulo">Colaboradores hoje</div>
+                <div class="valor" id="info-colab-hoje">--</div>
+            </div>
+        </div>
+
+        <div class="card-info-bottom">
+            <div class="icon">🛠️</div>
+            <div>
+                <div class="titulo">OSs em execução</div>
+                <div class="valor" id="info-oss-hoje">--</div>
+            </div>
+        </div>
+
+        <div class="card-info-bottom">
+            <div class="icon">⚠️</div>
+            <div>
+                <div class="titulo">Documentos</div>
+                <div class="valor" id="info-docs">--</div>
+            </div>
+        </div>
+
+        <div class="card-info-bottom">
+            <div class="icon">📝</div>
+            <div>
+                <div class="titulo">Integrações</div>
+                <div class="valor" id="info-integracoes">--</div>
+            </div>
+        </div>
+
+        <div class="card-info-bottom">
+            <div class="icon">🏥</div>
+            <div>
+                <div class="titulo">Atestados</div>
+                <div class="valor" id="info-atestados">--</div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- PAINEL DE ANIVERSARIANTES (DIREITA) -->
+    <div id="painel-aniversarios" class="glass">
+        <h4>🎂 Aniversariantes do mês</h4>
+        <div id="lista-aniversarios" class="area-cards"></div>
+
+        <h4 style="margin-top: 25px;">⏳ Próximos aniversários</h4>
+        <div id="lista-proximos" class="area-cards"></div>
+    </div>
+
+
 </div>

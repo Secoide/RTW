@@ -34,6 +34,7 @@ async function getExameByColaborador(idFunc) {
             fce.id as idfce,
             fce.data,
             fce.vencimento,
+            fce.anexoExamePDF,
             ROW_NUMBER() OVER (
               PARTITION BY f.id, e.idexame
               ORDER BY fce.data DESC, fce.id DESC
@@ -50,6 +51,10 @@ async function getExameByColaborador(idFunc) {
           u.descricao  AS descricao,
           u.icone      AS icone,
 		      u.idfce,
+              CASE 
+        WHEN u.anexoExamePDF IS NOT NULL AND u.anexoExamePDF <> '' THEN 'pdf_anexado'
+        ELSE 'sem_pdf'
+        END AS contemPDF,
           -- Datas já formatadas (pt-BR)
           DATE_FORMAT(u.data, '%d/%m/%Y') AS data_realizacao,
           CASE

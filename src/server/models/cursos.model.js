@@ -2,12 +2,12 @@ const connection = require('../config/db');
 
 // Listar todos
 async function getCursos() {
-    const [rows] = await connection.query(`
+  const [rows] = await connection.query(`
     SELECT *
       FROM cursos
       ORDER BY nome ASC;
   `);
-    return rows;
+  return rows;
 }
 
 // Listar todos cursos em CBX (apenas ID e Nome)
@@ -21,18 +21,18 @@ async function getCursosCBX() {
 
 // Buscar por ID
 async function getCursoById(id) {
-    const [rows] = await connection.query(
-        `SELECT telefone, email
+  const [rows] = await connection.query(
+    `SELECT telefone, email
       FROM tb_supervisorcliente 
       WHERE id_supervisores = ?`,
-        [id]
-    );
-    return rows[0] || null;
+    [id]
+  );
+  return rows[0] || null;
 }
 
 // Buscar supervisor por ID da empresa
 async function getCursosByColaborador(idFunc) {
-    const [rows] = await connection.query(`
+  const [rows] = await connection.query(`
       WITH ultimos AS (
           SELECT
             f.id                                  AS idfunc,
@@ -42,6 +42,7 @@ async function getCursosByColaborador(idFunc) {
             fce.id as idfcc,
             fce.datarealizado,
             fce.vencimento,
+            fce.anexoCursoPDF,
             ROW_NUMBER() OVER (
               PARTITION BY f.id, e.id
               ORDER BY fce.datarealizado DESC, fce.id DESC
@@ -57,6 +58,10 @@ async function getCursosByColaborador(idFunc) {
           u.nome       AS nome,
           u.descricao  AS descricao,
           u.idfcc,
+          CASE 
+			WHEN u.anexoCursoPDF IS NOT NULL AND u.anexoCursoPDF <> '' THEN 'pdf_anexado'
+			ELSE 'sem_pdf'
+		  END AS contemPDF,
           -- Datas já formatadas (pt-BR)
           DATE_FORMAT(u.datarealizado, '%d/%m/%Y') AS data_realizacao,
            DATE_FORMAT(DATE_ADD(u.datarealizado, INTERVAL u.vencimento MONTH), '%d/%m/%Y') AS data_vencimento,
@@ -85,58 +90,58 @@ async function getCursosByColaborador(idFunc) {
           DATE_ADD(u.datarealizado, INTERVAL u.vencimento MONTH) ASC;
       `, [idFunc]);
 
-    return rows || [];  // sempre retorna array
+  return rows || [];  // sempre retorna array
 }
 
 
 // Criar novo supervisor
 async function createCurso(data) {
-    // 1) Insere supervisor
-    const sql = `
+  // 1) Insere supervisor
+  const sql = `
     INSERT INTO cursos (nome, descricao)
     VALUES (?, ?)
   `;
-    const [cursoResult] = await connection.query(sql, [
-        data.nome,
-        data.descricao
-    ]);
+  const [cursoResult] = await connection.query(sql, [
+    data.nome,
+    data.descricao
+  ]);
 
-    const idCurso = cursoResult.insertId;
+  const idCurso = cursoResult.insertId;
 
-    return {
-        message: "Curso cadastrado com sucesso!",
-        id: idCurso,
-        nome: data.nome,
-    };
+  return {
+    message: "Curso cadastrado com sucesso!",
+    id: idCurso,
+    nome: data.nome,
+  };
 }
 
 
 // Atualizar
 async function updateCurso(id, data) {
-    const sql = `
+  const sql = `
     UPDATE tb_supervisorcliente
     SET nome = ?, telefone = ?, email = ?
     WHERE id_supervisores = ?
   `;
-    const [result] = await connection.query(sql, [
-        data.nome,
-        data.telefoneSup,
-        data.emailSup,
-        id
-    ]);
-    return result.affectedRows > 0;
+  const [result] = await connection.query(sql, [
+    data.nome,
+    data.telefoneSup,
+    data.emailSup,
+    id
+  ]);
+  return result.affectedRows > 0;
 }
 
 // Deletar
 async function deleteCurso(id) {
-    const [result] = await connection.query('DELETE FROM cursos WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+  const [result] = await connection.query('DELETE FROM cursos WHERE id = ?', [id]);
+  return result.affectedRows > 0;
 }
 
 // Deletar
 async function deleteCursosByColaborador(id) {
-    const [result] = await connection.query('DELETE FROM funcionarios_contem_cursos WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+  const [result] = await connection.query('DELETE FROM funcionarios_contem_cursos WHERE id = ?', [id]);
+  return result.affectedRows > 0;
 }
 
 //Anexar curso em colaborador
@@ -166,14 +171,14 @@ async function buscarCursoPorId(id) {
 }
 
 module.exports = {
-    getCursos,
-    getCursosCBX,
-    getCursoById,
-    createCurso,
-    updateCurso,
-    deleteCurso,
-    getCursosByColaborador,
-    deleteCursosByColaborador,
-    inserirCurso,
-    buscarCursoPorId
+  getCursos,
+  getCursosCBX,
+  getCursoById,
+  createCurso,
+  updateCurso,
+  deleteCurso,
+  getCursosByColaborador,
+  deleteCursosByColaborador,
+  inserirCurso,
+  buscarCursoPorId
 };
