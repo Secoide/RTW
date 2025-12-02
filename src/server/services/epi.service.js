@@ -119,7 +119,16 @@ async function apagarAssinaturasAntigas(idfcepi) {
     }
 }
 
+async function gerarTokenAssinatura(idfcepi) {
+  const crypto = require("crypto");
+  const token = crypto.randomBytes(32).toString("hex");
+  await EPIModel.salvarTokenAssinatura(idfcepi, token);
+  return token;
+}
 
+async function validarToken(idfcepi, token) {
+  return await EPIModel.validarTokenAssinatura(idfcepi, token);
+}
 
 module.exports = {
   listarEPIs,
@@ -134,5 +143,7 @@ module.exports = {
   salvarEPI,
   baixarEPI,
   salvarCaminhoAssinatura,
-  apagarAssinaturasAntigas
+  apagarAssinaturasAntigas,
+  gerarTokenAssinatura,
+  validarToken
 };

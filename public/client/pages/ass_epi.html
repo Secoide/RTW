@@ -300,6 +300,12 @@
         <script>
             const urlParams = new URLSearchParams(window.location.search);
             const idfcepi = urlParams.get("idfcepi");
+            const token = urlParams.get("token");
+
+            if (!token) {
+                alert("Link inválido: token ausente.");
+            }
+
 
             const canvas = document.getElementById("signature-pad");
             let signaturePad = null;
@@ -327,7 +333,8 @@
             }
 
             async function carregarAssinaturaExistente() {
-                const res = await fetch(`/api/epi/assinatura/${idfcepi}`);
+                const res = await fetch(`/api/epi/assinatura/${idfcepi}?token=${token}`);
+
                 if (!res.ok) return;
 
                 const dados = await res.json();
@@ -460,8 +467,10 @@
 
                     const envio = {
                         idfcepi: idfcepi,
-                        assinaturaBase64: assinaturaBase64
+                        assinaturaBase64: assinaturaBase64,
+                        token: token
                     };
+
 
                     try {
                         const response = await fetch("/api/epi/por-colaborador/assinatura", {
@@ -493,7 +502,8 @@
                 });
 
                 $("#baixarPDF").on("click", function () {
-                    const url = `/api/epi/assinatura/pdf/${idfcepi}`;
+                    const url = `/api/epi/assinatura/pdf/${idfcepi}?token=${token}`;
+
                     const a = document.createElement("a");
                     a.href = url;
                     a.target = "_blank";

@@ -182,6 +182,27 @@ async function salvarCaminhoAssinatura(idfcepi, filename) {
 }
 
 
+async function salvarTokenAssinatura(idfcepi, token) {
+  await connection.query(`
+    UPDATE funcionarios_contem_epi
+    SET token_assinatura = ?
+    WHERE id = ?
+  `, [token, idfcepi]);
+}
+
+async function validarTokenAssinatura(idfcepi, token) {
+  const [rows] = await connection.query(`
+    SELECT token_assinatura
+    FROM funcionarios_contem_epi
+    WHERE id = ?
+  `, [idfcepi]);
+
+  if (!rows[0]) return false;
+
+  return rows[0].token_assinatura === token;
+}
+
+
 module.exports = {
   getEPIs,
   getEPIById,
@@ -193,5 +214,7 @@ module.exports = {
   deleteEPIByColaborador,
   inserirEPI,
   buscarEPIPorId,
-  salvarCaminhoAssinatura
+  salvarCaminhoAssinatura,
+  salvarTokenAssinatura,
+  validarTokenAssinatura
 };

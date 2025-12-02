@@ -183,10 +183,12 @@ async function checkEPI(req, res) {
     return res.sendStatus(500);
   }
 }
-
 async function uploadAssinatura(req, res) {
   try {
-    const { idfcepi, assinaturaBase64 } = req.body;
+    const { idfcepi, assinaturaBase64, token } = req.body;
+
+    // 🔒 valida token
+    if (!(await validarAcessoPublico(idfcepi, token, res))) return;
 
     if (!idfcepi || !assinaturaBase64) {
       return res.status(400).json({ error: "Dados incompletos" });
@@ -233,7 +235,10 @@ async function uploadAssinatura(req, res) {
 async function getAssinatura(req, res) {
   try {
     const { idfcepi } = req.params;
+    const { token } = req.query;
 
+    // 🔒 valida token
+    if (!(await validarAcessoPublico(idfcepi, token, res))) return;
     const resultado = await EPIService.buscarEPIsByColaboradorContem(idfcepi);
 
     // resultado = array → pegar o primeiro item
@@ -260,6 +265,11 @@ async function getAssinatura(req, res) {
 async function gerarPDFComAssinatura(req, res) {
   try {
     const { idfcepi } = req.params;
+    const { token } = req.query;
+
+    // 🔒 valida token
+    if (!(await validarAcessoPublico(idfcepi, token, res))) return;
+
 
     // Buscar dados no MySQL (lista completa do colaborador + EPI)
     const registros = await EPIService.buscarEPIsByColaboradorContem(idfcepi);
@@ -653,6 +663,30 @@ async function gerarFichaEPI(req, res) {
 }
 }
 
+// --- TOKEN DE ASSINATURA (SEM EXPIRAÇÃO) ---
+async function gerarTokenAssinatura(req, res) {
+  try {
+    const { idfcepi } = req.params;
+
+    const token = await EPIService.gerarTokenAssinatura(idfcepi);
+
+    return res.json({ token });
+  } catch (err) {
+    console.error("Erro ao gerar token de assinatura:", err);
+    return res.status(500).json({ error: "Erro ao gerar token de assinatura." });
+  }
+}
+
+async function validarAcessoPublico(idfcepi, token, res) {
+  const valido = await EPIService.validarToken(idfcepi, token);
+
+  if (!valido) {
+    res.status(403).json({ error: "Token inválido." });
+    return false;
+  }
+
+  return true;
+}
 
 
 module.exports = {
@@ -670,5 +704,7 @@ module.exports = {
   uploadAssinatura,
   getAssinatura,
   gerarPDFComAssinatura,
-  gerarFichaEPI
+  gerarFichaEPI,
+  gerarTokenAssinatura,
+  validarAcessoPublico
 };

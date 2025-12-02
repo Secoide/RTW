@@ -6,7 +6,7 @@ import { open_form_AnexarExame } from "../forms/anexarExame.js";
 import { open_form_AnexarEPI } from "../forms/anexarEPI.js";
 import { open_form_AnexarIntegracao } from "../forms/anexarIntegracao.js";
 import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
-import { formatarTelefoneParaWhatsApp } from "../../utils/formatters/number-format.js"; 
+import { formatarTelefoneParaWhatsApp } from "../../utils/formatters/number-format.js";
 
 // ========================================================
 // 🔧 Funções utilitárias globais
@@ -107,7 +107,7 @@ function removerDaOS($colab, socket, osID, funcID, fnoID, dataDia) {
 
 async function abrirIntegracao(funcID) {
   await get_carregarPerfilUsuario(funcID);
-    $('.cad a.bt_menu[data-target=".painel_integra"]').trigger("click");
+  $('.cad a.bt_menu[data-target=".painel_integra"]').trigger("click");
 }
 
 function removerSupervisor(osID, dataDia, $colab) {
@@ -598,7 +598,11 @@ export function initColaboradoresContextMenu(socket) {
             }
 
             // Gera a URL automática
-            const assinaturaURL = `${window.location.origin}/assinar-epi?idfcepi=${idFuncionarioEPI}`;
+            const r = await fetch(`/api/epi/gerar-token/${idFuncionarioEPI}`, { method: "POST" });
+            const { token } = await r.json();
+
+            const assinaturaURL = `${window.location.origin}/assinar-epi?idfcepi=${idFuncionarioEPI}&token=${token}`;
+
 
 
             // Copiar para a área de transferência
@@ -621,7 +625,7 @@ export function initColaboradoresContextMenu(socket) {
 
             // Abre o WhatsApp
             //window.open(whatsappURL, "_blank");
-            
+
             // Feedback visual
             Swal.fire({
               icon: "success",
