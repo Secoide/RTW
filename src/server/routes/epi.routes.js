@@ -11,9 +11,9 @@ router.put('/editar/:id', verificarAutenticacao, epiController.updateEPI);
 router.get('/colaborador_contem/:idfcepi', verificarAutenticacao, epiController.getEPIsByColaboradorContem);
 
 // 🔥 ROTAS DE ASSINATURA – MUITO IMPORTANTE ESTAREM AQUI EM CIMA
-router.post('/por-colaborador/assinatura', verificarAutenticacao, epiController.uploadAssinatura);
-router.get('/assinatura/:idfcepi', verificarAutenticacao, epiController.getAssinatura);
-router.get('/assinatura/pdf/:idfcepi', verificarAutenticacao, epiController.gerarPDFComAssinatura);
+router.post('/por-colaborador/assinatura', epiController.uploadAssinatura);
+router.get('/assinatura/:idfcepi', epiController.getAssinatura);
+router.get('/assinatura/pdf/:idfcepi', epiController.gerarPDFComAssinatura);
 router.get("/ficha-completa/:idColab", verificarAutenticacao, epiController.gerarFichaEPI);
 
 
