@@ -166,8 +166,8 @@ function montarCard(colab) {
 
     const cardHTML = `
     <div class="card-aniver ${classeHoje}" data-hoje="${isHoje}">
-        <img src="${colab.fotoperfil}" 
-             onerror="this.src='/imagens/fotoperfil/user-default.jpg'">
+        <img src="${colab.fotoperfil}?v=${new Date().getTime()}"
+     onerror="this.src='/imagens/fotoperfil/user-default.jpg'">
 
         <div>
             <div class="nome">${colab.nome}</div>
