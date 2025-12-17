@@ -86,6 +86,7 @@ async function getListaGeralRH() {
         SELECT 
         f.id AS idFunc,
         f.fotoperfil,
+        f.versao_foto,
         f.nome,
         CONCAT(DATE_FORMAT(f.nascimento, '%d/%m/%Y'), ' (', TIMESTAMPDIFF(YEAR, f.nascimento, CURDATE()), ' anos)') AS nascimento_idade,
         IFNULL(f.cpf, '') AS cpf,

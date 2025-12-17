@@ -27,6 +27,6 @@ router.get('/:id', verificarAutenticacao, colaboradoresController.getColaborador
 router.post('/cadastrar', verificarAutenticacao, colaboradoresController.createColaborador);
 router.put('/editar/:id', verificarAutenticacao, colaboradoresController.updateColaborador);
 router.put('/editar-profissional/:id', verificarAutenticacao, colaboradoresController.updateProfissionalColab);
-router.delete('/:id', verificarAutenticacao, colaboradoresController.deleteColaborador);
+router.delete('/deletar/:id', verificarAutenticacao, colaboradoresController.deleteColaborador);
 
 module.exports = router;

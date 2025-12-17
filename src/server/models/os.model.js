@@ -88,9 +88,9 @@ async function updateOS(id, data) {
     campos.push("descricao = ?");
     valores.push(data.descricao);
   }
-  if (data.orçado !== undefined) {
+  if (data.orcado !== undefined) {
     campos.push("orcado = ?");
-    valores.push(data.orçado);
+    valores.push(data.orcado);
   }
   if (data.criado !== undefined) {
     campos.push("datacriada = ?");
@@ -107,6 +107,10 @@ async function updateOS(id, data) {
   if (data.cidade !== undefined) {
     campos.push("id_cidade = ?");
     valores.push(data.cidade);
+  }
+  if (data.responsavel !== undefined) {
+    campos.push("id_responsavel = ?");
+    valores.push(data.responsavel);
   }
 
   // Só define data de conclusão manual se status NÃO for '4'

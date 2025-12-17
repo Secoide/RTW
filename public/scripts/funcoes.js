@@ -1,6 +1,6 @@
 
 $(document).ready(function () {
-    $(document).on('click mousedown mouseup mousemove mouseenter mouseleave', '.colaborador.saude, .colaborador.paternidade, .colaborador.ferias, .colaborador.afastamento', function (e) {
+    $(document).on('click mousedown mouseup mousemove mouseenter mouseleave', '.colaborador.saude, .colaborador.paternidade, .colaborador.maternidade, .colaborador.ferias, .colaborador.afastamento', function (e) {
         e.stopImmediatePropagation();
         e.preventDefault();
         return false;

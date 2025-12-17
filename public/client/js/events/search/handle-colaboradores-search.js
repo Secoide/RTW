@@ -70,6 +70,7 @@ export function initColaboradoresSearch(socket) {
                 if ($colab.attr('data-status') === 'ferias'
                     || $colab.hasClass('saude')
                     || $colab.hasClass('paternidade')
+                    || $colab.hasClass('maternidade')
                     || $colab.hasClass('falta-indevida')
                     || $colab.hasClass('afastamento')) {
                     cor = '#dc3545';

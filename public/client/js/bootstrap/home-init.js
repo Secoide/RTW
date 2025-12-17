@@ -4,8 +4,9 @@ import "../events/click/handle-atestados.js";
 import { initColaboradoresContextMenu } from "../events/contextmenu/handle-colaboradores-contextmenu.js";
 import { conectarSocket } from "../services/sockets/socket-service.js";
 import { carregarAniversariantes } from "../services/api/aniversariantes.js";
-import { reduzirNome } from "../utils/formatters/strings-format.js"; 
+import { reduzirNome } from "../utils/formatters/strings-format.js";
 
+import { initSantaDropWalkWrapper } from "../services/ui/christmas-painel-inicio.js";
 
 // =======================================================
 // VARIÁVEIS GLOBAIS
@@ -24,6 +25,10 @@ const Toast = Swal.mixin({
     toast.onmouseleave = Swal.resumeTimer;
   }
 });
+
+
+
+
 
 // =======================================================
 // FUNÇÕES BACK-END
@@ -296,19 +301,21 @@ document.querySelectorAll("#iconeLista span").forEach(el => {
 // =======================================================
 // MAIN
 // =======================================================
-export function initHome() {
+export async function initHome() {
 
   const socket = conectarSocket();
   initColaboradoresContextMenu(socket);
 
-  fetch("menu.html")
+  // Aguarda menu
+  await fetch("menu.html")
     .then(res => res.text())
     .then(html => {
       document.getElementById("menu").innerHTML = html;
       aplicarPermissoesMenu_porRoles();
     });
 
-  fetch("menuPerfil.html")
+  // Aguarda menu perfil
+  await fetch("menuPerfil.html")
     .then(res => res.text())
     .then(html => {
       document.getElementById("menuperfil").innerHTML = html;
@@ -316,9 +323,11 @@ export function initHome() {
       initAbrirInfoColabClick();
     });
 
-  carregarAniversariantes();
-  carregarAvisos();
+  // Só agora DOM está completo
+  await carregarAniversariantes();
+  await carregarAvisos();
 
+  initSantaDropWalkWrapper();
   // ==========================================
   // SELEÇÃO DE ÍCONES → AGORA FUNCIONA
   // ==========================================
@@ -332,6 +341,20 @@ export function initHome() {
     });
   });
 
+  document.getElementById("btnLogout").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    // limpa estado local
+    //localStorage.clear();
+    sessionStorage.clear();
+
+    window.location.href = "/login";
+  });
 }
 
 function tempoRelativo(dataString) {

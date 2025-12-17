@@ -72,6 +72,8 @@
     scroll-behavior: smooth;
     position: relative;
     flex-wrap: wrap;
+    height: 86vh;
+    margin-bottom: 5px;
 }
 
 .conjuntoServidor i {
@@ -87,9 +89,10 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    width: 360px;
+    width: 357px;
     margin-top: 20px;
     border-radius: 10px;
+    height: 97%;
 }
 
 .painel_Dia {
@@ -378,6 +381,10 @@
     background-color: var(--paternidade);
 }
 
+.colaborador.maternidade {
+    background-color: var(--maternidade);
+}
+
 .colaborador.falta-indevida {
     background-color: var(--faltaindevida);
 }
@@ -395,6 +402,9 @@
 }
 
 .colaborador.paternidade .nome {
+    color: var(--preto) !important;
+}
+.colaborador.maternidade .nome {
     color: var(--preto) !important;
 }
 
@@ -488,6 +498,12 @@
 
 .colaborador .exame_alerta {
     color: rgb(255, 136, 0);
+    animation: alerta 0.9s ease-in-out infinite;
+}
+
+@keyframes alerta {
+    0%  { transform:  scale(1.0)}
+    100% { transform:  scale(0.5)}
 }
 
 .colaborador .exame_vencido {
@@ -524,6 +540,14 @@
 }
 
 .colaborador.paternidade .nome::after {
+    content: "\f77c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--preto);
+    margin-left: 4px;
+}
+
+.colaborador.maternidade .nome::after {
     content: "\f77c";
     font-family: "Font Awesome 5 Free";
     font-weight: 900;

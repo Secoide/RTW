@@ -100,8 +100,13 @@ body.modal-open {
 }
 
 .painel_foto.paternidade {
-    border: 2px solid #007B97;
-    box-shadow: 1px 1px 15px 0 #007B97;
+    border: 2px solid var(--paternidade);
+    box-shadow: 1px 1px 15px 0 var(--paternidade);
+}
+
+.painel_foto.maternidade {
+    border: 2px solid var(--maternidade);
+    box-shadow: 1px 1px 15px 0 var(--maternidade);
 }
 
 .painel_foto.desligado {
@@ -155,9 +160,16 @@ body.modal-open {
 
 .statusIcon.paternidade::after {
     content: "\f77c";
-    border: 2px solid #007B97;
+    border: 2px solid var(--paternidade);
     background-color: #caf5ff;
-    color: #007B97;
+    color: var(--paternidade);
+}
+
+.statusIcon.maternidade::after {
+    content: "\f77c";
+    border: 2px solid var(--maternidade);
+    background-color: #fdd0fd;
+    color: var(--maternidade);
 }
 
 .statusIcon.desligado::after {
@@ -275,7 +287,8 @@ body.modal-open {
 
 .email-suggestions {
     position: absolute;
-    background: white;
+    background: var(--bg-padrao);
+    color: var(--texto-principal);
     border: 1px solid #ccc;
     width: 300px;
     font-size: 14px;
@@ -288,7 +301,7 @@ body.modal-open {
 }
 
 .email-suggestions div:hover {
-    background: #eee;
+    background: var(--bg-card);
 }
 
 .linha_Setor {
@@ -296,8 +309,18 @@ body.modal-open {
     gap: 20px;
 }
 
+
+.div_atestar{
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
 #motivo {
-    width: 200px;
+    min-width: 180px;
+    width: auto;
 }
 
 #cpf,
@@ -305,6 +328,12 @@ body.modal-open {
     width: 100px;
     text-align: left;
     padding-left: 10px;
+}
+
+.input-erro {
+    border: 2px solid var(--vermelho) !important;
+    background: #fff23a !important;
+    color: black !important;
 }
 
 .linha_padrao {
@@ -344,7 +373,7 @@ body.modal-open {
 }
 
 .img_epi.status-trocar {
-    filter: sepia(100%) saturate(200%) hue-rotate(-40deg) brightness(70%) contrast(200%)
+    filter: sepia(100%) saturate(200%) hue-rotate(-40deg) brightness(60%) contrast(200%)
 }
 
 .statusEPI.status-ok {
@@ -356,7 +385,7 @@ body.modal-open {
 }
 
 .statusEPI.status-trocar {
-    color: #d31919;
+    color: #dd2c2c;
 }
 
 

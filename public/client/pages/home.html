@@ -31,7 +31,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" defer></script>
     <script src="https://unpkg.com/croppie/croppie.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
@@ -47,8 +46,6 @@
     <script src="scripts/nivel_acesso.js" defer></script>
     <script src="scripts/websocket/inatividade.js" defer></script>
 
-    <!-- Inicialização modular -->
-    <script type="module" src="/client/js/main.js"></script>
 
     <style>
         html,
@@ -137,8 +134,9 @@
     <div id="form_cadSupervisor"></div>
     <div id="form_cadCidade"></div>
 
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Inicialização modular -->
+    <script type="module" src="/client/js/main.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Quando o home for carregado, injeta inicio.html dentro de #conteudo

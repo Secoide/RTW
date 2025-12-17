@@ -9,6 +9,7 @@
     });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
 <div class="cad" style="visibility: visible; opacity: 1;">
 
@@ -16,7 +17,7 @@
         <div class="painel_fundoResumo">
             <div class="painel_resumoColab">
                 <div class="painel_foto">
-                    <img id="fotoavatar" class="foto avatar" src="/imagens/user-default.jpg" alt="Avatar">
+                    <img id="fotoavatar" class="foto avatar" src="/imagens/user-default.webp" alt="Avatar">
                     <div class="statusIcon"></div>
                 </div>
                 <div class="resumoDados">
@@ -61,7 +62,7 @@
                         <i class="fa-solid fa-chart-simple"></i>
                         <span class="menu-text">Estatística</span>
                     </a>
-                    <a class="bt_menu" data-target=".painel_nivel">
+                    <a class="bt_menu" data-target=".painel_nivel" style="display: none;">
                         <i class="fa-solid fa-chart-diagram"></i>
                         <span class="menu-text">Nível</span>
                     </a>
@@ -71,7 +72,7 @@
                     </a>
                     <a class="bt_menu" data-target=".painel_senha">
                         <i class="fa-solid fa-lock"></i>
-                        <span class="menu-text">Senha</span>
+                        <span class="menu-text">Config. / Senha</span>
                     </a>
                     <a id="bt_sair_perfil" class="bt_menu bt_sair" title="Fechar Dados">
                         <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>
@@ -115,7 +116,7 @@
                             <div class="linha_contatoColab linha_padrao">
                                 <input id="telefone" class="tbx_teste glass" type="text" name="telefone"
                                     placeholder="(00) 0 0000-0000">
-                                <input id="mail" class="tbx_teste glass" type="email" name="email"
+                                <input id="mail" class="tbx_teste glass input_obrigatorio" type="email" name="email"
                                     placeholder="exemplo@email.com" autocomplete="off"
                                     style="text-align: left; padding-left: 10px;">
                                 <div id="email-suggestions" class="email-suggestions" style="display: none;"></div>
@@ -138,8 +139,8 @@
                             <div class="div_botoesAcao">
                                 <input id="bt_cadColaborador" class="bt_padrao bt_cad" type="submit" name="cadColab"
                                     value="Cadastrar">
-                                <input id="bt_editColab" class="bt_padrao bt_cad" type="submit"
-                                    name="editColab" value="Salvar" style="display: none;">
+                                <input id="bt_editColab" class="bt_padrao bt_cad" type="submit" name="editColab"
+                                    value="Salvar" style="display: none;">
                             </div>
                         </form>
                     </div>
@@ -194,8 +195,8 @@
                             </div>
                             <input type="hidden" name="idColaboradorPro" id="idColaboradorPro">
                             <div class="div_botoesAcao">
-                                <input id="bt_editColabProf" class="bt_padrao bt_cad" type="submit"
-                                    name="editColabProf" value="Salvar">
+                                <input id="bt_editColabProf" class="bt_padrao bt_cad" type="submit" name="editColabProf"
+                                    value="Salvar">
                             </div>
                         </form>
                     </div>
@@ -213,17 +214,17 @@
                     </div>
                     <div class="painel_exames">
                         <p>Exames</p>
-                        <div id="carregarExamesAqui" class="painel_vencimento_exames">
+                        <div id="carregarExamesAqui" class="painel_vencimento_exames scroll-container">
 
                         </div>
-                        <div class="p_acoes linha_padrao">
+                        <div class=" p_acoes linha_padrao">
                             <input type="button" id="bt_anexarExame_noPerfil" class="bt_teste glass" name="anexarExame"
                                 value="Anexar Exame">
                         </div>
                     </div>
                     <div class="painel_cursos">
                         <p>Cursos</p>
-                        <div id="carregarCursosAqui" class="painel_vencimento_cursos">
+                        <div id="carregarCursosAqui" class="painel_vencimento_cursos scroll-container">
 
                         </div>
                         <div class="p_acoes linha_padrao">
@@ -236,25 +237,22 @@
                         <div id="carregarIntegracoesAqui" class="painel_vencimento_integracoes scroll-container">
 
                         </div>
-                        <div class="p_acoes linha_padrao">
-                            <input type="button" id="bt_anexarIntegracao_noPerfil" class="bt_teste glass"
-                                name="anexarIntegracao" value="Anexar Integração">
-                        </div>
                     </div>
                     <div class="painel_atestar">
                         <p>Atestar Colaborador</p>
                         <form id="form_atestar" method="POST">
-                            <div class="linha_padrao">
+                            <div class="div_atestar">
                                 <select id="motivo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
                                     name="atestado" required="required">
                                     <option value="" disabled selected hidden>Selecione o Atestado...</option>
                                     <option value="Ferias">Férias</option>
                                     <option value="Saude">Atestado Saúde</option>
                                     <option value="Paternidade">Licença Paternidade</option>
+                                    <option value="Maternidade">Licença Maternidade</option>
                                     <option value="Afastamento">Afastamento</option>
                                 </select>
-                                <br>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; gap:10px;">
                                     <div>
                                         <label for="datainicio">Data Inicial</label>
                                         <input id="datainicio" class="tbx_teste glass" type="date" name="periodoinicial"
@@ -266,10 +264,10 @@
                                             title="" style="width: 120px;">
                                     </div>
                                 </div>
-                                <textarea id="descricao" class="tbx_teste glass" name="descricaoatest"
-                                    placeholder="Descreva algo, se necessário"
-                                    style="width: 97%; height:50px; padding: 4px; resize: none;"></textarea>
                             </div>
+                            <textarea id="descricao" class="tbx_teste glass" name="descricaoatest"
+                                placeholder="Descreva algo, se necessário"
+                                style="width: auto; padding: 4px; resize: none;"></textarea>
                             <div class="p_acoes p_padrao linha_padrao">
                                 <input class="bt_teste glass" type="submit" name="salvarAtestado" value="Salvar">
                             </div>
@@ -292,16 +290,6 @@
                                     <!-- Linhas serão adicionadas via JS -->
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="painel_desligarColab">
-                            <br>
-                            <div class="linha_padrao">
-                                <h5>Colaborador desligado</h5>
-                                <label class="switch">
-                                    <input type="checkbox" id="checkColabDesligado">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
                         </div>
                     </div>
                     <div class="painel_estatistica">
@@ -334,45 +322,46 @@
                     <div class="painel_senha">
                         <form id="form_senha" autocomplete="off">
                             <div class="linha_padrao linha_senhas">
-                                <form id="form_senha" autocomplete="off">
-                                    <form id="form_senha" autocomplete="off">
-                                        <!-- campo oculto para username (para evitar warning do navegador) -->
-                                        <input type="hidden" name="username" id="username" value="usuario_atual"
-                                            autocomplete="username">
 
-                                        <div>
-                                            <label for="senhaantiga">Antiga Senha</label>
-                                            <div style="position: relative;">
-                                                <input id="senhaantiga" class="tbx_pesquisarOS senha-input"
-                                                    type="password" name="senhaantiga" style="width: 150px;"
-                                                    autocomplete="current-password">
-                                                <i class="fa-solid fa-eye toggle-senha" data-target="senhaantiga"></i>
-                                            </div>
-                                        </div>
+                                <!-- campo oculto para username (para evitar warning do navegador) -->
+                                <input type="hidden" name="username" id="username" value="usuario_atual"
+                                    autocomplete="username">
 
-                                        <div>
-                                            <label for="novasenha">Nova Senha</label>
-                                            <div style="position: relative;">
-                                                <input id="novasenha" class="tbx_pesquisarOS senha-input"
-                                                    type="password" name="novasenha" style="width: 150px;"
-                                                    autocomplete="new-password">
-                                                <i class="fa-solid fa-eye toggle-senha" data-target="novasenha"></i>
-                                            </div>
-                                        </div>
+                                <div>
+                                    <label for="senhaantiga">Antiga Senha</label>
+                                    <div style="position: relative;">
+                                        <input id="senhaantiga" class="tbx_pesquisarOS senha-input" type="password"
+                                            name="senhaantiga" style="width: 150px;" autocomplete="current-password">
+                                        <i class="fa-solid fa-eye toggle-senha" data-target="senhaantiga"></i>
+                                    </div>
+                                </div>
 
-                                        <div>
-                                            <label for="confirmarnovasenha">Confirmar Nova Senha</label>
-                                            <div style="position: relative;">
-                                                <input id="confirmarnovasenha" class="tbx_pesquisarOS senha-input"
-                                                    type="password" name="confirmarnovasenha" style="width: 150px;"
-                                                    autocomplete="new-password">
-                                                <i class="fa-solid fa-eye toggle-senha"
-                                                    data-target="confirmarnovasenha"></i>
-                                            </div>
-                                        </div>
-                                    </form>
+                                <div>
+                                    <label for="novasenha">Nova Senha</label>
+                                    <div style="position: relative;">
+                                        <input id="novasenha" class="tbx_pesquisarOS senha-input" type="password"
+                                            name="novasenha" style="width: 150px;" autocomplete="new-password">
+                                        <i class="fa-solid fa-eye toggle-senha" data-target="novasenha"></i>
+                                    </div>
+                                    <!-- Barra de força -->
+                                    <div id="passwordStrength"
+                                        style="width:150px; height:6px; background:#ccc; border-radius:4px; margin-top:4px;">
+                                        <div id="passwordBar"
+                                            style="height:6px; width:0%; background:red; border-radius:4px;"></div>
+                                    </div>
+                                    <p id="passwordLabel" style="font-size:12px; margin:2px 0 10px 0; color:#888;"></p>
+                                </div>
 
-                                </form>
+
+                                <div>
+                                    <label for="confirmarnovasenha">Confirmar Nova Senha</label>
+                                    <div style="position: relative;">
+                                        <input id="confirmarnovasenha" class="tbx_pesquisarOS senha-input"
+                                            type="password" name="confirmarnovasenha" style="width: 150px;"
+                                            autocomplete="new-password">
+                                        <i class="fa-solid fa-eye toggle-senha" data-target="confirmarnovasenha"></i>
+                                    </div>
+                                </div>
 
                             </div>
 
@@ -381,14 +370,19 @@
                             </div>
 
                             <input type="hidden" name="idColab" id="idColab" value="">
-                            <!-- substitua por JS se necessário -->
                         </form>
-
+                        <div class="div_botoesAcao">
+                            <h3>Configurações Avançadas</h3><br>
+                            <input id="bt_excluirConta" class="bt_padrao bt_cancel" type="submit" name="excluirConta"
+                                value="‼️Excluir conta">
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <div id="crop-modal" hidden>
     <div class="crop-panel">
@@ -410,6 +404,16 @@
 
 
 <script>
+
+    if (!window.Toast) {
+        window.Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    }
+
     $(document).on("click", "#bt_sair_perfil", function () {
         $('#form_cadColab').empty();
     });
@@ -476,8 +480,7 @@
                 }
             });
         } else if (botaoClicado === 'editColab') {
-            // 🔹 Editar
-            const idColaborador = $('#idColaborador').val(); // pega do input hidden
+            const idColaborador = $('#idColaborador').val();
 
             $.ajax({
                 url: `/api/colaboradores/editar/${idColaborador}`,
@@ -486,26 +489,152 @@
                 dataType: 'json',
                 success: function (res) {
                     if (res.sucesso) {
-                        Swal.fire({
-                            icon: "warning",
-                            title: "Atenção",
-                            theme: "dark",
+                        Toast.fire({
+                            icon: "success",
+                            theme: 'dark',
                             text: 'Colaborador atualizado com sucesso!'
                         });
                     } else {
-                        alert(res.mensagem);
+                        // 🔥 Detectar qual campo falta baseando-se na mensagem
+                        destacarCampoQueFalta(res.mensagem);
+                        Toast.fire({
+                            icon: "warning",
+                            theme: 'dark',
+                            title: mensagem
+                        });
                     }
                 },
-                error: function () {
-                    alert('Erro ao atualizar colaborador.');
+                error: function (xhr) {
+                    const resp = xhr.responseJSON;
+
+                    if (resp?.mensagem) {
+                        destacarCampoQueFalta(resp.mensagem);
+                    }
+                    Toast.fire({
+                        icon: "warning",
+                        theme: 'dark',
+                        title: resp?.mensagem || "Erro ao atualizar colaborador."
+                    });
                 }
             });
         }
+
     });
 
 
+    function destacarCampoQueFalta(mensagem) {
+        // Remove erros anteriores
+        $('input').removeClass('input-erro');
 
+        // 🔎 Verifica nome
+        if (mensagem.toLowerCase().includes("nome")) {
+            const inp = $('[name="nome"]');
+            inp.addClass('input-erro').focus();
+        }
 
+        // 🔎 Verifica CPF
+        if (mensagem.toLowerCase().includes("cpf")) {
+            const inp = $('[name="cpf"]');
+            inp.addClass('input-erro').focus();
+        }
+        // 🔎 Verifica E-mail
+        if (mensagem.toLowerCase().includes("e-mail")) {
+            const inp = $('[name="email"]');
+            inp.addClass('input-erro').focus();
+        }
+    }
+
+    function verificarForcaSenha(senha) {
+        let score = 0;
+
+        if (senha.length >= 6) score++;
+        if (senha.length >= 10) score++;
+        if (/[A-Z]/.test(senha)) score++;
+        if (/[0-9]/.test(senha)) score++;
+        if (/[^A-Za-z0-9]/.test(senha)) score++;
+
+        return score;
+    }
+
+    $('#novasenha').on('input', function () {
+        const senha = $(this).val();
+        const score = verificarForcaSenha(senha);
+
+        const bar = $('#passwordBar');
+        const label = $('#passwordLabel');
+
+        if (score == 0) {
+            bar.css({ width: "1%", background: "blue" });
+            label.text("Digite sua nova senha").css("color", '#3debf1');
+        } else if (score == 1) {
+            bar.css({ width: "25%", background: "red" });
+            label.text("Senha fraca").css("color", "red");
+        } else if (score == 2) {
+            bar.css({ width: "50%", background: "orange" });
+            label.text("Senha média").css("color", "orange");
+        } else if (score >= 3) {
+            bar.css({ width: "100%", background: "green" });
+            label.text("Senha forte").css("color", "green");
+        }
+    });
+
+    $('#form_senha').on('submit', function (e) {
+        e.preventDefault();
+
+        const idColab = $('#idColab').val();
+        const senhaAntiga = $('#senhaantiga').val();
+        const novaSenha = $('#novasenha').val();
+        const confirmar = $('#confirmarnovasenha').val();
+
+        if (novaSenha !== confirmar) {
+            return Swal.fire({
+                icon: "warning",
+                title: "Atenção",
+                text: "A confirmação da nova senha não confere.",
+                theme: "dark"
+            });
+        }
+
+        $.ajax({
+            url: '/api/auth/alterar-senha',
+            method: 'POST',
+            data: {
+                idColab,
+                senhaAntiga,
+                novaSenha
+            },
+            success: function (res) {
+                if (res.sucesso) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Senha alterada!",
+                        text: "Sua senha foi atualizada com sucesso.",
+                        theme: "dark"
+                    });
+                    $('#form_senha')[0].reset();
+                    $('#passwordBar').css("width", "0%");
+                    $('#passwordLabel').text("Senha fraca").css("color", "#888");
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erro",
+                        text: res.mensagem,
+                        theme: "dark"
+                    });
+                }
+            },
+            error: function (err) {
+                const msg = err.responseJSON?.mensagem || "Não foi possível alterar sua senha.";
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Atenção",
+                    text: msg,
+                    theme: "dark"
+                });
+            }
+        });
+    });
 
 
     //SALVAR FOTO
@@ -572,15 +701,44 @@
             $btn.prop('disabled', true).text('Enviando...');
 
             try {
-                const blob = await croppie.result({
+                // 1) Obtém a imagem recortada em PNG
+                const pngBlob = await croppie.result({
                     type: 'blob',
                     format: 'png',
-                    size: 'viewport' // 220x220 e já circular por causa do viewport
+                    size: 'viewport'
                 });
+
+                // 2) Converte PNG → WEBP usando Canvas (otimizado)
+                const webpBlob = await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+
+                        const ctx = canvas.getContext('2d', { alpha: true });
+
+                        // melhora a interpolação, evita serrilhado
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = "high";
+
+                        ctx.drawImage(img, 0, 0);
+
+                        // exporta com compressão otimizada
+                        canvas.toBlob(
+                            blob => resolve(blob),
+                            'image/webp',
+                            0.72 // qualidade ideal para avatar (70~75%)
+                        );
+                    };
+                    img.onerror = reject;
+                    img.src = URL.createObjectURL(pngBlob);
+                });
+
 
                 // FormData direto (não depende do <form> agora)
                 const formData = new FormData();
-                formData.append('fotoperfil', blob, 'avatar.png'); // name deve bater com multer.single('fotoperfil')
+                formData.append('fotoperfil', webpBlob, 'avatar.webp');
                 formData.append('id', userId);
 
                 const resp = await $.ajax({
@@ -595,7 +753,7 @@
                     .attr('src', resp.novaFotoURL + '?t=' + Date.now())
                     .on('error', function () {
                         console.warn("⚠️ Imagem de perfil não encontrada, usando padrão.");
-                        $(this).attr('src', '/imagens/fotoperfil/user-default.jpg');
+                        $(this).attr('src', '/imagens/user-default.webp');
                     });
 
                 closeCropModal();
@@ -614,17 +772,19 @@
         ],
         "1": [
             { value: "1", label: "Auxiliar Eletricista" },
-            { value: "2", label: "Eletricista Junior I" },
-            { value: "3", label: "Eletricista Junior II" },
-            { value: "4", label: "Eletricista Junior III" },
-            { value: "5", label: "Eletricista Pleno I" },
-            { value: "6", label: "Eletricista Pleno II" },
-            { value: "7", label: "Eletricista Pleno III" },
-            { value: "8", label: "Eletricista Senior I" },
-            { value: "9", label: "Eletricista Senior II" },
-            { value: "10", label: "Eletricista Senior III" },
+            { value: "2", label: "Eletricista Junior" },
+            { value: "3", label: "Eletricista Junior I" },
+            { value: "4", label: "Eletricista Junior II" },
+            { value: "5", label: "Eletricista Pleno" },
+            { value: "6", label: "Eletricista Pleno I" },
+            { value: "7", label: "Eletricista Pleno II" },
+            { value: "8", label: "Eletricista Sênior" },
+            { value: "9", label: "Eletricista Sênior I" },
+            { value: "10", label: "Eletricista Sênior II" },
             { value: "11", label: "Painelista" },
-            { value: "12", label: "Encarregado" },
+            { value: "12", label: "Supervisor de Manutenção Elétrica" },
+            { value: "31", label: "Supervisor de Manutenção 2" },
+            { value: "32", label: "Técnico de Segurança" },
             { value: "13", label: "Gerente de Produção" }
         ],
         "2": [
@@ -647,7 +807,8 @@
         ],
         "7": [
             { value: "22", label: "Analista Financeiro" },
-            { value: "23", label: "Assistente Financeiro" }
+            { value: "23", label: "Assistente Financeiro" },
+            { value: "30", label: "Auxiliar Fiscal" }
         ],
         "8": [
             { value: "24", label: "Assistente de RH" },
@@ -785,7 +946,10 @@
             load_integracoes_colaborador(idFunc, $('#carregarIntegracoesAqui'));
 
         }
-
+        if (target === '.painel_senha') {
+            const id = $('#idColaborador').val(); // ID que já existe nos outros painéis
+            $('#idColab').val(id);
+        }
         // Oculta todos os painéis
         $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
 

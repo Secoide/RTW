@@ -4,24 +4,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
-  <title>RTW - Login</title>
 
   <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
   <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
-  <link rel="stylesheet" type="text/css" href="css/padrao/thema.css">
   <link rel="stylesheet" type="text/css" href="css/login.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
-  <!-- Agora só carrega o main.js -->
-  <script type="module" src="/client/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
   <div class="fundo_img">
+    <img src="../fundos2.webp" class="bg" alt="">
+    <div id="snow-layer"></div>
     <div class="painel_login centralizada glass">
       <div class="form_login">
         <p class="tituloLogin">Faça seu login.</p>
@@ -35,63 +31,27 @@
           <a class="esquecisenha" href="#">Esqueci minha senha</a>
           <div class="divbutton">
             <input class="botao-degrade" type="submit" value="Entrar">
-            <a class="semconta" href="#">Ainda não tenho uma conta</a>
+            <a class="semconta" href="#">Não consigo acessar minha conta</a>
           </div>
         </form>
       </div>
     </div>
-    <div class="versao"></div>
+    <div class="versao" title="Verificar as atualizações da versão atual."></div>
   </div>
   <!-- POPUP DE ATUALIZAÇÃO DO SISTEMA -->
   <div id="popupAtualizacao" class="atualizacao-overlay">
     <div class="atualizacao-box">
 
-      <h2>🚀 Nova Atualização lançada!</h2>
+      <h2>🚀 Nova atualização lançada!</h2>
       <p><strong>Versão:</strong> <span id="versaoAtual"></span></p>
 
-      <div class="changelog-container">
-
-        <details open>
-          <summary>Assinatura Digital ✍🏻</summary>
-
-          <details>
-            <summary>🆕 Adicionado</summary>
-            <ul>
-              <li>Assinatura de EPIs entregues com assinatura digital via link (Em teste);</li>
-              <li>Indicador “PDF” no painel de exames/cursos informando documento anexado;</li>
-              <li>Novas informações na pagina de inicio</li>
-              <li>Painel indicativo de Aniversariantes do mês, e proximo aniversários</li>
-              <li>Mural de informações, separados por alguumas categorias (Avisos do RH, Treinamentos Futuros, Comunicados da Diretoria e Avisos de Segurança)</li>
-            </ul>
-          </details>
-
-          <details>
-            <summary>⚙️ Alterado</summary>
-            <ul>
-              <li>Pequenas alterações no visual e enquadros no formulario do Colaborador.</li>
-            </ul>
-          </details>
-
-          <details>
-            <summary>🐞 Corrigido</summary>
-            <ul>
-              <li>Arquivos anexados (PDFs e fotos) eram perdidos após atualização do sistema;</li>
-              <li>Mini ícone às vezes não abria a aba correta do colaborador;</li>
-              <li>Varios pequenos bugs;</li>
-            </ul>
-          </details>
-
-        </details>
-
-      </div>
-
+      <div class="changelog-container"></div>
 
       <button id="btnPopupOk">OBRIGADO</button>
     </div>
   </div>
-
-  <!-- Inatividade separado -->
-  <script type="text/javascript" src="scripts/websocket/inatividade.js"></script>
+  <!-- Agora só carrega o main-login.js -->
+  <script type="module" src="/client/js/main-login.js"></script>
 </body>
 
 </html>

@@ -17,8 +17,8 @@ body {
 
 /* Estilo vidro permanece o mesmo */
 .glass {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 
@@ -49,7 +49,8 @@ option:checked {
     color: var(--verde_2);
     font-weight: bold;
 }
-option{
+
+option {
     background-color: var(--bg-padrao);
     color: var(--texto-principal);
 }
@@ -63,14 +64,15 @@ option{
     cursor: pointer;
     color: var(--texto-principal);
 }
-.bt_padrao:hover{
-    background: var(--bt-hover);
+
+.bt_padrao:hover {
+    background: linear-gradient(35deg, #919191, #cacaca, #707070);
     color: var(--texto-invertido);
 }
 
 /* BOTAO ADICIONAR */
 .bt_cad:hover {
-    background-color: var(--verde_2);
+    background: linear-gradient(35deg, #52aa59, #93ff68, #1c9937);
     color: var(--texto-invertido);
 }
 
@@ -86,9 +88,12 @@ option{
     color: var(--texto-invertido);
 }
 
-.bt_atualizar:hover{
-    background-color: var(--azul_1);
-    color: var(--texto-invertido);
+.bt_atualizar {
+    border: 1px solid rgba(0, 204, 255, 0.562);
+}
+
+.bt_atualizar:hover {
+    background: linear-gradient(35deg, #488392, #7bdffe, #5773cf);
 }
 
 /* BOTAO CANCELAR */
@@ -97,7 +102,7 @@ option{
 }
 
 .bt_cancel:hover {
-    background-color: var(--vermelho);
+    background: linear-gradient(35deg, #f12929, #ffa023, #791b03);
     color: var(--white);
     cursor: pointer;
 }
@@ -265,7 +270,7 @@ option{
     color: var(--texto-principal);
 }
 
-#notification-container{
+#notification-container {
     display: flex;
 }
 
@@ -285,6 +290,37 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-.form_padrao{
+.form_padrao {
     width: 100%;
+}
+
+
+
+
+
+/* =========================================================
+   🎅 PAPAI NOEL (PADRÃO ATUAL)
+========================================================= */
+
+/* Wrapper que faz o corte */
+.santa-walk-wrapper {
+    position: fixed;
+    top: -50px;
+    left: -160px;
+    height: 50px;
+    overflow: hidden;
+    z-index: 1700;
+    pointer-events: none;
+}
+
+/* GIF do Noel (tamanho real) */
+.santa-walk {
+    height: 54px;   /* GIF real */
+    display: block;
+}
+.santa-drop {
+    position: fixed;
+    z-index: 1800;
+    pointer-events: none;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.45));
 }

@@ -49,10 +49,19 @@ export function initGestao() {
     $tabs.on("click", function () {
         $tabs.removeClass("active");
         $(this).addClass("active");
+
         entidadeAtual = $(this).data("entity");
         $searchInput.val("");
-        carregarTabela();
+
+        $("#gestao").attr("data-entity", entidadeAtual);
+
+        carregarTabela().then(() => {
+            if (entidadeAtual === "Empresa") {
+                habilitarResizeColunasEmpresa();
+            }
+        });
     });
+
 
     // ========================== CARREGAR TABELA ==========================
     async function carregarTabela() {
@@ -185,6 +194,7 @@ export function initGestao() {
                     estado: e.estado ?? "",
                 }));
             } else if (entidadeAtual === "OS") {
+
                 const data = await $.ajax({
                     url: `${BASE_URL}/os`,
                     method: "GET",
@@ -210,7 +220,7 @@ export function initGestao() {
                     supervisor: e.nomeSupervisor,
                     cidade: e.cidade,
                     responsavel: e.lider,
-                    orçado: e.orcado,
+                    orcado: e.orcado,
                     criado: e.mesCriado,
                     concluido: e.mesConcluido,
                 }));
@@ -236,6 +246,12 @@ export function initGestao() {
 
             // Linhas
             renderLinhasTabela();
+
+            // 🔎 Reaplica filtro se houver texto digitado
+            const termoAtual = $searchInput.val();
+            if (termoAtual) {
+                aplicarFiltro(termoAtual);
+            }
 
             // ======== Cards de resumo (Aba OS) / Total (demais abas) ========
             const $resumo = $("#resumo");
@@ -500,12 +516,112 @@ export function initGestao() {
         // Desabilita checkboxes durante edição (caso existam)
         $linha.find("input[type='checkbox']").prop("disabled", true);
 
+
+        function renderDependentesOS($linha, emp, dadosOriginais) {
+
+            // índices das colunas
+            const idxSup = lastCols.indexOf("supervisor");
+            const idxCid = lastCols.indexOf("cidade");
+
+            // células (DECLARADAS UMA ÚNICA VEZ)
+            const $tdSup = $linha.find("td").eq(idxSup);
+            const $tdCid = $linha.find("td").eq(idxCid);
+
+            // 🔹 limpa qualquer estado anterior
+            $tdSup.removeAttr("data-clear data-single-id data-single-field").empty();
+            $tdCid.removeAttr("data-clear data-single-id data-single-field").empty();
+
+            // ===== Supervisor =====
+            if (emp.supervisores?.length > 1) {
+                const $selSup = $("<select>")
+                    .attr({ "data-field": "supervisor", "data-editing": "true" })
+                    .css({
+                        width: "100%",
+                        padding: "4px 6px",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
+                        border: "1px solid #555",
+                        borderRadius: "4px",
+                        fontSize: "12px"
+                    });
+
+                $selSup.append(`<option value="">— selecione —</option>`);
+                emp.supervisores.forEach(s =>
+                    $selSup.append(`<option value="${s.id}">${s.nome}</option>`)
+                );
+
+                const supAtual = emp.supervisores.find(
+                    s => s.nome === dadosOriginais.supervisor || s.id == dadosOriginais.supervisor
+                );
+                if (supAtual) $selSup.val(supAtual.id);
+
+                $tdSup.append($selSup);
+            }
+            else if (emp.supervisores?.length === 1) {
+                $tdSup
+                    .text(emp.supervisores[0].nome)
+                    .attr("data-single-field", "supervisor")
+                    .attr("data-single-id", emp.supervisores[0].id);
+            }
+            else {
+                $tdSup
+                    .text("—")
+                    .attr("data-clear", "supervisor");
+            }
+
+            // ===== Cidade =====
+            if (emp.cidades?.length > 1) {
+                const $selCid = $("<select>")
+                    .attr({ "data-field": "cidade", "data-editing": "true" })
+                    .css({
+                        width: "100%",
+                        padding: "4px 6px",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
+                        border: "1px solid #555",
+                        borderRadius: "4px",
+                        fontSize: "12px"
+                    });
+
+                $selCid.append(`<option value="">— selecione —</option>`);
+                emp.cidades.forEach(c =>
+                    $selCid.append(`<option value="${c.id}">${c.nome}</option>`)
+                );
+
+                const cidAtual = emp.cidades.find(
+                    c => c.nome === dadosOriginais.cidade || c.id == dadosOriginais.cidade
+                );
+                if (cidAtual) $selCid.val(cidAtual.id);
+
+                $tdCid.append($selCid);
+            }
+            else if (emp.cidades?.length === 1) {
+                $tdCid
+                    .text(emp.cidades[0].nome)
+                    .attr("data-single-field", "cidade")
+                    .attr("data-single-id", emp.cidades[0].id);
+            }
+            else {
+                $tdCid
+                    .text("—")
+                    .attr("data-clear", "cidade");
+            }
+        }
+
+
+
+
         // Transforma colunas em campos de texto (exceto chips em Empresa e exceto booleanos)
         lastCols.forEach(async (col, i) => {
             if (col === "id") return;
             // NÃO transformar booleans em input — manter checkbox
             if (["integracao", "liberacao", "seguranca"].includes(col)) return;
             if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) return;
+            // 🔒 BLOQUEIA supervisor e cidade inicialmente (OS)
+            if (entidadeAtual === "OS" && (col === "supervisor" || col === "cidade")) {
+                // mantém texto e não transforma em input
+                return;
+            }
 
             if (entidadeAtual === "OS" && col === "status") {
                 const $sel = $linha.find("td").eq(i).find("select");
@@ -610,48 +726,83 @@ export function initGestao() {
 
                 // Seleciona empresa atual
                 const empresaAtual = empresas.find(e => e.nome === valor || e.id == valor);
-                if (empresaAtual) $sel.val(empresaAtual.id);
+                if (empresaAtual) {
+                    $sel.val(empresaAtual.id);
+
+                    // 🔹 NOVO: já renderiza supervisor e cidade conforme empresa atual
+                    renderDependentesOS($linha, empresaAtual, dadosOriginais);
+                }
 
                 // Ao mudar a empresa, atualiza Supervisor e Cidade
                 $sel.on("change", async function () {
                     const emp = empresas.find(e => e.id == $(this).val());
                     if (!emp) return;
 
-                    // Campo supervisor
-                    const $tdSup = $linha.find("td").eq(lastCols.indexOf("supervisor"));
-                    $tdSup.empty();
-                    if (emp.supervisores.length > 1) {
-                        const $selSup = $("<select>").css({
-                            width: "100%", padding: "4px 6px", background: "#3f3f3f", color: "#fff",
-                            border: "1px solid #555", borderRadius: "4px", fontSize: "12px"
-                        });
-                        emp.supervisores.forEach(s => $selSup.append(`<option value="${s.id}">${s.nome}</option>`));
-                        $tdSup.append($selSup);
-                    } else if (emp.supervisores.length === 1) {
-                        $tdSup.text(emp.supervisores[0].nome);
-                    } else {
-                        $tdSup.text("—");
-                    }
+                    renderDependentesOS($linha, emp, dadosOriginais);
 
-                    // Campo cidade
-                    const $tdCid = $linha.find("td").eq(lastCols.indexOf("cidade"));
-                    $tdCid.empty();
-                    if (emp.cidades.length > 1) {
-                        const $selCid = $("<select>").css({
-                            width: "100%", padding: "4px 6px", background: "#3f3f3f", color: "#fff",
-                            border: "1px solid #555", borderRadius: "4px", fontSize: "12px"
-                        });
-                        emp.cidades.forEach(c => $selCid.append(`<option value="${c.id}">${c.nome}</option>`));
-                        $tdCid.append($selCid);
-                    } else if (emp.cidades.length === 1) {
-                        $tdCid.text(emp.cidades[0].nome);
-                    } else {
-                        $tdCid.text("—");
-                    }
                 });
 
                 $input = $sel;
-            } else {
+            } else if (entidadeAtual === "OS" && col === "responsavel") {
+                const responsaveis = await fetchResponsaveis();
+                const $td = $linha.find("td").eq(i);
+                const valorAtual = dadosOriginais.responsavel;
+
+                const $sel = $("<select>")
+                    .attr({ "data-field": "responsavel", "data-editing": "true" })
+                    .css({
+                        width: "100%",
+                        padding: "4px 6px",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
+                        border: "1px solid #555",
+                        borderRadius: "4px",
+                        fontSize: "12px"
+                    });
+
+                $sel.append(`<option value="">— selecione —</option>`);
+
+                responsaveis.forEach(r =>
+                    $sel.append(`<option value="${r.id}">${r.nome}</option>`)
+                );
+
+                // 🔹 pré-seleciona responsável atual
+                const atual = responsaveis.find(
+                    r => r.nome === valorAtual || r.id == valorAtual
+                );
+                if (atual) $sel.val(atual.id);
+
+                $td.empty().append($sel);
+                return;
+            } else if (entidadeAtual === "OS" && col === "orcado") {
+                const $td = $linha.find("td").eq(i);
+
+                // valor vem como "R$ 1.000,00" → converte para número simples
+                const valorNum = moedaParaNumero(valor);
+
+                const $input = $("<input>")
+                    .attr({
+                        type: "text",
+                        "data-field": "orcado",
+                        "data-editing": "true",
+                        placeholder: "0,00"
+                    })
+                    .val(valorNum != null && !isNaN(valorNum) ? valorNum.toString().replace(".", ",") : "")
+                    .css({
+                        width: "100%",
+                        padding: "4px 6px",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
+                        border: "1px solid #555",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        textAlign: "right"
+                    });
+
+                $td.empty().append($input);
+                return; // ⛔ não deixa cair no input genérico
+            }
+            else {
                 $input = $("<input>")
                     .val(valor)
                     .attr({ "data-field": col, "data-editing": "true" })
@@ -723,6 +874,7 @@ export function initGestao() {
                 novo[campo] = $(el).val();
             });
 
+
             $linha.find("[data-editing='true']").each((_, el) => {
                 const campo = $(el).data("field");
                 let valor = $(el).val();
@@ -731,7 +883,9 @@ export function initGestao() {
                 if (campo.toLowerCase().includes("telefone") || campo.toLowerCase().includes("celular")) {
                     valor = valor.replace(/\D/g, ""); // mantém só dígitos
                 }
-
+                if (campo === "orcado") {
+                    valor = moedaParaNumero(valor);
+                }
                 novo[campo] = valor;
             });
             // 🔹 Validação de datas (apenas para aba OS)
@@ -748,6 +902,26 @@ export function initGestao() {
                     return; // interrompe o salvamento
                 }
             }
+
+            ["supervisor", "cidade"].forEach(campo => {
+                const idx = lastCols.indexOf(campo);
+                const $td = $linha.find("td").eq(idx);
+
+                // 1️⃣ Se existe select, o valor já foi capturado antes → não faz nada
+                if ($td.find("select").length) return;
+
+                // 2️⃣ Caso exista apenas uma opção (texto com ID oculto)
+                if ($td.attr("data-single-field") === campo) {
+                    const id = $td.attr("data-single-id");
+                    novo[campo] = id ? Number(id) : null;
+                    return;
+                }
+
+                // 3️⃣ Caso não exista nenhuma opção → limpa
+                if ($td.attr("data-clear") === campo) {
+                    novo[campo] = null;
+                }
+            });
             try {
                 await updateRegistro(entidadeAtual, id, novo);
                 Toast.fire({
@@ -772,6 +946,7 @@ export function initGestao() {
                     $linha.find("select[data-field='status']").prop("disabled", false);
                 }
             }
+
         });
     }
 
@@ -810,10 +985,20 @@ export function initGestao() {
                 // Coluna ID fica vazia
                 $td.text("—");
             }
+
+            // 🔒 Empresa: bloquear cidades e supervisores
             else if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) {
-                // Empresa: mantém campos de chips inalterados
-                $td.text("—");
+                $td.text("—").attr("title", "Disponível após salvar a empresa");
             }
+
+            // 🔒 Empresa: bloquear integracao, liberacao e seguranca
+            else if (
+                entidadeAtual === "Empresa" &&
+                ["integracao", "liberacao", "seguranca"].includes(col)
+            ) {
+                $td.text("—").attr("title", "Disponível após salvar a empresa");
+            }
+
             else {
                 // Campos editáveis
                 let $input;
@@ -845,11 +1030,11 @@ export function initGestao() {
                         });
                 }
                 $td.append($input);
-
             }
 
             $tr.append($td);
         });
+
 
         // Coluna de ações
         const $tdAcoes = $("<td>").addClass("col-acoes");
@@ -999,6 +1184,7 @@ export function initGestao() {
     }
 
     async function updateRegistro(entidade, id, payload) {
+        console.log(entidade)
         const url = `${BASE_URL}/${entidade.toLowerCase()}/editar/${id}`;
         return $.ajax({
             url,
@@ -1167,6 +1353,24 @@ export function initGestao() {
                     supervisores: [{ id: 10, nome: "João" }]
                 }
             ];
+        }
+    }
+
+    async function fetchResponsaveis() {
+        try {
+            const arr = await $.ajax({
+                url: "/api/colaboradores/responsavel/cbx",
+                method: "GET",
+                xhrFields: { withCredentials: true }
+            });
+
+            return (Array.isArray(arr) ? arr : []).map(r => ({
+                id: r.id ?? r.id_responsavel ?? null,
+                nome: r.nome ?? r.name ?? ""
+            }));
+        } catch (e) {
+            console.error("Erro ao buscar responsáveis:", e);
+            return [];
         }
     }
 
@@ -1607,6 +1811,9 @@ export function initGestao() {
                 }
 
                 // ======== Texto padrão ========
+                else if (entidadeAtual === "OS" && c === "orcado") {
+                    $td.text(formatarMoedaBR(item[c]));
+                }
                 else {
                     $td.text(formatCell(item[c], c));
                 }
@@ -1626,6 +1833,77 @@ export function initGestao() {
 
         $tbody.append($fragBody);
     }
+
+    function formatarMoedaBR(valor) {
+        if (valor == null || valor === "") return "";
+        const num = Number(valor);
+        if (isNaN(num)) return valor;
+
+        return num.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+        });
+    }
+
+    function moedaParaNumero(valor) {
+        if (valor == null || valor === "") return null;
+
+        // remove R$, espaços e pontos de milhar
+        if (typeof valor === "string") {
+            valor = valor
+                .replace(/[R$\s]/g, "")
+                .replace(/\./g, "")
+                .replace(",", ".");
+        }
+
+        const num = Number(valor);
+        return isNaN(num) ? null : num;
+    }
+
+    function habilitarResizeColunasEmpresa() {
+        const table = document.getElementById("dataTable");
+        if (!table) return;
+
+        const ths = table.querySelectorAll("thead th");
+
+        // Cidades (3) e Supervisores (4)
+        [2, 3].forEach(idx => {
+            const th = ths[idx];
+            if (!th || th.classList.contains("resizable")) return;
+
+            th.classList.add("resizable");
+
+            let startX, startWidth;
+
+            th.addEventListener("mousedown", e => {
+                // só permite arrastar se estiver próximo da borda direita
+                if (e.offsetX < th.offsetWidth - 8) return;
+
+                startX = e.pageX;
+                startWidth = th.offsetWidth;
+
+                document.body.classList.add("resizing");
+
+                const onMouseMove = eMove => {
+                    const newWidth = startWidth + (eMove.pageX - startX);
+                    if (newWidth > 120) {
+                        th.style.width = newWidth + "px";
+                    }
+                };
+
+                const onMouseUp = () => {
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                    document.body.classList.remove("resizing");
+                };
+
+                document.addEventListener("mousemove", onMouseMove);
+                document.addEventListener("mouseup", onMouseUp);
+            });
+        });
+    }
+
+
 
 }
 

@@ -166,8 +166,9 @@ function montarCard(colab) {
 
     const cardHTML = `
     <div class="card-aniver ${classeHoje}" data-hoje="${isHoje}">
-        <img src="${colab.fotoperfil}?v=${new Date().getTime()}"
-     onerror="this.src='/imagens/fotoperfil/user-default.jpg'">
+        <img class="tb_fotoColab"
+            src="${colab.fotoperfil}?v=${colab.versao_foto}"
+            onerror="this.src='/imagens/user-default.webp'">
 
         <div>
             <div class="nome">${colab.nome}</div>
@@ -183,8 +184,9 @@ function montarCard(colab) {
 function montarCardProximo(colab) {
     return `
         <div class="card-aniver">
-            <img src="${colab.fotoperfil}" 
-                 onerror="this.src='/imagens/fotoperfil/user-default.jpg'">
+           <img class="tb_fotoColab"
+                src="${colab.fotoperfil}?v=${colab.versao_foto}"
+                onerror="this.src='/imagens/user-default.webp'">
             <div>
                 <div class="nome">${colab.nome}</div>
                 <div class="data">${colab.dataFormatada} — em ${colab.diff} dias</div>

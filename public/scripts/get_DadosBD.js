@@ -569,7 +569,7 @@ function load_epis_colaborador(idFunc, $box) {
                         <div class="img_${classEpi}">
                             <div>
                                 <img class="img_epi status-${situacao}" 
-                                     src="../../imagens/epi/${classEpi}.png" 
+                                     src="../../imagens/epi/${classEpi}.webp" 
                                      alt="epi">
                             </div>
                             <div class="status_EPI status_${classEpi}" data-idfcepi="${epi.idfcepi}" data-idepi="${epi.idepi}">

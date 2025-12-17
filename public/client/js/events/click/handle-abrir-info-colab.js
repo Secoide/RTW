@@ -91,9 +91,6 @@ export function get_carregarPerfilUsuario(funcId) {
 
                     if (status === "success") {
 
-                        // 🔥 IMPORTANTE:
-                        // Só chamaremos resolve() DEPOIS que TUDO estiver carregado.
-
                         $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
                         $('.painel_perfil').show();
                         $('#bt_editColab').show();
@@ -106,17 +103,17 @@ export function get_carregarPerfilUsuario(funcId) {
                         $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
                         $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
 
-                        const fotoURL = dados.fotoperfil;
+                        const fotoURL = dados.fotoperfil + "?v=" + dados.versao_foto;
 
                         if (fotoURL && fotoURL.startsWith("http")) {
-                            $('#fotoavatar').attr('src', fotoURL + '?t=' + Date.now());
+                            $('#fotoavatar').attr('src', fotoURL);
                         } else {
-                            $('#fotoavatar').attr('src', '/imagens/fotoperfil/user-default.jpg');
+                            $('#fotoavatar').attr('src', '/imagens/user-default.webp');
                         }
 
                         $('#fotoavatar').on('error', function () {
                             console.warn("⚠️ Foto do perfil não encontrada. Carregando padrão.");
-                            $(this).attr('src', '/imagens/fotoperfil/user-default.jpg');
+                            $(this).attr('src', '/imagens/user-default.webp');
                         });
 
                         $('#id').val(dados.id);

@@ -17,11 +17,11 @@ const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET || "supersecreto",
   resave: false,
   saveUninitialized: false,
-  ccookie: {
+  cookie: {
     httpOnly: true,
     secure: false,      // true se usar HTTPS
     sameSite: "lax",     // ou "none" se frontend/back estiverem em hosts diferentes
-    maxAge: 1000 * 60 * 60
+    maxAge: 1000 * 60 * 10 // 10 minutos
   }
   ,
 });

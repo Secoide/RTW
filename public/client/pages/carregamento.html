@@ -6,8 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RTW Engenharia Elétrica - Carregando</title>
 
+  <link rel="stylesheet" type="text/css" href="css/padrao/thema.css">
+
   <!-- Font Awesome -->
   <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     /* Tela de carregamento */
@@ -66,8 +70,17 @@
     <div class="loadingProgress">Carregando: <span id="loadingPercent">0%</span></div>
   </div>
 
-  <script type="module">
 
+
+
+  <!-- Inatividade separado -->
+  <script type="text/javascript" src="scripts/websocket/inatividade.js"></script>
+
+  <!-- Agora só carrega o main.js -->
+  <script type="module" src="/client/js/main.js"></script>
+
+  <script type="module">
+    
 
     // Simula o progresso do carregamento
     let percent = 0;

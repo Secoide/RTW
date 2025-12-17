@@ -43,6 +43,19 @@ function criarMenuContextual(e, opcoesMenu) {
   setTimeout(() => $(document).one("click", () => menu.remove()), 0);
 }
 
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  }
+});
+
+
 async function registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fnoID) {
   $colab.addClass("falta-indevida");
 
@@ -216,7 +229,6 @@ export function initColaboradoresContextMenu(socket) {
       { label: "🥾 Registrar EPI", action: () => open_form_AnexarEPI(funcID) },
       { label: "🩺 Anexar Exame", action: () => open_form_AnexarExame(funcID) },
       { label: "📚 Anexar Curso", action: () => open_form_AnexarCurso(funcID) },
-      { label: "🗃️ Anexar Integração", action: () => open_form_AnexarIntegracao(funcID) },
       "SEPARADOR",
       {
         label: "🚫 Marcar Falta Indevida",
@@ -271,11 +283,19 @@ export function initColaboradoresContextMenu(socket) {
               let msg = "Erro ao visualizar exame.";
               if (res.status === 400) msg = "Nenhum PDF anexado para este exame.";
               if (res.status === 404) msg = "Exame ou arquivo não encontrado.";
-              return Swal.fire({ icon: "warning", title: "Atenção", theme: "dark", text: msg });
+              return Toast.fire({
+                icon: "warning",
+                theme: 'dark',
+                title: msg
+              });
             }
             window.open(`/api/exame/download/${idFuncionarioExame}`, "_blank");
           } catch (err) {
-            Swal.fire({ icon: "error", title: "Erro", theme: "dark", text: err.message });
+            return Toast.fire({
+              icon: "error",
+              theme: 'dark',
+              title: err.message
+            });
           }
         }
       },
@@ -307,26 +327,23 @@ export function initColaboradoresContextMenu(socket) {
 
                 preencherTabelaColaboradoresRH();
                 document.querySelector('.bt_menu[data-target=".painel_exames"]').click();
-                Swal.fire({
+                Toast.fire({
                   icon: "success",
-                  title: "Excluído!",
-                  theme: "dark",
-                  text: "Exame excluído!"
+                  theme: 'dark',
+                  title: "Exame excluído!"
                 });
               } else {
-                Swal.fire({
+                Toast.fire({
                   icon: "error",
-                  title: "Falha",
-                  theme: "dark",
-                  text: "Não foi possível excluir o Exame."
+                  theme: 'dark',
+                  title: "Não foi possível excluir o Exame."
                 });
               }
             } catch (err) {
-              Swal.fire({
+              Toast.fire({
                 icon: "error",
-                title: "Erro",
-                theme: "dark",
-                text: err.message
+                theme: 'dark',
+                title: err.message
               });
             }
           }
@@ -359,11 +376,19 @@ export function initColaboradoresContextMenu(socket) {
               let msg = "Erro ao visualizar curso.";
               if (res.status === 400) msg = "Nenhum PDF anexado para este curso.";
               if (res.status === 404) msg = "Curso ou arquivo não encontrado.";
-              return Swal.fire({ icon: "warning", title: "Atenção", theme: "dark", text: msg });
+              return Toast.fire({
+                icon: "warning",
+                theme: 'dark',
+                title: msg
+              });
             }
             window.open(`/api/curso/download/${idFuncionarioCurso}`, "_blank");
           } catch (err) {
-            Swal.fire({ icon: "error", title: "Erro", theme: "dark", text: err.message });
+            Toast.fire({
+              icon: "error",
+              theme: 'dark',
+              title: err.message
+            });
           }
         }
       },
@@ -395,26 +420,23 @@ export function initColaboradoresContextMenu(socket) {
 
                 preencherTabelaColaboradoresRH();
                 document.querySelector('.bt_menu[data-target=".painel_cursos"]').click();
-                Swal.fire({
+                Toast.fire({
                   icon: "success",
-                  title: "Excluído!",
-                  theme: "dark",
-                  text: "Curso excluído!"
+                  theme: 'dark',
+                  title: "Curso excluído!"
                 });
               } else {
-                Swal.fire({
+                Toast.fire({
                   icon: "error",
-                  title: "Falha",
-                  theme: "dark",
-                  text: "Não foi possível excluir o curso."
+                  theme: 'dark',
+                  title: "Não foi possível excluir o curso."
                 });
               }
             } catch (err) {
-              Swal.fire({
+              Toast.fire({
                 icon: "error",
-                title: "Erro",
-                theme: "dark",
-                text: err.message
+                theme: 'dark',
+                title: err.message
               });
             }
           }
@@ -447,11 +469,19 @@ export function initColaboradoresContextMenu(socket) {
               let msg = "Erro ao visualizar integração.";
               if (res.status === 400) msg = "Nenhum PDF anexado para esta integração.";
               if (res.status === 404) msg = "Integração ou arquivo não encontrado.";
-              return Swal.fire({ icon: "warning", title: "Atenção", theme: "dark", text: msg });
+              return Toast.fire({
+                icon: "warning",
+                theme: 'dark',
+                title: msg
+              });
             }
             window.open(`/api/integracao/download/${idFuncionarioIntegracao}`, "_blank");
           } catch (err) {
-            Swal.fire({ icon: "error", title: "Erro", theme: "dark", text: err.message });
+            Toast.fire({
+                icon: "error",
+                theme: 'dark',
+                title: err.mensagem
+              });
           }
         }
       },
@@ -482,26 +512,23 @@ export function initColaboradoresContextMenu(socket) {
 
                 preencherTabelaColaboradoresRH();
                 document.querySelector('.bt_menu[data-target=".painel_integra"]').click();
-                Swal.fire({
+                Toast.fire({
                   icon: "success",
-                  title: "Excluído!",
-                  theme: "dark",
-                  text: "Integração excluída!"
+                  theme: 'dark',
+                  title: "Integração excluída!"
                 });
               } else {
-                Swal.fire({
+                Toast.fire({
                   icon: "error",
-                  title: "Falha",
-                  theme: "dark",
-                  text: "Não foi possível excluir a integração."
+                  theme: 'dark',
+                  title: "Não foi possível excluir a integração."
                 });
               }
             } catch (err) {
-              Swal.fire({
+              Toast.fire({
                 icon: "error",
-                title: "Erro",
-                theme: "dark",
-                text: err.message
+                theme: 'dark',
+                title: err.message
               });
             }
           }
@@ -588,11 +615,10 @@ export function initColaboradoresContextMenu(socket) {
           action: async () => {
 
             if (!idFuncionarioEPI) {
-              Swal.fire({
+              Toast.fire({
                 icon: "warning",
-                title: "ID inválido",
-                text: "ID do registro EPI não encontrado.",
-                theme: "dark"
+                theme: 'dark',
+                title: "ID do registro EPI não encontrado."
               });
               return;
             }
@@ -652,11 +678,19 @@ export function initColaboradoresContextMenu(socket) {
                 let msg = "Erro ao visualizar EPI.";
                 if (res.status === 400) msg = "Nenhum PDF anexado para esta EPI.";
                 if (res.status === 404) msg = "EPI ou arquivo não encontrado.";
-                return Swal.fire({ icon: "warning", title: "Atenção", theme: "dark", text: msg });
+                return Toast.fire({
+                icon: "warning",
+                theme: 'dark',
+                title: msg
+              });
               }
               window.open(`/api/epi/download/${idFuncionarioEPI}`, "_blank");
             } catch (err) {
-              Swal.fire({ icon: "error", title: "Erro", theme: "dark", text: err.message });
+              Toast.fire({
+                icon: "error",
+                theme: 'dark',
+                title: err.message
+              });
             }
           }
         },
@@ -687,26 +721,23 @@ export function initColaboradoresContextMenu(socket) {
                 if (res.ok) {
                   preencherTabelaColaboradoresRH();
                   document.querySelector('.bt_menu[data-target=".painel_vestimentas"]').click();
-                  Swal.fire({
+                  Toast.fire({
                     icon: "success",
-                    title: "Excluído!",
-                    theme: "dark",
-                    text: "EPI excluído!"
+                    theme: 'dark',
+                    title: "EPI excluído!"
                   });
                 } else {
-                  Swal.fire({
+                  Toast.fire({
                     icon: "error",
-                    title: "Falha",
-                    theme: "dark",
-                    text: "Não foi possível excluir EPI."
+                    theme: 'dark',
+                    title: "Não foi possível excluir EPI."
                   });
                 }
               } catch (err) {
-                Swal.fire({
+                Toast.fire({
                   icon: "error",
-                  title: "Erro",
-                  theme: "dark",
-                  text: err.message
+                  theme: 'dark',
+                  title: err.message
                 });
               }
             }

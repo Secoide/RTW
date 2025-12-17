@@ -33,12 +33,13 @@ async function atualizarOS(id, data) {
   const camposValidos = {};
   if (data.status !== undefined) camposValidos.status = data.status;
   if (data.descricao !== undefined) camposValidos.descricao = data.descricao;
-  if (data.orçado !== undefined) camposValidos.orçado = data.orçado;
+  if (data.orcado !== undefined) camposValidos.orcado = data.orcado;
   if (data.concluido !== undefined) camposValidos.concluido = data.concluido;
   if (data.criado !== undefined) camposValidos.criado = data.criado;
   if (data.empresa !== undefined) camposValidos.empresa = data.empresa;
   if (data.supervisor !== undefined) camposValidos.supervisor = data.supervisor;
   if (data.cidade !== undefined) camposValidos.cidade = data.cidade;
+  if (data.responsavel !== undefined) camposValidos.responsavel = data.responsavel;
 
   if (Object.keys(camposValidos).length === 0) return false;
 

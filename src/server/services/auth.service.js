@@ -1,5 +1,8 @@
 const { gerarHash, verificarHash } = require('../utils/crypto/hash');
 const AuthModel = require('../models/auth.model');
+const crypto = require('crypto');
+const emailService = require('../services/email.service');
+
 
 async function login(username, password) {
   const usuario = await AuthModel.buscarUsuarioPorUsername(username);
@@ -55,7 +58,57 @@ async function alterarSenha(idColab, senhaAntiga, novaSenha) {
   return { sucesso: true };
 }
 
+async function solicitarRecuperacao(idColab, email) {
+  const usuario = await AuthModel.buscarUsuarioParaRecuperarSenha(idColab, email);
+
+  // Não revelar se o usuário existe
+  if (!usuario) {
+    return { sucesso: true };
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiracao = Date.now() + 1000 * 60 * 10; // 10 min
+
+  await AuthModel.salvarTokenRecuperacao(usuario.id, token, expiracao);
+
+  const link = `${process.env.APP_URL}/resetar-senha?token=${token}`;
+
+  await emailService.enviarEmail({
+    para: usuario.mail,
+    assunto: "Recuperação de senha - RTW",
+    html: `
+      <p>Olá ${usuario.nome},</p>
+      <p>Para redefinir sua senha clique no link abaixo:</p>
+      <a href="${link}">${link}</a>
+      <p>Este link expira em 10 minutos.</p>
+    `
+  });
+
+  return { sucesso: true };
+}
+
+async function redefinirSenha(token, novaSenha) {
+  const dados = await AuthModel.buscarTokenRecuperacao(token);
+
+  if (!dados) {
+    return { sucesso: false, mensagem: "Token inválido." };
+  }
+
+  if (Date.now() > dados.expiracao) {
+    return { sucesso: false, mensagem: "Token expirado." };
+  }
+
+  const novaHash = await gerarHash(novaSenha);
+  await AuthModel.atualizarSenha(dados.id_usuario, novaHash);
+  await AuthModel.removerTokenRecuperacao(token);
+
+  return { sucesso: true, mensagem: "Senha alterada com sucesso." };
+}
+
+
 module.exports = {
   login,
-  alterarSenha
+  alterarSenha,
+  solicitarRecuperacao,
+  redefinirSenha
 };

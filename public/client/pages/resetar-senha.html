@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Redefinir Senha - RTW Engenharia</title>
+    <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
+    <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* Animações suaves */
+        .painel_login {
+            animation: fadeIn 0.6s ease, slideUp 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, calc(-50% + 20px));
+            }
+
+            to {
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .tituloLogin {
+            font-size: 26px !important;
+            margin-bottom: 20px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="fundo_img">
+
+        <img src="../fundos.webp" class="bg" alt="">
+        <div class="painel_login centralizada glass">
+            <p class="tituloLogin">Redefinir Senha</p>
+
+            <form id="formResetSenha">
+
+                <!-- CAMPO FAKE para enganar o Chrome -->
+                <input type="password" style="display:none" autocomplete="off">
+
+                <label for="novaSenha">Nova Senha</label>
+
+                <input id="novaSenha" name="novaSenha_real" type="text" placeholder="Digite sua nova senha"
+                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                    onfocus="ativarCampoSenha()" style="-webkit-text-security: disc;">
+
+
+                <!-- Barra de força -->
+                <div id="passwordStrength"
+                    style="width:220px; height:6px; background:#ccc; border-radius:4px; margin-top:4px; margin-bottom:4px;">
+                    <div id="passwordBar"
+                        style="height:6px; width:0%; background:red; border-radius:4px; transition:0.3s;"></div>
+                </div>
+                <p id="passwordLabel" style="font-size:12px; margin:0 0 15px 0; color:#888;"></p>
+                <div class="divbutton">
+                    <input class="botao-degrade" type="submit" value="Alterar Senha">
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function ativarCampoSenha() {
+            const input = document.getElementById("novaSenha");
+
+            if (input.getAttribute("type") === "text") {
+                input.setAttribute("type", "password");
+                input.style.webkitTextSecurity = "none"; // volta ao normal
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+
+        /* ----------------------------
+            FUNÇÃO FORÇA DA SENHA
+        -----------------------------*/
+        function verificarForcaSenha(senha) {
+            let score = 0;
+
+            if (senha.length >= 6) score++;
+            if (senha.length >= 10) score++;
+            if (/[A-Z]/.test(senha)) score++;
+            if (/[0-9]/.test(senha)) score++;
+            if (/[^A-Za-z0-9]/.test(senha)) score++;
+
+            return score;
+        }
+
+        $("#novaSenha").on("input", function () {
+            const senha = $(this).val();
+            const score = verificarForcaSenha(senha);
+
+            const bar = $("#passwordBar");
+            const label = $("#passwordLabel");
+
+            if (score === 0) {
+                bar.css({ width: "1%", background: "#00e1ff" });
+                label.text("Digite sua nova senha").css("color", "#00e1ff");
+            } else if (score === 1) {
+                bar.css({ width: "25%", background: "red" });
+                label.text("Senha fraca").css("color", "red");
+            } else if (score === 2) {
+                bar.css({ width: "50%", background: "orange" });
+                label.text("Senha média").css("color", "orange");
+            } else if (score >= 3) {
+                bar.css({ width: "100%", background: "#39c939" });
+                label.text("Senha forte").css("color", "#39c939");
+            }
+        });
+
+        /* ----------------------------
+            ENVIAR ALTERAÇÃO DE SENHA
+        -----------------------------*/
+        $("#formResetSenha").on("submit", function (e) {
+            e.preventDefault();
+
+            const novaSenha = $("#novaSenha").val().trim();
+            const score = verificarForcaSenha(novaSenha);
+
+            // Regras mínimas obrigatórias
+            if (
+                novaSenha.length < 5
+                //||
+                //!/[A-Z]/.test(novaSenha) ||
+                //!/[a-z]/.test(novaSenha) ||
+                //!/[0-9]/.test(novaSenha)
+            ) {
+                return Swal.fire({
+                    icon: "warning",
+                    title: "Senha inválida",
+                    html: `
+                        A senha deve conter:<br>
+                        • Mínimo 5 caracteres<br>
+                    `
+                });
+            }
+
+            if (score < 2) {
+                return Swal.fire({
+                    icon: "warning",
+                    title: "Senha muito fraca",
+                    text: "Escolha uma senha mais forte."
+                });
+            }
+
+            $.ajax({
+                url: "/api/auth/resetar-senha",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ token, novaSenha }),
+                success: () => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Senha alterada!",
+                        text: "Sua senha foi redefinida com sucesso.",
+                        confirmButtonText: "Ir para Login"
+                    }).then(() => {
+                        window.location.href = "/login";
+                    });
+                },
+                error: () => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Token inválido ou expirado",
+                        html: `
+                            Seu link não é mais válido.<br>
+                            Deseja solicitar um novo link?
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: "Solicitar novo link",
+                        cancelButtonText: "Fechar"
+                    }).then(result => {
+                        if (result.isConfirmed) solicitarNovoLink();
+                    });
+                }
+            });
+        });
+
+        /* ----------------------------
+            SOLICITAR NOVO LINK
+        -----------------------------*/
+        function solicitarNovoLink() {
+            Swal.fire({
+                title: "Recuperar senha",
+                text: "Digite seu e-mail cadastrado:",
+                input: "email",
+                inputPlaceholder: "exemplo@rtwengenharia.com",
+                showCancelButton: true,
+                confirmButtonText: "Enviar"
+            }).then(result => {
+                if (!result.value) return;
+
+                $.ajax({
+                    url: "/api/auth/recuperar-senha",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ email: result.value }),
+                    success: () => {
+                        Swal.fire({
+                            icon: "success",
+                            title: "E-mail enviado!",
+                            text: "Se o e-mail existir no sistema, enviaremos um link de redefinição."
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+
+</body>
+
+</html>

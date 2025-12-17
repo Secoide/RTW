@@ -69,13 +69,14 @@ async function createCidade(data) {
 // Atualizar
 async function updateCidade(id, data) {
   const nomeCidade = data.nome.toUpperCase();
+  const nomeEstadoabrev = data.estado.toUpperCase();
   const sql = `
     UPDATE tb_cidades
-    SET nome = ?
+    SET nome = ?, estado = ?
     WHERE id_cidades = ?
   `;
   const [result] = await connection.query(sql, [
-    nomeCidade,
+    nomeCidade, nomeEstadoabrev,
     id
   ]);
   return result.affectedRows > 0;

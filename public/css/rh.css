@@ -7,6 +7,44 @@
   gap: 10px;
 }
 
+.menuSuspensoRegistar {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* submenu fechado */
+.menuSuspensoRegistar .submenu-container {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    border-radius: 8px;
+    padding: 6px;
+    min-width: 100px;
+    z-index: 1000;
+}
+
+/* quando ativo */
+.menuSuspensoRegistar.ativo .submenu-container {
+    display: block;
+}
+
+.menuSuspensoRegistar .bt_submenu {
+    margin-bottom: 4px;
+}
+
+.menuSuspensoRegistar input {
+    width: 100%;
+}
+
+#myInputPesquisaNomeRH{
+  background-color: rgb(209, 209, 209);
+  color: var(--preto);
+
+}
+
+
 #rh .tb_zebrada th:nth-child(1),
 #rh.tb_zebrada td:nth-child(1) {
   width: 45px;
@@ -49,31 +87,36 @@
   background: rgba(255, 174, 0, 0.329);
 }
 
-#rh .tb_zebrada .desligado {
-  background-color: rgba(94, 94, 94, 0.411);
-  filter: grayscale(100%);
-  display: none;
-}
 
 #rh.mostrar-desligados .tb_zebrada .desligado {
   display: table-row;
 }
 
-#rh .tb_zebrada .Ferias {
-  background-color: rgba(255, 247, 131, 0.445);
+#rh .tb_zebrada .desligado {
+  background: linear-gradient(270deg, transparent 20%, rgb(53, 53, 53) 100%);
+  filter: grayscale(100%);
   color: var(--preto);
+  display: none;
+}
+
+#rh .tb_zebrada .Ferias {
+  background: linear-gradient(270deg, transparent 90%, #d3d61593 100%);
 }
 
 #rh .tb_zebrada .Paternidade {
-  background-color: rgba(176, 246, 255, 0.726);
+  background: linear-gradient(270deg, transparent 90%, #3debf191 100%);
+}
+
+#rh .tb_zebrada .Maternidade {
+  background: linear-gradient(270deg, transparent 90%, #ffafff88 100%);
 }
 
 #rh .tb_zebrada .Afastamento {
-  background-color: rgba(255, 176, 176, 0.685);
+  background: linear-gradient(270deg, transparent 90%, #c928287e 100%);
 }
 
 #rh .tb_zebrada .Saude {
-  background-color: rgba(255, 214, 176, 0.685);
+  background: linear-gradient(270deg, transparent 90%, #e25d158c 100%);
 }
 
 
@@ -88,7 +131,7 @@
 #rh .tb_zebrada td:nth-child(10) .desligado {
   display: inline-block;
   min-width: 80px;
-  background-color: rgb(68, 68, 68);
+  background-color: rgb(46, 46, 46);
   color: white;
   padding: 5px 12px;
   border-radius: 10px;
@@ -107,6 +150,15 @@
   display: inline-block;
   min-width: 80px;
   background-color: var(--paternidade);
+  color: rgb(0, 0, 0);
+  padding: 5px 12px;
+  border-radius: 10px;
+}
+
+#rh .tb_zebrada td:nth-child(10) .Maternidade {
+  display: inline-block;
+  min-width: 80px;
+  background-color: var(--maternidade);
   color: rgb(0, 0, 0);
   padding: 5px 12px;
   border-radius: 10px;
@@ -242,7 +294,7 @@
 }
 
 .mini_exame.status-demissional {
-  background: rgb(63, 63, 63);
+  background: rgb(49, 49, 49);
 }
 
 .mini_exame:hover{
@@ -293,11 +345,12 @@
 
 .mini_curso.status-vencido {
   z-index: 10;
-  animation: shakeiconAlerta 1.5s infinite;
+  background: rgb(190, 41, 41);
+  color: white;
 }
 
 .mini_curso.status-alerta {
-  border: 1px solid rgb(255, 123, 0) !important;
+  animation: shakeiconAlerta 1.4s infinite;
 }
 
 
@@ -352,8 +405,8 @@
   }
 
   100% {
-    transform: rotate(45deg) translateX(-5px) translateY(-5px) scale(1.4);
-    background: rgb(252, 65, 65);
+    transform: rotate(45deg) translateX(-5px) translateY(-5px) scale(1.3);
+    background: rgb(255, 65, 31);
     z-index: 9999;
   }
 }

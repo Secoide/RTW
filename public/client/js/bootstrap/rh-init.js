@@ -7,12 +7,17 @@ import { open_form_AnexarEPI } from "../events/forms/anexarEPI.js";
 export async function inciarRH() {
     try {
         preencherTabelaColaboradoresRH();
-        filterTableOS();
     } catch (err) {
         console.error("❌ Erro ao inicializar tela rh:", err);
     }
 
+
+
 }
+
+$(document).on("click", "#bt_atualizarRH", async function () {
+    preencherTabelaColaboradoresRH();
+});
 
 $(document).on("click", ".bt_form_anexar_epi", function (e) {
     open_form_AnexarEPI();
@@ -53,6 +58,72 @@ $(document).on("click", "#chkDesligados", function (e) {
 $(document).on("input", "#myInputPesquisaNomeRH", function (e) {
     filterTableOS();
 });
+
+$(document).on("click", "#bt_excluirConta", function () {
+    const idColaborador = $('#idColaborador').val();
+
+    Swal.fire({
+        title: "Excluir?",
+        text: "Deseja realmente excluir essa conta? Não será possível reverter esta ação!",
+        icon: "warning",
+        theme: "dark",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, excluir!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/api/colaboradores/deletar/${idColaborador}`,
+                type: "DELETE",
+                dataType: "json",
+                success: function (res) {
+                    if (res.sucesso) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Excluído",
+                            theme: "dark",
+                            text: "Conta excluída com sucesso!"
+                        });
+                        $('#form_cadColab').empty();
+                        preencherTabelaColaboradoresRH();
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Erro",
+                            theme: "dark",
+                            text: res.mensagem || "Erro ao excluir conta."
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erro",
+                        theme: "dark",
+                        text: "Erro ao processar a solicitação."
+                    });
+                    console.error(xhr);
+                }
+            });
+        }
+    });
+});
+
+$(document).on("click", function (e) {
+    const menu = document.getElementById("menuRegistrar");
+
+    if (!menu) return;
+
+    if ($(e.target).closest(menu).length === 0) {
+        // clique fora
+        menu.classList.remove("ativo");
+    } else {
+        // clique dentro
+        menu.classList.toggle("ativo");
+    }
+});
+
 
 function filterTableOS() {
     // pega o valor digitado
@@ -99,9 +170,9 @@ export function preencherTabelaColaboradoresRH() {
                         <tr class="rh_tb_lin_colob ${colab.exames} ${colab.contrato === "desligado" ? colab.contrato : colab.motivo}" style="font-size: 13px;" data-id="${colab.idFunc}">
                             <td>${colab.idFunc}</td>
                            <td>
-                            <img class="tb_fotoColab" 
-                                src="${colab.fotoperfil ? colab.fotoperfil + '?t=' + Date.now() : '/imagens/fotoperfil/user-default.jpg'}"
-                                onerror="this.src='/imagens/fotoperfil/user-default.jpg'">
+                            <img class="tb_fotoColab"
+                                    src="${colab.fotoperfil}?v=${colab.versao_foto}"
+                                    onerror="this.src='/imagens/user-default.webp'">
                             </img>${colab.nome}</td>
                             <td>${colab.nascimento_idade}</td>
                             <td>${colab.cargo}</td>
@@ -122,6 +193,8 @@ export function preencherTabelaColaboradoresRH() {
                 load_miniintegracoes_colaborador(colab.idFunc, $(buscarIntegracao));
                 load_minicursos_colaborador(colab.idFunc, $(buscarCurso))
             });
+
+            filterTableOS();
         },
         error: function (xhr) {
             alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');

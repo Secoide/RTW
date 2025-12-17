@@ -77,7 +77,7 @@ h1 {
 #gestao input[type="search"] {
     border: 1px solid #2a3242;
     border-radius: 8px;
-    color: #e7ebf6;
+    color: var(--preto);
     padding: 9px 12px;
     min-width: 240px;
 }
@@ -239,7 +239,7 @@ h1 {
 }
 
 #gestao .inline-add select {
-    min-width: 220px;
+    min-width: 200px;
     background: var(--input-bg);
     color: var(--texto-principal);
     border: 1px solid #4b4b4b;
@@ -308,6 +308,78 @@ h1 {
     border-color: var(--verde);
     background: #2f2f2f;
 }
+
+/* ===== Colunas Cidades e Supervisores – largura controlada ===== */
+
+/* Cidades (3ª coluna) */
+#gestao[data-entity="Empresa"] #dataTable th:nth-child(3),
+#gestao[data-entity="Empresa"] #dataTable td:nth-child(3) {
+    width: 300px;     /* largura real da coluna */
+}
+
+/* Supervisores (4ª coluna) */
+#gestao[data-entity="Empresa"] #dataTable th:nth-child(4),
+#gestao[data-entity="Empresa"] #dataTable td:nth-child(4) {
+    width: 300px;
+}
+
+#gestao[data-entity="Empresa"]#dataTable td:nth-child(3) .chips,
+#gestao[data-entity="Empresa"] #dataTable td:nth-child(4) .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    width: 100%;          /* ocupa a largura da coluna */
+    max-height: 100px;     /* opcional */
+    overflow-x: auto;
+}
+
+/* ===== Coluna ID – largura fixa em todas as tabelas ===== */
+#gestao[data-entity="Empresa"] #dataTable {
+    table-layout: fixed;   /* ESSENCIAL para respeitar widths */
+    width: 100%;
+}
+
+#gestao[data-entity="Empresa"] #dataTable th:first-child,
+#gestao[data-entity="Empresa"] #dataTable td:first-child {
+    width: 40px;           /* ajuste como quiser: 50px / 70px */
+    min-width: 40px;
+    max-width: 40px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+
+/* ===== Colunas redimensionáveis ===== */
+th.resizable {
+    position: relative;
+}
+
+/* área de arraste */
+th.resizable::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+}
+
+/* evita seleção de texto ao arrastar */
+.resizing {
+    user-select: none;
+}
+
+
+.chip .label {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 
 /* ======== Destaque visual da linha em edição ======== */
 #gestao tr.editing-row {
@@ -466,30 +538,31 @@ h1 {
 
 /* ======== Linha de gráficos OS ======== */
 #osChartsRow {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
 }
 
 
 #osTimelineContainer {
-  flex: 1; /* ocupa o restante do espaço */
-  height: 300px;
+    flex: 1;
+    /* ocupa o restante do espaço */
+    height: 300px;
 }
 
 #osPieContainer {
-  flex: 0 0 220px;
-  height: 280px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    flex: 0 0 220px;
+    height: 280px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #osPieContainer canvas {
-  width: 100% !important;
-  height: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
 }

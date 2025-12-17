@@ -2,28 +2,27 @@ const ColabService = require('../services/colaboradores.service');
 
 // GET /api/colaboradores
 async function getColaboradores(req, res) {
-    try {
-        const colaboradores = await ColabService.listarColaboradores();
-        res.json(colaboradores);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao listar colaboradores' });
-    }
+  try {
+    const colaboradores = await ColabService.listarColaboradores();
+    res.json(colaboradores);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao listar colaboradores' });
+  }
 }
 
 // GET /api/colaboradores/:id
 async function getColaborador(req, res) {
-    try {
-        const colaborador = await ColabService.buscarColaborador(req.params.id);
-        if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
-        res.json(colaborador);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar colaborador' });
-    }
+  try {
+    const colaborador = await ColabService.buscarColaborador(req.params.id);
+    if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(colaborador);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar colaborador' });
+  }
 }
 
 // POST /api/colaboradores
 async function createColaborador(req, res) {
-  console.log('REQ.BODY:', req.body);
   try {
     const novo = await ColabService.criarColaborador(req.body);
 
@@ -42,23 +41,40 @@ async function createColaborador(req, res) {
 }
 
 
-// PUT /api/colaboradores/:id
+// PUT /api/colaboradores/:id (controller.js)
 async function updateColaborador(req, res) {
   try {
-    const { id } = req.params; // vem da URL
-    const atualizado = await ColabService.atualizarColaborador(id, req.body);
+    const { id } = req.params;
 
-    res.status(200).json({
+    const resultado = await ColabService.atualizarColaborador(id, req.body);
+
+    // Se o próprio service indicar falha, tratar aqui
+    if (!resultado.sucesso) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: resultado.mensagem || "Falha ao atualizar colaborador.",
+        detalhe: resultado.detalhe || undefined
+      });
+    }
+
+    // Sucesso
+    return res.status(200).json({
       sucesso: true,
-      id: atualizado.id
+      mensagem: resultado.mensagem,
+      dados: resultado.dados
     });
+
   } catch (err) {
-    res.status(400).json({
+    console.error("Erro no controller updateColaborador:", err);
+
+    return res.status(500).json({
       sucesso: false,
-      mensagem: err.message
+      mensagem: "Erro interno ao atualizar o colaborador.",
+      detalhe: err.message
     });
   }
 }
+
 
 async function updateProfissionalColab(req, res) {
   try {
@@ -77,16 +93,58 @@ async function updateProfissionalColab(req, res) {
   }
 }
 
-// DELETE /api/colaboradores/:id
+//DELETE
 async function deleteColaborador(req, res) {
-    try {
-        const ok = await ColabService.deletarColaborador(req.params.id);
-        if (!ok) return res.status(404).json({ erro: 'Não encontrado' });
-        res.json({ sucesso: true });
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao deletar' });
+  try {
+    const { id } = req.params;
+
+    const userId = Number(req.user.id);
+    const nivel = Number(req.user.role);
+
+    const isDiretoria = nivel === 5;
+    const isRH = nivel === 4;
+    const isAdmin = nivel === 99;
+
+    // 🛡 PERMISSÃO
+    if (!isAdmin && !isDiretoria && !isRH) {
+      return res.status(403).json({
+        sucesso: false,
+        mensagem: "Você não tem permissão para excluir essa conta."
+      });
     }
+
+    // 🔐 Não permitir autoexclusão
+    if (Number(id) === userId) {
+      return res.status(403).json({
+        sucesso: false,
+        mensagem: "Você não pode excluir sua própria conta."
+      });
+    }
+
+    const ok = await ColabService.deletarColaborador(id);
+
+    if (!ok) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Colaborador não encontrado."
+      });
+    }
+
+    return res.json({
+      sucesso: true,
+      mensagem: "Colaborador excluído com sucesso."
+    });
+
+  } catch (err) {
+    console.error("Erro ao deletar colaborador:", err);
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno ao deletar colaborador."
+    });
+  }
 }
+
+
 
 // GET /api/colaboradores/:dia
 async function getColaboradoresDisp(req, res) {
@@ -157,13 +215,13 @@ async function getColaboradorCBX(req, res) {
 }
 
 async function getColaboradoresAniversariantes(req, res) {
-    try {
-        const colaboradores = await ColabService.listarColaboradoresAniversariantes();
-        res.json(colaboradores);
-    } catch (err) {
-        console.error("Erro ao buscar aniversariantes:", err.message);
-        res.status(500).json({ erro: "Erro ao buscar aniversariantes" });
-    }
+  try {
+    const colaboradores = await ColabService.listarColaboradoresAniversariantes();
+    res.json(colaboradores);
+  } catch (err) {
+    console.error("Erro ao buscar aniversariantes:", err.message);
+    res.status(500).json({ erro: "Erro ao buscar aniversariantes" });
+  }
 }
 
 
@@ -219,34 +277,34 @@ async function cadastrarAtestado(req, res) {
 
 
 async function getHistoricoAtestar(req, res) {
-    try {
-        const colaborador = await ColabService.buscarHistoricoAtestar(req.params.id);
-        if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
-        res.json(colaborador);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar historico de atestados do colaborador' });
-    }
+  try {
+    const colaborador = await ColabService.buscarHistoricoAtestar(req.params.id);
+    if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(colaborador);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar historico de atestados do colaborador' });
+  }
 }
 
 async function getDadosCPFRG(req, res) {
-    try {
-        const { dataDia, osID } = req.params;
-        const colaborador = await ColabService.buscarDadosCPFRG(dataDia, osID);
-        if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
-        res.json(colaborador);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar dados do colaborador' });
-    }
+  try {
+    const { dataDia, osID } = req.params;
+    const colaborador = await ColabService.buscarDadosCPFRG(dataDia, osID);
+    if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(colaborador);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar dados do colaborador' });
+  }
 }
 
 async function getHistoricoColabPorEmpresas(req, res) {
-    try {
-        const colaborador = await ColabService.buscarHistoricoColabPorEmpresa(req.params.idFuncionario);
-        if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
-        res.json(colaborador);
-    } catch (err) {
-        res.status(500).json({ erro: 'Erro ao buscar historico de colaborador por empresas' });
-    }
+  try {
+    const colaborador = await ColabService.buscarHistoricoColabPorEmpresa(req.params.idFuncionario);
+    if (!colaborador) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(colaborador);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar historico de colaborador por empresas' });
+  }
 }
 
 async function uploadFoto(req, res) {
@@ -261,23 +319,23 @@ async function uploadFoto(req, res) {
 }
 
 module.exports = {
-    getColaboradores,
-    getColaborador,
-    createColaborador,
-    updateColaborador,
-    updateProfissionalColab,
-    deleteColaborador,
-    getColaboradoresDisp,
-    getColaboradoresEmOS,
-    excluirColaboradorEmos,
-    getColaboradorResponsavelOS,
-    getColaboradorCBX,
-    getColaboradoresAniversariantes,
-    setColaboradorSupervisor,
-    removerSupervisorAtual,
-    getHistoricoAtestar,
-    getDadosCPFRG,
-    cadastrarAtestado,
-    getHistoricoColabPorEmpresas,
-    uploadFoto
+  getColaboradores,
+  getColaborador,
+  createColaborador,
+  updateColaborador,
+  updateProfissionalColab,
+  deleteColaborador,
+  getColaboradoresDisp,
+  getColaboradoresEmOS,
+  excluirColaboradorEmos,
+  getColaboradorResponsavelOS,
+  getColaboradorCBX,
+  getColaboradoresAniversariantes,
+  setColaboradorSupervisor,
+  removerSupervisorAtual,
+  getHistoricoAtestar,
+  getDadosCPFRG,
+  cadastrarAtestado,
+  getHistoricoColabPorEmpresas,
+  uploadFoto
 };

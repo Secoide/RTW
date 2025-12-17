@@ -33,8 +33,8 @@ async function gerarHash(senha) {
 }
 
 async function criarColaborador(data) {
-  if (!data.nome || !data.cpf) {
-    throw new Error('Nome e CPF são obrigatórios');
+  if (!data.nome || !data.cpf || !data.email) {
+    throw new Error('Nome, e-mail e CPF são obrigatórios');
   }
 
   // Normaliza CPF (remove pontuação)
@@ -61,7 +61,7 @@ async function criarColaborador(data) {
     cpf: cpfLimpo,
     rg: data.rg,
     senha: senhaHash,
-    fotoperfil: data.fotoperfil || '/imagens/fotoperfil/user-default.jpg'
+    fotoperfil: data.fotoperfil || '/imagens/user-default.webp'
   };
 
 
@@ -70,30 +70,65 @@ async function criarColaborador(data) {
 }
 
 
-
-// Atualizar
+// Atualizar (service.js)
 async function atualizarColaborador(id, data) {
-  if (!id) throw new Error('ID do colaborador é obrigatório');
-  if (!data.nome || !data.cpf) throw new Error('Nome e CPF são obrigatórios');
+  try {
+    // 🔍 Validações obrigatórias
+    if (!id) {
+      return { sucesso: false, mensagem: "ID do colaborador é obrigatório." };
+    }
 
-  const atualizado = await ColabModel.updateColaborador(id, {
-    nome: data.nome,
-    sexo: data.genero,
-    nascimento: data.dataNascimento,
-    endereco: data.endereco,
-    telefone: data.telefone,
-    mail: data.email,
-    sobre: data.sobre,
-    cpf: data.cpf ? data.cpf.replace(/\D/g, '').trim() : null,
-    rg: data.rg ? data.rg.trim() : null
-  });
+    if (!data.nome) {
+      return { sucesso: false, mensagem: "Nome Completo é obrigatório." };
+    }
+    if (!data.cpf) {
+      return { sucesso: false, mensagem: "CPF é obrigatório." };
+    }
+    if (!data.email) {
+      return { sucesso: false, mensagem: "E-mail é obrigatório." };
+    }
 
-  if (!atualizado) {
-    throw new Error('Colaborador não encontrado para atualização');
+    // 🔧 Sanitização
+    const payload = {
+      nome: data.nome,
+      sexo: data.genero,
+      nascimento: data.dataNascimento,
+      endereco: data.endereco,
+      telefone: data.telefone,
+      mail: data.email,
+      sobre: data.sobre,
+      cpf: data.cpf ? data.cpf.replace(/\D/g, "").trim() : null,
+      rg: data.rg ? data.rg.trim() : null
+    };
+
+    // 🔄 Atualiza no banco
+    const atualizado = await ColabModel.updateColaborador(id, payload);
+
+    if (!atualizado) {
+      return {
+        sucesso: false,
+        mensagem: "Colaborador não encontrado para atualização."
+      };
+    }
+
+    // 🎉 Sucesso
+    return {
+      sucesso: true,
+      mensagem: "Colaborador atualizado com sucesso!",
+      dados: { id, ...payload }
+    };
+
+  } catch (error) {
+    console.error("Erro ao atualizar colaborador:", error);
+
+    return {
+      sucesso: false,
+      mensagem: "Erro interno ao atualizar colaborador.",
+      detalhe: error.message
+    };
   }
-
-  return { id, ...data };
 }
+
 
 // Atualizar dados profissional
 async function atualizarProfissionalColab(id, data) {

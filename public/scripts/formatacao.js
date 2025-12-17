@@ -40,7 +40,7 @@ $(document).on('input', '#telefone', function () {
 
 
 // E-MAIL - sugestões automáticas após "@"
-const dominios = ['gmail.com', 'hotmail.com', 'outlook.com.br', 'icloud.com'];
+const dominios = ['gmail.com', 'hotmail.com', 'outlook.com.br', 'icloud.com','rtwengenharia.com.br'];
 
 $(document).on('input', '#mail', function (e) {
     const val = $(this).val();
@@ -62,8 +62,8 @@ $(document).on('input', '#mail', function (e) {
 
             const offset = $(this).offset();
             $suggestions.css({
-                top: offset.top + $(this).outerHeight(),
-                left: offset.left
+                top: offset.top + $(this).outerHeight() -95,
+                left: offset.left - 650
             });
         } else {
             $suggestions.hide();

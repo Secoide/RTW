@@ -11,7 +11,6 @@ function verificarAutenticacao(req, res, next) {
       nome: usuarioNome || null,
       role: req.session.nivel_acesso 
     };
-
     return next();
   }
 

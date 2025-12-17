@@ -1,5 +1,4 @@
 import { renderColaboradoresDisponiveis, renderOSComColaboradores, renderColoboradorEmOS, atualizarStatusDia } from "../../utils/dom/programacao-render.js";
-import { formatDate } from "../../utils/formatters/date-format.js";
 
 import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
 

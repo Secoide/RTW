@@ -15,6 +15,7 @@ import "../events/click/handle-status-dia.js";
 import { atualizarProgramacao } from "../events/change/handle-date-change.js";
 
 
+
 export async function initProgramacao() {
   try {
     const socket = conectarSocket(window.usuarioLogado); // 🔗 cria ou retorna o mesmo socket
@@ -29,7 +30,7 @@ export async function initProgramacao() {
     } else {
       console.warn("⚠️ Não encontrei #seletor_data no DOM");
     }
-    
+
 
     // inicializa drag & drop de colaboradores
     initColaboradoresDragDrop();
@@ -46,10 +47,11 @@ export async function initProgramacao() {
   } catch (err) {
     console.error("❌ Erro ao inicializar programação:", err);
   }
-  
+
   $(document).on("click", "#bt_atualizarProgramacao", async function () {
     const dataSelecionada = new Date($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
   });
+
 }
 

@@ -3,7 +3,7 @@ const connection = require('../config/db');
 // Listar todos
 async function getColaboradores() {
   const [rows] = await connection.query(`
-    SELECT id, nome, sexo, nascimento, cpf, rg, fotoperfil
+    SELECT id, nome, sexo, nascimento, cpf, rg, fotoperfil, versao_foto
     FROM funcionarios
     WHERE id <> 0
     ORDER BY nome ASC
@@ -24,7 +24,7 @@ async function getColaboradorById(id) {
        f.sobre,
        c.id          AS cargo,
        c.cargo       AS nomeCargo,
-       nv.id_catnvl  AS setor,
+       c.idsetor  AS setor,
        f.empresaContrato,
        f.cpf,
        f.rg,
@@ -33,7 +33,8 @@ async function getColaboradorById(id) {
        fi.datafinal,
        IFNULL(fi.motivo,'ativo') as motivo,
        fi.descricao,
-       f.fotoperfil
+       f.fotoperfil,
+       f.versao_foto
           FROM funcionarios f
             LEFT JOIN tb_cargos c
                   ON f.cargo = c.id
@@ -83,7 +84,8 @@ async function createColaborador(data) {
     (nome, sexo, nascimento, cpf, rg, mail, telefone, endereco, sobre, senha, fotoperfil)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  const [result] = await connection.query(sql, [
+
+  await connection.query(sql, [
     data.nome,
     data.sexo,
     data.nascimento,
@@ -93,11 +95,20 @@ async function createColaborador(data) {
     data.telefone,
     data.endereco,
     data.sobre,
-    data.senha, // já vem hash
-    data.fotoperfil || '/imagens/fotoperfil/user-default.jpg'
+    data.senha,
+    data.fotoperfil || '/imagens/user-default.webp'
   ]);
-  return { id: result.insertId, ...data };
+
+  // buscar o último registro criado
+  const [rows] = await connection.query(`
+    SELECT id FROM funcionarios 
+    ORDER BY created_at DESC 
+    LIMIT 1
+  `);
+
+  return { id: rows[0].id, ...data };
 }
+
 
 async function findByCPF(cpf) {
   const [rows] = await connection.query(
@@ -136,12 +147,11 @@ async function updateColaborador(id, data) {
 async function updateProfissionalColab(idColaboradorPro, data) {
   const sql = `
     UPDATE funcionarios SET
-        idnvlacesso = ?,  cargo = ?, cnh = ?, empresaContrato = ?
+        cargo = ?, cnh = ?, empresaContrato = ?
         WHERE id = ?
   `;
 
   const [result] = await connection.query(sql, [
-    data.setor,
     data.cargo,
     data.vehicles_selected,
     data.empresacontrato,
@@ -223,14 +233,13 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         ELSE ''
       END AS contrato,
       IF(DATE_FORMAT(f.nascimento, '%m-%d') = DATE_FORMAT((SELECT ref_date FROM params), '%m-%d'), 'aniver', '') AS aniver,
-      CASE nv.id_catnvl 
-        WHEN 10 THEN 'encarregado' 
-        WHEN 5  THEN 'lider' 
-        WHEN 6  THEN 'lider' 
-        WHEN 1  THEN 'producao' 
-        WHEN 12 THEN 'terceiro' 
-        ELSE '' 
-      END AS funcao,
+      CASE
+		  WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
+		  WHEN c.idsetor IN (5, 6, 10) THEN 'lider'
+		  WHEN c.idsetor = 1 THEN 'producao'
+		  WHEN c.idsetor = 12 THEN 'terceiro'
+		  ELSE ''
+		END AS funcao,
       CASE
         WHEN spf.status_score IS NULL THEN 'falta'
         WHEN spf.status_score = 2 THEN 'vencido'
@@ -238,17 +247,27 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         ELSE 'ok'
       END AS status_alerta
     FROM funcionarios f
-    LEFT JOIN tb_categoria_nvl_acesso nv ON f.idnvlacesso = nv.id_catnvl
+    LEFT JOIN tb_cargos c ON f.cargo = c.id 
+    LEFT JOIN tb_categoria_nvl_acesso nv ON c.idsetor = nv.id_catnvl
     LEFT JOIN params p ON 1=1
     LEFT JOIN tb_func_interrupto fi ON f.id = fi.id_func AND p.ref_date BETWEEN fi.datainicio AND fi.datafinal
     LEFT JOIN exames_func exf ON f.id = exf.idfuncionario
     LEFT JOIN score_por_func spf ON f.id = spf.idfuncionario
     WHERE 
       f.id <> 0 
-      AND nv.id_catnvl IN (12, 1, 10, 5, 6)
-      AND (exf.data_admissional IS NULL OR p.ref_date >= exf.data_admissional)
+      AND nv.id_catnvl IN (1, 10, 5, 6, 12)
+      AND (p.ref_date >= exf.data_admissional)
       AND (exf.data_demissional IS NULL OR p.ref_date <= exf.data_demissional)
-    ORDER BY FIELD(nv.id_catnvl, 56, 10, 1, 12), f.nome ASC;
+    ORDER BY 
+	  CASE
+		WHEN nv.id_catnvl IN (5, 6, 10) THEN 1
+		WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 2
+		WHEN nv.id_catnvl = 1 THEN 3
+		WHEN nv.id_catnvl = 10 THEN 4
+		WHEN nv.id_catnvl = 12 THEN 5
+		ELSE 99
+	  END,
+	  f.nome ASC;
   `;
 
   const [rows] = await connection.query(sql, [dataDia]);
@@ -461,6 +480,7 @@ async function getColaboradoresAniversariantes() {
         f.nome,
         f.nascimento,
         f.fotoperfil,
+        f.versao_foto,
         CASE WHEN d.idfuncionario IS NOT NULL THEN 'desligado' ELSE '' END AS contrato
     FROM funcionarios f
     LEFT JOIN dem d ON d.idfuncionario = f.id
@@ -568,8 +588,14 @@ async function getHistoricoColabPorEmpresa(id) {
 }
 
 async function atualizarFotoPerfil(userId, caminhoFoto) {
-  const sql = 'UPDATE funcionarios SET fotoperfil = ? WHERE id = ?';
+  const sql = 'UPDATE funcionarios SET fotoperfil = ?, versao_foto = versao_foto + 1 WHERE id = ?';
   const [result] = await connection.query(sql, [caminhoFoto, userId]);
+  return result;
+}
+
+async function incrementarVersaoFoto(userId) {
+  const sql = 'UPDATE funcionarios SET versao_foto = versao_foto + 1 WHERE id = ?';
+  const [result] = await connection.query(sql, [userId]);
   return result;
 }
 
@@ -596,5 +622,6 @@ module.exports = {
   getExportarDados,
   inserirAtestado,
   getHistoricoColabPorEmpresa,
-  atualizarFotoPerfil
+  atualizarFotoPerfil,
+  incrementarVersaoFoto
 };

@@ -36,7 +36,7 @@ export function iniciarConexao() {
 
     // 🔄 Atualiza a programação após reconectar
     try {
-      await initProgramacao();
+      //await initProgramacao();
       console.log("✅ Programação recarregada após reconexão");
     } catch (err) {
       console.error("❌ Falha ao recarregar programação:", err);
