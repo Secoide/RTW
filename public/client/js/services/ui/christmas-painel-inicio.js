@@ -62,8 +62,8 @@ export function initSantaDropWalkWrapper() {
     if (now.getMonth() !== 11) return;
 
     const AUDIO_LEAD_TIME = 1000;
-    const CHECK_INTERVAL = 36000;
-    const CHANCE =  0.01; // use 0.01 em produção
+    const CHECK_INTERVAL = 300000;
+    const CHANCE =  0.02; // use 0.01 em produção
 
     setInterval(() => {
         if (document.visibilityState !== "visible") return;
