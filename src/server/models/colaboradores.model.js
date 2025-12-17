@@ -236,7 +236,7 @@ async function buscarColaboradoresDisponiveis(dataDia) {
       CASE
 		  WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
 		  WHEN c.idsetor IN (5, 6, 10) THEN 'lider'
-		  WHEN c.idsetor = 1 THEN 'producao'
+		  WHEN c.idsetor = 1 AND f.cargo NOT IN (12, 13, 31, 32) THEN 'producao'
 		  WHEN c.idsetor = 12 THEN 'terceiro'
 		  ELSE ''
 		END AS funcao,
@@ -255,7 +255,7 @@ async function buscarColaboradoresDisponiveis(dataDia) {
     LEFT JOIN score_por_func spf ON f.id = spf.idfuncionario
     WHERE 
       f.id <> 0 
-      AND nv.id_catnvl IN (1, 10, 5, 6, 12)
+      AND nv.id_catnvl IN (1, 10, 5, 6, 12) AND f.cargo NOT IN (13, 31, 32)
       AND (p.ref_date >= exf.data_admissional)
       AND (exf.data_demissional IS NULL OR p.ref_date <= exf.data_demissional)
     ORDER BY 
