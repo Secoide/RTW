@@ -147,7 +147,7 @@ export function initSantaDropWalkWrapper() {
 
             markSantaAsAppearedToday();
 
-            if (santaAudioUnlocked && santaAudio && Math.random() < 0.1) {
+            if (santaAudioUnlocked && santaAudio && Math.random() < 0.5) {
                 santaAudio.currentTime = 0;
                 santaAudio.play().catch(() => { });
             }
