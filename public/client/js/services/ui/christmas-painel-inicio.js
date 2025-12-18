@@ -1,12 +1,54 @@
 /* =========================================================
    🔊 CONTROLE DE ÁUDIO (AUTOPLAY SAFE)
 ========================================================= */
+const SANTA_TEST_MODE = false; //modo TESTE
+
+
+const BASE_CHANCE = SANTA_TEST_MODE ? 0.4 : 0.010;
+const MAX_CHANCE = SANTA_TEST_MODE ? 1.0 : 0.05;
+const CHECK_INTERVAL = SANTA_TEST_MODE ? 5000 : 300000; // 5s ou 5min
+const ACTIVE_STEP_TIME = SANTA_TEST_MODE ? 5000 : 300000; // 5s ou 5min
+const AUDIO_LEAD_TIME = 1000;
 
 
 let santaAudioUnlocked = false;
 let santaAudio = null;
 let santaActive = false;
 let stopSanta = false;
+
+let santaChance = BASE_CHANCE;
+let activeTime = 0;
+let lastActiveTick = Date.now();
+
+window.aparecerPapaiNoel = () => {
+    if (!santaActive) {
+        spawnSanta();
+        if (santaAudioUnlocked && santaAudio && Math.random() < 0.3) {
+            santaAudio.currentTime = 0;
+            santaAudio.play().catch(() => { });
+        }
+
+        console.log("🎅 Ho ho ho!");
+        console.log(
+            'Chance: ' + (BASE_CHANCE * 100).toFixed(1) + '%\n' +
+            'Tempo acumulado: ' + formatTime(activeTime)
+        );
+
+        return;
+    }
+    return 'Não foi possivel gerar!';
+};
+
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(hours).padStart(2, '0')}:` +
+           `${String(minutes).padStart(2, '0')}:` +
+           `${String(seconds).padStart(2, '0')}`;
+}
 
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible") {
@@ -56,25 +98,56 @@ document.addEventListener("touchstart", unlockSantaAudio, { once: true });
    - Queda suave
    - Leve pulinho ao tocar a borda
 ========================================================= */
+function todayKey() {
+    const d = new Date();
+    return `santa-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function santaAlreadyAppearedToday() {
+    return localStorage.getItem(todayKey()) === "true";
+}
+
+function markSantaAsAppearedToday() {
+    localStorage.setItem(todayKey(), "true");
+}
+
+setInterval(() => {
+    const now = Date.now();
+
+    if (document.visibilityState === "visible") {
+        activeTime += now - lastActiveTick;
+    }
+
+    lastActiveTick = now;
+}, 1000);
+
 
 export function initSantaDropWalkWrapper() {
     const now = new Date();
     if (now.getMonth() !== 11) return;
 
-    const AUDIO_LEAD_TIME = 1000;
-    const CHECK_INTERVAL = 300000;
-    const CHANCE =  0.02; // use 0.01 em produção
+    santaChance = BASE_CHANCE;
 
     setInterval(() => {
         if (document.visibilityState !== "visible") return;
-
-        // 🔒 trava se já existe ou já foi agendado
         if (santaActive) return;
+        if (santaAlreadyAppearedToday()) return;
 
-        if (Math.random() < CHANCE) {
+        // 📈 chance progressiva baseada em tempo ativo real
+        const steps = Math.floor(activeTime / ACTIVE_STEP_TIME);
+        santaChance = Math.min(
+            BASE_CHANCE + steps * BASE_CHANCE,
+            MAX_CHANCE
+        );
+
+        if (Math.random() < santaChance) {
             santaActive = true;
+            activeTime = 0;
+            santaChance = BASE_CHANCE;
 
-            if (santaAudioUnlocked && santaAudio && (Math.random() < 0.1)) {
+            markSantaAsAppearedToday();
+
+            if (santaAudioUnlocked && santaAudio && Math.random() < 0.1) {
                 santaAudio.currentTime = 0;
                 santaAudio.play().catch(() => { });
             }
@@ -84,12 +157,13 @@ export function initSantaDropWalkWrapper() {
                     santaActive = false;
                     return;
                 }
-
                 spawnSanta();
             }, AUDIO_LEAD_TIME);
         }
+
     }, CHECK_INTERVAL);
 }
+
 
 
 
