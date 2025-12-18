@@ -23,20 +23,57 @@ let lastActiveTick = Date.now();
 window.aparecerPapaiNoel = () => {
     if (!santaActive) {
         spawnSanta();
-        if (santaAudioUnlocked && santaAudio && Math.random() < 0.3) {
+        if (santaAudioUnlocked && santaAudio) {
             santaAudio.currentTime = 0;
             santaAudio.play().catch(() => { });
         }
-
-        console.log("🎅 Ho ho ho!");
-        console.log(
-            'Chance: ' + (BASE_CHANCE * 100).toFixed(1) + '%\n' +
-            'Tempo acumulado: ' + formatTime(activeTime)
-        );
-
-        return;
+        
+        return '🎅 Ho ho ho!';
     }
-    return 'Não foi possivel gerar!';
+    let santaChance1 = 0.0;
+        const steps1 = Math.floor(activeTime / ACTIVE_STEP_TIME);
+        santaChance1 = Math.min(
+            BASE_CHANCE + steps1 * BASE_CHANCE,
+            MAX_CHANCE
+        );
+    console.log(
+        '\n🎅 Papai Noel Debug\n' +
+        `⏱️ Tempo ativo: ${formatTime(activeTime)}\n` +
+        `🔥 Chance real: ${(santaChance1 * 100).toFixed(2)}%` +
+        (santaChance1 === MAX_CHANCE ? ' (MAX)' : '')
+    );
+    console.log('Já apareceu?');
+    return (santaAlreadyAppearedToday() ? 'Sim' : 'Não');
+};
+
+window.resetarPapaiNoel = () => {
+    const key = todayKey();
+
+    // 🔐 reset diário (produção)
+    localStorage.setItem(key, "false");
+
+    // 🎧 áudio
+    if (santaAudio) {
+        santaAudio.pause();
+        santaAudio.currentTime = 0;
+    }
+    santaAudioUnlocked = false;
+    santaAudio = null;
+
+    // 🧹 REMOVE O PAPAI NOEL DO DOM
+    document.querySelectorAll(
+        '.santa, .papai-noel, .santa-container, .santa-wrapper'
+    ).forEach(el => el.remove());
+
+    // 🎅 estado
+    santaActive = false;
+    stopSanta = false;
+
+    // ⏱️ progressão
+    activeTime = 0;
+    santaChance = BASE_CHANCE;
+
+    return "🎄 Papai Noel resetado completamente!";
 };
 
 function formatTime(ms) {
@@ -46,8 +83,8 @@ function formatTime(ms) {
     const seconds = totalSeconds % 60;
 
     return `${String(hours).padStart(2, '0')}:` +
-           `${String(minutes).padStart(2, '0')}:` +
-           `${String(seconds).padStart(2, '0')}`;
+        `${String(minutes).padStart(2, '0')}:` +
+        `${String(seconds).padStart(2, '0')}`;
 }
 
 document.addEventListener("visibilitychange", () => {
