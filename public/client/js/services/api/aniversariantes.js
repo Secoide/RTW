@@ -63,8 +63,7 @@ export async function carregarAniversariantes() {
             listaMes.innerHTML += montarCard(c);
         });
 
-        // próximos 30 dias
-        // próximos 30 dias — CORRIGIDO
+        // próximos 40 dias
         const proximos = colaboradores
             .map((c) => {
                 const data = tratarData(c.nascimento);
@@ -103,7 +102,7 @@ export async function carregarAniversariantes() {
             .filter((c) =>
                 c !== null &&
                 c.diff > 0 &&
-                c.diff <= 31 &&   // dentro dos próximos 30 dias reais
+                c.diff <= 40 &&   // dentro dos próximos 30 dias reais
                 c.mes !== mesAtual // mantém lógica de não mostrar mês atual
             )
             .sort((a, b) => a.diff - b.diff);

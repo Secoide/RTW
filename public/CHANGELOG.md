@@ -6,6 +6,19 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
+## [1.3.1] - 2025-12-15
+## Nome: 🔨 Ajustes
+### Adicionado
+- Adicionado resumo para NR-33 nos icones da tabela RH;
+- Visibilidade e bloqueio para mais paginas e funções conforme nível de permissão do usuário;
+
+### Alterado
+- Aumentado numero de dias para verificar proximos anivesariantes;
+
+### Removido
+- Sistema de inatividade removido para melhorias;
+
+
 ## [1.3.0] - 2025-12-15
 ## Nome: 🔐 Login e Senhas
 ### Adicionado

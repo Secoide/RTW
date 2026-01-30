@@ -1,0 +1,59 @@
+<div class="painel_pagina glass">
+    <div class="painel_menuSuperior">
+        <div id="usuarios_online" style="padding: 5px 10px;">
+            👤 Online: <span id="lista_usuarios_online">Nenhum usuário</span>
+            <div class="conjuntoServidor" style="display: flex;">
+                <i id="btn-debug-ws" class="fa-solid fa-server" aria-hidden="true" style="color: rgb(0, 128, 0);"></i>
+                <div id="status">Conectado</div>
+            </div>
+            
+        </div>
+        <div id="bt_abrir_NovaFerias" class="bt_submenu">
+                <input type="button" name="" value="➕ Férias" title="Cadastrar Ferias" class="bt_padrao bt_cad">
+        </div>
+        <div class="bt_submenu" style="width: 20px; text-align: center;">|</div>
+        <div id="bt_atualizarFerias" class="bt_submenu">
+                <input type="button" name="" value="🔄 Atualizar Férias" title="Atualizar Férias" class="bt_padrao bt_atualizar">
+        </div>  
+        <div class="direitaflex"></div>
+        <div class="painel_EsqBtAcoes" style="padding-right: 10px; ">
+            <input id="mesSelecionado" type="month" class="tbx_data tbx_teste glass" type="date" value="">
+            <!--<button class="bt_abrirmenu"><i class="fa-solid fa-ellipsis"></i></button>-->
+            <!--<p id="toggle-mode" class=""></p>-->
+        </div>
+    </div>
+</div>
+
+<main id="ferias">
+    <div class="scroll-container" style="height: 800px;">
+
+        <div id="tabela-ferias">
+            <div class="mes">
+                <div class="titulo-mes"></div>
+                <div class="linha-dias"></div>
+                <div class="linha-colaborador"></div>
+            </div>
+
+            <div class="mes">
+                <div class="titulo-mes"></div>
+                <div class="linha-dias"></div>
+                <div class="linha-colaborador"></div>
+            </div>
+
+            <div class="mes">
+                <div class="titulo-mes"></div>
+                <div class="linha-dias"></div>
+                <div class="linha-colaborador"></div>
+            </div>
+
+        </div>
+        <div id="menu-status" class="menu-status">
+            <div data-status="avaliar">🔍 Avaliar</div>
+            <div data-status="aprovado">✅ Aprovar</div>
+            <div data-status="reprovado">❌ Reprovar</div>
+            <hr>
+            <div data-acao="excluir" class="danger">🗑 Apagar férias</div>
+        </div>
+    </div>
+
+</main>

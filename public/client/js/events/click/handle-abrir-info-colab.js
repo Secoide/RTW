@@ -4,6 +4,7 @@ import { formatarCPF } from "../../utils/formatters/strings-format.js";
 import { initColabForm } from "../forms/handle-colaborador-submit.js";
 import { open_form_AnexarCurso } from "../forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../forms/anexarExame.js";
+import { initMaleta } from "../../services/ui/maleta.js";
 
 export function initAbrirInfoColabClick() {
     $(document).on("click", "#bt_perfilhome", function () {
@@ -91,7 +92,7 @@ export function get_carregarPerfilUsuario(funcId) {
 
                     if (status === "success") {
 
-                        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
+                        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
                         $('.painel_perfil').show();
                         $('#bt_editColab').show();
                         $('#bt_cadColaborador').hide();
@@ -150,8 +151,9 @@ export function get_carregarPerfilUsuario(funcId) {
                         $('#categoria').val(dados.setor).trigger('change');
 
                         setTimeout(() => { $('#cargo').val(dados.cargo); }, 100);
-
+                        initMaleta();
                         preencherTabelaAtestar(dados.id);
+
 
                         // 🔥 Tudo terminou, liberamos o resolve()
                         resolve(dados);
@@ -174,7 +176,7 @@ export function get_carregarPerfilUsuario(funcId) {
 
 export function open_form_cad_colaborador() {
     $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function () {
-        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_apoio, .painel_senha').hide();
+        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
 
         $('.painel_perfil').show();
         $('[data-target]').hide();     // esconde todos

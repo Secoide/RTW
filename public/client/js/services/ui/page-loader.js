@@ -1,6 +1,7 @@
 import { initProgramacao } from "../../bootstrap/programacao-init.js";
 import { inciarRH } from "../../bootstrap/rh-init.js";
 import { initGestao } from "../../bootstrap/gestao-init.js";
+import { initFerias } from "../../bootstrap/ferias-init.js";
 import { initHome } from "../../bootstrap/home-init.js";
 
 // Funções de carregamento de páginas
@@ -26,6 +27,9 @@ export function carregarPagina(pagina) {
         }
         if (pagina.includes('gestao')) {
           initGestao();
+        }
+        if (pagina.includes('ferias')) {
+          initFerias();
         }
         if (pagina.includes('inicio')) {
           initHome();

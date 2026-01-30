@@ -118,6 +118,14 @@ async function findByCPF(cpf) {
   return rows.length > 0 ? rows[0] : null;
 }
 
+async function findByRG(rg) {
+  const [rows] = await connection.query(
+    'SELECT id FROM funcionarios WHERE rg = ? LIMIT 1',
+    [rg]
+  );
+  return rows.length > 0 ? rows[0] : null;
+}
+
 // Atualizar
 async function updateColaborador(id, data) {
   const sql = `
@@ -606,6 +614,7 @@ module.exports = {
   getStatusIntegracaoByColab,
   createColaborador,
   findByCPF,
+  findByRG,
   updateColaborador,
   updateProfissionalColab,
   deleteColaborador,

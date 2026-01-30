@@ -97,13 +97,28 @@ $(document).on("click", "#bt_excluirConta", function () {
                     }
                 },
                 error: function (xhr) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Erro",
+                    let mensagem = "Erro ao processar a solicitação.";
+
+                    if (xhr.responseJSON?.mensagem) {
+                        mensagem = xhr.responseJSON.mensagem;
+                    }
+                    else if (xhr.responseText) {
+                        try {
+                            const json = JSON.parse(xhr.responseText);
+                            mensagem = json.mensagem || mensagem;
+                        } catch (e) { }
+                    }
+
+                    // 🎯 Regras de negócio
+                    const ehAviso =
+                        mensagem.includes('Você não tem permissão para excluir essa conta');
+
+                    Toast.fire({
+                        icon: ehAviso ? "warning" : "error",
+                        title: ehAviso ? "Atenção" : "Erro",
                         theme: "dark",
-                        text: "Erro ao processar a solicitação."
+                        text: mensagem
                     });
-                    console.error(xhr);
                 }
             });
         }

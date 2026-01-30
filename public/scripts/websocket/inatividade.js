@@ -1,40 +1,23 @@
+const INATIVIDADE_ATIVA = false; // 👈 desligado por enquanto
 
-let tempoLimite = 10 * 60 * 1000; // 10 minutos em ms
+const TEMPO_LIMITE = 30 * 60 * 1000; // 30 minutos
 let timerInatividade;
+let sessaoEncerrada = false;
+let ultimoReset = 0;
 
 function usuarioLogado() {
     return !!sessionStorage.getItem("id_usuario");
 }
 
 function resetarTimer() {
-    if (!usuarioLogado()) return;
+    if (!INATIVIDADE_ATIVA) return; // 🔴 DESLIGA AQUI
+
+    if (!usuarioLogado() || sessaoEncerrada) return;
+
+    const agora = Date.now();
+    if (agora - ultimoReset < 2000) return;
+    ultimoReset = agora;
 
     clearTimeout(timerInatividade);
-    timerInatividade = setTimeout(() => {
-        Swal.fire({
-            icon: "info",
-            title: "Sessão expirada",
-            text: "Você foi desconectado por inatividade",
-            confirmButtonText: "Ok"
-        }).then(async () => {
-
-            await fetch("/api/auth/logout", {
-                method: "POST",
-                credentials: "include"
-            });
-
-            //localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/login";
-        });
-    }, tempoLimite);
+    timerInatividade = setTimeout(encerrarSessao, TEMPO_LIMITE);
 }
-
-
-// Eventos que resetam o contador
-window.onload = resetarTimer;
-document.onmousemove = resetarTimer;
-document.onkeypress = resetarTimer;
-document.onclick = resetarTimer;
-document.onscroll = resetarTimer;
-document.ontouchstart = resetarTimer; // toque em dispositivos móveis

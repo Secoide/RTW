@@ -40,10 +40,16 @@ async function criarColaborador(data) {
   // Normaliza CPF (remove pontuação)
   const cpfLimpo = data.cpf.replace(/\D/g, '').trim();
 
-  // Verifica se já existe
+  // Verifica se já existe CPF
   const existente = await ColabModel.findByCPF(cpfLimpo);
   if (existente) {
     throw new Error('CPF já cadastrado.');
+  }
+
+  // Verifica se já existe RG
+  const existenterg = await ColabModel.findByRG(data.rg);
+  if (existenterg) {
+    throw new Error('RG já cadastrado.');
   }
 
   // Define senha (default = "123" se não enviada)
@@ -230,7 +236,7 @@ async function listarColaboradoresCBX() {
 
 
 async function listarColaboradoresAniversariantes() {
-    return await ColabModel.getColaboradoresAniversariantes();
+  return await ColabModel.getColaboradoresAniversariantes();
 }
 
 

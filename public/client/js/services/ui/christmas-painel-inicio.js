@@ -5,10 +5,12 @@ const SANTA_TEST_MODE = false; //modo TESTE
 
 
 const BASE_CHANCE = SANTA_TEST_MODE ? 0.4 : 0.010;
-const MAX_CHANCE = SANTA_TEST_MODE ? 1.0 : 0.05;
+const MAX_CHANCE = SANTA_TEST_MODE ? 1.0 : 0.1;
 const CHECK_INTERVAL = SANTA_TEST_MODE ? 5000 : 300000; // 5s ou 5min
 const ACTIVE_STEP_TIME = SANTA_TEST_MODE ? 5000 : 300000; // 5s ou 5min
 const AUDIO_LEAD_TIME = 1000;
+
+const ACTIVE_TIME_KEY = "santa-active-time";
 
 
 let santaAudioUnlocked = false;
@@ -17,61 +19,68 @@ let santaActive = false;
 let stopSanta = false;
 
 let santaChance = BASE_CHANCE;
-let activeTime = 0;
+let activeTime = Number(localStorage.getItem(ACTIVE_TIME_KEY)) || 0;
 let lastActiveTick = Date.now();
 
 window.aparecerPapaiNoel = () => {
-    if (!santaActive) {
-        spawnSanta();
-        if (santaAudioUnlocked && santaAudio) {
-            santaAudio.currentTime = 0;
-            santaAudio.play().catch(() => { });
-        }
-        
-        return '🎅 Ho ho ho!';
+    // 🛑 evita duplicar
+    if (santaActive) {
+        return "🎅 Papai Noel já está ativo!";
     }
-    let santaChance1 = 0.0;
-        const steps1 = Math.floor(activeTime / ACTIVE_STEP_TIME);
-        santaChance1 = Math.min(
-            BASE_CHANCE + steps1 * BASE_CHANCE,
-            MAX_CHANCE
-        );
-    console.log(
-        '\n🎅 Papai Noel Debug\n' +
-        `⏱️ Tempo ativo: ${formatTime(activeTime)}\n` +
-        `🔥 Chance real: ${(santaChance1 * 100).toFixed(2)}%` +
-        (santaChance1 === MAX_CHANCE ? ' (MAX)' : '')
+
+    // 🔓 ignora regras de dia / mês / localStorage
+    stopSanta = false;
+    santaActive = true;
+
+    // 🎧 áudio
+    if (santaAudioUnlocked && santaAudio) {
+        santaAudio.currentTime = 0;
+        santaAudio.play().catch(() => {});
+    }
+
+    // ⏱️ DEBUG de tempo e chance (informativo)
+    const steps = Math.floor(activeTime / ACTIVE_STEP_TIME);
+    const chanceAtual = Math.min(
+        BASE_CHANCE + steps * BASE_CHANCE,
+        MAX_CHANCE
     );
-    console.log('Já apareceu?');
+
+    console.log(
+        '\n🎅 oh oh oh!\n' +
+        `⏱️ Tempo acumulado: ${formatTime(activeTime)}\n` +
+        `🔥 Chance teórica: ${(chanceAtual * 100).toFixed(2)}%`
+    );
+
+    // 🎅 SPAWN FORÇADO
+    spawnSanta();
+    console.log('Papail Noel ja apareceu antes? ');
     return (santaAlreadyAppearedToday() ? 'Sim' : 'Não');
 };
 
 window.resetarPapaiNoel = () => {
     const key = todayKey();
 
-    // 🔐 reset diário (produção)
     localStorage.setItem(key, "false");
 
-    // 🎧 áudio
     if (santaAudio) {
         santaAudio.pause();
         santaAudio.currentTime = 0;
     }
+
     santaAudioUnlocked = false;
     santaAudio = null;
 
-    // 🧹 REMOVE O PAPAI NOEL DO DOM
     document.querySelectorAll(
         '.santa, .papai-noel, .santa-container, .santa-wrapper'
     ).forEach(el => el.remove());
 
-    // 🎅 estado
     santaActive = false;
     stopSanta = false;
 
-    // ⏱️ progressão
+    // ⏱️ reset progressão
     activeTime = 0;
     santaChance = BASE_CHANCE;
+    localStorage.removeItem(ACTIVE_TIME_KEY);
 
     return "🎄 Papai Noel resetado completamente!";
 };
@@ -152,7 +161,11 @@ setInterval(() => {
     const now = Date.now();
 
     if (document.visibilityState === "visible") {
-        activeTime += now - lastActiveTick;
+        const delta = now - lastActiveTick;
+        activeTime += delta;
+
+        // 💾 salva no localStorage
+        localStorage.setItem(ACTIVE_TIME_KEY, activeTime.toString());
     }
 
     lastActiveTick = now;

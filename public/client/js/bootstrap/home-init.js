@@ -1,4 +1,3 @@
-import { aplicarPermissoesMenu_porRoles } from "../state/role.js";
 import { initAbrirInfoColabClick } from "../events/click/handle-abrir-info-colab.js";
 import "../events/click/handle-atestados.js";
 import { initColaboradoresContextMenu } from "../events/contextmenu/handle-colaboradores-contextmenu.js";
@@ -7,6 +6,7 @@ import { carregarAniversariantes } from "../services/api/aniversariantes.js";
 import { reduzirNome } from "../utils/formatters/strings-format.js";
 
 import { initSantaDropWalkWrapper } from "../services/ui/christmas-painel-inicio.js";
+import { observarPermissoesPorRoles } from "../state/role.js";
 
 // =======================================================
 // VARIÁVEIS GLOBAIS
@@ -311,7 +311,6 @@ export async function initHome() {
     .then(res => res.text())
     .then(html => {
       document.getElementById("menu").innerHTML = html;
-      aplicarPermissoesMenu_porRoles();
     });
 
   // Aguarda menu perfil
@@ -319,7 +318,9 @@ export async function initHome() {
     .then(res => res.text())
     .then(html => {
       document.getElementById("menuperfil").innerHTML = html;
-      document.getElementById("bt_perfilhome").innerText = sessionStorage.getItem("nome_usuario");
+      document.getElementById("bt_perfilhome").innerText =
+        sessionStorage.getItem("nome_usuario");
+
       initAbrirInfoColabClick();
     });
 
@@ -355,6 +356,9 @@ export async function initHome() {
 
     window.location.href = "/login";
   });
+
+  observarPermissoesPorRoles();
+
 }
 
 function tempoRelativo(dataString) {

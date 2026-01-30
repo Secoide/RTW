@@ -1,0 +1,266 @@
+#tabela-ferias {
+    margin: 50px;
+    position: relative;
+}
+
+.linha-dias,
+.linha-colaborador {
+    display: grid;
+    grid-template-columns: repeat(31, 1fr);
+    border-bottom: 1px solid #ccc;
+    position: relative;
+}
+
+.colaborador-label {
+    position: absolute;
+    left: -120px;
+    top: 10px;
+    width: 110px;
+    text-align: right;
+}
+
+.mes {
+    margin-bottom: 12px;
+}
+
+.titulo-mes {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.linha-dias {
+    display: grid;
+    position: relative;
+}
+
+.dia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.num-dia {
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 1.1;
+}
+
+.dia-semana {
+    font-size: 10px;
+    color: #666;
+    line-height: 1;
+}
+
+.barra-ferias:active {
+    cursor: grabbing;
+}
+
+.drag-handle {
+    position: absolute;
+    cursor: grab;
+    background: rgba(0, 0, 0, 0);
+    z-index: 50;
+}
+
+.linha-colaborador {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 36px;
+}
+
+.colaborador-nome {
+    width: 140px;
+    text-align: right;
+    padding-right: 10px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.colaborador-grade {
+    position: relative;
+    height: 100%;
+    flex-grow: 1;
+}
+
+/* =====================================================
+   BARRA DE FÉRIAS (LAYOUT FINAL)
+===================================================== */
+.barra-ferias {
+    position: absolute;
+    top: 4px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: grab;
+    background: var(--bg-padrao);
+    border: 2px solid #999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    font-size: 12px;
+    color: var(--texto-principal);
+}
+
+/* LADO ESQUERDO: FOTO + NOME */
+.barra-esquerda {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.barra-foto {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* TEXTO */
+.barra-nome {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* LADO DIREITO: ÍCONES */
+.barra-direita {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* =====================================================
+   ÍCONES E TOOLTIP
+===================================================== */
+.barra-icone {
+    position: relative;
+    cursor: help;
+    font-size: 14px;
+}
+
+/* Tooltip */
+.barra-icone::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 130%;
+    right: 0;
+
+    background: #333;
+    color: #fff;
+
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.4;
+
+    border-radius: 4px;
+
+    white-space: pre-line;
+
+    width: max-content;
+    min-width: 220px;
+    max-width: 320px;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transform: translateY(6px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    z-index: 9999;
+}
+
+
+.barra-icone::before {
+    content: "";
+    position: absolute;
+    bottom: 120%;
+    right: 8px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.barra-icone:hover::after,
+.barra-icone:hover::before {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ÍCONE DE INFORMAÇÃO */
+.barra-info {
+    opacity: 0.85;
+}
+
+.barra-info:hover {
+    opacity: 1;
+}
+
+/* =====================================================
+   ESTADOS
+===================================================== */
+.barra-bloqueada {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+/* BORDAS POR STATUS */
+.status-avaliar {
+    border-color: #2196F3;
+}
+
+.status-aprovado {
+    border-color: #4CAF50;
+}
+
+.status-reprovado {
+    border-color: #F44336;
+}
+
+/* ALERTA SOBREPÕE */
+.status-alerta {
+    border-color: #FFC107;
+}
+
+
+.status-sugerida {
+    background: #e6e6e6;
+    border: 2px dashed #999;
+    color: #555;
+}
+
+.status-sugerida .barra-nome {
+    font-style: italic;
+}
+
+/* =====================================================
+   MENU DE STATUS
+===================================================== */
+.menu-status {
+    position: fixed;
+    background: var(--bg-padrao);
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 1000;
+    border-radius: 4px;
+    font-size: 13px;
+    min-width: 140px;
+    color: var(--texto-principal);
+}
+
+.menu-status div {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.menu-status div:hover {
+    background: #3333337c;
+}

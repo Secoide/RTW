@@ -432,6 +432,9 @@ function load_minicursos_colaborador(idFunc, $box) {
                     case 'NR 18':
                         nCurso = '18';
                         break;
+                    case 'NR 33':
+                        nCurso = '33';
+                        break;
                     case 'NR 35':
                         nCurso = '35';
                         break;

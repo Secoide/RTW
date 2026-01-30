@@ -50,6 +50,7 @@ app.use("/api/atestado", atestadosRoutes);
 const comunicadosRoutes = require("./routes/comunicados.routes");
 app.use("/api/comunicados", comunicadosRoutes);
 
+app.use('/api/ferias', require('./routes/ferias.routes'));
 
 const rhRoutes = require("./routes/rh.routes");
 app.use("/api/rh", rhRoutes);
