@@ -6,6 +6,20 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
+## [1.3.2] - 2025-12-15
+## Nome: 🔨 Ajustes e Correções gerais
+### Adicionado
+- 
+
+### Alterado
+- 
+
+### Corrigido
+- Dia de aniversario e atestados mostravam um dia a menos do que era salvo;
+
+### Removido
+- 
+
 ## [1.3.1] - 2025-12-15
 ## Nome: 🔨 Ajustes
 ### Adicionado
@@ -15,8 +29,6 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Alterado
 - Aumentado numero de dias para verificar proximos anivesariantes;
 
-### Corrigido
--
 ### Removido
 - Sistema de inatividade removido para melhorias;
 

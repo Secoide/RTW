@@ -295,8 +295,8 @@ function getTextoSaldoCiclo(ciclo) {
 
     // 🟢 ciclo encerrado → mostra data
     if (ciclo.cicloEncerradoEm) {
-        return `Ciclo encerrado em ${new Date(ciclo.cicloEncerradoEm).toLocaleDateString('pt-BR')
-            }`;
+        const [ano, mes, dia] = ciclo.cicloEncerradoEm.slice(0, 10).split('-');
+        return `Ciclo encerrado em ${dia}/${mes}/${ano}`;
     }
 
     // 🟡 ciclo atual → mostra saldo
