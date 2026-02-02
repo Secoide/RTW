@@ -15,6 +15,8 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Alterado
 - Aumentado numero de dias para verificar proximos anivesariantes;
 
+### Corrigido
+-
 ### Removido
 - Sistema de inatividade removido para melhorias;
 

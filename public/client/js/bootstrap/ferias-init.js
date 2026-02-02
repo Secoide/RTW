@@ -91,11 +91,11 @@ export function initFerias() {
                 return;
             }
 
-            fetch('/api/ferias', {
+            apiFetch('/api/ferias', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    'Content-Type': 'application/json'
+                    // ❌ REMOVE Authorization (sessão ≠ token)
                 },
                 body: JSON.stringify({
                     id_func: colabId,
@@ -104,11 +104,16 @@ export function initFerias() {
                     status: 'aprovado'
                 })
             })
-                .then(() => carregarFerias());
+                .then(() => carregarFerias())
+                .catch(err => {
+                    console.error(err);
+                    // redirect já foi tratado no apiFetch
+                });
 
             $('#menu-status').hide();
             return;
         }
+
 
         // 📌 FÉRIAS REAIS → STATUS
         fetch(`/api/ferias/${periodoId}/status`, {

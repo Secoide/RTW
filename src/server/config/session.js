@@ -9,7 +9,7 @@ const redisClient = createClient({
 
 redisClient.connect().catch(console.error);
 
-const SEM_INATIVIDADE = process.env.SEM_INATIVIDADE === 'true';
+const DOZE_HORAS = 1000 * 60 * 60 * 12; // 12h em ms
 
 const sessionMiddleware = session({
   name: "rtw.sid",
@@ -17,26 +17,21 @@ const sessionMiddleware = session({
   store: new RedisStore({
     client: redisClient,
     prefix: "sess:",
-    ttl: SEM_INATIVIDADE
-      ? 60 * 60 * 24 // 🔥 24 HORAS
-      : 60 * 20
+    disableTouch: false, // 🔥 RENOVA TTL NO REDIS
   }),
 
   secret: process.env.SESSION_SECRET || "supersecreto",
   resave: false,
   saveUninitialized: false,
 
-  rolling: !SEM_INATIVIDADE, // 🔑 CRÍTICO
+  rolling: true, // 🔥 renova o cookie a cada request
 
   cookie: {
+    maxAge: DOZE_HORAS,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: SEM_INATIVIDADE
-      ? 1000 * 60 * 60 * 24
-      : 1000 * 60 * 20
-  }
+  },
 });
-
 
 module.exports = sessionMiddleware;

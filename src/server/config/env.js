@@ -1,12 +1,14 @@
 require('dotenv').config();
 
+const DOZE_HORAS = 1000 * 60 * 60 * 12; // 12h
+
 module.exports = {
   port: Number(process.env.PORT) || 3000,
   
   db: {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD  || '',
+    password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'bd_cadastro',
     port: Number(process.env.DB_PORT) || 3306,
   },
@@ -17,7 +19,7 @@ module.exports = {
 
   session: {
     secret: process.env.SESSION_SECRET || 'chaveUltraSecreta',
-    maxAge: Number(process.env.SESSION_MAXAGE) || 1000 * 60 * 60, // default 1h
+    maxAge: Number(process.env.SESSION_MAXAGE) || DOZE_HORAS, // 🔥 12h
   },
 
   nodeEnv: process.env.NODE_ENV || 'development',
