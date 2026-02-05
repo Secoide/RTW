@@ -33,23 +33,23 @@
                         <i class="fa-solid fa-user"></i>
                         <span class="menu-text">Dados Pessoal</span>
                     </a>
-                    <a class="bt_menu" data-roles="4,5,6,7,99" data-target=".painel_profissional">
+                    <a class="bt_menu" data-roles="*" data-target=".painel_profissional">
                         <i class="fa-solid fa-house"></i>
                         <span class="menu-text">Dados Profissional</span>
                     </a>
-                    <a class="bt_menu" data-roles="4,5,6,7,99" data-target=".painel_exames">
+                    <a class="bt_menu" data-roles="*" data-target=".painel_exames">
                         <i class="fa-solid fa-suitcase-medical"></i>
                         <span class="menu-text">Exames</span>
                     </a>
-                    <a class="bt_menu" data-roles="4,5,6,7,99" data-target=".painel_cursos">
+                    <a class="bt_menu" data-roles="*" data-target=".painel_cursos">
                         <i class="fa-solid fa-graduation-cap"></i>
                         <span class="menu-text">Cursos</span>
                     </a>
-                    <a class="bt_menu" data-roles="4,5,6,7,99" data-target=".painel_integra">
+                    <a class="bt_menu" data-roles="*" data-target=".painel_integra">
                         <i class="fa-solid fa-paperclip"></i>
                         <span class="menu-text">Integrações</span>
                     </a>
-                    <a class="bt_menu" data-roles="4,5,6,7,99" data-target=".painel_atestar">
+                    <a class="bt_menu" data-roles="*" data-target=".painel_atestar">
                         <i class="fa-solid fa-calendar-days"></i>
                         <span class="menu-text">Atestar</span>
                     </a>
@@ -138,10 +138,10 @@
                             </div>
                             <input type="hidden" name="idColaborador" id="idColaborador">
                             <div class="div_botoesAcao">
-                                <input id="bt_cadColaborador" class="bt_padrao bt_cad" type="submit" name="cadColab"
-                                    value="Cadastrar">
-                                <input id="bt_editColab" class="bt_padrao bt_cad" type="submit" name="editColab"
-                                    value="Salvar" style="display: none;">
+                                <input id="bt_cadColaborador" class="bt_padrao bt_cad" data-roles="4,6,7,99"
+                                    type="submit" name="cadColab" value="Cadastrar">
+                                <input id="bt_editColab" class="bt_padrao bt_cad" data-roles="4,6,7,99" type="submit"
+                                    name="editColab" value="Salvar" style="display: none;">
                             </div>
                         </form>
                     </div>
@@ -196,8 +196,8 @@
                             </div>
                             <input type="hidden" name="idColaboradorPro" id="idColaboradorPro">
                             <div class="div_botoesAcao">
-                                <input id="bt_editColabProf" class="bt_padrao bt_cad" type="submit" name="editColabProf"
-                                    value="Salvar">
+                                <input id="bt_editColabProf" class="bt_padrao bt_cad" data-roles="4,6,7,99"
+                                    type="submit" name="editColabProf" value="Salvar">
                             </div>
                         </form>
                     </div>
@@ -270,7 +270,8 @@
                                 placeholder="Descreva algo, se necessário"
                                 style="width: auto; padding: 4px; resize: none;"></textarea>
                             <div class="p_acoes p_padrao linha_padrao">
-                                <input class="bt_teste glass" type="submit" name="salvarAtestado" value="Salvar">
+                                <input class="bt_teste glass" data-roles="4,6,7,99" type="submit" name="salvarAtestado"
+                                    value="Salvar">
                             </div>
                             <input id="id" type="hidden" name="idColab" value="">
                         </form>
@@ -939,15 +940,15 @@
                             </div>
 
                             <div class="p_acoes p_padrao linha_padrao">
-                                <input class="bt_padrao bt_cad" type="submit" value="Salvar">
+                                <input class="bt_padrao bt_cad" data-roles="4,99" type="submit" value="Salvar">
                             </div>
 
                             <input type="hidden" name="idColab" id="idColab" value="">
                         </form>
                         <div class="div_botoesAcao">
                             <h3>Configurações Avançadas</h3><br>
-                            <input id="bt_excluirConta" class="bt_padrao bt_cancel" type="submit" name="excluirConta"
-                                value="‼️Excluir conta">
+                            <input id="bt_excluirConta" class="bt_padrao bt_cancel" data-roles="4,99" type="submit"
+                                name="excluirConta" value="‼️Excluir conta">
                         </div>
                     </div>
                 </div>
@@ -1401,8 +1402,14 @@
         ],
         "5": [
             { value: "14", label: "Projetista Junior" },
+            { value: "33", label: "Projetista Junior I" },
+            { value: "34", label: "Projetista Junior II" },
             { value: "15", label: "Projetista Pleno" },
+            { value: "35", label: "Projetista Pleno I" },
+            { value: "36", label: "Projetista Pleno II" },
             { value: "16", label: "Projetista Senior" },
+            { value: "37", label: "Projetista Senior I" },
+            { value: "38", label: "Projetista Senior II" },
             { value: "17", label: "Engenheiro Eletricista" },
             { value: "18", label: "Gerente de Engenharia" }
         ],

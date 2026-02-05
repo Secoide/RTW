@@ -29,19 +29,27 @@ function criarMenuContextual(e, opcoesMenu) {
 
   opcoesMenu.forEach(item => {
     if (!item) return;
-    if (item === "SEPARADOR") return addSeparator();
 
-    const option = $('<div class="opcao-menu"></div>').html(item.label);
+    if (item === "SEPARADOR") {
+      return addSeparator();
+    }
+
+    const option = $('<div class="opcao-menu"></div>')
+      .html(item.label)
+      .attr("data-roles", item.roles === "*" ? "*" : item.roles.join(","));
+
     option.on("click", () => {
       item.action?.();
       menu.remove();
     });
+
     menu.append(option);
   });
 
   $("body").append(menu);
   setTimeout(() => $(document).one("click", () => menu.remove()), 0);
 }
+
 
 const Toast = Swal.mixin({
   toast: true,
@@ -175,17 +183,35 @@ export function initColaboradoresContextMenu(socket) {
       $colab.hasClass("status-integracao-atenção");
 
     const opcoesMenu = [
-      { label: "👤 Perfil", action: () => get_carregarPerfilUsuario(funcID) },
+      {
+        label: "👤 Perfil",
+        roles: "*", action: () => get_carregarPerfilUsuario(funcID)
+      },
       "SEPARADOR",
       jaESupervisor
-        ? { label: "⭐ Remover Supervisor", action: () => removerSupervisor(osID, dataDia, $colab) }
-        : { label: "⭐ Tornar Supervisor", action: () => definirSupervisor(fnoID, osID, dataDia, $painelOS, $colab) },
-      { label: "🚫 Marcar Falta Indevida", action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fnoID) },
+        ? {
+          label: "⭐ Remover Supervisor",
+          roles: [6, 7, 99], action: () => removerSupervisor(osID, dataDia, $colab)
+        }
+        : {
+          label: "⭐ Tornar Supervisor",
+          roles: [6, 7, 99], action: () => definirSupervisor(fnoID, osID, dataDia, $painelOS, $colab)
+        },
+      {
+        label: "🚫 Marcar Falta Indevida",
+        roles: [4, 6, 7, 99], action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fnoID)
+      },
       ...(precisaAttIntegracao
-        ? [{ label: "📜 Verificar Integração", action: () => abrirIntegracao(funcID) }]
+        ? [{
+          label: "📜 Verificar Integração",
+          roles: "*", action: () => abrirIntegracao(funcID)
+        }]
         : []),
       "SEPARADOR",
-      { label: "❌ Remover da OS", action: () => removerDaOS($colab, socket, osID, funcID, fnoID, dataDia) }
+      {
+        label: "❌ Remover da OS",
+        roles: [6, 7, 99], action: () => removerDaOS($colab, socket, osID, funcID, fnoID, dataDia)
+      }
     ];
 
     criarMenuContextual(e, opcoesMenu);
@@ -203,10 +229,14 @@ export function initColaboradoresContextMenu(socket) {
     const dataDia = $painelDia.attr("data-dia");
 
     const opcoesMenu = [
-      { label: "👤 Perfil", action: () => get_carregarPerfilUsuario(funcID) },
+      {
+        label: "👤 Perfil",
+        roles: "*", action: () => get_carregarPerfilUsuario(funcID)
+      },
       "SEPARADOR",
       {
         label: "🚫 Marcar Falta Indevida",
+        roles: [4, 6, 7, 99],
         action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket)
       }
     ];
@@ -224,14 +254,27 @@ export function initColaboradoresContextMenu(socket) {
     const funcID = $colab.data("id");
 
     const opcoesMenu = [
-      { label: "👤 Perfil", action: () => get_carregarPerfilUsuario(funcID) },
+      {
+        label: "👤 Perfil",
+        roles: "*", action: () => get_carregarPerfilUsuario(funcID)
+      },
       "SEPARADOR",
-      { label: "🥾 Registrar EPI", action: () => open_form_AnexarEPI(funcID) },
-      { label: "🩺 Anexar Exame", action: () => open_form_AnexarExame(funcID) },
-      { label: "📚 Anexar Curso", action: () => open_form_AnexarCurso(funcID) },
+      {
+        label: "🥾 Registrar EPI",
+        roles: [5, 6, 7, 99], action: () => open_form_AnexarEPI(funcID)
+      },
+      {
+        label: "🩺 Anexar Exame",
+        roles: [4, 99], action: () => open_form_AnexarExame(funcID)
+      },
+      {
+        label: "📚 Anexar Curso",
+        roles: [4, 99], action: () => open_form_AnexarCurso(funcID)
+      },
       "SEPARADOR",
       {
         label: "🚫 Marcar Falta Indevida",
+        roles: [4, 5, 6, 7, 99],
         action: () => {
           const $date = $('<input type="date" style="position:absolute;left:-9999px;">').appendTo("body");
           $date.on("change", function () {
@@ -255,7 +298,10 @@ export function initColaboradoresContextMenu(socket) {
         }
       },
       "SEPARADOR",
-      { label: "🏴 Desligar colaborador", action: () => open_form_AnexarExame(funcID, 3) }
+      {
+        label: "🏴 Desligar colaborador",
+        roles: [4, 6, 7, 99], action: () => open_form_AnexarExame(funcID, 3)
+      }
     ];
 
     criarMenuContextual(e, opcoesMenu);
@@ -270,86 +316,121 @@ export function initColaboradoresContextMenu(socket) {
     const idColab = $("#idColaboradorPro").val();
     const idExame = $(this).data("idexame");
     const idFuncionarioExame = $(this).data("idfce");
+    const opcoesMenu = [];
 
-    const opcoesMenu = [
-      { label: "🔄 Atualizar Exame", action: () => open_form_AnexarExame(idColab, idExame) },
+    const confirmarExclusaoExame = async (idFuncionarioExame, idExame) => {
+      if (!idFuncionarioExame) return;
+
+      const isAdmissional = idExame === 1;
+
+      const result = await Swal.fire({
+        title: "Apagar?",
+        text: isAdmissional
+          ? "⚠️ Este é um exame ADMISSIONAL. Ao excluir, adicione o quanto antes um novo exame admissional para não gerar falhas nos processos do sistema."
+          : "Deseja realmente apagar este exame?",
+        icon: "warning",
+        theme: "dark",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sim, apagar!",
+        cancelButtonText: "Cancelar"
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        const res = await fetch(`/api/exame/excluir/colaborador/${idFuncionarioExame}`, {
+          method: "DELETE",
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          return Toast.fire({
+            icon: "error",
+            theme: "dark",
+            title: "Não foi possível excluir o exame."
+          });
+        }
+
+        preencherTabelaColaboradoresRH();
+        document
+          .querySelector('.bt_menu[data-target=".painel_exames"]')
+          ?.click();
+
+        Toast.fire({
+          icon: "success",
+          theme: "dark",
+          title: isAdmissional
+            ? "Exame admissional excluído. Não esqueça de cadastrar um novo!"
+            : "Exame excluído!"
+        });
+
+      } catch (err) {
+        Toast.fire({
+          icon: "error",
+          theme: "dark",
+          title: err.message
+        });
+      }
+    };
+
+
+    const visualizarExame = async (idFuncionarioExame) => {
+      if (!idFuncionarioExame) return;
+
+      try {
+        const res = await fetch(`/api/exame/download/${idFuncionarioExame}`, {
+          method: "HEAD",
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          const mensagens = {
+            400: "Nenhum PDF anexado para este exame.",
+            404: "Exame ou arquivo não encontrado."
+          };
+
+          return Toast.fire({
+            icon: "warning",
+            theme: "dark",
+            title: mensagens[res.status] || "Erro ao visualizar exame."
+          });
+        }
+
+        window.open(`/api/exame/download/${idFuncionarioExame}`, "_blank");
+
+      } catch (err) {
+        Toast.fire({
+          icon: "error",
+          theme: "dark",
+          title: err.message
+        });
+      }
+    };
+
+    // ---------- Montagem do menu ----------
+    if (idExame !== 1) {
+      opcoesMenu.push({
+        label: "🔄 Atualizar Exame",
+        roles: [4, 7, 99],
+        action: () => open_form_AnexarExame(idColab, idExame)
+      });
+    }
+
+    opcoesMenu.push(
       {
         label: "🧾 Visualizar Exame",
-        action: async () => {
-          if (!idFuncionarioExame) return;
-          try {
-            const res = await fetch(`/api/exame/download/${idFuncionarioExame}`, { method: "HEAD", credentials: "include" });
-            if (!res.ok) {
-              let msg = "Erro ao visualizar exame.";
-              if (res.status === 400) msg = "Nenhum PDF anexado para este exame.";
-              if (res.status === 404) msg = "Exame ou arquivo não encontrado.";
-              return Toast.fire({
-                icon: "warning",
-                theme: 'dark',
-                title: msg
-              });
-            }
-            window.open(`/api/exame/download/${idFuncionarioExame}`, "_blank");
-          } catch (err) {
-            return Toast.fire({
-              icon: "error",
-              theme: 'dark',
-              title: err.message
-            });
-          }
-        }
+        roles: "*", // todos podem
+        action: () => visualizarExame(idFuncionarioExame)
       },
       "SEPARADOR",
       {
         label: "❌ Apagar Exame",
-        action: async () => {
-          if (!idFuncionarioExame) return;
-
-          const result = await Swal.fire({
-            title: "Apagar?",
-            text: "Deseja realmente apagar este Exame?",
-            icon: "warning",
-            theme: "dark",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sim, apagar!"
-          });
-
-          if (result.isConfirmed) {
-            try {
-              const res = await fetch(`/api/exame/excluir/colaborador/${idFuncionarioExame}`, {
-                method: "DELETE",
-                credentials: "include"
-              });
-
-              if (res.ok) {
-
-                preencherTabelaColaboradoresRH();
-                document.querySelector('.bt_menu[data-target=".painel_exames"]').click();
-                Toast.fire({
-                  icon: "success",
-                  theme: 'dark',
-                  title: "Exame excluído!"
-                });
-              } else {
-                Toast.fire({
-                  icon: "error",
-                  theme: 'dark',
-                  title: "Não foi possível excluir o Exame."
-                });
-              }
-            } catch (err) {
-              Toast.fire({
-                icon: "error",
-                theme: 'dark',
-                title: err.message
-              });
-            }
-          }
-        }
+        roles: [4, 7, 99],
+        action: () => confirmarExclusaoExame(idFuncionarioExame, idExame)
       }
-    ];
+    );
 
     criarMenuContextual(e, opcoesMenu);
   });
@@ -365,9 +446,13 @@ export function initColaboradoresContextMenu(socket) {
     const idFuncionarioCurso = $(this).data("idfcc");
 
     const opcoesMenu = [
-      { label: "🔄 Atualizar Curso", action: () => open_form_AnexarExame(idColab, idCurso) },
+      {
+        label: "🔄 Atualizar Curso",
+        roles: [4, 7, 99], action: () => open_form_AnexarExame(idColab, idCurso)
+      },
       {
         label: "🧾 Visualizar Curso",
+        roles: "*",
         action: async () => {
           if (!idFuncionarioCurso) return;
           try {
@@ -395,6 +480,7 @@ export function initColaboradoresContextMenu(socket) {
       "SEPARADOR",
       {
         label: "❌ Apagar Curso",
+        roles: [4, 99],
         action: async () => {
           if (!idFuncionarioCurso) return;
 
@@ -456,11 +542,15 @@ export function initColaboradoresContextMenu(socket) {
     const idColab = $("#idColaboradorPro").val();
     const idEmpresa = $(this).data("idempresa");
     const idFuncionarioIntegracao = $(this).data("idfci");
-
+    
     const opcoesMenu = [
-      { label: "🔄 Atualizar Integração", action: () => open_form_AnexarIntegracao(idColab, idEmpresa) },
+      {
+        label: "🔄 Atualizar Integração",
+        roles: [4, 6, 7, 99], action: () => open_form_AnexarIntegracao(idColab, idEmpresa)
+      },
       {
         label: "🧾 Visualizar Integração",
+        roles: "*",
         action: async () => {
           if (!idFuncionarioIntegracao) return;
           try {
@@ -478,15 +568,16 @@ export function initColaboradoresContextMenu(socket) {
             window.open(`/api/integracao/download/${idFuncionarioIntegracao}`, "_blank");
           } catch (err) {
             Toast.fire({
-                icon: "error",
-                theme: 'dark',
-                title: err.mensagem
-              });
+              icon: "error",
+              theme: 'dark',
+              title: err.mensagem
+            });
           }
         }
       },
       "SEPARADOR", {
         label: "❌ Apagar Integração",
+        roles: [4, 99],
         action: async () => {
           if (!idFuncionarioIntegracao) return;
 
@@ -576,6 +667,7 @@ export function initColaboradoresContextMenu(socket) {
       // Somente Registrar
       opcoesMenu.push({
         label: `${icone} Registrar ${epi}`,
+        roles: [4, 5, 6, 7, 99],
         action: () => {
           open_form_AnexarEPI(idColab, idEPI);
         }
@@ -584,6 +676,7 @@ export function initColaboradoresContextMenu(socket) {
       // Somente Atualizar
       opcoesMenu.push({
         label: `${icone} Atualizar ${epi}`,
+        roles: [4, 5, 6, 7, 99],
         action: () => {
           open_form_AnexarEPI(idColab, idEPI);
         }
@@ -592,12 +685,14 @@ export function initColaboradoresContextMenu(socket) {
       // Padrão — se surgir outro status, mostra ambos
       opcoesMenu.push(
         {
-          label: `${icone} Registrar ${epi}`, action: () => {
+          label: `${icone} Registrar ${epi}`,
+          roles: [4, 5, 6, 7, 99], action: () => {
             open_form_AnexarEPI(idColab, idEPI);
           }
         },
         {
-          label: `🔄 Atualizar ${epi}`, action: () => {
+          label: `🔄 Atualizar ${epi}`,
+          roles: [4, 5, 6, 7, 99], action: () => {
             open_form_AnexarEPI(idColab, idEPI);
           }
         }
@@ -679,10 +774,10 @@ export function initColaboradoresContextMenu(socket) {
                 if (res.status === 400) msg = "Nenhum PDF anexado para esta EPI.";
                 if (res.status === 404) msg = "EPI ou arquivo não encontrado.";
                 return Toast.fire({
-                icon: "warning",
-                theme: 'dark',
-                title: msg
-              });
+                  icon: "warning",
+                  theme: 'dark',
+                  title: msg
+                });
               }
               window.open(`/api/epi/download/${idFuncionarioEPI}`, "_blank");
             } catch (err) {

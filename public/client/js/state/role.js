@@ -1,12 +1,12 @@
 export function getUserRole() {
   const papel = sessionStorage.getItem('papel') ?? localStorage.getItem('papel');
   const nivel = sessionStorage.getItem('nivel_acesso') ?? localStorage.getItem('nivel_acesso');
+  
   return (papel && papel.trim()) || (nivel && nivel.trim()) || '';
 }
 
 export function observarPermissoesPorRoles() {
   const myRole = getUserRole();
-
   function aplicar(root = document) {
     root.querySelectorAll('[data-roles]').forEach(el => {
       const roles = el.getAttribute('data-roles');

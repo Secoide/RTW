@@ -304,6 +304,7 @@ document.querySelectorAll("#iconeLista span").forEach(el => {
 export async function initHome() {
 
   const socket = conectarSocket();
+  observarPermissoesPorRoles();
   initColaboradoresContextMenu(socket);
 
   // Aguarda menu
@@ -324,6 +325,7 @@ export async function initHome() {
       initAbrirInfoColabClick();
     });
 
+  carregarFotoPerfil();
   // Só agora DOM está completo
   await carregarAniversariantes();
   await carregarAvisos();
@@ -357,9 +359,52 @@ export async function initHome() {
     window.location.href = "/login";
   });
 
-  observarPermissoesPorRoles();
 
 }
+
+function carregarFotoPerfil() {
+  const id = sessionStorage.getItem("id_usuario");;
+
+  if (!id) {
+    alert('ID do colaborador não encontrado!');
+    return reject("ID não encontrado");
+  }
+
+  $.ajax({
+    url: `/api/colaboradores/${id}`,
+    type: 'GET',
+    contentType: 'application/json',
+
+    success: function (res) {
+      const dados = res;
+
+      if (!dados || !dados.id) {
+        alert("Colaborador não encontrado.");
+        return reject("Colaborador não encontrado");
+      }
+      const fotoURL = dados.fotoperfil + "?v=" + dados.versao_foto;
+
+      if (fotoURL && fotoURL.startsWith("http")) {
+        $('#fotoavatarPerfil').attr('src', fotoURL);
+      } else {
+        $('#fotoavatarPerfil').attr('src', '/imagens/user-default.webp');
+      }
+
+      $('#fotoavatarPerfil').on('error', function () {
+        console.warn("⚠️ Foto do perfil não encontrada. Carregando padrão.");
+        $(this).attr('src', '/imagens/user-default.webp');
+      });
+    },
+
+    error: function (err) {
+      alert('Erro ao logar. Tente novamente.');
+      reject(err);
+    }
+  });
+}
+
+
+
 
 function tempoRelativo(dataString) {
   const data = new Date(dataString);

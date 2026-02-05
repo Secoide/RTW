@@ -81,8 +81,8 @@ async function getStatusIntegracaoByColab(idfuncionario, idOS, dataDia) {
 async function createColaborador(data) {
   const sql = `
     INSERT INTO funcionarios 
-    (nome, sexo, nascimento, cpf, rg, mail, telefone, endereco, sobre, senha, fotoperfil)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (nome, sexo, nascimento, cpf, rg, mail, telefone, endereco, sobre, senha, fotoperfil, versao_foto)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '0')
   `;
 
   await connection.query(sql, [

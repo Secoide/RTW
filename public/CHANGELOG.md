@@ -9,13 +9,17 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [1.3.2] - 2025-12-15
 ## Nome: 🔨 Ajustes e Correções gerais
 ### Adicionado
-- 
+- Novos cargos de projetista I e II;
+- Visibilidade e bloqueio para mais paginas e funções conforme nível de permissão do usuário;
 
 ### Alterado
 - 
 
 ### Corrigido
 - Dia de aniversario e atestados mostravam um dia a menos do que era salvo;
+- Alterar foto não atualiza corretamente nova versão da imagem;
+- Ao arrastar um colaborador disponível e soltá-lo fora de uma OS, ele permanecia com aparência de selecionado.
+
 
 ### Removido
 - 

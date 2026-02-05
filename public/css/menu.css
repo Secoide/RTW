@@ -25,6 +25,17 @@ html.auth-ok #menu {
   border-bottom-right-radius: 20px;
 }
 
+.menu_Perfil .tb_fotoColab {
+  position: absolute;
+  left: -50px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--bg-gradiente-padrao);
+  border-radius: 50%;
+  object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
+}
+
 .menu:hover,
 .menu_Colab:hover {
   width: 140px;

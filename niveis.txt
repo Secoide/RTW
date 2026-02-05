@@ -1,0 +1,14 @@
+ID    CARGO       NIVEL
+
+0	 Estágio        1
+1	 Produção	    1
+12	 Terceirizado	1
+2	 Almoxarifado	2
+7	 Financeiro   	3
+9	 Orçamento	    3
+4	 Compras        3
+8	 RH	            4
+5	 Engenharia	    5
+6	 Gerência     	6
+10	 Diretoria	    7
+11	 Administrador	99

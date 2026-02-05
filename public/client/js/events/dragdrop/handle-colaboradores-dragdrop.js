@@ -57,9 +57,22 @@ export function initColaboradoresDragDrop() {
 
   // dragend
   $(document).on("dragend.colabDragDrop", ".colaborador", function () {
-    $(".painelDia").removeClass("bloqueado");
-    $(".p_colabs").removeClass("destino-highlight destino-validado");
+    resetDragVisual();
   });
+
+  function resetDragVisual() {
+    $(".painelDia").removeClass("bloqueado");
+    $(".p_colabs")
+      .removeClass("destino-highlight destino-validado");
+
+    $(".colaborador").removeClass("selecionado");
+
+    dragCounters.clear?.(); // se virar Map no futuro
+  }
+
+
+
+
 
   // dragover
   $(document).on("dragover.colabDragDrop", ".p_colabs", e => e.preventDefault());
@@ -144,7 +157,18 @@ export function initColaboradoresDragDrop() {
     const descOS = $destinoOS.find(".lbl_descricaoOS").text();
     const cliente = $destinoOS.find(".lbl_clienteOS").text();
     const dataDestino = $painelDia.attr("data-dia");
+    const osDestino = $destinoOS.find(".p_infoOS").data("os");
 
+    // 🛑 DROP NA MESMA ORIGEM → apenas reset visual
+    if (!osDestino && !osOrigem) {
+      resetDragVisual();
+      return;
+    }
+
+    if (osDestino === osOrigem) {
+      resetDragVisual();
+      return;
+    }
     if (dataOrigem !== dataDestino) {
       alert("Não é permitido mover colaboradores entre dias diferentes.");
       return;
@@ -176,7 +200,7 @@ export function initColaboradoresDragDrop() {
 
         // adiciona ao destino se ainda não está
         const jaExiste = $destinoOS.find(`.p_colabs .colaborador[data-id="${id}"]`).length > 0;
-        
+
         if (!jaExiste) {
           adicionarColaboradorNaOS(id, nome, $destinoOS, dataOrigem);
         }
