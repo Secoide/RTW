@@ -10,7 +10,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## Nome: 🔨 Ajustes e Correções gerais
 ### Adicionado
 - Novos cargos de projetista I e II;
-- Visibilidade e bloqueio para mais paginas e funções conforme nível de permissão do usuário;
+- Muito mais Visibilidade e bloqueio para paginas e funções conforme nível de permissão do usuário;
 
 ### Alterado
 - 
