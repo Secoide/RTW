@@ -1,3 +1,16 @@
+
+.hidden-inicial{
+    display: none;
+}
+.role-hidden {
+    display: none !important;
+}
+
+.ativo {
+    display: block;
+}
+
+
 .painel_principal {
     display: flex;
     flex-direction: column;
@@ -795,6 +808,10 @@ body.modal-open {
     background: linear-gradient(180deg, rgb(43, 151, 0), #1e271f);
 }
 
+.bloco_exame.status-agendado {
+    background: linear-gradient(180deg, rgb(0, 89, 255), #1e271f);
+}
+
 .bloco_exame.status-vencido {
     background: linear-gradient(180deg, red, #241b1b);
 }
@@ -809,6 +826,10 @@ body.modal-open {
 
 .exame_dias.status-ok {
     color: rgb(43, 151, 0);
+}
+
+.exame_dias.status-agendado {
+    color: rgb(0, 89, 255);
 }
 
 .exame_dias.status-vencido {

@@ -14,6 +14,16 @@ async function getAll(req, res) {
     }
 }
 
+async function getAllExamesAgendados(req, res) {
+    try {
+        const dados = await ComunicadosService.listarTodosExamesAgendados();
+        res.json(dados);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: "Erro ao buscar comunicados" });
+    }
+}
+
 async function getByCategoria(req, res) {
     try {
         const categoria = req.params.categoria;
@@ -141,6 +151,7 @@ async function deleteItem(req, res) {
 
 module.exports = {
     getAll,
+    getAllExamesAgendados,
     getByCategoria,
     create,
     getItem,

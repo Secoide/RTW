@@ -24,10 +24,17 @@ export function renderColaboradoresDisponiveis(colaboradores, container = ".p_co
     const display = classeMotivo === "" ? "visible;" : "hidden;";
     const iconeClass = "exame_" + colab.status_alerta;
 
+    let horario = colab.horario_agendado; // exemplo: "2026-03-02 14:30:00"
+    let somenteHora;
+    if (horario) {
+        somenteHora = horario.substring(11, 16);
+    }
+
     let statusExame = "";
     switch (colab.status_alerta) {
       case "falta": statusExame = "Exames pendentes"; break;
       case "alerta": statusExame = "Um ou mais exames a vencer"; break;
+      case "agendado": statusExame = `Exame agendado para este dia, às ${somenteHora}`; break;
       case "vencido": statusExame = "Um ou mais exames vencidos"; break;
       case "demissional": statusExame = "Desligado"; break;
       case "ok": statusExame = "Exames em dia"; break;

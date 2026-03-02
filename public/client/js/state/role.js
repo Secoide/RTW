@@ -12,7 +12,7 @@ export function observarPermissoesPorRoles() {
       const roles = el.getAttribute('data-roles');
       const ok = canSee(roles, myRole);
 
-      el.style.display = ok ? '' : 'none';
+      el.classList.toggle('role-hidden', !ok);
 
       if (!ok) el.classList.remove('ativo');
 

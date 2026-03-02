@@ -3,6 +3,7 @@ import { carregarColaboradoresDisp, carregarOSComColaboradores } from "../../ser
 import { get_carregarPerfilUsuario } from "../click/handle-abrir-info-colab.js";
 import { open_form_AnexarCurso } from "../forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../forms/anexarExame.js";
+import { open_form_AgendarExame } from "../forms/agendarExame.js";
 import { open_form_AnexarEPI } from "../forms/anexarEPI.js";
 import { open_form_AnexarIntegracao } from "../forms/anexarIntegracao.js";
 import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
@@ -419,6 +420,11 @@ export function initColaboradoresContextMenu(socket) {
     }
 
     opcoesMenu.push(
+      {
+        label: "📅 Agendar Exame",
+        roles: "*", // todos podem
+        action: () => open_form_AgendarExame(idColab, idFuncionarioExame)
+      },
       {
         label: "🧾 Visualizar Exame",
         roles: "*", // todos podem

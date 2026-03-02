@@ -32,6 +32,30 @@ async function criarExame(data) {
   };
 }
 
+async function agendaExame(data) {
+
+  if (!data.datamarcadoExame) {
+    throw new Error("Data e horário são obrigatórios.");
+  }
+
+  // Remove o T e adiciona segundos
+  const horarioFormatado =
+    data.datamarcadoExame.replace("T", " ") + ":00";
+
+  const result = await ExameModel.agendarExame({
+    ...data,
+    horarioFormatado
+  });
+
+  if (result.affectedRows === 0) {
+    throw new Error("Registro não encontrado.");
+  }
+
+  return {
+    message: "Exame agendado com sucesso!"
+  };
+}
+
 // Atualizar
 async function atualizarExame(id, data) {
   return await ExameModel.updateExame(id, data);
@@ -105,6 +129,7 @@ module.exports = {
   buscarExame,
   buscarExameIDEmpresa,
   criarExame,
+  agendaExame,
   atualizarExame,
   deletarExame,
   buscarExamesByColaborador,

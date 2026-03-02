@@ -1,4 +1,4 @@
-import { conectarSocket } from "../client/js/services/sockets/socket-service.js";
+import { getSocket } from "../client/js/services/sockets/socket-service.js";
 
 import { atualizarPainel } from "../client/js/utils/dom/atualizar-painel.js";
 
@@ -149,7 +149,7 @@ $(document).on('click', '.bt_prioridade', function () {
         $icon.addClass('alta').attr('title', 'Prioridade: Alta');
         localStorage.setItem("prioridade_OS_" + osID, 'prioridade-alta');
     }
-    const socket = conectarSocket(); // 🔗 cria ou retorna o mesmo socket
+    const socket = getSocket(); // 🔗 cria ou retorna o mesmo socket
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             acao: 'atualizar_prioridade_os',

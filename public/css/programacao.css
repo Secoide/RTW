@@ -32,13 +32,14 @@
     /* empurra os seguintes para a direita */
 }
 
-#usuarios_online {
-    font-size: 10px;
-}
 
 #seletor_data {
     width: 120px;
     cursor: pointer;
+}
+
+.date-icon-btn {
+  display: none;
 }
 
 .bt_abrirmenu {
@@ -509,6 +510,27 @@
 .colaborador .exame_vencido {
     color: var(--vermelho);
 }
+
+.colaborador .exame_agendado {
+    color: var(--azul);
+}
+
+.colaborador:has(.exame_agendado) {
+    border: 1px dashed var(--azul);
+    animation: avisoExameAgendado 2.5s infinite;
+}
+
+
+@keyframes avisoExameAgendado {
+    0% {
+        background-color: var(--bg-bloco);
+    }
+
+    50% {
+        background-color: #182236;
+    }
+}
+
 
 .colaborador .exame_demissional {
     color: var(--preto);
@@ -1199,6 +1221,7 @@
 .cad,
 .cadOS,
 .anexoexame,
+.agendarexame,
 .anexocurso,
 .anexoepi,
 .anexointegracao,

@@ -26,7 +26,18 @@ async function getExame(req, res) {
 // POST /api/exame
 async function createExame(req, res) {
   try {
+    console.log("BODY:", req.body);
     const novo = await ExameService.criarExame(req.body);
+    res.status(201).json(novo);
+  } catch (err) {
+    res.status(400).json({ erro: err.message });
+  }
+}
+
+// POST /api/exame
+async function agendarExame(req, res) {
+  try {
+    const novo = await ExameService.agendaExame(req.body);
     res.status(201).json(novo);
   } catch (err) {
     res.status(400).json({ erro: err.message });
@@ -154,6 +165,7 @@ module.exports = {
   getExames,
   getExame,
   createExame,
+  agendarExame,
   updateExame,
   deleteExame,
   getExamesByColaborador,

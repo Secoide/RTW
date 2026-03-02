@@ -8,6 +8,17 @@ body {
     padding: 0;
 }
 
+
+
+.swal-title-custom {
+  font-size: 16px !important;
+}
+
+.swal-text-custom {
+  font-size: 14px !important;
+}
+
+
 * {
     padding: 0px;
     margin: 0;
@@ -315,12 +326,14 @@ input[type="checkbox"] {
 
 /* GIF do Noel (tamanho real) */
 .santa-walk {
-    height: 54px;   /* GIF real */
+    height: 54px;
+    /* GIF real */
     display: block;
 }
+
 .santa-drop {
     position: fixed;
     z-index: 1800;
     pointer-events: none;
-    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.45));
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.45));
 }

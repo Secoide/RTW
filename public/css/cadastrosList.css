@@ -323,6 +323,13 @@ h1 {
     width: 300px;
 }
 
+/* Cidades (3ª coluna) */
+#gestao[data-entity="Setor"] #dataTable th:nth-child(3),
+#gestao[data-entity="Setor"] #dataTable td:nth-child(3) {
+    width: 600px;     /* largura real da coluna */
+}
+
+
 #gestao[data-entity="Empresa"]#dataTable td:nth-child(3) .chips,
 #gestao[data-entity="Empresa"] #dataTable td:nth-child(4) .chips {
     display: flex;

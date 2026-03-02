@@ -1,0 +1,60 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nome = sessionStorage.getItem("nome_usuario");
+        const nivel = sessionStorage.getItem("nivel_acesso");
+
+        if (!nome || !nivel) {
+            window.location.href = "login"; // redireciona para a página de login
+        }
+    });
+</script>
+
+
+<div class="agendarexame" style="visibility: visible; opacity: 1;">
+    <div class="">
+        <div class="painel_dadosAnexo">
+            <form id="formAgendarExame" method="POST">
+                <div class="linha_infoColab linha_padrao">
+                    <input type="hidden" name="idColab" id="idColabAgendarExame">
+                    <input type="hidden" name="exame" id="idExameAgendarExame">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; align-items: center;">
+                            <p class="dataAgendado">Horario Agendado</p>
+                            <input type="datetime-local" min="" id="datamarcadoExame" class="tbx_teste glass"
+                                name="datamarcadoExame" style="width: 180px;">
+                        </div>
+                    </div>
+                    <div class="linha_sobreMim linha_padrao">
+                        <textarea id="observacaoAgendarExame" class="glass" name="observacao" placeholder="Observação"
+                            style="width: 97%; height:50px; border-radius: 20px; padding: 4px; resize: none;"></textarea>
+                    </div>
+                    <!-- Barra de progresso (Bootstrap) -->
+                    <div id="uploadProgressWrapper" class="mt-3" style="display:none;">
+                        <div class="progress">
+                            <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar"
+                                style="border-radius: 10px; background: #447cad57; text-align: center; width: 0%;"
+                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                0%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p_acoes linha_padrao">
+                        <input id="bt_agenarExame" class="bt_teste glass btn btn-primary" data-roles="4,7,99"
+                            type="submit" name="agendarExame" value="Agendar">
+                        <input id="bt_fechar_formAgendarCurso" class="bt_teste glass" type="reset" value="Cancelar">
+                    </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).on("click", "#bt_fechar_formAgendarCurso", function () {
+        $('#form_agendarExame').empty();
+    });
+</script>

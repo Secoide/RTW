@@ -7,4 +7,5 @@
     color: var(--texto-principal);
     padding-block: 10px;
     border: 1px solid var(--border-form);
+    padding: 20px;
 }

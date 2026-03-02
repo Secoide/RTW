@@ -51,6 +51,9 @@ const comunicadosRoutes = require("./routes/comunicados.routes");
 app.use("/api/comunicados", comunicadosRoutes);
 
 app.use('/api/ferias', require('./routes/ferias.routes'));
+app.use('/api/cargo', require('./routes/cargo.routes'));
+app.use('/api/setor', require('./routes/setor.routes'));
+
 
 const rhRoutes = require("./routes/rh.routes");
 app.use("/api/rh", rhRoutes);

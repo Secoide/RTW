@@ -140,7 +140,6 @@ async function atualizarColaborador(id, data) {
 async function atualizarProfissionalColab(id, data) {
   if (!id) throw new Error('ID do colaborador é obrigatório');
   if (!data.setor || !data.cargo) throw new Error('Setor e Cargo são obrigatórios');
-
   const atualizado = await ColabModel.updateProfissionalColab(id, {
     setor: data.setor,
     cargo: data.cargo,

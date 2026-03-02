@@ -83,6 +83,10 @@
   background: rgba(255, 0, 0, 0.329);
 }
 
+#rh .tb_zebrada .AGENDADO {
+  background: rgb(0, 89, 255, 0.32);
+}
+
 #rh .tb_zebrada .ALERTA {
   background: rgba(255, 174, 0, 0.329);
 }
@@ -132,6 +136,15 @@
   display: inline-block;
   min-width: 80px;
   background-color: rgb(46, 46, 46);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 10px;
+}
+
+#rh .tb_zebrada td:nth-child(10) .ExameAgendado {
+  display: inline-block;
+  min-width: 80px;
+  border: 1px dashed white;
   color: white;
   padding: 5px 12px;
   border-radius: 10px;
@@ -199,7 +212,7 @@
 
 .bt_teste {
   position: relative;
-  display: flex;
+  text-align: center;
   align-items: center;
   padding: 10px;
   font-size: 12px;
@@ -289,6 +302,11 @@
   background: red;
 }
 
+.mini_exame.status-agendado {
+  background: #0059ff;
+}
+
+
 .mini_exame.status-alerta {
   background: rgb(255, 123, 0);
 }
@@ -346,6 +364,12 @@
 .mini_curso.status-vencido {
   z-index: 10;
   background: rgb(190, 41, 41);
+  color: white;
+}
+
+.mini_curso.status-agendado {
+  z-index: 10;
+  background: rgb(0, 89, 255);
   color: white;
 }
 

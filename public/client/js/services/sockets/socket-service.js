@@ -1,37 +1,55 @@
 // /public/client/js/services/sockets/socket-service.js
 import { handleSocketMessage } from "./socket-dispatcher.js";
+let ultimoPong = Date.now();
+
 
 let socket = null;
-let usuarioAtual = null; // 🔹 guarda o nome do usuário para reenvio automático
+let usuarioAtual = null;
+let reconnectTimeout = null;
+let tentativas = 0;
+const MAX_TENTATIVAS = 5;
+
+let estado = "offline";
+// offline | connecting | connected
 
 function getWebSocketURL() {
   const protocol = location.protocol === "https:" ? "wss://" : "ws://";
   return `${protocol}${location.host}`;
 }
 
-export function conectarSocket(nomeUsuario) {
-  // 🔹 se for passado um nome novo, atualiza o cache
-  if (nomeUsuario) usuarioAtual = nomeUsuario;
-
-  // 🔹 se já há socket conectado ou em conexão, apenas reutiliza
-  if (socket && socket.readyState <= 1) {
-    // Se já estiver aberto e o usuário foi definido depois (ex: pós-login), reenviar
-    if (socket.readyState === WebSocket.OPEN && usuarioAtual) {
-      socket.send(JSON.stringify({ acao: "usuario_online", nome: usuarioAtual }));
-    }
-    return socket;
+function criarSocket() {
+  if (socket) {
+    socket.onopen = null;
+    socket.onclose = null;
+    socket.onerror = null;
+    socket.onmessage = null;
   }
-
-  // 🔹 cria a conexão nova
+  if (socket && socket.readyState === WebSocket.OPEN) return;
+  estado = "connecting";
   const url = getWebSocketURL();
   socket = new WebSocket(url);
 
   socket.addEventListener("open", () => {
-    console.log("🟢 WebSocket conectado!");
+
+    if (reconnectTimeout) {
+      clearTimeout(reconnectTimeout);
+      reconnectTimeout = null;
+    }
+
+    tentativas = 0;
+    estado = "connected";
+
+    document.dispatchEvent(new Event("ws:connected")); // 🔥 ESSENCIAL
+
     if (usuarioAtual) {
-      socket.send(JSON.stringify({ acao: "usuario_online", nome: usuarioAtual }));
+      socket.send(JSON.stringify({
+        acao: "usuario_online",
+        nome: usuarioAtual
+      }));
     }
   });
+
+
 
   socket.addEventListener("message", (event) => {
     try {
@@ -43,20 +61,83 @@ export function conectarSocket(nomeUsuario) {
   });
 
   socket.addEventListener("close", () => {
-    console.warn("⚠️ WebSocket desconectado");
+    estado = "offline";
+    document.dispatchEvent(new Event("ws:disconnected"));
+    tentarReconectar();
   });
 
   socket.addEventListener("error", (err) => {
-    console.error("❌ Erro no WebSocket:", err);
-  });
+    estado = "offline";
+    console.warn("⚠️ Falha ao conectar com o servidor.");
+    document.dispatchEvent(new Event("ws:disconnected"));
 
+    if (socket) socket.close();
+  });
+}
+
+
+function tentarReconectar() {
+
+  if (reconnectTimeout) return; // 🔥 impede múltiplos timers
+
+  if (tentativas >= MAX_TENTATIVAS) {
+    document.dispatchEvent(new Event("ws:reconnect_failed"));
+    return;
+  }
+
+  tentativas++;
+
+  const delay = Math.min(5000 * tentativas, 15000);
+
+  document.dispatchEvent(
+    new CustomEvent("ws:reconnecting", {
+      detail: { tentativa: tentativas }
+    })
+  );
+
+  reconnectTimeout = setTimeout(() => {
+    reconnectTimeout = null; // 🔥 limpa antes de tentar
+    criarSocket();
+  }, delay);
+}
+
+export function conectarSocket(nomeUsuario) {
+  if (nomeUsuario) usuarioAtual = nomeUsuario;
+
+  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+    return socket;
+  }
+
+  criarSocket();
   return socket;
 }
 
 export function getSocket() {
-  if (!socket || socket.readyState > 1) {
-    console.warn("⚠️ Socket não inicializado. Chamando conectarSocket().");
-    conectarSocket();
-  }
   return socket;
 }
+
+export function fecharSocket() {
+  if (reconnectTimeout) clearTimeout(reconnectTimeout);
+  if (socket) socket.close();
+}
+
+window.addEventListener("offline", () => {
+  console.warn("🌐 Internet perdida");
+  document.dispatchEvent(new Event("ws:disconnected"));
+
+  if (socket) socket.close();
+});
+
+window.addEventListener("online", () => {
+  console.warn("🌐 Internet restaurada");
+
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+
+  tentativas = 0;
+  estado = "offline";
+
+  criarSocket();
+});

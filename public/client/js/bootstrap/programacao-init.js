@@ -4,8 +4,7 @@ import { initColaboradoresSearch } from "../events/search/handle-colaboradores-s
 import { initRemoverColaboradorClick } from "../events/click/handle-remover-colaborador.js";
 import { initPesquisarOS } from "../events/controls/handle-pesquisar-os.js";
 import { initAbrirOSClick } from "../events/click/handle-abrir-os.js";
-import { renderUsuariosOnline } from "../services/sockets/socket-users.js";
-import { conectarSocket } from "../services/sockets/socket-service.js";
+import { getSocket } from "../services/sockets/socket-service.js";
 
 import { initColaboradoresTransferencia } from "../events/transferencia/handle-colaboradores-transferencia.js";
 import { initFiltros } from "../events/click/handle-filtros-os.js";
@@ -18,7 +17,7 @@ import { atualizarProgramacao } from "../events/change/handle-date-change.js";
 
 export async function initProgramacao() {
   try {
-    const socket = conectarSocket(window.usuarioLogado); // 🔗 cria ou retorna o mesmo socket
+    const socket = getSocket(); // 🔗 cria ou retorna o mesmo socket
     initDateChangeHandler();
     const hoje = new Date().toISOString().split("T")[0];
     const seletor = document.getElementById("seletor_data");
@@ -38,12 +37,11 @@ export async function initProgramacao() {
     initRemoverColaboradorClick();
     initPesquisarOS();
     initAbrirOSClick();
-    renderUsuariosOnline();
     initColaboradoresTransferencia(socket);
     initFiltros();
     get_dadosColab();
     initExportarDados();
-    
+
   } catch (err) {
     console.error("❌ Erro ao inicializar programação:", err);
   }
@@ -52,6 +50,8 @@ export async function initProgramacao() {
     const dataSelecionada = new Date($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
   });
+
+
 
 }
 

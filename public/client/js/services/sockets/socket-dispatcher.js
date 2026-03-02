@@ -1,4 +1,4 @@
-import { atualizarUsuariosOnline } from "./socket-users.js";
+import { atualizarUsuariosOnline , atualizarListaOnline } from "./socket-users.js";
 import { atualizarUI } from "./socket-notifications.js";
 import {
     handleAlocarColaborador,
@@ -14,6 +14,9 @@ export function handleSocketMessage(data, socket) {
         case "atualizar_usuarios_online":
             atualizarUsuariosOnline(data);
             break;
+        case "usuarios_online":
+            atualizarListaOnline(data.lista);
+            break;
         case "alocar_colaborador":
             handleAlocarColaborador(data);
             break;
@@ -24,7 +27,7 @@ export function handleSocketMessage(data, socket) {
             handleConfirmarAlocacao(data);
             break;
         case "transferencia_concluida":
-            handleTransferenciaConcluida(data); 
+            handleTransferenciaConcluida(data);
             break;
         case "atualizar_prioridade_os":
             handlePrioridadeOS(data);
@@ -34,9 +37,6 @@ export function handleSocketMessage(data, socket) {
             break;
         case "notificacao":
             atualizarUI(data);
-            break;
-        case "ping":
-            socket.send(JSON.stringify({ acao: "pong" }));
             break;
         default:
             console.warn("⚠️ Ação WS desconhecida:", data.acao);

@@ -1,4 +1,5 @@
 import { formatarData } from "../formatters/date-format.js";
+import { atualizarProgramacao } from "../../events/change/handle-date-change.js";
 
 /**
  * Atualiza o ícone e os avisos de programação do dia
@@ -36,6 +37,8 @@ export function mudarStatusProgramacaoDia({ statuss, dia, origem }) {
       avisos += `\n\n${novoAviso}`;
       $("#form_aviso").load("../aviso.html", function () {
         mostrarAviso(avisos);
+        const dataSelecionada = new Date($("#seletor_data").val());
+        atualizarProgramacao(dataSelecionada);
       });
     }
   }

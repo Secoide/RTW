@@ -13,6 +13,9 @@ export function atualizarUI(data) {
     notificacoes.push(
       `Programação de ${formatarData(data.dia)} liberada para lançamento.`
     );
+    if (notificacoes.length > 50) {
+      notificacoes = notificacoes.slice(-50);
+    }
   }
 
   localStorage.setItem(notifKey, JSON.stringify(notificacoes));

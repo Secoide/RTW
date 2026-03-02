@@ -38,7 +38,7 @@ async function getColaboradorById(id) {
           FROM funcionarios f
             LEFT JOIN tb_cargos c
                   ON f.cargo = c.id
-            LEFT JOIN tb_categoria_nvl_acesso nv
+            LEFT JOIN tb_setores nv
                   ON c.idsetor = nv.id_catnvl
             LEFT JOIN tb_func_interrupto fi
                   ON f.id = fi.id_func
@@ -188,6 +188,7 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         e.nome,
         fce.data,
         fce.vencimento,
+        fce.horarioAgendando,  -- NOVA COLUNA
         ROW_NUMBER() OVER (
           PARTITION BY fce.idfuncionario, e.idexame
           ORDER BY fce.data DESC, fce.id DESC
@@ -201,6 +202,7 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         ue.nome,
         ue.data,
         ue.vencimento,
+        ue.horarioAgendando, -- PROPAGADA
         DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH) AS dt_venc
       FROM ultimos_exames ue
       WHERE ue.rn = 1
@@ -212,11 +214,18 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         p.idfuncionario,
         MAX(
           CASE
+            WHEN DATE(p.horarioAgendando) = (SELECT ref_date FROM params) THEN 3
             WHEN p.dt_venc <  (SELECT ref_date FROM params) THEN 2
             WHEN p.dt_venc <= DATE_ADD((SELECT ref_date FROM params), INTERVAL 30 DAY) THEN 1
             ELSE 0
           END
-        ) AS status_score
+        ) AS status_score,
+        MAX(
+          CASE 
+            WHEN DATE(p.horarioAgendando) = (SELECT ref_date FROM params)
+            THEN p.horarioAgendando
+          END
+        ) AS horarioAgendado
       FROM periodicos p
       GROUP BY p.idfuncionario
     ),
@@ -250,20 +259,22 @@ async function buscarColaboradoresDisponiveis(dataDia) {
 		END AS funcao,
       CASE
         WHEN spf.status_score IS NULL THEN 'falta'
+        WHEN spf.status_score = 3 THEN 'agendado'
         WHEN spf.status_score = 2 THEN 'vencido'
         WHEN spf.status_score = 1 THEN 'alerta'
         ELSE 'ok'
-      END AS status_alerta
+      END AS status_alerta,
+      spf.horarioAgendado AS horario_agendado
     FROM funcionarios f
     LEFT JOIN tb_cargos c ON f.cargo = c.id 
-    LEFT JOIN tb_categoria_nvl_acesso nv ON c.idsetor = nv.id_catnvl
+    LEFT JOIN tb_setores nv ON c.idsetor = nv.id_catnvl
     LEFT JOIN params p ON 1=1
     LEFT JOIN tb_func_interrupto fi ON f.id = fi.id_func AND p.ref_date BETWEEN fi.datainicio AND fi.datafinal
     LEFT JOIN exames_func exf ON f.id = exf.idfuncionario
     LEFT JOIN score_por_func spf ON f.id = spf.idfuncionario
     WHERE 
       f.id <> 0 
-      AND nv.id_catnvl IN (1, 10, 5, 6, 12) AND f.cargo NOT IN (13, 31, 32)
+      AND ativo_colaborador = 1
       AND (p.ref_date >= exf.data_admissional)
       AND (exf.data_demissional IS NULL OR p.ref_date <= exf.data_demissional)
     ORDER BY 
@@ -434,7 +445,7 @@ async function buscarColaboradoresEmOS(dataDia) {
          ON fno.id_OS = o.id_OSs 
         AND fno.data  = (SELECT ref_date FROM params)
   LEFT JOIN funcionarios f     ON fno.idfuncionario = f.id 
-  LEFT JOIN tb_categoria_nvl_acesso nv ON f.idnvlacesso = nv.id_catnvl
+  LEFT JOIN tb_setores nv ON f.idnvlacesso = nv.id_catnvl
   LEFT JOIN exame_critico ec   ON ec.idfuncionario = f.id
   LEFT JOIN ultima_integracao ui ON ui.idfuncionario = f.id AND ui.idempresa = e.id_empresas
   LEFT JOIN funcionario_na_os fno2 ON fno2.id_OS = o.id_OSs AND fno2.data = (SELECT ref_date FROM params)
@@ -543,8 +554,8 @@ async function removerSupervisorAtual(osID, dataDia) {
 async function inserirAtestado(periodoinicial, periodofinal, atestado, descricaoatest, idColab) {
   const insertSql = `
     INSERT INTO tb_func_interrupto
-    (datainicio, datafinal, motivo, descricao, id_func)
-    VALUES (?, ?, ?, ?, ?)
+    (datainicio, datafinal, motivo, descricao, id_func, status)
+    VALUES (?, ?, ?, ?, ?, 'aprovado')
   `;
 
   return connection.query(insertSql, [
@@ -561,7 +572,7 @@ async function getHistoricoAtestar(id) {
       datafinal, 
       IFNULL(descricao, '') AS descricao 
         FROM tb_func_interrupto 
-          WHERE id_func = ?`,
+          WHERE id_func = ? AND status = 'aprovado'`,
     [id]
   );
   return rows;

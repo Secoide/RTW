@@ -4,8 +4,7 @@ const connection = require('../config/db');
 // Listar todos
 async function getListaGeralRH() {
     const [rows] = await connection.query(
-        `
--- Colaboradores (RH) + exames + status de EPI (status somente setores 1)
+        `-- Colaboradores (RH) + exames + status de EPI (status somente setores 1)
         WITH dem AS (
         SELECT fce.idfuncionario
         FROM funcionarios_contem_exames fce
@@ -28,6 +27,7 @@ async function getListaGeralRH() {
             e.nome AS nome_exame,
             fce.data,
             fce.vencimento,
+			fce.horarioAgendando,
             ROW_NUMBER() OVER (
             PARTITION BY fce.idfuncionario, e.idexame
             ORDER BY fce.data DESC, fce.id DESC
@@ -38,21 +38,32 @@ async function getListaGeralRH() {
 
         -- Status de exames (pior caso por funcionário considerando só o exame mais recente de cada tipo)
         alertas AS (
-        SELECT
-            ue.idfuncionario,
-            -- rank de severidade: 2 = VENCIDO, 1 = ALERTA, 0 = ''
-            MAX(
-            CASE
-                WHEN LOWER(ue.nome_exame) IN ('admissional','demissional') THEN 0
-                WHEN DATEDIFF(DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH), CURDATE()) < 0 THEN 2
-                WHEN DATEDIFF(DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH), CURDATE()) <= 30 THEN 1
-                ELSE 0
-            END
-            ) AS max_rank
-        FROM ult_exames ue
-        WHERE ue.rn = 1
-        GROUP BY ue.idfuncionario
-        ),
+            SELECT
+                ue.idfuncionario,
+                MAX(
+                    CASE
+                        WHEN LOWER(ue.nome_exame) IN ('admissional','demissional') THEN 0
+
+                        -- 🔴 VENCIDO e NÃO agendado = prioridade máxima
+                        WHEN DATEDIFF(DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH), CURDATE()) < 0
+                            AND ue.horarioAgendando IS NULL THEN 4
+
+                        -- 🔵 AGENDADO
+                        WHEN ue.horarioAgendando IS NOT NULL THEN 3
+
+                        -- 🟠 VENCIDO normal
+                        WHEN DATEDIFF(DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH), CURDATE()) < 0 THEN 2
+
+                        -- 🟡 ALERTA
+                        WHEN DATEDIFF(DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH), CURDATE()) <= 30 THEN 1
+
+                        ELSE 0
+                    END
+                ) AS max_rank
+            FROM ult_exames ue
+            WHERE ue.rn = 1
+            GROUP BY ue.idfuncionario
+            ),
 
         -- última entrega por funcionário+EPI
         ult_epi AS (
@@ -91,7 +102,10 @@ async function getListaGeralRH() {
         CONCAT(DATE_FORMAT(f.nascimento, '%d/%m/%Y'), ' (', TIMESTAMPDIFF(YEAR, f.nascimento, CURDATE()), ' anos)') AS nascimento_idade,
         IFNULL(f.cpf, '') AS cpf,
         IFNULL(f.rg, '') AS rg,
-        IFNULL(fi.motivo, '') AS motivo,
+        CASE 
+            WHEN COALESCE(al.max_rank, 0) = 3 THEN 'Exame Agendado'
+            ELSE IFNULL(fi.motivo, '')
+        END AS motivo,
         CASE WHEN d.idfuncionario IS NOT NULL THEN 'desligado' ELSE '' END AS contrato,
         CASE WHEN d.idfuncionario IS NOT NULL THEN 'demissional' ELSE NULL END AS exame_dem,
         IF(DATE_FORMAT(f.nascimento, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d'), 'aniver', '') AS aniver,
@@ -105,7 +119,9 @@ async function getListaGeralRH() {
         IFNULL(nv.categoria, '') AS categoria,
 
         -- mapeia o pior rank para string final
-        CASE COALESCE(al.max_rank, 0)
+       CASE COALESCE(al.max_rank, 0)
+            WHEN 4 THEN 'VENCIDO'
+            WHEN 3 THEN 'AGENDADO'
             WHEN 2 THEN 'VENCIDO'
             WHEN 1 THEN 'ALERTA'
             ELSE ''
@@ -121,7 +137,7 @@ async function getListaGeralRH() {
         FROM funcionarios f
         LEFT JOIN tb_cargos c 
             ON f.cargo = c.id 
-        LEFT JOIN tb_categoria_nvl_acesso nv 
+        LEFT JOIN tb_setores nv 
             ON c.idsetor = nv.id_catnvl
         LEFT JOIN fi_atual fi 
             ON fi.id_func = f.id
@@ -132,16 +148,14 @@ async function getListaGeralRH() {
         LEFT JOIN epi_status es
             ON es.idFunc = f.id
         WHERE f.id NOT IN (999, 1000)
-        ORDER BY 
-        CASE 
-            WHEN COALESCE(al.max_rank, 0) = 2 THEN 1   -- VENCIDO
-            WHEN COALESCE(al.max_rank, 0) = 1 THEN 2   -- ALERTA
-            ELSE 3                                     -- ''
-        END,
-        f.nome ASC;
-
-
-  `
+			ORDER BY 
+                CASE 
+                    WHEN COALESCE(al.max_rank, 0) = 4 THEN 1  -- VENCIDO crítico
+                    WHEN COALESCE(al.max_rank, 0) = 2 THEN 2
+                    WHEN COALESCE(al.max_rank, 0) = 1 THEN 3
+                    ELSE 4
+                END,
+                f.nome ASC;`
     );
     return rows;
 }

@@ -1,10 +1,11 @@
 import { initAbrirInfoColabClick } from "../events/click/handle-abrir-info-colab.js";
 import "../events/click/handle-atestados.js";
 import { initColaboradoresContextMenu } from "../events/contextmenu/handle-colaboradores-contextmenu.js";
-import { conectarSocket } from "../services/sockets/socket-service.js";
+import { getSocket } from "../services/sockets/socket-service.js";
 import { carregarAniversariantes } from "../services/api/aniversariantes.js";
 import { reduzirNome } from "../utils/formatters/strings-format.js";
 
+import { } from "../services/sockets/reconnect-service.js";
 import { initSantaDropWalkWrapper } from "../services/ui/christmas-painel-inicio.js";
 import { observarPermissoesPorRoles } from "../state/role.js";
 
@@ -181,7 +182,7 @@ async function salvarAviso() {
 // =======================================================
 // LISTAR AVISOS
 // =======================================================
-async function carregarAvisos() {
+export async function carregarAvisos() {
 
   const usuarioId = sessionStorage.getItem("id_usuario");
   const usuarioNivel = Number(sessionStorage.getItem("nivel_acesso"));
@@ -222,8 +223,8 @@ async function carregarAvisos() {
                       
                       <!-- Botões (apenas se tiver permissão) -->
                       <div style="${!podeEditarOuExcluir ? 'display:none;' : ''}">
-                        <span class="btn-editar" title="Editar" style="font-size:11px;" data-id="${item.id}">✏️</span>
-                        <span class="btn-excluir" title="Apagar" style="font-size:11px;" data-id="${item.id}">🗑️</span>
+                        <span class="btn-editar" title="Editar" data-id="${item.id}">✏️</span>
+                        <span class="btn-excluir" title="Apagar" data-id="${item.id}">🗑️</span>
                       </div>
 
                       <!-- Criado por -->
@@ -241,6 +242,44 @@ async function carregarAvisos() {
     } catch (err) {
       console.error("Erro ao carregar comunicados:", cat.nome, err);
     }
+  }
+  carregarAvisosExames();
+}
+
+
+async function carregarAvisosExames() {
+
+  try {
+    const resp = await fetch(`/api/comunicados/exames`, {
+      headers: { "authorization": "Bearer " + sessionStorage.getItem("token") }
+    });
+
+    const lista = await resp.json();
+    const el = document.querySelector(".panel-rh");
+
+    lista.forEach(item => {
+      el.innerHTML += `
+          <div class="item-comunicado exame">
+              <div class="item-icon">🩺</div>
+
+              <div style="width:100%;">
+                  <div class="item-titulo">Exame Agendado</div>
+                  <div class="item-texto">${item.nome}<br><strong>${item.nomeExame}</strong><br>${item.horarioFormatado}\n</div>
+
+                  <div class="painel-acoes">
+                      <!-- Criado por -->
+                      <p style="opacity: 0.7; font-size: 9px; text-align:right; margin:0;">
+                        Sistema RH
+                      </p>
+
+                  </div>
+              </div>
+          </div>
+        `;
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar comunicados:", cat.nome, err);
   }
 }
 
@@ -303,7 +342,7 @@ document.querySelectorAll("#iconeLista span").forEach(el => {
 // =======================================================
 export async function initHome() {
 
-  const socket = conectarSocket();
+  const socket = getSocket();
   observarPermissoesPorRoles();
   initColaboradoresContextMenu(socket);
 
@@ -358,6 +397,66 @@ export async function initHome() {
 
     window.location.href = "/login";
   });
+
+  const menuToggle = document.getElementById("menuToggle");
+  const menu = document.getElementById("menuMobile");
+  const overlay = document.getElementById("menuOverlay");
+  const menuIcon = document.getElementById("menuIcon");
+  const perfilMobileBtn = document.getElementById("perfilMobileBtn");
+  const perfilOriginal = document.getElementById("bt_perfilhome");
+  const avatarDesktop = document.getElementById("fotoavatarPerfil");
+  const avatarMobile = document.getElementById("avatarMobile");
+
+  if (avatarDesktop && avatarMobile) {
+    avatarMobile.src = avatarDesktop.src;
+  }
+  function abrirFecharMenu() {
+    menu.classList.toggle("open");
+    overlay.classList.toggle("show");
+    menuToggle.classList.toggle("open");
+
+    if (menu.classList.contains("open")) {
+      menuIcon.classList.replace("fa-bars", "fa-arrow-left");
+    } else {
+      menuIcon.classList.replace("fa-arrow-left", "fa-bars");
+    }
+  }
+
+  function fecharMenu() {
+    menu.classList.remove("open");
+    overlay.classList.remove("show");
+    menuToggle.classList.remove("open");
+    menuIcon.classList.replace("fa-arrow-left", "fa-bars");
+  }
+
+  menuToggle.addEventListener("click", abrirFecharMenu);
+  overlay.addEventListener("click", fecharMenu);
+
+  document.querySelectorAll(".menu a").forEach(link => {
+    link.addEventListener("click", fecharMenu);
+  });
+
+  perfilMobileBtn.addEventListener("click", () => {
+    perfilOriginal.click();
+  });
+
+  document.querySelectorAll(".painel-comunicado").forEach(painel => {
+    if (!painel.querySelector(".item-comunicado")) {
+      painel.classList.add("oculto");
+    }
+  });
+
+
+
+
+
+  const btn = document.getElementById("online-button");
+  const panel = document.getElementById("online-panel");
+
+  btn.onclick = () => {
+    panel.classList.toggle("active");
+  };
+
 
 
 }

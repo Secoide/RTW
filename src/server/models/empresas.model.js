@@ -162,7 +162,7 @@ async function removeSupervisorFromEmpresa(idEmpresa, idSupervisor) {
   return { message: "Supervisor removido da empresa com sucesso!" };
 }
 
-// Associar supervisor à empresa
+// Associar cidade à empresa
 async function addCidadeToEmpresa(idEmpresa, idCidade) {
   const sql = `
     INSERT INTO empresa_cidade (idempresa, idcidade)
@@ -172,7 +172,7 @@ async function addCidadeToEmpresa(idEmpresa, idCidade) {
   return { message: "Cidade adicionada à empresa com sucesso!" };
 }
 
-// Remover supervisor da empresa
+// Remover cidade da empresa
 async function removeCidadeFromEmpresa(idEmpresa, idCidade) {
   const sql = `
     DELETE FROM empresa_cidade

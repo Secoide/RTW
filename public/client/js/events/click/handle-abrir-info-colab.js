@@ -5,11 +5,17 @@ import { initColabForm } from "../forms/handle-colaborador-submit.js";
 import { open_form_AnexarCurso } from "../forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../forms/anexarExame.js";
 import { initMaleta } from "../../services/ui/maleta.js";
+import {
+    preencherCbxSetor,
+    preencherCbxCargo
+} from "../forms/populate-combobox.js";
+
 
 export function initAbrirInfoColabClick() {
     $(document).on("click", "#bt_perfilhome", function () {
         const idUsuario = sessionStorage.getItem("id_usuario");
         if (idUsuario) {
+
             get_carregarPerfilUsuario(idUsuario);
         } else {
             console.warn("⚠️ Nenhum usuário logado na sessão.");
@@ -30,6 +36,16 @@ export function initAbrirInfoColabClick() {
         const idFunc = $('#idColaborador').val();
         open_form_AnexarCurso(idFunc);
     });
+
+    $(document).on("change", "#selectSetor", async function () {
+        const $wrap = $('#formColaboradorProfissional');
+        const idSetor = $(this).val();
+        if (!idSetor) {
+          return;
+        }
+        await preencherCbxCargo(idSetor, $wrap);
+      });
+
 
     $(document).ready(function () {
         const $html = $('html');
@@ -65,122 +81,182 @@ export function initAbrirInfoColabClick() {
 }
 
 // ABRIR Form Colaborador com os dados do colaborador clicado
-export function get_carregarPerfilUsuario(funcId) {
-    return new Promise((resolve, reject) => {
-        initColabForm();
-        const id = funcId;
+export async function get_carregarPerfilUsuario(funcId) {
+    try {
 
-        if (!id) {
+        initColabForm();
+
+        if (!funcId) {
             alert('ID do colaborador não encontrado!');
-            return reject("ID não encontrado");
+            throw new Error("ID não encontrado");
         }
 
-        $.ajax({
-            url: `/api/colaboradores/${id}`,
-            type: 'GET',
-            contentType: 'application/json',
+        // 🔹 1 - Buscar dados do colaborador
+        const response = await fetch(`/api/colaboradores/${funcId}`);
 
-            success: function (res) {
-                const dados = res;
+        if (!response.ok) {
+            throw new Error("Erro ao buscar colaborador");
+        }
 
-                if (!dados || !dados.id) {
-                    alert("Colaborador não encontrado.");
-                    return reject("Colaborador não encontrado");
+        const dados = await response.json();
+
+        if (!dados || !dados.id) {
+            alert("Colaborador não encontrado.");
+            throw new Error("Colaborador não encontrado");
+        }
+
+        // 🔹 2 - Carregar HTML do formulário como Promise
+        await carregarFormulario();
+
+        // 🔹 3 - Preencher combobox setor
+        const $wrap = $('#formColaboradorProfissional');
+        await preencherCbxSetor($wrap);
+
+
+        // 🔹 4 - Ajustar painéis
+        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
+        $('.painel_perfil').show();
+
+        
+        $('#btn_upload').addClass('hidden-inicial');
+        $('#bt_cadColaborador').addClass('hidden-inicial');
+        $('#bt_editColab').removeClass('hidden-inicial');;
+        $('.bt_menu[data-target=".painel_atestar"]').show();
+
+        // 🔹 5 - Resumo perfil
+        const statusPerfil = dados.motivo?.toLowerCase() || "ativo";
+
+        $('#nomeCompletoResumo').text(dados.nome);
+        $('#cargoResumo').text(dados.nomeCargo);
+
+        $('.painel_resumoColab .painel_foto .statusIcon')
+            .removeClass()
+            .addClass(`statusIcon ${statusPerfil}`);
+
+        $('.painel_resumoColab .painel_foto')
+            .removeClass('ativo inativo afastado')
+            .addClass(statusPerfil);
+
+        // 🔹 6 - Foto
+        const fotoURL = dados.fotoperfil
+            ? `${dados.fotoperfil}?v=${dados.versao_foto}`
+            : null;
+
+        $('#fotoavatar')
+            .attr('src', fotoURL?.startsWith('http')
+                ? fotoURL
+                : '/imagens/user-default.webp')
+            .on('error', function () {
+                $(this).attr('src', '/imagens/user-default.webp');
+            });
+
+        // 🔹 7 - Preencher campos
+        preencherCamposBasicos(dados);
+
+        // 🔹 8 - CNH
+        preencherCNH(dados.cnh);
+
+        // 🔹 9 - Profissional
+        $('#empresacontrato').val(dados.empresaContrato);
+        $('#idColaboradorPro').val(dados.id);
+        $('#selectSetor').val(dados.setor).trigger('change');
+        
+        await preencherCbxCargo(dados.setor, $wrap)    
+        setTimeout(() => {
+            $('#selectCargo').val(dados.cargo);
+        }, 100);
+
+        initMaleta();
+        preencherTabelaAtestar(dados.id);
+
+        return dados;
+
+    } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+        alert("Erro ao carregar perfil do colaborador.");
+        throw error;
+    }
+}
+
+function carregarFormulario() {
+    return new Promise((resolve, reject) => {
+
+        $('#form_cadColab')
+            .empty()
+            .load('../html/forms/cadastrocolaborador.html', function (response, status) {
+
+                if (status === "success") {
+                    resolve();
+                } else {
+                    reject(new Error("Erro ao carregar formulário"));
                 }
 
-                $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function (response, status, xhr) {
+            });
 
-                    if (status === "success") {
-
-                        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
-                        $('.painel_perfil').show();
-                        $('#bt_editColab').show();
-                        $('#bt_cadColaborador').hide();
-                        $('.bt_menu[data-target=".painel_atestar"]').show();
-
-                        const statusPerfil = dados.motivo?.toLowerCase() || "ativo";
-                        $('#nomeCompletoResumo').text(dados.nome);
-                        $('#cargoResumo').text(dados.nomeCargo);
-                        $('.painel_resumoColab .painel_foto .statusIcon').addClass(statusPerfil);
-                        $('.painel_resumoColab .painel_foto').addClass(statusPerfil);
-
-                        const fotoURL = dados.fotoperfil + "?v=" + dados.versao_foto;
-
-                        if (fotoURL && fotoURL.startsWith("http")) {
-                            $('#fotoavatar').attr('src', fotoURL);
-                        } else {
-                            $('#fotoavatar').attr('src', '/imagens/user-default.webp');
-                        }
-
-                        $('#fotoavatar').on('error', function () {
-                            console.warn("⚠️ Foto do perfil não encontrada. Carregando padrão.");
-                            $(this).attr('src', '/imagens/user-default.webp');
-                        });
-
-                        $('#id').val(dados.id);
-                        $('#idColaborador').val(dados.id);
-                        $('#nome').val(dados.nome);
-                        $('#sexo').val(dados.sexo);
-                        $('#nascimento').val(formatDateToInput(dados.nascimento));
-                        $('#endereco').val(dados.endereco);
-                        $('#telefone').val(dados.telefone);
-                        $('#mail').val(dados.mail);
-                        $('#sobremim').val(dados.sobre || "");
-                        $('#cpf').val(dados.cpf);
-                        $('#rg').val(dados.rg);
-                        $('#datainicio').val(formatDateToInput(dados.datainicio));
-                        $('#datafinal').val(formatDateToInput(dados.datafinal));
-                        $('#motivo').val(dados.motivo);
-
-                        let arr = [];
-                        if (Array.isArray(dados.cnh)) {
-                            arr = dados.cnh;
-                        } else if (typeof dados.cnh === 'string') {
-                            arr = dados.cnh.split(/[,\s;]+/).filter(Boolean);
-                        }
-                        const validos = new Set(['A', 'B', 'C', 'D']);
-                        arr = arr.filter(v => validos.has(v.toUpperCase())).map(v => v.toUpperCase());
-                        $("input[name='vehicle']").prop("checked", false);
-                        arr.forEach(v => {
-                            $("input[name='vehicle'][value='" + v + "']").prop("checked", true);
-                        });
-                        $("#vehicles_selected").val(arr.join(','));
-
-                        $('#empresacontrato').val(dados.empresaContrato);
-                        $('#idColaboradorPro').val(dados.id);
-                        $('#categoria').val(dados.setor).trigger('change');
-
-                        setTimeout(() => { $('#cargo').val(dados.cargo); }, 100);
-                        initMaleta();
-                        preencherTabelaAtestar(dados.id);
-
-
-                        // 🔥 Tudo terminou, liberamos o resolve()
-                        resolve(dados);
-
-                    } else {
-                        alert("Erro ao carregar formulário.");
-                        reject("Erro ao carregar formulário");
-                    }
-                });
-            },
-
-            error: function (err) {
-                alert('Erro ao logar. Tente novamente.');
-                reject(err);
-            }
-        });
     });
 }
 
 
+function preencherCamposBasicos(dados) {
+
+    $('#id').val(dados.id);
+    $('#idColaborador').val(dados.id);
+    $('#nome').val(dados.nome);
+    $('#sexo').val(dados.sexo);
+    $('#nascimento').val(formatDateToInput(dados.nascimento));
+    $('#endereco').val(dados.endereco);
+    $('#telefone').val(dados.telefone);
+    $('#mail').val(dados.mail);
+    $('#sobremim').val(dados.sobre || "");
+    $('#cpf').val(dados.cpf);
+    $('#rg').val(dados.rg);
+    $('#datainicio').val(formatDateToInput(dados.datainicio));
+    $('#datafinal').val(formatDateToInput(dados.datafinal));
+    $('#motivo').val(dados.motivo);
+
+}
+
+
+function preencherCNH(cnh) {
+
+    let arr = [];
+
+    if (Array.isArray(cnh)) {
+        arr = cnh;
+    } else if (typeof cnh === 'string') {
+        arr = cnh.split(/[,\s;]+/).filter(Boolean);
+    }
+
+    const validos = new Set(['A', 'B', 'C', 'D']);
+
+    arr = arr
+        .map(v => v.toUpperCase())
+        .filter(v => validos.has(v));
+
+    $("input[name='vehicle']").prop("checked", false);
+
+    arr.forEach(v => {
+        $(`input[name='vehicle'][value='${v}']`)
+            .prop("checked", true);
+    });
+
+    $("#vehicles_selected").val(arr.join(','));
+}
+
+
+
 export function open_form_cad_colaborador() {
     $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function () {
+        initColabForm();
         $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
-
+        
         $('.painel_perfil').show();
         $('[data-target]').hide();     // esconde todos
         $('[data-target=".painel_perfil"]').show();  // mostra só o perfil
-
+        
+        
+        $('#btn_upload').addClass('hidden-inicial');
+        $('#bt_editColab').addClass('hidden-inicial');
+        $('#bt_cadColaborador').removeClass('hidden-inicial');
     });
 }

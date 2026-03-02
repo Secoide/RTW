@@ -9,6 +9,9 @@ router.post('/cadastrar', verificarAutenticacao, exameController.createExame);
 router.get('/por-colaborador/:idFunc', verificarAutenticacao, exameController.getExamesByColaborador);
 router.put('/editar/:id', verificarAutenticacao, exameController.updateExame);
 
+
+router.put('/agendar', verificarAutenticacao, exameController.agendarExame);
+
 // Upload de exame (protegido)
 router.post('/upload', verificarAutenticacao, uploadExamePDF.single('documento'), exameController.uploadExame);
 

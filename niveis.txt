@@ -1,4 +1,4 @@
-ID    CARGO       NIVEL
+ID    SETOR       NIVEL
 
 0	 Estágio        1
 1	 Produção	    1
@@ -12,3 +12,10 @@ ID    CARGO       NIVEL
 6	 Gerência     	6
 10	 Diretoria	    7
 11	 Administrador	99
+
+
+
+
+
+
+

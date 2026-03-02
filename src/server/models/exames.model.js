@@ -35,6 +35,7 @@ async function getExameByColaborador(idFunc) {
             fce.data,
             fce.vencimento,
             fce.anexoExamePDF,
+            fce.horarioAgendando,
             ROW_NUMBER() OVER (
               PARTITION BY f.id, e.idexame
               ORDER BY fce.data DESC, fce.id DESC
@@ -50,6 +51,7 @@ async function getExameByColaborador(idFunc) {
           u.nome       AS nome,
           u.descricao  AS descricao,
           u.icone      AS icone,
+          u.horarioAgendando AS horario_marcado,
 		      u.idfce,
               CASE 
         WHEN u.anexoExamePDF IS NOT NULL AND u.anexoExamePDF <> '' THEN 'pdf_anexado'
@@ -74,6 +76,7 @@ async function getExameByColaborador(idFunc) {
           CASE
             WHEN LOWER(u.nome) = 'admissional' THEN 'admissional'
             WHEN LOWER(u.nome) = 'demissional' THEN 'demissional'
+            WHEN u.horarioAgendando IS NOT NULL THEN 'AGENDADO'
             WHEN DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()) < 0 THEN 'VENCIDO'
             WHEN DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()) <= 30 THEN 'ALERTA'
             ELSE 'OK'
@@ -113,6 +116,26 @@ async function createExame(data) {
         message: "Exame cadastrado com sucesso!",
         nome: data.nome
     };
+}
+
+
+// Agendar 
+async function agendarExame(data) {
+  const sql = `
+    UPDATE funcionarios_contem_exames
+    SET horarioAgendando = ?, observacao = ?
+    WHERE id = ? AND idfuncionario = ?
+  `;
+  console.log("ID exame:", data.exame);
+console.log("ID funcionario:", data.idColab);
+  const [result] = await connection.query(sql, [
+    data.horarioFormatado,
+    data.observacao,
+    data.exame,
+    data.idColab
+  ]);
+
+  return result;
 }
 
 // Atualizar
@@ -174,6 +197,7 @@ module.exports = {
     getExames,
     getExameById,
     createExame,
+    agendarExame,
     updateExame,
     deleteExame,
     getExameByColaborador,

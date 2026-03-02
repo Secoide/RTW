@@ -51,6 +51,7 @@ bindMiniClick(".mini_exame", ".painel_exames");
 bindMiniClick(".mini_integracao", ".painel_integra");
 bindMiniClick(".text-danger", ".painel_vestimentas");
 
+
 $(document).on("click", "#chkDesligados", function (e) {
     toggleDesligados($(this))
 });
@@ -196,7 +197,7 @@ export function preencherTabelaColaboradoresRH() {
                             <td><div id="integracoes_${colab.idFunc}" class="rh_integracao"></div></td>
                             <td><div id="exames_${colab.idFunc}" class="rh_exames"></div></td>
                             <td><div id="cursos_${colab.idFunc}" class="tb_coluna_NRs"></div></td>
-                            <td><span class="${colab.contrato === "desligado" ? colab.contrato : colab.motivo}">${colab.contrato === "desligado" ? "Desligado" : colab.motivo}</span></td>
+                            <td><span class="${colab.contrato === "desligado" ? colab.contrato : colab.motivo.replace(/\s+/g, '')}">${colab.contrato === "desligado" ? "Desligado" : colab.motivo}</span></td>
                             <td><i class="fa-solid fa-trash-can bt_excluirHistoricoAtestar"></i></td>
                         </tr>
                         `;

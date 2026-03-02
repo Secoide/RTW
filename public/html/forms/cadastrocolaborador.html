@@ -140,8 +140,8 @@
                             <div class="div_botoesAcao">
                                 <input id="bt_cadColaborador" class="bt_padrao bt_cad" data-roles="4,6,7,99"
                                     type="submit" name="cadColab" value="Cadastrar">
-                                <input id="bt_editColab" class="bt_padrao bt_cad" data-roles="4,6,7,99" type="submit"
-                                    name="editColab" value="Salvar" style="display: none;">
+                                <input id="bt_editColab"  class="bt_padrao bt_cad hidden-inicial" data-roles="4,6,7,99" type="submit"
+                                    name="editColab" value="Salvar">
                             </div>
                         </form>
                     </div>
@@ -174,22 +174,10 @@
                             </div>
 
                             <div class="linha_Setor linha_padrao">
-                                <select id="categoria" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                <select id="selectSetor" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
                                     name="setor" required="required">
-                                    <option value="" disabled selected hidden>Selecione o setor...</option>
-                                    <option value="0">Estágio</option>
-                                    <option value="1">Produção</option>
-                                    <option value="2">Almoxarifado</option>
-                                    <option value="4">Compras</option>
-                                    <option value="5">Engenharia</option>
-                                    <option value="6">Gerência</option>
-                                    <option value="7">Financeiro</option>
-                                    <option value="8">RH</option>
-                                    <option value="9">Orçamento</option>
-                                    <option value="10">Diretoria</option>
-                                    <option value="12">Terceirizado</option>
                                 </select>
-                                <select id="cargo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                <select id="selectCargo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
                                     name="cargo" required="required">
                                     <option value="" disabled selected hidden>Selecione o cargo...</option>
                                 </select>
@@ -1007,138 +995,9 @@
     });
 
 
-    $('#formColaborador').on('submit', function (e) {
-        e.preventDefault();
-
-        // Captura o botão que disparou o submit
-        const botaoClicado = e.originalEvent.submitter?.name || '';
-
-        // Serializa dados do form
-        const formData = $(this).serialize();
-
-        if (botaoClicado === 'cadColab') {
-            // 🔹 Cadastrar
-            $.ajax({
-                url: '/api/colaboradores/cadastrar',
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function (res) {
-                    if (res.sucesso) {
-                        let msg = `Colaborador cadastrado com sucesso!`;
-                        msg += `\n\nLogin: ${res.id}`;
-                        msg += `\nSenha: ${res.senhaPadrao}`;
-                        $('#idColaborador').val(res.id);
-                        $('#idColaboradorPro').val(res.id);
-                        Swal.fire({
-                            icon: "success",
-                            title: "Cadastrado",
-                            theme: "dark",
-                            text: msg
-                        });
-                        $('#bt_editColab').show();
-                        $('#bt_cadColaborador').hide();
-                        $('[data-target=".painel_profissional"]').show();
-                    } else {
-                        Toast.fire({
-                            icon: "warning",
-                            title: "Atenção",
-                            theme: "dark",
-                            text: res.mensagem
-                        });
-                    }
-                },
-                error: function (xhr) {
-                    let mensagem = "Erro ao processar a solicitação.";
-
-                    if (xhr.responseJSON?.mensagem) {
-                        mensagem = xhr.responseJSON.mensagem;
-                    }
-                    else if (xhr.responseText) {
-                        try {
-                            const json = JSON.parse(xhr.responseText);
-                            mensagem = json.mensagem || mensagem;
-                        } catch (e) { }
-                    }
-
-                    // 🎯 Regras de negócio
-                    const ehAviso =
-                        mensagem.includes('CPF já cadastrado') ||
-                        mensagem.includes('RG já cadastrado');
-
-                    Toast.fire({
-                        icon: ehAviso ? "warning" : "error",
-                        title: ehAviso ? "Atenção" : "Erro",
-                        theme: "dark",
-                        text: mensagem
-                    });
-                }
-            });
-        } else if (botaoClicado === 'editColab') {
-            const idColaborador = $('#idColaborador').val();
-
-            $.ajax({
-                url: `/api/colaboradores/editar/${idColaborador}`,
-                type: 'PUT',
-                data: formData,
-                dataType: 'json',
-                success: function (res) {
-                    if (res.sucesso) {
-                        Toast.fire({
-                            icon: "success",
-                            theme: 'dark',
-                            text: 'Colaborador atualizado com sucesso!'
-                        });
-                    } else {
-                        // 🔥 Detectar qual campo falta baseando-se na mensagem
-                        destacarCampoQueFalta(res.mensagem);
-                        Toast.fire({
-                            icon: "warning",
-                            theme: 'dark',
-                            title: res.mensagem
-                        });
-                    }
-                },
-                error: function (xhr) {
-                    const resp = xhr.responseJSON;
-
-                    if (resp?.mensagem) {
-                        destacarCampoQueFalta(resp.mensagem);
-                    }
-                    Toast.fire({
-                        icon: "warning",
-                        theme: 'dark',
-                        title: resp?.mensagem || "Erro ao atualizar colaborador."
-                    });
-                }
-            });
-        }
-
-    });
 
 
-    function destacarCampoQueFalta(mensagem) {
-        // Remove erros anteriores
-        $('input').removeClass('input-erro');
-
-        // 🔎 Verifica nome
-        if (mensagem.toLowerCase().includes("nome")) {
-            const inp = $('[name="nome"]');
-            inp.addClass('input-erro').focus();
-        }
-
-        // 🔎 Verifica CPF
-        if (mensagem.toLowerCase().includes("cpf")) {
-            const inp = $('[name="cpf"]');
-            inp.addClass('input-erro').focus();
-        }
-        // 🔎 Verifica E-mail
-        if (mensagem.toLowerCase().includes("e-mail")) {
-            const inp = $('[name="email"]');
-            inp.addClass('input-erro').focus();
-        }
-    }
-
+   
     function verificarForcaSenha(senha) {
         let score = 0;
 
@@ -1372,127 +1231,6 @@
         });
     })();
 
-
-    cargosPorSetor = {
-        "0": [
-            { value: "0", label: "Estagiário" }
-        ],
-        "1": [
-            { value: "1", label: "Auxiliar Eletricista" },
-            { value: "2", label: "Eletricista Junior" },
-            { value: "3", label: "Eletricista Junior I" },
-            { value: "4", label: "Eletricista Junior II" },
-            { value: "5", label: "Eletricista Pleno" },
-            { value: "6", label: "Eletricista Pleno I" },
-            { value: "7", label: "Eletricista Pleno II" },
-            { value: "8", label: "Eletricista Sênior" },
-            { value: "9", label: "Eletricista Sênior I" },
-            { value: "10", label: "Eletricista Sênior II" },
-            { value: "11", label: "Painelista" },
-            { value: "12", label: "Supervisor de Manutenção Elétrica" },
-            { value: "31", label: "Supervisor de Manutenção 2" },
-            { value: "32", label: "Técnico de Segurança" },
-            { value: "13", label: "Gerente de Produção" }
-        ],
-        "2": [
-            { value: "19", label: "Estoquista" }
-        ],
-        "4": [
-            { value: "20", label: "Comprador" }
-        ],
-        "5": [
-            { value: "14", label: "Projetista Junior" },
-            { value: "33", label: "Projetista Junior I" },
-            { value: "34", label: "Projetista Junior II" },
-            { value: "15", label: "Projetista Pleno" },
-            { value: "35", label: "Projetista Pleno I" },
-            { value: "36", label: "Projetista Pleno II" },
-            { value: "16", label: "Projetista Senior" },
-            { value: "37", label: "Projetista Senior I" },
-            { value: "38", label: "Projetista Senior II" },
-            { value: "17", label: "Engenheiro Eletricista" },
-            { value: "18", label: "Gerente de Engenharia" }
-        ],
-        "6": [
-            { value: "13", label: "Gerente de Produção" },
-            { value: "18", label: "Gerente de Engenharia" },
-            { value: "21", label: "Gerente Financeiro" }
-        ],
-        "7": [
-            { value: "22", label: "Analista Financeiro" },
-            { value: "23", label: "Assistente Financeiro" },
-            { value: "30", label: "Auxiliar Fiscal" }
-        ],
-        "8": [
-            { value: "24", label: "Assistente de RH" },
-            { value: "25", label: "Analista de RH" }
-        ],
-        "9": [
-            { value: "26", label: "Orçamentista" }
-        ],
-        "10": [
-            { value: "27", label: "Diretor" }
-        ],
-        "12": [
-            { value: "29", label: "Terceiro" }
-        ]
-    };
-
-
-    $(function () {
-        const $categoria = $("#categoria");
-        const $cargo = $("#cargo");
-
-        function preencherCargos(setor, manterValorSelecionado = false) {
-            const placeholder = '<option value="" disabled selected hidden>Selecione o cargo...</option>';
-            const valorAnterior = manterValorSelecionado ? $cargo.val() : "";
-
-            const chave = String(setor).trim();
-            const lista = cargosPorSetor[chave] || [];
-
-            // Limpa e desabilita por padrão
-            $cargo.html(placeholder).prop("disabled", true);
-
-            if (!lista.length) {
-                console.warn("[preencherCargos] Setor sem mapeamento ou vazio:", { setor, chave, lista });
-                return; // fica só com placeholder e desabilitado
-            }
-
-            // Popula
-            $.each(lista, function (i, item) {
-                // Defesa contra itens malformados
-                if (!item || typeof item.value === "undefined" || typeof item.label === "undefined") {
-                    console.warn("[preencherCargos] Item inválido na lista:", item);
-                    return;
-                }
-                $cargo.append($("<option>", { value: item.value, text: item.label }));
-            });
-
-            // Habilita
-            $cargo.prop("disabled", false);
-
-            // Restaura seleção, se válida
-            if (manterValorSelecionado && valorAnterior) {
-                const existe = $cargo.find("option[value='" + valorAnterior + "']").length > 0;
-                if (existe) $cargo.val(valorAnterior);
-            }
-        }
-
-        // Change de categoria
-        $categoria.on("change", function () {
-            const val = $(this).val();
-            preencherCargos(val);
-        });
-
-        // Inicialização (se vier preenchido do servidor)
-        if ($categoria.val()) {
-            preencherCargos($categoria.val(), true);
-        } else {
-            // Garantir que cargo inicie desabilitado até escolher setor
-            $cargo.prop("disabled", true);
-        }
-    });
-
     $(document).ready(function () {
         $("input[name='vehicle']").change(function () {
             // Pega todos os checkboxes marcados
@@ -1505,29 +1243,6 @@
             $("#vehicles_selected").val(selecionados);
         });
     });
-
-
-
-
-
-    $('#checkColabDesligado').on('change', function () {
-        const ligado = $(this).is(':checked');
-        const userId = $('.painel_todos').find('#id').val();
-
-        $.ajax({
-            url: '/desligar_colab', // Substitua pelo seu backend
-            method: 'POST',
-            data: { status: ligado ? 'on' : 'off', userId },
-            success: function (resposta) {
-
-            },
-            error: function (erro) {
-                console.error('Erro na requisição:', erro);
-            }
-        });
-    });
-
-
 
 
     // Controle dos botões do menu

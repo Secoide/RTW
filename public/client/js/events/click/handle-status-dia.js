@@ -1,9 +1,21 @@
 import { alterarStatusProgDia } from "../../services/sockets/status-dia-socket.js";
 
+
+
 $(document).on('click', '.iconeStatusDia i', async function (event, data) {
     event.preventDefault();
     event.stopPropagation();
-
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
     const isProgramatico = !!(data && data.programatico);
 
     // Nível de acesso (parse explícito + default seguro)
@@ -35,15 +47,39 @@ $(document).on('click', '.iconeStatusDia i', async function (event, data) {
     if (!isProgramatico) {
         const indoFinalizar = $icon.hasClass('fa-file-signature');
         const msg = indoFinalizar
-            ? "Programação finalizada para lançamento?"
+            ? "Deseja finalizar programção para lançamento?"
             : "Modificar programação novamente?";
-        if (!confirm(msg)) {
+        const btConfirm = indoFinalizar ? "Sim, finalizar!" : "Modificar!";
+        if (!(await confirmarAcao(msg, btConfirm))) return false;
+    }
+
+    async function confirmarAcao(msg, btConfirm) {
+
+        const result = await Swal.fire({
+            text: msg,
+            icon: "warning",
+            theme: "dark",
+            showCancelButton: true,
+            confirmButtonColor: "#51d630",
+            cancelButtonColor: "#d33",
+            confirmButtonText: btConfirm
+        });
+
+        if (!result.isConfirmed) {
             $wrapper.data('busy', false);
             return false;
         }
-    }
 
-    
+        if (msg.includes("finalizar")) {
+            Toast.fire({
+                icon: "success",
+                theme: 'dark',
+                title: "Programação do dia finalizada!"
+            });
+        }
+
+        return true;
+    }
 
     // Define status desejado com base no estado atual do ícone
     // (ideal: ler/gravar em data-status no wrapper)

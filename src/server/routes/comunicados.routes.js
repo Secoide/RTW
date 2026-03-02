@@ -5,6 +5,7 @@ const verificarAutenticacao = require("../middlewares/auth.middleware");
 const comunicadosController = require("../controllers/comunicados.controller");
 
 router.get("/", verificarAutenticacao, comunicadosController.getAll);
+router.get("/exames", verificarAutenticacao, comunicadosController.getAllExamesAgendados);
 router.get("/item/:id", verificarAutenticacao, comunicadosController.getItem);
 router.put("/:id", verificarAutenticacao, comunicadosController.update); 
 router.delete("/:id", verificarAutenticacao, comunicadosController.deleteItem);

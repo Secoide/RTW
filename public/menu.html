@@ -1,4 +1,14 @@
-<div class="menu glass">
+
+
+<button class="menu-toggle glass" id="menuToggle">
+  <i class="fa-solid fa-bars" id="menuIcon"></i>
+</button>
+<button class="perfil-mobile glass" id="perfilMobileBtn">
+  <img id="avatarMobile" src="/imagens/fotoperfil/user-default.jpg" />
+  <span class="badge-notif" id="badgeNotif">0</span>
+</button>
+
+<div class="menu glass" id="menuMobile">
   <div class="menuSuperior">
     <a class="bt_menuP ativo" data-roles="*" data-pagina="/client/pages/inicio.html">
       <i class="fa-solid fa-house"></i><span class="menu-text">Início</span>
@@ -9,7 +19,7 @@
     <a class="bt_menuP" data-roles="6,7,99" data-pagina="/client/pages/programacaoOS.html">
       <i class="fa-solid fa-clock"></i><span class="menu-text">Programação OS</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-pagina="/client/pages/projetos.html">
+    <a class="bt_menuP" data-roles="" data-pagina="/client/pages/projetos.html">
       <i class="fa-solid fa-briefcase"></i><span class="menu-text">Projetos</span>
     </a>
     <a class="bt_menuP" data-roles="6,7,99" data-pagina="/client/pages/gestao.html">
@@ -21,8 +31,9 @@
     <a class="bt_menuP" data-roles="" data-pagina="/client/pages/admin.html">
       <i class="fa-solid fa-user-gear"></i><span class="menu-text">Admin</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-pagina="/client/pages/ass_epi.html">
+    <a class="bt_menuP" data-roles="" data-pagina="/client/pages/ass_epi.html">
       <i class="fa-solid fa-pen"></i><span class="menu-text">Assinar</span>
     </a>
   </div>
 </div>
+<div class="menu-overlay" id="menuOverlay"></div>

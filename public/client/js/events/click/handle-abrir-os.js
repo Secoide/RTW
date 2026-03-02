@@ -41,7 +41,7 @@ export function initAbrirOSClick() {
 
 
 
-initOSForm();
+  initOSForm();
 
 
 

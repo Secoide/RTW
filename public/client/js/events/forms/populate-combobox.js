@@ -185,3 +185,51 @@ export async function preencherCbxEPI() {
     mostrarErroUI("Erro ao tentar preencher combobox EPI");
   }
 }
+
+// Setor
+export async function preencherCbxSetor($form) {
+  const $cbx = $form.find("#selectSetor");
+  $cbx.empty();
+  try {
+    const res = await fetch("/api/setor", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    $cbx.append('<option value="" disabled selected hidden>Selecione o Setor...</option>');
+    data.forEach(c => {
+      $cbx.append(`<option value="${c.id}">${c.nome}</option>`);
+    });
+  } catch (err) {
+    console.error("Erro carregar Setores:", err);
+    mostrarErroUI("Erro ao tentar preencher combobox Setor");
+  }
+}
+
+// Cidade
+export async function preencherCbxCargo(idSetor, $form) {
+  const $cbx = $form.find("#selectCargo");
+  $cbx.empty();
+  try {
+    const res = await fetch(`/api/cargo/idSetor/${idSetor}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    $cbx.append('<option value="" disabled selected hidden>Selecione o Cargo...</option>');
+    data.forEach(c => {
+      $cbx.append(`<option value="${c.id_cargo}">${c.cargo}</option>`);
+    });
+
+    if (data.length === 1) {
+      $cbx.val(data[0].id_cargo).trigger("change");
+    }
+  } catch (err) {
+    console.error("Erro carregar cargos:", err);
+    mostrarErroUI("Erro ao tentar preencher combobox Cargos");
+  }
+}

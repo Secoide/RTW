@@ -9,6 +9,11 @@ function securityConfig(app) {
    * 1. Helmet com Content Security Policy (CSP)
    * Evita carregamento de scripts e recursos de lugares não confiáveis
    */
+
+
+
+
+
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -58,34 +63,35 @@ function securityConfig(app) {
 
   /**
    * 2. CORS com domínios permitidos
-   */
+  */
   const cors = require("cors");
-
+ 
   app.use(cors({
     origin: "http://localhost:3000",  // frontend
     credentials: true                 // permite envio de cookies
   }));
-  /*
-  app.use(
-    cors({
-      origin: function (origin, callback) {
-        if (!origin || corsOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-      credentials: true,
-    })
-  );
-  if (nodeEnv === 'development') {
-    console.log('⚠️  Security config: Helmet, CORS e Rate Limit ativos.');
-    console.log('   Allowed origins:', corsOrigins);
-  }
+ 
+/*
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || corsOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
+if (nodeEnv === 'development') {
+  console.log('⚠️  Security config: Helmet, CORS e Rate Limit ativos.');
+  console.log('   Allowed origins:', corsOrigins);
+}
 
-  */
+*/
 
 
   /**

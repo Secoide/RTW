@@ -2,10 +2,20 @@ const connection = require('../config/db');
 
 async function buscarUsuarioPorUsername(username) {
   const sql = `
-    SELECT f.id, f.nome, f.mail, f.senha, nv.nivel_acesso
-    FROM funcionarios f
-    JOIN tb_categoria_nvl_acesso nv ON f.idnvlacesso = nv.id_catnvl
-    WHERE f.id = ? OR f.mail = ?
+    SELECT 
+    f.id,
+    f.nome,
+    f.mail,
+    f.senha,
+    GREATEST(
+        IFNULL(c.nivel_acesso, 0),
+        IFNULL(s.nivel_acesso, 0)
+    ) AS nivel_acesso
+FROM funcionarios f
+LEFT JOIN tb_cargos c ON f.cargo = c.id
+LEFT JOIN tb_setores s ON c.idsetor = s.id_catnvl
+WHERE f.id = ? OR f.mail = ?
+LIMIT 1;
   `;
   const [rows] = await connection.query(sql, [username, username]);
   return rows[0] || null;
@@ -16,7 +26,7 @@ async function buscarUsuarioParaRecuperarSenha(idColab, username) {
   const sql = `
     SELECT f.id, f.nome, f.mail, f.senha, nv.nivel_acesso
     FROM funcionarios f
-    JOIN tb_categoria_nvl_acesso nv ON f.idnvlacesso = nv.id_catnvl
+    JOIN tb_setores nv ON f.idnvlacesso = nv.id_catnvl
     WHERE f.id = ? AND f.mail = ?
   `;
   const [rows] = await connection.query(sql, [idColab, username]);

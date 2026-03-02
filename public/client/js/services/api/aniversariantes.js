@@ -188,7 +188,7 @@ function montarCardProximo(colab) {
                 onerror="this.src='/imagens/user-default.webp'">
             <div>
                 <div class="nome">${colab.nome}</div>
-                <div class="data">${colab.dataFormatada} — em ${colab.diff} dias</div>
+                <div class="data">${colab.dataFormatada} <span style="color:#aaa;"> — em ${colab.diff} dias</span></div>
             </div>
         </div>
     `;

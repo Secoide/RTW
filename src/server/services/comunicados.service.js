@@ -8,6 +8,10 @@ async function listarTodos() {
     return await ComunicadosModel.getComunicados();
 }
 
+async function listarTodosExamesAgendados() {
+    return await ComunicadosModel.getComunicadosExamesAgendados();
+}
+
 async function listarPorCategoria(categoria) {
     return await ComunicadosModel.getComunicadosPorCategoria(categoria);
 }
@@ -34,6 +38,7 @@ async function excluir(id) {
 
 module.exports = {
     listarTodos,
+    listarTodosExamesAgendados,
     listarPorCategoria,
     novo,
     buscarPorId,

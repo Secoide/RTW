@@ -6,23 +6,45 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
-## [1.3.2] - 2025-12-15
-## Nome: 🔨 Ajustes e Correções gerais
+## [1.4.0] - 2026-03-02
+## Nome: 🧩 Integração Operacional e Conectividade do Sistema
+
 ### Adicionado
-- Novos cargos de projetista I e II;
-- Muito mais Visibilidade e bloqueio para paginas e funções conforme nível de permissão do usuário;
+- Implementado novo modelo de visibilidade e bloqueio de páginas e funções, conforme o nível de permissão do usuário;
+- Nivel de acesso, agora é classificado pelo mais alto entre o setor e ou seu cargo correspondente;
+- Adicionado controle de níveis de permissão/acesso por setor e/ou cargo, permitindo maior segurança e organização das informações;
+- Incluídas duas novas abas na página de Gestão: Setor e Cargo;
+- Disponibilizado controle completo para adicionar, editar e excluir registros de setores e cargos;
+- Implementada a funcionalidade de associação de cargos aos respectivos setores;
+- A visibilidade dos colaboradores na programação agora é controlada pela aba Cargos;
+- É possível selecionar quais cargos estarão disponíveis na programação. Observação: o colaborador só será exibido após o cadastro do exame admissional;
+- Adicionado melhoria no sistema de conexão automatica com o servidor, caso perca conectividade. (Sistema tenta 5 vezes antes de realmente deslogar);
+- Novo painel Widget flutuante “ONLINE” com painel expansível exibindo usuários conectados em tempo real;
+- Contagem dinâmica e popup temporário ao detectar entrada de novos usuários;
+- Novo formulário para adicionar Agendamento de exame na pagina RH, permitindo definir data, horário e observação;
+- Implementado novo status "AGENDADO" para exames com data e hora definidas;
+- Status 'Agendado' adicionado na tabela do RH, no perfil do colaborador e na visualização de colaboradores disponíveis na programação;
+- Assim que um exame é agendado, é gerado um aviso no mural de recados do RH na pagina inicial (some após 2 dias depois da data marcada);
+- Quando houver exame agendado na data consultada da programação, o colaborador será destacado com animação em azul. Ao passar o mouse sobre o indicador azul, será exibido o horário do exame agendado;
+- Após notificação de programação lançada, o sistema atualiza automaticamente a programação do usuario que recebe o aviso;
+- Agora ao gerar a programação do dia, é possível adicionar observações (uma por linha com Enter) e confirmar ou enviar sem observações.
 
 ### Alterado
-- 
+- Atualização da lógica de listas online para detectar novos usuários;
+- Nova hierarquia de prioridade dos exames, considerando VENCIDO sem agendamento como prioridade máxima;
+- Ajustada lógica SQL para considerar múltiplos exames por colaborador mantendo a criticidade;
 
 ### Corrigido
 - Dia de aniversario e atestados mostravam um dia a menos do que era salvo;
 - Alterar foto não atualiza corretamente nova versão da imagem;
-- Ao arrastar um colaborador disponível e soltá-lo fora de uma OS, ele permanecia com aparência de selecionado.
-
+- Ao arrastar um colaborador disponível e soltá-lo fora de uma OS, ele permanecia com aparência de selecionado;
+- Salvar dados profissional do colaborador, nao atualizava tabela do RH automaticamente;
+- Botão salvar ficava visivel na hora de cadastrar colaborador;
+- Sistema nao havisava quando perdia conexão com o servidor;
 
 ### Removido
-- 
+- Informação de onlines na página da programação;
+
 
 ## [1.3.1] - 2025-12-15
 ## Nome: 🔨 Ajustes

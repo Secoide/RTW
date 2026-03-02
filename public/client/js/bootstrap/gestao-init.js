@@ -8,11 +8,11 @@ let lastCols = [];
 
 export function initGestao() {
     // ========================== CONFIG ==========================
-    const ENTIDADES = ["EPI", "Exame", "Curso", "Empresa", "Supervisor", "Cidade", "OS"];
+    const ENTIDADES = ["EPI", "Exame", "Curso", "Empresa", "Supervisor", "Cidade", "OS", "Cargos", "Setor"];
     const BASE_URL = "/api"; // 🔧 troque pelo endpoint real se necessário
 
     // ========================== ESTADO ==========================
-    let entidadeAtual = "EPI";
+    let entidadeAtual = "OS";
     let dados = [];
 
     const $tabs = $(".tab");
@@ -224,7 +224,91 @@ export function initGestao() {
                     criado: e.mesCriado,
                     concluido: e.mesConcluido,
                 }));
-            } else {
+            } else if (entidadeAtual === "Cargo") {
+                const data = await $.ajax({
+                    url: `${BASE_URL}/cargo`,
+                    method: "GET",
+                    xhrFields: { withCredentials: true }
+                });
+
+                dados = (Array.isArray(data) ? data : []).map(e => ({
+                    id: e.id,
+                    nome: e.nome,
+                    nivel: e.nivel_acesso,
+                    disponivel: !!e.ativo_colaborador
+                }));
+            } else if (entidadeAtual === "Setor") {
+                const data = await $.ajax({
+                    url: `${BASE_URL}/setor`,
+                    method: "GET",
+                    xhrFields: { withCredentials: true }
+                });
+                const parseMaybeJSON = (v) => {
+                    if (Array.isArray(v)) return v;
+                    if (typeof v === "string") {
+                        const s = v.trim();
+                        if (s.startsWith("[") && s.endsWith("]")) {
+                            try { return JSON.parse(s); } catch { /* ignore */ }
+                        }
+                    }
+                    return null;
+                };
+
+                const toList = (val) => {
+                    const parsed = parseMaybeJSON(val);
+                    if (parsed) return parsed;
+
+                    if (Array.isArray(val)) return val;
+                    if (val == null) return [];
+                    if (typeof val === "object") {
+                        return [{
+                            id: val.id ?? val.id_cargos ?? val.id_cargo ?? null,
+                            nome: val.nome ?? val.cargo ?? String(val.id ?? "")
+                        }];
+                    }
+                    return [{ id: null, nome: String(val) }];
+                };
+
+                const uniqueBy = (arr) => {
+                    const seen = new Set();
+                    const out = [];
+
+                    for (const x of arr) {
+                        const id = x?.id ?? null;
+                        const nome = x?.nome ?? x?.cargo ?? String(x?.id ?? "");
+
+                        const key = id != null
+                            ? `id:${id}`
+                            : `nome:${nome.toLowerCase()}`;
+
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            out.push({
+                                id,
+                                nome
+                            });
+                        }
+                    }
+
+                    return out;
+                };
+
+
+                const normList = (maybeArray, singularObj /*, singularName */) => {
+                    let list = toList(maybeArray);
+                    if (!list.length && singularObj) list = toList(singularObj);
+                    list = uniqueBy(list).sort((a, b) => (a.nome ?? "").localeCompare(b.nome ?? ""));
+                    return list;
+                };
+
+                dados = (Array.isArray(data) ? data : []).map(e => ({
+                    id: e.id ?? e.id_catnvl ?? null,
+                    nome: e.nome ?? "",
+                    cargos: normList(e.cargos, e.cargo),
+                    nivel: e.nivel_acesso
+                }));
+            }
+            else {
                 dados = getDadosFake(entidadeAtual);
             }
 
@@ -408,8 +492,8 @@ export function initGestao() {
             return;
         }
 
-        // === ESPECÍFICO PARA EMPRESA ===
-        if (entidadeAtual === "Empresa") {
+        // === ESPECÍFICO PARA EMPRESA e SETOR ===
+        if (entidadeAtual === "Empresa" || entidadeAtual === "Setor") {
             if (acao === "chip-add") {
                 const $td = $btn.closest("td");
                 openChipAdder($td, id, $btn.data("kind"));
@@ -434,7 +518,14 @@ export function initGestao() {
         const $sel = $("<select>").html(`<option value="">— selecione —</option>`);
 
         try {
-            const options = kind.startsWith("cidade") ? await fetchCidades() : await fetchSupervisores();
+            const tipo = String(kind).toLowerCase();
+
+            const options = tipo.startsWith("cidade")
+                ? await fetchCidades()
+                : tipo.startsWith("cargo")
+                    ? await fetchCargos()
+                    : await fetchSupervisores();
+
             (options || []).forEach(o => {
                 $sel.append($("<option>").val(o.id).text(`${o.nome ?? o.name ?? o.id}`));
             });
@@ -615,14 +706,14 @@ export function initGestao() {
         lastCols.forEach(async (col, i) => {
             if (col === "id") return;
             // NÃO transformar booleans em input — manter checkbox
-            if (["integracao", "liberacao", "seguranca"].includes(col)) return;
+            if (["disponivel", "integracao", "liberacao", "seguranca"].includes(col)) return;
             if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) return;
+            if (entidadeAtual === "Setor" && (col === "cargos")) return;
             // 🔒 BLOQUEIA supervisor e cidade inicialmente (OS)
             if (entidadeAtual === "OS" && (col === "supervisor" || col === "cidade")) {
                 // mantém texto e não transforma em input
                 return;
             }
-
             if (entidadeAtual === "OS" && col === "status") {
                 const $sel = $linha.find("td").eq(i).find("select");
                 if ($sel.length) {
@@ -801,8 +892,30 @@ export function initGestao() {
 
                 $td.empty().append($input);
                 return; // ⛔ não deixa cair no input genérico
-            }
-            else {
+            } else if ((entidadeAtual === "Cargo" && col === "nivel") || (entidadeAtual === "Setor" && col === "nivel")) {
+                $input = $("<select>").attr({ "data-field": col, "data-editing": "true" })
+                    .css({
+                        width: "100%",
+                        padding: "4px 6px",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
+                        border: "1px solid #555",
+                        borderRadius: "4px",
+                        fontSize: "12px"
+                    })
+                    .append(`<option value="">— selecione —</option>`)
+                    .append(`<option value="0">0</option>`)
+                    .append(`<option value="1">1</option>`)
+                    .append(`<option value="2">2</option>`)
+                    .append(`<option value="3">3</option>`)
+                    .append(`<option value="4">4</option>`)
+                    .append(`<option value="5">5</option>`)
+                    .append(`<option value="6">6</option>`)
+                    .append(`<option value="7">7</option>`)
+                    .append(`<option value="8">8</option>`)
+                    .append(`<option value="9">9</option>`);
+                $input.val(valor);
+            } else {
                 $input = $("<input>")
                     .val(valor)
                     .attr({ "data-field": col, "data-editing": "true" })
@@ -835,7 +948,7 @@ export function initGestao() {
                 const $td = $linha.find("td").eq(i);
                 if (!col) return;
                 // Se era checkbox, restaura checked/unchecked
-                if (["integracao", "liberacao", "seguranca"].includes(col)) {
+                if (["disponivel", "integracao", "liberacao", "seguranca"].includes(col)) {
                     // encontra checkbox nessa célula (se existir)
                     const $chk = $td.find("input[type='checkbox']");
                     if ($chk.length) {
@@ -853,10 +966,8 @@ export function initGestao() {
                     $linha.find("select[data-field='status']").prop("disabled", false);
                 }
                 if (entidadeAtual === "OS" && col === "status") return; // 🔹 não mexe no combobox
-                if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) {
-                    return;
-                }
-
+                if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) return;
+                if (entidadeAtual === "Setor" && (col === "cargos")) return;
                 $td.text(dadosOriginais[col]);
             });
 
@@ -903,7 +1014,7 @@ export function initGestao() {
                 }
             }
 
-            ["supervisor", "cidade"].forEach(campo => {
+            ["supervisor", "cidade", "cargo"].forEach(campo => {
                 const idx = lastCols.indexOf(campo);
                 const $td = $linha.find("td").eq(idx);
 
@@ -978,7 +1089,7 @@ export function initGestao() {
         const campos = [...lastCols];
         const $tr = $("<tr>").addClass("novo-registro editing-row");
 
-        campos.forEach(col => {
+        for (const col of campos) {
             const $td = $("<td>");
 
             if (col === "id") {
@@ -988,18 +1099,17 @@ export function initGestao() {
 
             // 🔒 Empresa: bloquear cidades e supervisores
             else if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) {
-                $td.text("—").attr("title", "Disponível após salvar a empresa");
+                $td.text("—").attr("title", "Disponível após salvar a Empresa");
             }
 
             // 🔒 Empresa: bloquear integracao, liberacao e seguranca
-            else if (
-                entidadeAtual === "Empresa" &&
-                ["integracao", "liberacao", "seguranca"].includes(col)
-            ) {
-                $td.text("—").attr("title", "Disponível após salvar a empresa");
+            else if (entidadeAtual === "Empresa" && ["integracao", "liberacao", "seguranca"].includes(col)) {
+                $td.text("—").attr("title", "Disponível após salvar a Empresa");
             }
-
-            else {
+            // 🔒 Cargo: bloquear disponivel
+            else if (entidadeAtual === "Cargo" && ["disponivel"].includes(col)) {
+                $td.text("—").attr("title", "Disponível após salvar o Cargo");
+            } else {
                 // Campos editáveis
                 let $input;
                 if (entidadeAtual === "EPI" && col === "obrigatorio") {
@@ -1016,6 +1126,28 @@ export function initGestao() {
                         .append(`<option value="">— selecione —</option>`)
                         .append(`<option value="1">Sim</option>`)
                         .append(`<option value="0">Não</option>`);
+                } else if ((entidadeAtual === "Cargo" && col === "nivel") || (entidadeAtual === "Setor" && col === "nivel")) {
+                    $input = $("<select>").attr({ "data-field": col, "data-editing": "true" })
+                        .css({
+                            width: "100%",
+                            padding: "4px 6px",
+                            background: "var(--input-bg)",
+                            color: "var(--texto-principal)",
+                            border: "1px solid #555",
+                            borderRadius: "4px",
+                            fontSize: "12px"
+                        })
+                        .append(`<option value="">— selecione —</option>`)
+                        .append(`<option value="0">0</option>`)
+                        .append(`<option value="1">1</option>`)
+                        .append(`<option value="2">2</option>`)
+                        .append(`<option value="3">3</option>`)
+                        .append(`<option value="4">4</option>`)
+                        .append(`<option value="5">5</option>`)
+                        .append(`<option value="6">6</option>`)
+                        .append(`<option value="7">7</option>`)
+                        .append(`<option value="8">8</option>`)
+                        .append(`<option value="9">9</option>`);
                 } else {
                     $input = $("<input>")
                         .attr({ "data-field": col, "data-editing": "true", placeholder: col })
@@ -1033,7 +1165,7 @@ export function initGestao() {
             }
 
             $tr.append($td);
-        });
+        };
 
 
         // Coluna de ações
@@ -1156,25 +1288,50 @@ export function initGestao() {
 
     // ========================== INTEGRAÇÃO (endpoints reais) ==========================
     async function addAssociation(clienteId, kind, relId) {
-        const isCidade = String(kind).startsWith("cidade");
-        const url = isCidade
-            ? `${BASE_URL}/empresa/${clienteId}/cidades`
-            : `${BASE_URL}/empresa/${clienteId}/supervisores`;
+
+        const tipo = String(kind).toLowerCase();
+
+        let url;
+        let field;
+
+        if (tipo.startsWith("cidade")) {
+            url = `${BASE_URL}/empresa/${clienteId}/cidades`;
+            field = "cidadeId";
+        }
+        else if (tipo.startsWith("cargo")) {
+            url = `${BASE_URL}/setor/${clienteId}/cargos`;
+            field = "idCargo";
+        }
+        else {
+            url = `${BASE_URL}/empresa/${clienteId}/supervisores`;
+            field = "supervisorId";
+        }
 
         return $.ajax({
             url,
             method: "POST",
             xhrFields: { withCredentials: true },
             contentType: "application/json",
-            data: JSON.stringify({ [isCidade ? "cidadeId" : "supervisorId"]: relId })
+            data: JSON.stringify({ [field]: relId })
         });
     }
 
+
     async function removeAssociation(clienteId, kind, relId) {
-        const isCidade = String(kind).startsWith("cidade");
-        const url = isCidade
-            ? `${BASE_URL}/empresa/${clienteId}/cidades/${relId}`
-            : `${BASE_URL}/empresa/${clienteId}/supervisores/${relId}`;
+
+        const tipo = String(kind).toLowerCase();
+
+        let url;
+
+        if (tipo.startsWith("cidade")) {
+            url = `${BASE_URL}/empresa/${clienteId}/cidades/${relId}`;
+        }
+        else if (tipo.startsWith("cargo")) {
+            url = `${BASE_URL}/setor/${clienteId}/cargos/${relId}`;
+        }
+        else {
+            url = `${BASE_URL}/empresa/${clienteId}/supervisores/${relId}`;
+        }
 
         return $.ajax({
             url,
@@ -1183,8 +1340,8 @@ export function initGestao() {
         });
     }
 
+
     async function updateRegistro(entidade, id, payload) {
-        console.log(entidade)
         const url = `${BASE_URL}/${entidade.toLowerCase()}/editar/${id}`;
         return $.ajax({
             url,
@@ -1309,6 +1466,27 @@ export function initGestao() {
         }
     }
 
+
+    async function fetchCargos() {
+        try {
+            const arr = await $.ajax({
+                url: `${BASE_URL}/cargo`,
+                method: "GET",
+                xhrFields: { withCredentials: true }
+            });
+            return (Array.isArray(arr) ? arr : []).map(c => ({
+                id: c.id ?? null,
+                nome: c.nome ?? ""
+            }));
+        } catch (e) {
+            console.warn("Fallback cidades (mock):", e);
+            return [
+                { id: 1, nome: "Teste 1" },
+                { id: 2, nome: "Teste 2" }
+            ];
+        }
+    }
+
     async function fetchEmpresas() {
         try {
             const arr = await $.ajax({
@@ -1373,6 +1551,25 @@ export function initGestao() {
             return [];
         }
     }
+
+    async function fetchSetores() {
+        try {
+            const arr = await $.ajax({
+                url: "/api/setor",
+                method: "GET",
+                xhrFields: { withCredentials: true }
+            });
+
+            return (Array.isArray(arr) ? arr : []).map(s => ({
+                id: s.id_catnvl,
+                nome: s.categoria ?? ""
+            }));
+        } catch (e) {
+            console.error("Erro ao buscar setores:", e);
+            return [];
+        }
+    }
+
 
 
     // ========================== DADOS FAKE (listagem) ==========================
@@ -1805,15 +2002,47 @@ export function initGestao() {
                     $td.append($chk);
                 }
 
+                // ======== Colunas booleanas (checkbox Empresa) ========
+                else if (entidadeAtual === "Cargo" && ["disponivel"].includes(c)) {
+                    const $chk = $("<input>").attr({
+                        type: "checkbox",
+                        "data-id": item.id,
+                        "data-field": c,
+                        "data-entity": entidadeAtual
+                    }).prop("checked", item[c] == 1);
+
+                    $chk.on("change", async function () {
+                        const id = $(this).data("id");
+                        const field = $(this).data("field");
+                        const valor = $(this).is(":checked") ? 1 : 0;
+                        try {
+                            await updateRegistro(entidadeAtual, id, { [field]: valor });
+                            Toast.fire({ icon: "success", theme: 'dark', title: `${field} atualizado!` });
+                        } catch {
+                            Toast.fire({ icon: "error", theme: 'dark', title: `Falha ao atualizar ${field}` });
+                        }
+                    });
+
+                    $td.append($chk);
+                }
+
+
+
                 // ======== Chips (Empresa) ========
                 else if (entidadeAtual === "Empresa" && (c === "cidades" || c === "supervisores")) {
                     renderChipsCell($td, item, c);
                 }
 
+                else if (entidadeAtual === "Setor" && (c === "cargos")) {
+                    renderChipsCell($td, item, c);
+                }
+
+
                 // ======== Texto padrão ========
                 else if (entidadeAtual === "OS" && c === "orcado") {
                     $td.text(formatarMoedaBR(item[c]));
                 }
+
                 else {
                     $td.text(formatCell(item[c], c));
                 }

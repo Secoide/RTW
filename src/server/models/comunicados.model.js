@@ -22,6 +22,37 @@ async function getComunicados() {
     return rows;
 }
 
+async function getComunicadosExamesAgendados() {
+    const [rows] = await connection.query(`
+        SELECT 
+    f.nome, 
+    e.nome AS nomeExame, 
+    CONCAT(
+        DATE_FORMAT(fce.horarioAgendando, '%d/%m/%Y'),
+        ' (',
+        CASE DAYNAME(fce.horarioAgendando)
+            WHEN 'Sunday' THEN 'domingo'
+            WHEN 'Monday' THEN 'segunda-feira'
+            WHEN 'Tuesday' THEN 'terça-feira'
+            WHEN 'Wednesday' THEN 'quarta-feira'
+            WHEN 'Thursday' THEN 'quinta-feira'
+            WHEN 'Friday' THEN 'sexta-feira'
+            WHEN 'Saturday' THEN 'sábado'
+        END,
+        ') às ',
+        DATE_FORMAT(fce.horarioAgendando, '%H:%i')
+    ) AS horarioFormatado
+        FROM funcionarios_contem_exames fce
+        JOIN funcionarios f ON fce.idfuncionario = f.id
+        JOIN exames e ON e.idexame = fce.idexame
+        WHERE 
+            fce.horarioAgendando IS NOT NULL
+            AND fce.horarioAgendando >= DATE_SUB(NOW(), INTERVAL 2 DAY)
+        ORDER BY fce.horarioAgendando ASC;
+    `);
+    return rows;
+}
+
 
 async function getComunicadosPorCategoria(categoria) {
     const [rows] = await connection.query(`
@@ -97,6 +128,7 @@ async function excluirComunicado(id) {
 module.exports = {
     getComunicados,
     getComunicadosPorCategoria,
+    getComunicadosExamesAgendados,
     criarComunicado,
     getComunicadoById,
     updateComunicado,

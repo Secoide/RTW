@@ -1,25 +1,23 @@
 <div class="painel_pagina glass">
     <div class="painel_menuSuperior">
-        <div id="usuarios_online" style="padding: 5px 10px;">
-            👤 Online: <span id="lista_usuarios_online">carregando...</span>
-            <div class="conjuntoServidor" style="display: flex;">
-                <i id="btn-debug-ws" class="fa-solid fa-server"></i>
-                <div id="status">Conectando servidor...</div>
-            </div>
-            
-        </div>
         <div id="bt_abrir_NovaOS" class="bt_submenu">
-                <input type="button" data-roles="6,7,99" name="" value="➕ Ordem de Serviço" title="Cadastrar OS"
-                    class="bt_padrao bt_cad">
+            <input type="button" data-roles="6,7,99" name="" value="➕ Ordem de Serviço" title="Cadastrar OS"
+                class="bt_padrao bt_cad">
         </div>
         <div class="bt_submenu" style="width: 20px; text-align: center;">|</div>
         <div id="bt_atualizarProgramacao" class="bt_submenu">
-                <input type="button" name="" value="🔄 Atualizar programação" title="Atualizar programação"
-                    class="bt_padrao bt_atualizar">
-        </div>  
+            <input type="button" name="" value="🔄 Atualizar programação" title="Atualizar programação"
+                class="bt_padrao bt_atualizar">
+        </div>
         <div class="direitaflex"></div>
         <div class="painel_EsqBtAcoes" style="padding-right: 10px; ">
-            <input id="seletor_data" class="tbx_data tbx_teste glass" type="date" value="">
+            <div class="date-wrapper glass">
+                <label for="seletor_data" id="btnAbrirData" class="date-icon-btn">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </label>
+
+                <input id="seletor_data" class="tbx_data tbx_teste glass" type="date" value="">
+            </div>
             <!--<button class="bt_abrirmenu"><i class="fa-solid fa-ellipsis"></i></button>-->
             <!--<p id="toggle-mode" class=""></p>-->
         </div>
@@ -291,23 +289,24 @@
 </div>
 
 <div id="modalDataTransferencia" class="modal-overlay-data" style="display:none">
-  <div class="modal-content-data">
-    <button type="button" class="fechar-modal-data" aria-label="Fechar">&times;</button>
-    <h3>Escolha as datas para a transferência</h3>
+    <div class="modal-content-data">
+        <button type="button" class="fechar-modal-data" aria-label="Fechar">&times;</button>
+        <h3>Escolha as datas para a transferência</h3>
 
-    <!-- ícone que abre o calendário -->
-    <button id="abrirCalendario" type="button" class="icone-calendario" title="Selecionar datas">
-      <i class="fa-solid fa-calendar-days"></i>
-    </button>
+        <!-- ícone que abre o calendário -->
+        <button id="abrirCalendario" type="button" class="icone-calendario" title="Selecionar datas">
+            <i class="fa-solid fa-calendar-days"></i>
+        </button>
 
-    <!-- input oculto só para o flatpickr “viver” -->
-    <input id="datasMultiHidden" type="text" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;width:0;height:0;border:0;padding:0;">
+        <!-- input oculto só para o flatpickr “viver” -->
+        <input id="datasMultiHidden" type="text" aria-hidden="true"
+            style="position:absolute;left:-9999px;opacity:0;width:0;height:0;border:0;padding:0;">
 
-    <!-- pode remover se não quiser mostrar nada -->
-    <!-- <div id="resumoDatas" class="texto-aux" style="display:none"></div> -->
+        <!-- pode remover se não quiser mostrar nada -->
+        <!-- <div id="resumoDatas" class="texto-aux" style="display:none"></div> -->
 
-    <button id="confirmarTransferencia" class="bt_padrao bt_cad">Confirmar</button>
-  </div>
+        <button id="confirmarTransferencia" class="bt_padrao bt_cad">Confirmar</button>
+    </div>
 </div>
 
 

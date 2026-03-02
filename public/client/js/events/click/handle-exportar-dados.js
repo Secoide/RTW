@@ -80,11 +80,11 @@ async function exportarDADOS($btn) {
   } catch (err) {
     console.error("Erro ao exportar dados:", err);
     Swal.fire({
-        icon: "error",
-        title: "Erro",
-        theme: "dark",
-        text: "Erro ao exportar dados."
-      });
+      icon: "error",
+      title: "Erro",
+      theme: "dark",
+      text: "Erro ao exportar dados."
+    });
   }
 }
 
@@ -118,10 +118,13 @@ function exportarWHATS($btn) {
     const $os = $(this);
     const idOS = $os.find(".lbl_OS").text().trim();
     const descricao = $os.find(".lbl_descricaoOS").text().trim();
+
+    const descricaoFormatada = descricao.charAt(0).toUpperCase() +
+      descricao.slice(1).toLowerCase();
     const cliente = $os.find(".lbl_clienteOS").text().trim();
     const cidade = $os.find(".p_infoOS").data("cidade");
 
-    let dadosOS = `—— *OS ${idOS}* ——\n> ${cliente.toUpperCase()} - ${descricao}\n`;
+    let dadosOS = `—— *OS ${idOS}* ——\n> ${cliente.toUpperCase()} - ${descricaoFormatada}\n`;
     let colaboradores = "";
 
     $os.find(".colaborador").each(function () {
@@ -153,7 +156,31 @@ function exportarWHATS($btn) {
     enviar += "\`" + `${cidade.toUpperCase()} ▼\`\n${cidades[cidade].join("")}`;
   }
 
-  copiarTexto(enviar, `Programação ${dia} gerado com sucesso!`);
+  Swal.fire({
+    text: `Alguma observação para este dia da programação?`,
+    theme: 'dark',
+    input: 'textarea',
+    inputPlaceholder: 'Digite cada observação em uma linha...',
+    showCancelButton: true,
+    confirmButtonText: 'Confirmar',
+    cancelButtonText: 'Sem observação'
+  }).then((result) => {
+
+    if (result.isConfirmed && result.value && result.value.trim() !== "") {
+
+      // 🔹 Quebra por linha
+      let linhas = result.value
+        .split('\n')                // separa por ENTER
+        .map(l => l.trim())         // remove espaços extras
+        .filter(l => l !== "")      // remove linhas vazias
+        .map(l => `- ${l}`)         // adiciona "- " na frente
+        .join('\n');                // junta novamente
+
+      enviar += `\n\n⚠️ OBSERVAÇÃO:\n${linhas}\n`;
+    }
+
+    copiarTexto(enviar, `Programação ${dia} gerado com sucesso!`);
+  });
 }
 
 

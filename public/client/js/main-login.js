@@ -8,7 +8,7 @@ $(document).ready(function () {
     initNewYearFireworks();   // ano novo
 
     // 🟦 DEFINA AQUI SUA VERSÃO ATUAL DO SISTEMA
-    const versaoSistema = "1.3.1";
+    const versaoSistema = "1.4.0";
 
     // Preenche o texto no popup
     $("#versaoAtual").text(versaoSistema);

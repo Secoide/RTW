@@ -53,6 +53,9 @@ async function buscarColaboradores(paineldasOS) {
                 case 'vencido':
                     statusExame = "Um ou mais exames vencidos"
                     break;
+                case 'agendado':
+                    statusExame = "Exame agendado para este dia!"
+                    break;
                 case 'demissional':
                     statusExame = "Desligado"
                     break;
@@ -329,14 +332,18 @@ function load_exames_colaborador(idFunc, $box) {
                 $box.html('<div class="vazio">Nenhum exame encontrado.</div>');
                 return;
             }
-            
+
             const html = exames.map(exame => {
-                const status = String(exame.status_alerta || '').toUpperCase(); // VENCIDO | ALERTA | OK | NAO_APLICA | ''
+                const status = String(exame.status_alerta || '').toUpperCase(); // AGENDADO | VENCIDO | ALERTA | OK | NAO_APLICA | ''
                 const statusK = status ? status.toLowerCase() : 'ok';            // chave p/ classe css
 
                 const diasTxt =
                     status === 'VENCIDO' ? 'VENCIDO' :
-                        (exame.dias_restantes != null ? `Vence em ${exame.dias_restantes} dias` : '—');
+                        status === 'AGENDADO'
+                            ? `Agendado para ${formatarDataHora(exame.horario_marcado)}`
+                            : (exame.dias_restantes != null
+                                ? `Vence em ${exame.dias_restantes} dias`
+                                : '—');
 
                 return `
                 <div class="bloco_exame status-${statusK}" data-status="${status}" data-idexame="${exame.idexame}"  data-idfce="${exame.idfce}" title="${exame.descricao ?? ''}">
@@ -345,7 +352,10 @@ function load_exames_colaborador(idFunc, $box) {
                     <div class="exames_status">
                     <span class="exame_nome">${exame.nome ?? ''}</span>
                     <span class="exame_dias status-${statusK}">${diasTxt}</span>
-                    <span class="exame_data">${exame.data_realizacao ?? ''}</span>
+                    ${status === 'AGENDADO'
+                        ? ''
+                        : `<span class="exame_data">${exame.data_realizacao ?? ''}</span>`
+                    }
                     </div>
                 </div>
                 `;
@@ -357,6 +367,17 @@ function load_exames_colaborador(idFunc, $box) {
             console.error('Erro ao carregar exames dos colaboradores:', err);
             $box.html('<div class="erro">Não foi possível carregar os exames.</div>');
         });
+}
+
+function formatarDataHora(dataHora) {
+    if (!dataHora) return '—';
+    return new Date(dataHora).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).replace(',', ' às');
 }
 
 
