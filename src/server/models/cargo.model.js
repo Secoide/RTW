@@ -48,11 +48,11 @@ async function getCargosAtivosPorSetor(idCatNvl) {
   return rows;
 }
 
-async function createCargo({ nome, idsetor, nivel }) {
+async function createCargo({ nome }) {
   const [result] = await connection.query(`
     INSERT INTO tb_cargos (cargo, idsetor, nivel_acesso, ativo_colaborador)
     VALUES (?, ?, ?, ?)
-  `, [nome, idsetor, nivel, 0]);
+  `, [nome, 0, 0, 0]);
 
   return result;
 }

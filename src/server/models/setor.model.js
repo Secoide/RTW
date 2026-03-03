@@ -76,13 +76,12 @@ async function getSetorByIdCargo(idCargo) {
 // Criar novo
 async function createSetor(data) {
   const nomeSetor = data.nome;
-  const nivel_acesso = data.nivel;
   const sql = `
     INSERT INTO tb_setores (categoria, nivel_acesso)
-      VALUES (?, ?)
+      VALUES (?, '0')
   `;
   const [setorResult] = await connection.query(sql, [
-    nomeSetor, nivel_acesso
+    nomeSetor
   ]);
 
   const idSetor = setorResult.insertId;

@@ -17,9 +17,12 @@ async function buscarSetorIDCargo(idCargo) {
 
 // Criar
 async function criarSetor(data) {
+  if (!data.nome) {
+    throw new Error('Nome do setor é obrigatório');
+  }
   const result = await SetorModel.createSetor(data);
   return {
-    message: "Setor cadastrada com sucesso!",
+    message: "Setor cadastrado com sucesso!",
     id: result.insertId
   };
 }

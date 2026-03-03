@@ -6,6 +6,22 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
+
+## [1.4.1] - 2025-12-15
+## Nome: 🔨 Ajustes
+### Adicionado
+- 
+
+### Alterado
+- Adicionar novo Cargo ou Setor, nivel é grava em 0 (alterar após cadastrar);
+
+### Corrigido
+- Sistema nao deixava cadastrar cargo
+
+### Removido
+- 
+
+
 ## [1.4.0] - 2026-03-02
 ## Nome: 🧩 Integração Operacional e Conectividade do Sistema
 

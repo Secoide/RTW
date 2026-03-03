@@ -12,14 +12,12 @@ async function listarCargosCBX(idSetor) {
 }
 
 async function criarCargo(data) {
-  if (!data.nome || !data.idsetor) {
-    throw new Error('Nome do cargo e setor são obrigatórios');
+  if (!data.nome) {
+    throw new Error('Nome do cargo é obrigatório');
   }
 
   return await CargoModel.createCargo({
-    nome: data.nome,
-    idsetor: Number(data.idsetor),
-    nivel: data.nivel
+    nome: data.nome
   });
 }
 
