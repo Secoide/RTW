@@ -258,28 +258,32 @@ async function carregarAvisosExames() {
     const el = document.querySelector(".panel-rh");
 
     lista.forEach(item => {
+
+      const agendaFormatada = item.agenda.replace(/\n/g, "<br>");
+
       el.innerHTML += `
-          <div class="item-comunicado exame">
-              <div class="item-icon">🩺</div>
+        <div class="item-comunicado exame">
+            <div class="item-icon">🩺</div>
 
-              <div style="width:100%;">
-                  <div class="item-titulo">Exame Agendado</div>
-                  <div class="item-texto">${item.nome}<br><strong>${item.nomeExame}</strong><br>${item.horarioFormatado}\n</div>
+            <div style="width:100%;">
+                <div class="item-titulo">Exame Agendado</div>
+                <div class="item-texto">
+                    ${item.colaborador}<br>
+                    ${agendaFormatada}
+                </div>
 
-                  <div class="painel-acoes">
-                      <!-- Criado por -->
-                      <p style="opacity: 0.7; font-size: 9px; text-align:right; margin:0;">
-                        Sistema RH
-                      </p>
-
-                  </div>
-              </div>
-          </div>
-        `;
+                <div class="painel-acoes">
+                    <p style="opacity:0.7;font-size:9px;text-align:right;margin:0;">
+                      Sistema RH
+                    </p>
+                </div>
+            </div>
+        </div>
+      `;
     });
 
   } catch (err) {
-    console.error("Erro ao carregar comunicados:", cat.nome, err);
+    console.error("Erro ao carregar comunicados:", err);
   }
 }
 

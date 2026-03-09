@@ -28,7 +28,8 @@ function securityConfig(app) {
             "https://code.jquery.com",
             "https://cdn.sheetjs.com",
             "https://unpkg.com",               // 🔥 croppie
-            "https://cdnjs.cloudflare.com"    // 🔥 leader-line
+            "https://cdnjs.cloudflare.com",    // 🔥 leader-line
+            "https://api.open-meteo.com" // 🌧 API de clima liberada
           ],
           "style-src": [
             "'self'",
@@ -53,7 +54,8 @@ function securityConfig(app) {
             "'self'",
             "wss:",
             "https://ka-f.fontawesome.com",
-            "https://cdn.jsdelivr.net"
+            "https://cdn.jsdelivr.net",
+  "https://api.open-meteo.com"
           ],
         },
       },

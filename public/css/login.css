@@ -287,3 +287,23 @@ a:hover {
         opacity: 0;
     }
 }
+
+
+.rain-drop {
+    position: absolute;
+    width: 2px;
+    height: 18px;
+    background: rgba(200,220,255,0.7);
+    animation: rainFall linear forwards;
+}
+
+@keyframes rainFall {
+    from {
+        transform: translateY(-20px);
+        opacity: 0.7;
+    }
+    to {
+        transform: translateY(100vh);
+        opacity: 0.2;
+    }
+}

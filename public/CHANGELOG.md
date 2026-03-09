@@ -10,13 +10,15 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [1.4.1] - 2025-12-15
 ## Nome: 🔨 Ajustes
 ### Adicionado
-- 
+- Adicionado a opção de cancelar exame agendado na aba exames do colaborador;
+- Evento climático dinâmico: exibição de chuva no login em dias chuvosos conforme o clima na localização da empresa, com complemento visual de estrelas durante o período noturno (após 19h).
 
 ### Alterado
-- Adicionar novo Cargo ou Setor, nivel é grava em 0 (alterar após cadastrar);
+- Adicionar novo Cargo ou Setor, agora nivel é gravado em 0 (alterar após cadastrar);
+- Avisos de exames no mural da página inicial passaram a ser agrupados por colaborador e por data/horário, facilitando a visualização quando há múltiplos exames agendados;
 
 ### Corrigido
-- Sistema nao deixava cadastrar cargo
+- Sistema não deixava cadastrar cargo;
 
 ### Removido
 - 

@@ -12,8 +12,7 @@ async function open_form_AgendarExame(idColab, idExame) {
         $('.agendarexame', $wrap).show();
         const agora = new Date();
         agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
-        document.getElementById("datamarcadoExame").min =
-            agora.toISOString().slice(0, 16);
+        
         // espera preencher os combos
         $('#idColabAgendarExame').val(idColab);
         $('#idExameAgendarExame').val(idExame);

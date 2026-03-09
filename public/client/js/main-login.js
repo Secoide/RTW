@@ -1,14 +1,16 @@
 import { initLoginForm } from "./events/forms/handle-login-submit.js";
 import { carregarChangelog } from "./services/ui/changelog-loader.js";
 import { initChristmasIcons, initNewYearFireworks } from "./services/ui/special-icons.js";
+import { startWeatherEffects } from "./services/ui/clima-tempo-login.js";
+
 
 $(document).ready(function () {
   if ($("#formLogin").length) {
     initChristmasIcons();  // natal
     initNewYearFireworks();   // ano novo
-
+    detectarClima();
     // 🟦 DEFINA AQUI SUA VERSÃO ATUAL DO SISTEMA
-    const versaoSistema = "1.4.0";
+    const versaoSistema = "1.4.1";
 
     // Preenche o texto no popup
     $("#versaoAtual").text(versaoSistema);
@@ -35,5 +37,40 @@ $(document).ready(function () {
     initLoginForm();
   }
 
+  async function detectarClima() {
+
+    try {
+
+      const resp = await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=-29&longitude=-52&current_weather=true"
+      );
+
+      const data = await resp.json();
+
+      const code = data.current_weather.weathercode;
+
+      const hour = new Date().getHours();
+
+      if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
+
+        startWeatherEffects("rain");
+
+      } else {
+
+        if (hour >= 19) {
+          startWeatherEffects("stars");
+        }
+
+      }
+
+    } catch (err) {
+
+      console.log("Erro clima", err);
+
+      startWeatherEffects("auto");
+
+    }
+
+  }
 });
 

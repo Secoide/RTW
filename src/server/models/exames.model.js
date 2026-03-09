@@ -126,8 +126,6 @@ async function agendarExame(data) {
     SET horarioAgendando = ?, observacao = ?
     WHERE id = ? AND idfuncionario = ?
   `;
-  console.log("ID exame:", data.exame);
-console.log("ID funcionario:", data.idColab);
   const [result] = await connection.query(sql, [
     data.horarioFormatado,
     data.observacao,
@@ -165,6 +163,14 @@ async function deleteExameByColaborador(id) {
     return result.affectedRows > 0;
 }
 
+// Cancelar agendamento de exame
+async function cancelarAgendamentoExame(id) {
+    const [result] = await connection.query(`UPDATE funcionarios_contem_exames
+    SET horarioAgendando = NULL, observacao = NULL
+    WHERE id = ?`, [id]);
+    return result.affectedRows > 0;
+}
+
 //Anexar exame em colaborador
 async function inserirExame(data, vencimento, nomeArquivo, idfuncionario, idexame) {
   const [result] = await connection.query(
@@ -199,6 +205,7 @@ module.exports = {
     createExame,
     agendarExame,
     updateExame,
+    cancelarAgendamentoExame,
     deleteExame,
     getExameByColaborador,
     deleteExameByColaborador,

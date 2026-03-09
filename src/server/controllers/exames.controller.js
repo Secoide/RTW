@@ -77,6 +77,16 @@ async function deleteExameByColaborador(req, res) {
     }
 }
 
+async function cancelarAgendamentoExame(req, res) {
+    try {
+        const ok = await ExameService.cancelarAgendaExame(req.params.id);
+        if (!ok) return res.status(404).json({ erro: 'Não encontrado' });
+        res.json({ sucesso: true });
+    } catch (err) {
+        res.status(500).json({ erro: 'Erro ao cancelar agendamento de Exame' });
+    }
+}
+
 // GET /api/exame/:id
 async function getExamesByColaborador(req, res) {
   try {
@@ -166,6 +176,7 @@ module.exports = {
   getExame,
   createExame,
   agendarExame,
+  cancelarAgendamentoExame,
   updateExame,
   deleteExame,
   getExamesByColaborador,

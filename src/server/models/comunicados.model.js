@@ -25,30 +25,48 @@ async function getComunicados() {
 async function getComunicadosExamesAgendados() {
     const [rows] = await connection.query(`
         SELECT 
-    f.nome, 
-    e.nome AS nomeExame, 
-    CONCAT(
-        DATE_FORMAT(fce.horarioAgendando, '%d/%m/%Y'),
-        ' (',
-        CASE DAYNAME(fce.horarioAgendando)
-            WHEN 'Sunday' THEN 'domingo'
-            WHEN 'Monday' THEN 'segunda-feira'
-            WHEN 'Tuesday' THEN 'terça-feira'
-            WHEN 'Wednesday' THEN 'quarta-feira'
-            WHEN 'Thursday' THEN 'quinta-feira'
-            WHEN 'Friday' THEN 'sexta-feira'
-            WHEN 'Saturday' THEN 'sábado'
-        END,
-        ') às ',
-        DATE_FORMAT(fce.horarioAgendando, '%H:%i')
-    ) AS horarioFormatado
-        FROM funcionarios_contem_exames fce
-        JOIN funcionarios f ON fce.idfuncionario = f.id
-        JOIN exames e ON e.idexame = fce.idexame
-        WHERE 
-            fce.horarioAgendando IS NOT NULL
-            AND fce.horarioAgendando >= DATE_SUB(NOW(), INTERVAL 2 DAY)
-        ORDER BY fce.horarioAgendando ASC;
+    UPPER(t.nome) AS colaborador,
+    GROUP_CONCAT(
+        CONCAT(
+            DATE_FORMAT(t.horarioAgendando,'%d/%m/%Y'),
+            ' (',
+            CASE WEEKDAY(t.horarioAgendando)
+                WHEN 0 THEN 'seg'
+                WHEN 1 THEN 'ter'
+                WHEN 2 THEN 'qua'
+                WHEN 3 THEN 'qui'
+                WHEN 4 THEN 'sex'
+                WHEN 5 THEN 'sab'
+                WHEN 6 THEN 'dom'
+            END,
+            ') às ',
+            DATE_FORMAT(t.horarioAgendando,'%H:%i'),
+            '\n- ',
+            REPLACE(t.exames, ',', '\n- ')
+        )
+        ORDER BY t.horarioAgendando
+        SEPARATOR '\n\n'
+    ) AS agenda
+FROM (
+
+    SELECT 
+        f.id,
+        f.nome,
+        fce.horarioAgendando,
+        GROUP_CONCAT(e.nome ORDER BY e.nome) AS exames
+    FROM funcionarios_contem_exames fce
+    JOIN funcionarios f ON f.id = fce.idfuncionario
+    JOIN exames e ON e.idexame = fce.idexame
+    WHERE 
+        fce.horarioAgendando IS NOT NULL
+        AND fce.horarioAgendando >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+    GROUP BY 
+        f.id,
+        fce.horarioAgendando
+
+) t
+GROUP BY t.id
+ORDER BY MIN(t.horarioAgendando);
     `);
     return rows;
 }

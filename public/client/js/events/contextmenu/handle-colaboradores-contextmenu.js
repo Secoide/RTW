@@ -144,6 +144,38 @@ function removerSupervisor(osID, dataDia, $colab) {
   });
 }
 
+function cancelarAgendamentoExame(idfce) {
+  if (!idfce) {
+    console.error("❌ ID do exame não informado.");
+    return;
+  }
+
+  $.ajax({
+    url: `/api/exame/cancelar-exame/${idfce}`,
+    type: "DELETE",
+    success: function (response) {
+      Toast.fire({
+        icon: "success",
+        theme: "dark",
+        title: "Agendamento de exame cancelado."
+      });
+      preencherTabelaColaboradoresRH();
+
+      const botaoMenu = document.querySelector('.bt_menu[data-target=".painel_exames"]');
+      if (botaoMenu) {
+        botaoMenu.click();
+      }
+    },
+    error: function (err) {
+      Toast.fire({
+        icon: "error",
+        theme: "dark",
+        title: "Não foi possível cancelar o agendamento de exame."
+      });
+    }
+  });
+}
+
 function definirSupervisor(fnoID, osID, dataDia, $painelOS, $colab) {
   $.ajax({
     url: `/api/colaboradores/setar-supervisor/${fnoID}`,
@@ -319,6 +351,8 @@ export function initColaboradoresContextMenu(socket) {
     const idFuncionarioExame = $(this).data("idfce");
     const opcoesMenu = [];
 
+    const jaEAgendado = $(this).hasClass("status-agendado");
+
     const confirmarExclusaoExame = async (idFuncionarioExame, idExame) => {
       if (!idFuncionarioExame) return;
 
@@ -420,11 +454,15 @@ export function initColaboradoresContextMenu(socket) {
     }
 
     opcoesMenu.push(
-      {
-        label: "📅 Agendar Exame",
-        roles: "*", // todos podem
-        action: () => open_form_AgendarExame(idColab, idFuncionarioExame)
-      },
+      jaEAgendado
+        ? {
+          label: "✖️ Cancelar Exame",
+          roles: [6, 7, 99], action: () => cancelarAgendamentoExame(idFuncionarioExame)
+        }
+        : {
+          label: "🗓️ Agendar Exame",
+          roles: [6, 7, 99], action: () => open_form_AgendarExame(idColab, idFuncionarioExame)
+        },
       {
         label: "🧾 Visualizar Exame",
         roles: "*", // todos podem
@@ -548,7 +586,7 @@ export function initColaboradoresContextMenu(socket) {
     const idColab = $("#idColaboradorPro").val();
     const idEmpresa = $(this).data("idempresa");
     const idFuncionarioIntegracao = $(this).data("idfci");
-    
+
     const opcoesMenu = [
       {
         label: "🔄 Atualizar Integração",

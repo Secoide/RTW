@@ -71,6 +71,11 @@ async function deletarExameByColaborador(id) {
   return await ExameModel.deleteExameByColaborador(id);
 }
 
+async function cancelarAgendaExame(id) {
+  return await ExameModel.cancelarAgendamentoExame(id);
+}
+
+
 // Buscar um
 async function buscarExamesByColaborador(idFunc) {
   return await ExameModel.getExameByColaborador(idFunc);
@@ -130,6 +135,7 @@ module.exports = {
   buscarExameIDEmpresa,
   criarExame,
   agendaExame,
+  cancelarAgendaExame,
   atualizarExame,
   deletarExame,
   buscarExamesByColaborador,
