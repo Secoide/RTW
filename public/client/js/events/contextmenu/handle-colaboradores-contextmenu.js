@@ -457,11 +457,11 @@ export function initColaboradoresContextMenu(socket) {
       jaEAgendado
         ? {
           label: "✖️ Cancelar Exame",
-          roles: [6, 7, 99], action: () => cancelarAgendamentoExame(idFuncionarioExame)
+          roles: [4, 7, 99], action: () => cancelarAgendamentoExame(idFuncionarioExame)
         }
         : {
           label: "🗓️ Agendar Exame",
-          roles: [6, 7, 99], action: () => open_form_AgendarExame(idColab, idFuncionarioExame)
+          roles: [4, 7, 99], action: () => open_form_AgendarExame(idColab, idFuncionarioExame)
         },
       {
         label: "🧾 Visualizar Exame",

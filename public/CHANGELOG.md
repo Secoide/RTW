@@ -5,9 +5,22 @@ Todos os formatos de mudanças importantes neste projeto serão documentados nes
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.2] - 2025-12-15
+## Nome: 🔨 Ajustes
+### Adicionado
+- 
+
+### Alterado
+- 
+
+### Corrigido
+- 
+
+### Removido
+- 
 
 
-## [1.4.1] - 2025-12-15
+## [1.4.1] - 2026-03-10
 ## Nome: 🔨 Ajustes
 ### Adicionado
 - Adicionado a opção de cancelar exame agendado na aba exames do colaborador;
@@ -19,9 +32,6 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Corrigido
 - Sistema não deixava cadastrar cargo;
-
-### Removido
-- 
 
 
 ## [1.4.0] - 2026-03-02
