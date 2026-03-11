@@ -2,13 +2,15 @@ import { initLoginForm } from "./events/forms/handle-login-submit.js";
 import { carregarChangelog } from "./services/ui/changelog-loader.js";
 import { initChristmasIcons, initNewYearFireworks } from "./services/ui/special-icons.js";
 import { startWeatherEffects } from "./services/ui/clima-tempo-login.js";
-
+import { startMotivationalPhrases } from "./services/ui/motivational-phrases.js";
 
 $(document).ready(function () {
   if ($("#formLogin").length) {
     initChristmasIcons();  // natal
     initNewYearFireworks();   // ano novo
     detectarClima();
+    startMotivationalPhrases();
+
     // 🟦 DEFINA AQUI SUA VERSÃO ATUAL DO SISTEMA
     const versaoSistema = "1.4.1";
 
@@ -51,7 +53,7 @@ $(document).ready(function () {
 
       const hour = new Date().getHours();
 
-      if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
+      if ([63, 65, 81, 82, 95].includes(code)) {
 
         startWeatherEffects("rain");
 

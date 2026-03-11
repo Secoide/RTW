@@ -8,10 +8,10 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [1.4.2] - 2025-12-15
 ## Nome: 🔨 Ajustes
 ### Adicionado
-- 
+- Nova animação aonde mostra frases motivacionais na tela de login;
 
 ### Alterado
-- 
+- Melhores efeitos na tela de login para chuva e a noite estrelada;
 
 ### Corrigido
 - 

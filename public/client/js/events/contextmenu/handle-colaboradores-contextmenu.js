@@ -751,6 +751,7 @@ export function initColaboradoresContextMenu(socket) {
         "SEPARADOR",
         {
           label: `✍🏻 Solicitar Assinatura`,
+          roles: [4,6, 7, 99],
           action: async () => {
 
             if (!idFuncionarioEPI) {
@@ -806,6 +807,7 @@ export function initColaboradoresContextMenu(socket) {
         ,
         {
           label: `🧾 Visualizar Registros`,
+          roles: [4,6, 7, 99],
           action: async () => {
             if (!idFuncionarioEPI) return;
             try {
@@ -836,6 +838,7 @@ export function initColaboradoresContextMenu(socket) {
         "SEPARADOR",
         {
           label: `❌ Apagar ${epi}`,
+          roles: [4, 6, 7, 99],
           action: async () => {
             if (!idFuncionarioEPI) return;
 
