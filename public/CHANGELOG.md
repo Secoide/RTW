@@ -14,7 +14,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Melhores efeitos na tela de login para chuva e a noite estrelada;
 
 ### Corrigido
-- 
+- Não aparecia opção de registrar assinatura de EPI;
 
 ### Removido
 - 

@@ -302,7 +302,7 @@ export function startMotivationalPhrases() {
             return frasesSexta[Math.floor(Math.random() * frasesSexta.length)];
         }
 
-        if (r < 0.1) {
+        if (r < 0.02) {
             return frasesEasterEgg[Math.floor(Math.random() * frasesEasterEgg.length)];
         }
 
@@ -394,13 +394,13 @@ export function startMotivationalPhrases() {
 
         criarFrase();
 
-        const delay = 10000 + Math.random() * 4000; // entre 5 e 9s
+        const delay = 11000 + Math.random() * 4000; // entre 5 e 9s
 
         setTimeout(iniciarFrases, delay);
 
     }
 
-    setTimeout(iniciarFrases, 2000);
+    setTimeout(iniciarFrases, 3000);
 
 }
 
