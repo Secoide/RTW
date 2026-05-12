@@ -36,10 +36,14 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Menu do usuario agora fica escondido, até clicar em sua foto;
 
 ### Corrigido
+<<<<<<< HEAD
 - Problema que impedia a exibição da opção de registrar assinatura de EPI;
 - Corrigido erro que ocultava o botão de adicionar foto do usuário;
 - Falha na geração dos gráficos de estatísticas de funcionários por empresa;
 - Corrigido erro no “Modo Foco” que fazia o filtro afetar outros dias/painéis ao invés de atuar somente no dia selecionado.
+=======
+- Não aparecia opção de registrar assinatura de EPI;
+>>>>>>> 8a69d6edba692296e2638daa032332c9e857ce8c
 
 ### Removido
 - 
