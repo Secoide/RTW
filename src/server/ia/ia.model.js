@@ -464,7 +464,8 @@ async function buscarDadosOperacionais(
                 o.id_OSs,
 
                 o.descricao,
-
+                    
+                fno.data AS data_ordenacao,
                 DATE_FORMAT(
                     fno.data,
                     '%d/%m/%Y'
@@ -563,7 +564,7 @@ async function buscarHistoricoColaborador(
                 o.descricao,
 
                 e.nome AS empresa,
-
+                fno.data AS data_ordenacao,
                 DATE_FORMAT(
                     fno.data,
                     '%d/%m/%Y'
