@@ -80,6 +80,40 @@ async function updateStatusOS(req, res) {
   }
 }
 
+async function salvarAnotacoesOS(req, res) {
+
+  try {
+
+    const {
+      datadia,
+      anotacoes,
+      icone
+    } = req.body;
+
+    await OSService.salvarAnotacoesOS(
+      datadia,
+      anotacoes,
+      icone
+    );
+
+    res.json({
+      sucesso: true
+    });
+
+  } catch (err) {
+
+    console.error(
+      "Erro salvarAnotacoesOS:",
+      err
+    );
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao salvar anotações"
+    });
+  }
+}
+
 async function getStatusOS(req, res) {
   try {
     const { dataDia } = req.params;
@@ -91,6 +125,21 @@ async function getStatusOS(req, res) {
     res.status(500).send("Erro ao buscar OS");
   }
 }
+
+
+
+async function getAnotacoesOS(req, res) {
+  try {
+    const { dataDia } = req.params;
+    const ordemServico = await OSService.buscarAnotacoesOS(dataDia);
+
+    res.json(ordemServico); // 🔥 devolve array (ou vazio)
+  } catch (err) {
+    console.error("Erro em getStatusOS:", err);
+    res.status(500).send("Erro ao buscar OS");
+  }
+}
+
 
 
 async function deleteOS(req, res) {
@@ -111,5 +160,7 @@ module.exports = {
   updateOS,
   deleteOS,
   updateStatusOS,
-  getStatusOS
+  salvarAnotacoesOS,
+  getStatusOS,
+  getAnotacoesOS
 };

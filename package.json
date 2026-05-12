@@ -12,9 +12,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.81.1",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
+    "chrono-node": "^2.9.1",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

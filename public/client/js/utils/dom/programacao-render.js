@@ -27,7 +27,7 @@ export function renderColaboradoresDisponiveis(colaboradores, container = ".p_co
     let horario = colab.horario_agendado; // exemplo: "2026-03-02 14:30:00"
     let somenteHora;
     if (horario) {
-        somenteHora = horario.substring(11, 16);
+      somenteHora = horario.substring(11, 16);
     }
 
     let statusExame = "";
@@ -103,7 +103,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
 
     // Cabeçalho da OS
     let html = `
-      <div class="painel_OS glass">
+      <div class="painel_OS">
         <div class="p_infoOS" data-os="${idOS}" data-cidade="${cidade}">
           <i title="${status_OS}" class="status_daOSnaOS ${statusClass} fa-solid fa-tag"></i>
           <p class="lbl_OS">${idOS}</p>
@@ -182,7 +182,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
 
   // 🔹 Botão de reativar OS
   const htmlReativarOS = `
-    <div class="painel_OS glass os_semColab">
+    <div class="painel_OS os_semColab">
       <div class="p_infoOS" style="height:25px; text-align:center;"> 
         <p class="lbl_mostrarOS" title="Reativar/Mostrar OS" 
            style="width:100%; font-size:12px; cursor:pointer;">
@@ -248,7 +248,7 @@ export function renderColoboradorEmOS() {
   });
 }
 
-export function atualizarStatusDia(painelDia) {
+export async function atualizarStatusDia(painelDia) {
   const $painelDia = $(painelDia);
   const diaPainel = $painelDia.attr('data-dia');
 
@@ -262,7 +262,7 @@ export function atualizarStatusDia(painelDia) {
     const [ano, mes, dia] = diaPainel.split('-');
     const diaBanco = new Date(ano, mes - 1, dia); // agora respeita o horário local
     diaBanco.setHours(0, 0, 0, 0); // garante mesma base de comparação
-    addDiv.empty();
+    //addDiv.empty();
     if (diaBanco < hoje) {
       htmlStatus = `
             <div class="iconeStatusDia" title="Programação bloqueada.">
@@ -299,4 +299,44 @@ export function atualizarStatusDia(painelDia) {
   });
 }
 
+export function atualizarIconeAnotacoes(painelDia) {
+  const $painelDia = $(painelDia);
+  const diaPainel = $painelDia.attr('data-dia');
+
+  $.get(`/api/os/anotacoes/${diaPainel}`, function (dados) {
+    
+    const container = $painelDia.find('.painelInfoDia .painel_iconeDia');
+
+    // remove apenas o ícone de anotação
+    container.find('.iconeAnotacaoDia').remove();
+    
+    const qtd = dados.quantidade || 0;
+    const anotacoes = dados.anotacoes || [];
+
+    let htmlAnotacao = '';
+    if (qtd > 0) {
+
+      // tooltip com quebra de linha
+      const tooltip = anotacoes.join('\n');
+
+      htmlAnotacao = `
+        <div class="iconeAnotacaoDia">
+          <i class="fa-solid fa-note-sticky"></i>
+          <span class="badgeAnotacao">${qtd}</span>
+          <div class="preview-anotacoes"></div>
+        </div>`;
+    } else {
+      htmlAnotacao = `
+        <div class="iconeAnotacaoDia">
+          <i class="fa-regular fa-note-sticky"></i>
+          <div class="preview-anotacoes"></div>
+        </div>`;
+    }
+
+    container.append(htmlAnotacao);
+
+  }).fail(function () {
+    console.error('Erro ao buscar anotações do dia:', diaPainel);
+  });
+}
 

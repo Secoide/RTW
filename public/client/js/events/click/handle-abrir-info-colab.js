@@ -118,7 +118,7 @@ export async function get_carregarPerfilUsuario(funcId) {
         $('.painel_perfil').show();
 
         
-        $('#btn_upload').addClass('hidden-inicial');
+        $('#btn_upload').removeClass('hidden-inicial');
         $('#bt_cadColaborador').addClass('hidden-inicial');
         $('#bt_editColab').removeClass('hidden-inicial');;
         $('.bt_menu[data-target=".painel_atestar"]').show();

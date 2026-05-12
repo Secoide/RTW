@@ -70,3 +70,7 @@ initSockets(wss);
 server.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Servidor rodando em http://localhost:${port}`);
 });
+
+
+
+//nodemon server.js

@@ -87,15 +87,13 @@ function initColaboradoresSocket(wss) {
 // ======================================================
 async function handleAlocarColaborador(wss, ws, { osID, dataDia, nomes }) {
   try {
-    // 1️⃣ Salva colaboradores na OS
     const confirmacoes = await ColaboradoresService.alocarColaboradores(osID, dataDia, nomes);
 
-    // 2️⃣ Notifica todos os outros clientes conectados
+    // broadcast básico
     broadcast(wss, ws, { acao: "alocar_colaborador", osID, dataDia, nomes });
 
-    // 3️⃣ Para cada colaborador salvo, busca o status de integração com base na data da OS
-    for (const { osID, idNaOS, idfuncionario, id } of confirmacoes) {
-      const idColab = idfuncionario || id; // aceita ambos os nomes
+    for (const { idNaOS, idfuncionario, id } of confirmacoes) {
+      const idColab = idfuncionario || id;
       if (!idNaOS || !idColab) continue;
 
       const status_integracao = await ColaboradoresService.buscarStatusIntegracao(
@@ -104,16 +102,18 @@ async function handleAlocarColaborador(wss, ws, { osID, dataDia, nomes }) {
         dataDia
       );
 
+      
       const payload = {
         acao: "confirmar_alocacao",
         osID,
         idfuncionario: idColab,
         idNaOS,
         status_integracao: status_integracao || "",
+        dataDia // 🔥 ESSENCIAL
       };
 
-      // 🔄 Envia para todos, inclusive o remetente
-      wss.clients.forEach((cliente) => {
+      // envia para todos (inclusive quem enviou)
+      wss.clients.forEach(cliente => {
         if (cliente.readyState === WebSocket.OPEN) {
           cliente.send(JSON.stringify(payload));
         }

@@ -8,7 +8,7 @@ let lastCols = [];
 
 export function initGestao() {
     // ========================== CONFIG ==========================
-    const ENTIDADES = ["EPI", "Exame", "Curso", "Empresa", "Supervisor", "Cidade", "OS", "Cargos", "Setor"];
+    const ENTIDADES = ["EPI", "Exame", "Curso", "Empresa", "Supervisor", "Cidade", "OS", "Cargos", "Setor", "Fornecedor"];
     const BASE_URL = "/api"; // 🔧 troque pelo endpoint real se necessário
 
     // ========================== ESTADO ==========================
@@ -306,6 +306,20 @@ export function initGestao() {
                     nome: e.nome ?? "",
                     cargos: normList(e.cargos, e.cargo),
                     nivel: e.nivel_acesso
+                }));
+            } else if (entidadeAtual === "Fornecedor") {
+                const data = await $.ajax({
+                    url: `${BASE_URL}/fornecedor`,
+                    method: "GET",
+                    xhrFields: { withCredentials: true }
+                });
+
+                dados = (Array.isArray(data) ? data : []).map(e => ({
+                    id: e.id ?? null,
+                    nome: e.nome ?? "",
+                    email: e.email ?? null,
+                    telefone: e.telefone ?? null,
+                    icms: e.icms ?? null,
                 }));
             }
             else {

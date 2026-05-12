@@ -1,7 +1,8 @@
 // src/server/app.js
+
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
-
 const sessionMiddleware = require("./config/session");
 const securityConfig = require("./config/security");
 
@@ -41,6 +42,7 @@ app.use("/api/empresa", empresasRoutes);
 const supervisoresRoutes = require("./routes/supervisor.routes");
 app.use("/api/supervisor", supervisoresRoutes);
 
+
 const cidadesRoutes = require("./routes/cidade.routes");
 app.use("/api/cidade", cidadesRoutes);
 
@@ -54,6 +56,11 @@ app.use('/api/ferias', require('./routes/ferias.routes'));
 app.use('/api/cargo', require('./routes/cargo.routes'));
 app.use('/api/setor', require('./routes/setor.routes'));
 
+app.use('/api/materiais', require('./routes/material.routes'));
+
+app.use("/api/fornecedor", require('./routes/fornecedor.routes'));
+
+app.use("/api/ia", require("./ia/ia.routes"));
 
 const rhRoutes = require("./routes/rh.routes");
 app.use("/api/rh", rhRoutes);

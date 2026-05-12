@@ -46,6 +46,38 @@ async function getOrdemServicoById(id) {
   return rows[0] || null;
 }
 
+// ============================================================
+// BUSCAR OS POR DATA
+// ============================================================
+
+async function getOSByDate(dataDia) {
+
+  const [rows] = await connection.query(`
+    
+    SELECT 
+      o.id_OSs,
+      o.descricao,
+      e.nome AS nomeEmpresa,
+      s.nome AS nomeSupervisor
+
+    FROM tb_obras o
+
+    LEFT JOIN tb_empresa e
+      ON e.id_empresas = o.id_empresa
+
+    LEFT JOIN tb_supervisorcliente s
+      ON s.id_supervisores = o.id_supervisor
+
+    WHERE DATE(o.datacriada) = ?
+
+    ORDER BY o.id_OSs DESC
+
+  `, [dataDia]);
+
+  return rows;
+
+}
+
 
 async function atualizarOS({ idos, descricao, dataconclusao, cliente, cidade, supervisor, responsavel, orcado }) {
   const sql = `
@@ -187,18 +219,93 @@ async function getStatusOS(dataDia) {
       WHERE DATE(datadia) = ?;`,
     [dataDia]
   );
-  return rows; // 🔥 sempre array
+  return rows;
+}
+
+async function salvarAnotacoesOS(datadia, anotacoes, icone) {
+
+  await connection.query(`
+      INSERT INTO tb_programacaostatus
+        (datadia, anotacoes, icone)
+
+      VALUES (?, ?, ?)
+
+      ON DUPLICATE KEY UPDATE
+
+        anotacoes = VALUES(anotacoes),
+        icone = VALUES(icone)
+
+  `, [
+    datadia,
+    anotacoes,
+    icone
+  ]);
+
+  return true;
+}
+
+
+async function getAnotacoesOS(dataDia) {
+
+  const [rows] = await connection.query(
+    `SELECT anotacoes, icone
+       FROM tb_programacaostatus
+      WHERE DATE(datadia) = ?;`,
+    [dataDia]
+  );
+
+  const lista = [];
+  const icones = [];
+
+  rows.forEach(row => {
+
+    if (!row.anotacoes) return;
+
+    // 🔹 anotações
+    const itens = row.anotacoes
+      .replace(/[{}]/g, '')
+      .split(';')
+      .map(t => t.replace(/"/g, '').trim())
+      .filter(Boolean);
+
+    // 🔹 ícones
+    const listaIcones = (row.icone || '')
+      .replace(/[{}]/g, '')
+      .split(';')
+      .map(i => i.replace(/"/g, '').trim());
+
+    itens.forEach((texto, index) => {
+
+      lista.push(texto);
+
+      icones.push(
+        listaIcones[index] || '📝'
+      );
+
+    });
+
+  });
+
+  return {
+    quantidade: lista.length,
+    anotacoes: lista,
+    icones
+  };
+
 }
 
 
 module.exports = {
   getOrdemServico,
   getOrdemServicoById,
+  getOSByDate,
   atualizarOS,
   updateOS,
   deleteOS,
   verificarOSExistente,
   inserirOS,
   updateStatusOS,
-  getStatusOS
+  getStatusOS,
+  getAnotacoesOS,
+  salvarAnotacoesOS
 };

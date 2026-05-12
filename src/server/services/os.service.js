@@ -10,6 +10,13 @@ async function buscarOrdemServico(id) {
   return await OSModel.getOrdemServicoById(id);
 }
 
+async function buscarOSPorData(dataDia) {
+
+  return await OSModel
+    .getOSByDate(dataDia);
+
+}
+
 async function salvarOS(dados) {
   if (dados.acao === "editOS") {
     await OSModel.atualizarOS(dados);
@@ -64,9 +71,21 @@ async function atualizarStatusOS(id, data) {
   return { id, ...data };
 }
 
+async function salvarAnotacoesOS(datadia,anotacoes,icone) {
+
+  return await OSModel.salvarAnotacoesOS(
+    datadia,
+    anotacoes,
+    icone
+  );
+}
 
 async function buscarStatusOS(dataDia) {
   return await OSModel.getStatusOS(dataDia);
+}
+
+async function buscarAnotacoesOS(dataDia) {
+  return await OSModel.getAnotacoesOS(dataDia);
 }
 
 // Deletar
@@ -78,9 +97,12 @@ async function deletarOS(id) {
 module.exports = {
   listarOrdemServico,
   buscarOrdemServico,
+  buscarOSPorData,
   salvarOS,
   atualizarOS,
   atualizarStatusOS,
+  salvarAnotacoesOS,
   buscarStatusOS,
+  buscarAnotacoesOS,
   deletarOS
 };

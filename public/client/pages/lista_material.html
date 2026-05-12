@@ -1,0 +1,116 @@
+<main id="listaMaterial">
+
+    <!-- 🔹 Seleção da OS -->
+
+    <!-- 🔹 Seleção da OS -->
+    <div class="toolbar-topo">
+
+        <!-- 🔹 ESQUERDA -->
+        <div class="left">
+            <select id="cbxOS" class="cbx_teste glass" style="width: auto;">
+                <option value="">Selecione uma OS</option>
+            </select>
+
+            <button id="btnNovoMaterial" class="bt_padrao bt_cad">+ Novo Material</button>
+            <button id="btnCadastrarMaterial" class="bt_padrao bt_cad">
+                + Cadastrar Material
+            </button>
+            <button id="btnReloadMaterial" class="bt_padrao bt_atualizar">Atualizar</button>
+            <button id="btnExportarLista" class="bt_padrao bt_atualizar">Exportar</button>
+        </div>
+
+        <!-- 🔹 DIREITA -->
+        <div class="right-painel">
+
+            <!-- 💰 FINANCEIRO -->
+            <div class="painel-financeiro">
+                <div class="card total">
+                    <span>Custo Total</span>
+                    <strong id="totalCusto">R$ 0,00</strong>
+                </div>
+
+                <div class="card comprado">
+                    <span>Comprado</span>
+                    <strong id="totalComprado">R$ 0,00</strong>
+                </div>
+
+                <div class="card estimado">
+                    <span>Estimado</span>
+                    <strong id="totalEstimado">R$ 0,00</strong>
+                </div>
+
+                <div class="card economia">
+                    <span>Economia</span>
+                    <strong id="economia">R$ 0,00</strong>
+                </div>
+
+                <div class="card progresso">
+                    <strong id="percentComprado">0%</strong>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 🔎 BUSCA (fica abaixo do topo) -->
+    <div class="toolbar-busca">
+        <input type="search" id="searchMaterial" placeholder="Buscar material...">
+        <!-- 📦 QUANTITATIVO -->
+        <div class="painel-quantitativo">
+            <span>Itens: <b id="totalItens">0</b></span>
+            <span>Qtd: <b id="qtdTotal">0</b></span>
+            <span>Fornecedores: <b id="totalFornecedores">0</b></span>
+            <span class="ok">Comprado: <b id="qtdComprada">0</b></span>
+            <span class="info">Separado: <b id="qtdSeparada">0</b></span>
+            <span class="danger">Faltante: <b id="qtdFaltante">0</b></span>
+        </div>
+        <div class="bt_submenu">
+            <label style="font-size: 11px; width: 150px;">
+                <input type="checkbox" id="chkMostrarImagemMaterial">
+                Mostrar imagens
+            </label>
+        </div>
+    </div>
+
+    <!-- 🔹 Tabela -->
+    <div class="table-container table-padrao">
+
+        <table id="tableMaterial">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Material</th>
+                    <th>Categoria</th>
+                    <th>Qtde</th>
+                    <th>Código</th>
+                    <th>Fabricante</th>
+                    <th>Separação</th>
+                    <th>Fornecedor</th>
+                    <th>Preço</th>
+                    <th>Total R$</th>
+                    <th class="col-acoes">Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div id="emptyMaterial" style="display:none;">
+            Nenhum material encontrado.
+        </div>
+    </div>
+
+    <div class="barra-progresso-material">
+        <div class="progresso separado"><span>0%</span></div>
+        <div class="progresso comprado"><span>0%</span></div>
+        <div class="progresso faltante"><span>0%</span></div>
+    </div>
+    <div class="filtros-status">
+        <button data-status="">Todos</button>
+        <button data-status="faltante">Faltante</button>
+        <button data-status="parcial">Parcial</button>
+        <button data-status="separado">Separado</button>
+        <button data-status="comprado">Comprado</button>
+    </div>
+
+</main>

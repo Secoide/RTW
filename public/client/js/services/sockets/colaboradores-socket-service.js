@@ -164,55 +164,56 @@ export function handleRemoverColaborador({ osID, id, dataDia }) {
   }
 }
 
-export function handleConfirmarAlocacao({ osID, idfuncionario, nome, idNaOS, status_integracao }) {
-  const $painel = $(".painel_OS").filter(function () {
+export function handleConfirmarAlocacao({
+  osID,
+  idfuncionario,
+  nome,
+  idNaOS,
+  status_integracao,
+  dataDia
+}) {
+
+  const $painelDia = $(".painelDia").filter(function () {
+    return $(this).attr("data-dia") === dataDia;
+  });
+
+  if ($painelDia.length === 0) return;
+
+  const $painel = $painelDia.find(".painel_OS").filter(function () {
     return $(this).find(".lbl_OS").text().trim() == osID;
   });
 
-  if ($painel.length === 0) {
-    console.warn(`⚠️ Painel da OS ${osID} não encontrado no DOM.`);
-    return;
+  if ($painel.length === 0) return;
+
+  let $colab = $painel.find(`.colaborador[data-id="${idfuncionario}"]`);
+
+  // 🔥 renderiza SOMENTE aqui (confirmado no banco)
+  if ($colab.length === 0) {
+    adicionarColaboradorNaOS(idfuncionario, nome, $painel);
   }
 
-  let $colab = null;
+  // 🔥 remove loading apenas do dia correto
+  $painelDia
+    .find(`.colaborador[data-id="${idfuncionario}"][data-loading="true"]`)
+    .removeClass("salvando")
+    .removeAttr("data-loading");
 
-  if (idfuncionario) {
-    $colab = $painel.find(`.colaborador[data-id="${idfuncionario}"]`);
-  }
-
-  if (!$colab || $colab.length === 0) {
-    $colab = $painel.find(".colaborador").filter(function () {
-      return $(this).find(".nome").text().trim() === nome;
-    });
-  }
-
-  if ($colab && $colab.length > 0) {
+  // 🔧 aplica idNaOS
+  $colab = $painel.find(`.colaborador[data-id="${idfuncionario}"]`);
+  if ($colab.length) {
     $colab.attr("data-idnaos", idNaOS);
 
-    // Limpa classes antigas
+    // limpar classes antigas
     $colab.removeClass(
       "status-integracao-integrado status-integracao-pendente status-integracao-vencido status-integracao-atenção"
     );
 
-    // Aplica nova classe
     if (status_integracao) {
       const classe = `status-integracao-${status_integracao.toLowerCase()}`;
       $colab.addClass(classe);
     }
-  } else {
-    if ($colab.length === 0) {
-      // aguarda o evento de renderização
-      $(document).one("colaboradorRenderizado", (e, { id, osID: osRenderizado }) => {
-        if (id == idfuncionario && osRenderizado == osID) {
-          handleConfirmarAlocacao({ osID, idfuncionario, nome, idNaOS, status_integracao });
-        }
-      });
-      return;
-    }
-    console.warn(`⚠️ Colaborador não encontrado na OS ${osID}:`, nome || idfuncionario);
   }
 }
-
 
 
 

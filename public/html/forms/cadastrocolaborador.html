@@ -945,18 +945,7 @@
     </div>
 </div>
 </div>
-<div id="crop-modal" hidden>
-    <div class="crop-panel">
-        <div id="crop-area"></div>
-        <div class="crop-ctrls">
-            <button type="button" id="rotLeft" class="bt_teste glass">⟲</button>
-            <button type="button" id="rotRight" class="bt_teste glass">⟳</button>
-            <button type="button" id="btn_cancel_crop" class="bt_teste glass">Cancelar</button>
-            <!-- NOVO: botão para salvar -->
-            <button type="button" id="btn_save_crop" class="bt_teste glass">Salvar</button>
-        </div>
-    </div>
-</div>
+
 
 </div>
 
@@ -1251,106 +1240,37 @@
 
         $('.bt_menu').removeClass('ativo');
         $(this).addClass('ativo');
-
+         const idFunc = $('#idColaborador').val();
         // Se o painel for exames, chama a função
         if (target === '.painel_exames') {
-            const idFunc = $('#idColaborador').val();
             load_exames_colaborador(idFunc, $('#carregarExamesAqui'));
         }
 
         // Se o painel for epi, chama a função
         if (target === '.painel_vestimentas') {
-            const idFunc = $('#idColaborador').val();
             load_epis_colaborador(idFunc, $('#carregarEPIAqui'));
         }
         // Se o painel for cursos, chama a função
         if (target === '.painel_cursos') {
-            const idFunc = $('#idColaborador').val();
             load_cursos_colaborador(idFunc, $('#carregarCursosAqui'));
         }
         // Se o painel for integracoes, chama a função
         if (target === '.painel_integra') {
-            const idFunc = $('#idColaborador').val();
             load_integracoes_colaborador(idFunc, $('#carregarIntegracoesAqui'));
 
         }
+         if (target === '.painel_estatistica') {
+            load_estatisticas_func_empresa(idFunc, $('#areaGraficoHist'));
+
+        }
         if (target === '.painel_senha') {
-            const id = $('#idColaborador').val(); // ID que já existe nos outros painéis
-            $('#idColab').val(id);
+            $('#idColab').val(idFunc);
         }
         // Oculta todos os painéis
         $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
 
         // Mostra o painel clicado
         $(target).fadeIn(200);
-    });
-
-    $(document).ready(function () {
-        let grafico;
-        const idFuncionario = $('.painel_todos').find('#id').val();
-        if (idFuncionario == '') { return false };
-        // Primeiro cria o canvas no DOM
-        $('#areaGraficoHist').html('<canvas id="graficoHistClientes"></canvas>');
-
-        // Só depois pega o contexto
-        const ctx = document.getElementById('graficoHistClientes').getContext('2d');
-
-        // Faz a requisição AJAX
-        $.getJSON(`/api/colaboradores/historico-empresas/${idFuncionario}`, function (resposta) {
-            const clientes = resposta.map(r => r.cliente);
-            const quantidades = resposta.map(r => r.quantidade);
-            const total = quantidades.reduce((soma, q) => soma + q, 0);
-
-            if (window.graficoHistClientes instanceof Chart) {
-                window.graficoHistClientes.destroy();
-            }
-
-            window.graficoHistClientes = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: clientes,
-                    datasets: [{
-                        label: 'Participações',
-                        data: quantidades,
-                        backgroundColor: 'rgba(75, 192, 75, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false, // ← ESSENCIAL para permitir crescer em altura
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    const valor = context.parsed.x;
-                                    const perc = ((valor / total) * 100).toFixed(1);
-                                    return `${valor} participações (${perc}%)`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            title: {
-                                display: false,
-                                text: 'Quantidade'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: false,
-                                text: 'Clientes'
-                            }
-                        }
-                    }
-                }
-            });
-        });
     });
 
 

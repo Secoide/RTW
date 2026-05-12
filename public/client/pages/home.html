@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/rh.css">
     <link rel="stylesheet" href="css/forms/anexoExames.css">
     <link rel="stylesheet" href="css/cadastrosList.css">
+    <link rel="stylesheet" href="css/material.css">
     <link rel="stylesheet" href="css/ferias.css">
     <link rel="stylesheet" href="css/inicio.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -77,8 +78,94 @@
             <div id="online-list"></div>
         </div>
 
-    </div>
 
+    </div>
+    <div id="ia-widget" data-roles="99" >
+
+        <div id="ia-button">
+            🧠 Central IA
+        </div>
+
+        <div id="ia-chat">
+
+            <div id="ia-messages">
+
+                <div id="ia-help-badge">
+                    🤖 IA Operacional RTW • Clique para ver exemplos e funções disponíveis
+                </div>
+
+                <div id="is-msg-bot-inicio" class="ia-msg ia-bot ia-hidden">
+
+                    <strong>Olá, eu sou a IA Operacional da RTW Engenharia 👋</strong><br><br>
+
+                    Posso consultar, analisar e interpretar informações operacionais em tempo real do sistema.<br><br>
+
+                    <strong>📋 Consultas Operacionais</strong><br>
+
+                    🔹 Colaboradores disponíveis<br>
+                    🔹 Equipes alocadas em OS<br>
+                    🔹 Programações diárias<br>
+                    🔹 Colaboradores escalados<br>
+                    🔹 Serviços programados<br>
+                    🔹 Informações de Ordens de Serviço<br>
+                    🔹 Colaboradores por data<br>
+                    🔹 Colaboradores por empresa<br>
+                    🔹 Histórico operacional<br>
+                    🔹 Histórico de colaboradores<br>
+                    🔹 Localização atual de colaboradores<br>
+                    🔹 Quantidade de dias trabalhados<br>
+                    🔹 Ranking de produtividade<br>
+                    🔹 Ranking por empresa<br>
+                    🔹 Ranking por período<br>
+                    🔹 Ranking por dia da semana<br>
+                    🔹 Aniversariantes<br>
+                    🔹 Versões e atualizações do sistema<br><br>
+
+                    <strong>💡 Exemplos de perguntas</strong><br><br>
+
+                    • Quem trabalhou hoje?<br>
+                    • Quem vai trabalhar amanhã?<br>
+                    • Quais colaboradores estão disponíveis hoje?<br>
+                    • Quem está na OS 1582?<br>
+                    • Quais os serviços programados para amanhã?<br>
+                    • Quais foram as OS do dia 08/07/2025?<br>
+                    • Onde o Regis Paiva está trabalhando?<br>
+                    • Em quais OS o Regis já trabalhou?<br>
+                    • Quantas vezes Marcos trabalhou na PMB?<br>
+                    • Quem mais trabalhou esse mês?<br>
+                    • Quem mais trabalhou em 2025?<br>
+                    • Quem mais trabalhou no domingo?<br>
+                    • Ranking da PMB<br>
+                    • Quem executou serviços em janeiro?<br>
+                    • Qual colaborador possui mais dias trabalhados?<br>
+                    • Aniversariantes de Julho?<br>
+                    • Qual a versão do sistema?<br><br>
+
+                    <strong>🧠 Recursos Inteligentes</strong><br>
+
+                    ⚡ Interpretação automática de datas<br>
+                    ⚡ Entendimento de períodos<br>
+                    ⚡ Filtros inteligentes<br>
+                    ⚡ Reconhecimento de empresas<br>
+                    ⚡ Análise operacional automática<br>
+                    ⚡ Ranking inteligente por atuação<br><br>
+
+                    <strong>⚙️ Versão:</strong> v0.1 Beta<br>
+
+                    Novas funções inteligentes serão adicionadas futuramente. ❤️
+
+                </div>
+
+            </div>
+
+            <div id="ia-input-area">
+                <input type="text" id="ia-input" placeholder="Digite sua pergunta...">
+                <button id="ia-send">Enviar</button>
+            </div>
+
+        </div>
+
+    </div>
     <!-- Containers para formulários carregados dinamicamente -->
     <div id="form_cadColab"></div>
     <div id="form_cadOS"></div>
@@ -91,7 +178,162 @@
     <div id="form_cadSupervisor"></div>
     <div id="form_cadCidade"></div>
 
+    <!-- 🔥 MODAL CADASTRO MATERIAL -->
+    <div id="modalMaterial" class="modal hidden">
+        <div class="modal-content">
 
+            <h2>Cadastro de Material</h2>
+
+            <!-- 🔹 MATERIAL -->
+            <div class="form-group">
+                <label>Material</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="nomeMaterial" placeholder="Ex: Abraçadeira">
+                    <div id="autocompleteMaterial" class="autocomplete-box"></div>
+                    <div id="variacoesExistentes" class="variacoes-box scroll-container"></div>
+                </div>
+            </div>
+
+            <!-- 🔹 CATEGORIA -->
+            <div class="form-group">
+                <label>Categoria</label>
+                <input type="text" id="categoriaMaterial" placeholder="Ex: Fixação">
+            </div>
+
+            <!-- 🔹 VARIAÇÃO -->
+            <div class="section">
+                <div class="section-title">Variação</div>
+
+                <div class="variacao-container">
+
+                    <!-- 🔹 IMAGEM -->
+                    <div class="variacao-imagem">
+                        <img id="imagemmaterial" src="/imagens/imagemmaterial.webp" alt="ImagemMaterial">
+
+                        <input type="file" id="select_imagemmaterial" name="imagemmaterial" accept="image/*">
+                        <input id="idMaterial" type="hidden" name="idMaterial" value="">
+                        <button id="btn_uploadImagem" type="button" class="btn-upload">
+                            📷 Carregar
+                        </button>
+                    </div>
+
+                    <!-- 🔹 DADOS -->
+                    <div class="variacao-dados">
+                        <div class="form-group">
+                            <label>Código</label>
+                            <input type="text" id="codigo" placeholder="Ex: ABC123">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fabricante</label>
+                            <input type="text" id="fabricante" placeholder="Ex: Wago">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 🔹 ATRIBUTOS -->
+            <div class="section">
+                <div class="section-title">Atributos</div>
+
+                <div class="inline-add">
+                    <select id="selectAtributo">
+                        <option value="">Selecionar atributo</option>
+
+                        <!-- 🔹 BÁSICOS -->
+                        <optgroup label="🧱 Básicos">
+                            <option value="Material">Material</option>
+                            <option value="Cor">Cor</option>
+                            <option value="Modelo">Modelo</option>
+                            <option value="Tipo">Tipo</option>
+                            <option value="Fabricante">Fabricante</option>
+                        </optgroup>
+
+                        <!-- 📏 DIMENSIONAIS -->
+                        <optgroup label="📏 Dimensionais">
+                            <option value="Tamanho">Tamanho</option>
+                            <option value="Bitola">Bitola</option>
+                            <option value="Diâmetro">Diâmetro</option>
+                            <option value="Comprimento">Comprimento</option>
+                            <option value="Largura">Largura</option>
+                            <option value="Altura">Altura</option>
+                            <option value="Espessura">Espessura</option>
+                            <option value="Raio">Raio</option>
+                            <option value="Ângulo">Ângulo</option>
+                        </optgroup>
+
+                        <!-- ⚡ ELÉTRICOS -->
+                        <optgroup label="⚡ Elétricos">
+                            <option value="Tensão">Tensão</option>
+                            <option value="Corrente">Corrente</option>
+                            <option value="Potência">Potência</option>
+                            <option value="Frequência">Frequência</option>
+                            <option value="Número de polos">Número de polos</option>
+                            <option value="Curva">Curva</option>
+                            <option value="Capacidade de interrupção">Capacidade de interrupção</option>
+                        </optgroup>
+
+                        <!-- 🔧 INSTALAÇÃO -->
+                        <optgroup label="🔧 Instalação">
+                            <option value="Fixação">Fixação</option>
+                            <option value="Montagem">Montagem</option>
+                            <option value="Aplicação">Aplicação</option>
+                        </optgroup>
+
+                        <!-- 🏭 PROTEÇÃO / ACABAMENTO -->
+                        <optgroup label="🏭 Proteção / Acabamento">
+                            <option value="Acabamento">Acabamento</option>
+                            <option value="Revestimento">Revestimento</option>
+                            <option value="Grau de proteção">Grau de proteção</option>
+                            <option value="Classe">Classe</option>
+                        </optgroup>
+
+                        <!-- 🔩 ESPECÍFICOS -->
+                        <optgroup label="🔩 Específicos Infraestrutura">
+                            <option value="Entrada">Entrada</option>
+                            <option value="Saída">Saída</option>
+                            <option value="Curso">Curso</option>
+                            <option value="Vedação">Vedação</option>
+                            <option value="Rosca">Rosca</option>
+                        </optgroup>
+                    </select>
+
+                    <button id="btnAddAtributo" class="btn-mini">+</button>
+                </div>
+
+                <!-- 🔹 LISTA VISUAL DE ATRIBUTOS -->
+                <div id="listaAtributos" class="chips-container"></div>
+
+                <!-- 🔹 INPUTS DOS VALORES -->
+                <div id="valoresAtributos" class="attr-container"></div>
+            </div>
+
+            <!-- 🔹 ALERTA -->
+            <div id="alertDuplicado" class="alert-erro">
+                ⚠️ Essa variação já existe
+            </div>
+
+            <!-- 🔹 AÇÕES -->
+            <div class="modal-actions">
+                <button id="btnFecharModal" class="btn-cancelar">Cancelar</button>
+                <button id="btnSalvarMaterial" class="btn-salvar">Salvar</button>
+            </div>
+
+        </div>
+    </div>
+    <div id="crop-modal" hidden>
+        <div class="crop-panel">
+            <div id="crop-area"></div>
+            <div class="crop-ctrls">
+                <button type="button" id="rotLeft" class="bt_teste glass">⟲</button>
+                <button type="button" id="rotRight" class="bt_teste glass">⟳</button>
+                <button type="button" id="btn_cancel_crop" class="bt_teste glass">Cancelar</button>
+                <!-- NOVO: botão para salvar -->
+                <button type="button" id="btn_save_crop" class="bt_teste glass">Salvar</button>
+            </div>
+        </div>
+    </div>
     <!-- Inicialização modular -->
     <script type="module" src="/client/js/main.js"></script>
     <script>
@@ -103,6 +345,7 @@
             });
         });
     </script>
+
 </body>
 
 </html>

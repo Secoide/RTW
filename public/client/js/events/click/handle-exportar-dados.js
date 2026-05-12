@@ -88,99 +88,126 @@ async function exportarDADOS($btn) {
   }
 }
 
-function exportarWHATS($btn) {
-  const $painelDia = $btn.closest(".painelDia");
-  const dia = formatarData($painelDia.data("dia"));
-  let enviar = `📆 *${dia.toUpperCase()}*\n\n`;
+async function exportarWHATS($btn) {
 
+  const $painelDia = $btn.closest(".painelDia");
+  const diaOriginal = $painelDia.data("dia");
+  const dia = formatarData(diaOriginal);
+
+  let enviar = `📆 *${dia.toUpperCase()}*\n\n`;
   let cidades = {};
   const todosNomes = [];
 
-  // 🔹 1. Coleta todos os nomes do dia
+  // 🔹 Coleta nomes
   $painelDia.find(".painel_OS").each(function () {
     $(this).find(".colaborador").each(function () {
-      const nome = $(this).data("nome");
-      todosNomes.push(nome);
+      todosNomes.push($(this).data("nome"));
     });
   });
 
-  // 🔹 2. Conta quantos têm o mesmo primeiro nome
+  // 🔹 Conta primeiros nomes
   const contagem = {};
+
   todosNomes.forEach(nomeCompleto => {
     const primeiro = nomeCompleto.split(" ")[0].trim().toLowerCase();
     contagem[primeiro] = (contagem[primeiro] || 0) + 1;
   });
 
-  // 🔹 3. Monta as OSs
+  // 🔹 Monta OS
   $painelDia.find(".painel_OS").filter(function () {
     return $(this).find(".colaborador").length > 0;
   }).each(function () {
+
     const $os = $(this);
+
     const idOS = $os.find(".lbl_OS").text().trim();
     const descricao = $os.find(".lbl_descricaoOS").text().trim();
-
-    const descricaoFormatada = descricao.charAt(0).toUpperCase() +
-      descricao.slice(1).toLowerCase();
     const cliente = $os.find(".lbl_clienteOS").text().trim();
     const cidade = $os.find(".p_infoOS").data("cidade");
 
-    let dadosOS = `—— *OS ${idOS}* ——\n> ${cliente.toUpperCase()} - ${descricaoFormatada}\n`;
+    const descricaoFormatada =
+      descricao.charAt(0).toUpperCase() +
+      descricao.slice(1).toLowerCase();
+
+    let dadosOS =
+      `—— *OS ${idOS}* ——\n` +
+      `> ${cliente.toUpperCase()} - ${descricaoFormatada}\n`;
+
     let colaboradores = "";
 
     $os.find(".colaborador").each(function () {
+
       let nome = $(this).data("nome");
       const primeiro = nome.split(" ")[0].trim().toLowerCase();
 
-      // 🔸 Se for único no dia, remove os 3 últimos caracteres
       if (contagem[primeiro] === 1) {
         nome = nome.slice(0, -3);
       }
 
       if ($(this).hasClass("supervisor")) {
-        colaboradores += "```" + `  └ ${nome} ★` + "```\n";
+        colaboradores += "```  └ " + nome + " ★```\n";
+
       } else if ($(this).hasClass("aniver")) {
-        colaboradores += "```" + `  └ ${nome} 🎉` + "```\n";
+        colaboradores += "```  └ " + nome + " 🎉```\n";
+
       } else if ($(this).find(".nome").hasClass("lider")) {
-        colaboradores += "```" + `  └ Eng. ${nome}` + "```\n";
+        colaboradores += "```  └ Eng. " + nome + "```\n";
+
       } else {
-        colaboradores += "```" + `  └ ${nome}` + "```\n";
+        colaboradores += "```  └ " + nome + "```\n";
       }
+
     });
 
     if (!cidades[cidade]) cidades[cidade] = [];
+
     cidades[cidade].push(dadosOS + colaboradores + "\n");
+
   });
 
-  // 🔹 4. Monta o texto final formatado para WhatsApp
+  // 🔹 Texto final
   for (const cidade in cidades) {
-    enviar += "\`" + `${cidade.toUpperCase()} ▼\`\n${cidades[cidade].join("")}`;
+    enviar += `\`${cidade.toUpperCase()} ▼\`\n${cidades[cidade].join("")}`;
   }
 
-  Swal.fire({
-    text: `Alguma observação para este dia da programação?`,
-    theme: 'dark',
-    input: 'textarea',
-    inputPlaceholder: 'Digite cada observação em uma linha...',
+
+  const result = await Swal.fire({
+    text: "Deseja adicionar as anotações na programação?",
+    icon: "warning",
+    theme: "dark",
     showCancelButton: true,
-    confirmButtonText: 'Confirmar',
-    cancelButtonText: 'Sem observação'
-  }).then((result) => {
-
-    if (result.isConfirmed && result.value && result.value.trim() !== "") {
-
-      // 🔹 Quebra por linha
-      let linhas = result.value
-        .split('\n')                // separa por ENTER
-        .map(l => l.trim())         // remove espaços extras
-        .filter(l => l !== "")      // remove linhas vazias
-        .map(l => `- ${l}`)         // adiciona "- " na frente
-        .join('\n');                // junta novamente
-
-      enviar += `\n\n⚠️ OBSERVAÇÃO:\n${linhas}\n`;
-    }
-
-    copiarTexto(enviar, `Programação ${dia} gerado com sucesso!`);
+    confirmButtonColor: "#51d630",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sim"
   });
+  // 🔹 Pergunta observações
+  if (result.isConfirmed) {
+    try {
+
+      const dados = await $.get(`/api/os/anotacoes/${diaOriginal}`);
+
+      if (dados?.anotacoes?.length > 0) {
+
+        let linhas = "";
+
+        dados.anotacoes.forEach((texto, index) => {
+          const icone = dados.icones?.[index] || "📝";
+          linhas += `> ${texto}\n`;
+        });
+
+        enviar += `\n⚠️ *OBSERVAÇÕES:*\n${linhas}`;
+      }
+
+    } catch (err) {
+      console.error("Erro ao carregar anotações:", err);
+    }
+  }
+
+  copiarTexto(
+    enviar,
+    `Programação ${dia} gerado com sucesso!`
+  );
+
 }
 
 

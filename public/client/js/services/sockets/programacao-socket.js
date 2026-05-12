@@ -44,22 +44,34 @@ export function getSocket() {
 // Emitir ações de programação
 // =======================
 export function enviarAlocarColaborador(osID, nomes, dataDia) {
-  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    alert("Sem conexão com servidor. Tente novamente.");
+    return;
+  }
   socket.send(JSON.stringify({ acao: "alocar_colaborador", osID, nomes, data: dataDia }));
 }
 
 export function enviarRemoverColaborador(osID, id, dataDia) {
-  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    alert("Sem conexão com servidor. Tente novamente.");
+    return;
+  }
   socket.send(JSON.stringify({ acao: "remover_colaborador", osID, id, data: dataDia }));
 }
 
 export function enviarAtualizarPrioridade(osID, prioridade) {
-  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    alert("Sem conexão com servidor. Tente novamente.");
+    return;
+  }
   socket.send(JSON.stringify({ acao: "atualizar_prioridade_os", osID, prioridade }));
 }
 
 export function enviarMudarStatusDia(dia, statuss) {
-  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    alert("Sem conexão com servidor. Tente novamente.");
+    return;
+  }
   console.log("➡️ ENVIANDO mudar_statusProgDia", { dia, statuss });
   socket.send(JSON.stringify({ acao: "mudar_statusProgDia", dia, statuss }));
 }

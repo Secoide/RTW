@@ -12,7 +12,7 @@ $(document).ready(function () {
     startMotivationalPhrases();
 
     // 🟦 DEFINA AQUI SUA VERSÃO ATUAL DO SISTEMA
-    const versaoSistema = "1.4.1";
+    const versaoSistema = "1.4.2";
 
     // Preenche o texto no popup
     $("#versaoAtual").text(versaoSistema);
@@ -59,7 +59,7 @@ $(document).ready(function () {
 
       } else {
 
-        if (hour >= 19) {
+        if (hour >= 18) {
           startWeatherEffects("stars");
         }
 

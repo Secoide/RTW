@@ -512,6 +512,492 @@ async function getColaboradoresAniversariantes() {
   return rows;
 }
 
+
+
+
+// ============================================================
+// BUSCAR COLABORADORES OS IA
+// CONSULTA LEVE PARA IA
+// NÃO ALTERA A QUERY PRINCIPAL
+// ============================================================
+
+async function buscarColaboradoresOSIA(
+  dataDia,
+  osID = null
+) {
+
+  try {
+
+    // ========================================================
+    // VALIDAÇÕES
+    // ========================================================
+
+    if (!dataDia) {
+
+      return [];
+
+    }
+
+    osID =
+      osID ? Number(osID) : null;
+
+    // ========================================================
+    // QUERY
+    // ========================================================
+
+    let sql = `
+
+      SELECT
+          o.id_OSs,
+          o.descricao,
+          e.nome AS empresa,
+          f.id AS idfuncionario,
+          f.nome AS colaborador
+
+      FROM funcionario_na_os fno
+
+      JOIN tb_obras o
+          ON o.id_OSs = fno.id_OS
+
+      JOIN funcionarios f
+          ON f.id = fno.idfuncionario
+
+      JOIN tb_empresa e
+          ON e.id_empresas = o.id_empresa
+
+      WHERE DATE(fno.data) = ?
+
+    `;
+
+    const params = [dataDia];
+
+    // ========================================================
+    // FILTRO OS
+    // ========================================================
+
+    if (osID) {
+
+      sql += `
+        AND o.id_OSs = ?
+      `;
+
+      params.push(osID);
+
+    }
+
+    // ========================================================
+    // ORDENAÇÃO
+    // ========================================================
+
+    sql += `
+
+      ORDER BY
+          o.id_OSs DESC,
+          f.nome ASC
+
+    `;
+
+    // ========================================================
+    // DEBUG
+    // ========================================================
+
+    console.log("================================================");
+    console.log("🤖 QUERY IA COLABORADORES");
+    console.log("Data:", dataDia);
+    console.log("OS:", osID);
+    console.log("================================================");
+
+    // ========================================================
+    // EXECUTA
+    // ========================================================
+
+    const [rows] =
+      await connection.query(
+        sql,
+        params
+      );
+
+    // ========================================================
+    // FORMATA
+    // ========================================================
+
+    const agrupado = {};
+
+    rows.forEach(row => {
+
+      if (!agrupado[row.id_OSs]) {
+
+        agrupado[row.id_OSs] = {
+
+          os: row.id_OSs,
+          descricao: row.descricao,
+          empresa: row.empresa,
+          colaboradores: []
+
+        };
+
+      }
+
+      agrupado[row.id_OSs]
+        .colaboradores
+        .push(row.colaborador);
+
+    });
+
+    return Object.values(agrupado);
+
+  } catch (err) {
+
+    console.error(
+      "Erro buscarColaboradoresOSIA:",
+      err
+    );
+
+    return [];
+
+  }
+
+}
+
+// ============================================================
+// BUSCAR COLABORADOR IA
+// ============================================================
+
+async function buscarColaboradorIA(
+  dataDia = null,
+  nomeColaborador = null
+) {
+
+  try {
+
+    let sql = `
+
+      SELECT
+          o.id_OSs,
+          o.descricao,
+          e.nome AS empresa,
+          f.id AS idfuncionario,
+          f.nome AS colaborador,
+          fno.data
+
+      FROM funcionario_na_os fno
+
+      JOIN tb_obras o
+          ON o.id_OSs = fno.id_OS
+
+      JOIN funcionarios f
+          ON f.id = fno.idfuncionario
+
+      JOIN tb_empresa e
+          ON e.id_empresas = o.id_empresa
+
+      WHERE 1 = 1
+
+    `;
+
+    const params = [];
+
+    // ========================================================
+    // DATA
+    // ========================================================
+
+    if (dataDia) {
+
+      sql += `
+        AND DATE(fno.data) = ?
+      `;
+
+      params.push(dataDia);
+
+    }
+
+    // ========================================================
+    // NOME
+    // ========================================================
+
+    if (nomeColaborador) {
+
+      const partes =
+        nomeColaborador
+          .toLowerCase()
+          .split(" ")
+          .filter(p => p.length > 2);
+
+      for (const parte of partes) {
+
+        sql += `
+          AND LOWER(f.nome)
+          LIKE ?
+        `;
+
+        params.push(`%${parte}%`);
+
+      }
+
+    }
+
+    sql += `
+
+      ORDER BY
+          fno.data DESC,
+          o.id_OSs DESC
+
+      LIMIT 1
+
+    `;
+
+    const [rows] =
+      await connection.query(
+        sql,
+        params
+      );
+
+    return rows[0] || null;
+
+  } catch (err) {
+
+    console.error(
+      "Erro buscarColaboradorIA:",
+      err
+    );
+
+    return null;
+
+  }
+
+}
+
+// ============================================================
+// RANKING COLABORADORES
+// ============================================================
+
+async function buscarRankingColaboradores(
+  empresa = null
+) {
+
+  try {
+
+    let sql = `
+
+      SELECT
+          f.nome AS colaborador,
+          COUNT(DISTINCT o.id_OSs) AS totalOS
+
+      FROM funcionario_na_os fno
+
+      JOIN funcionarios f
+          ON f.id = fno.idfuncionario
+
+      JOIN tb_obras o
+          ON o.id_OSs = fno.id_OS
+
+      LEFT JOIN tb_empresa e
+          ON e.id_empresas = o.id_empresa
+
+      WHERE 1 = 1
+
+    `;
+
+    const params = [];
+
+    // ========================================================
+    // EMPRESA
+    // ========================================================
+
+    if (empresa) {
+
+      sql += `
+        AND UPPER(e.nome)
+            LIKE CONCAT('%', ?, '%')
+      `;
+
+      params.push(
+        empresa.toUpperCase()
+      );
+
+    }
+
+    // ========================================================
+    // AGRUPAMENTO
+    // ========================================================
+
+    sql += `
+
+      GROUP BY
+          f.id,
+          f.nome
+
+      ORDER BY
+          totalOS DESC
+
+      LIMIT 10
+
+    `;
+
+    const [rows] =
+      await connection.query(
+        sql,
+        params
+      );
+
+    return rows;
+
+  } catch (err) {
+
+    console.error(
+      "Erro buscarRankingColaboradores:",
+      err
+    );
+
+    return [];
+
+  }
+
+}
+
+
+// ============================================================
+// LISTAR COLABORADORES POR DATA
+// ============================================================
+
+// ============================================================
+// LISTAR COLABORADORES POR DATA
+// ============================================================
+
+async function listarColaboradoresPorData(
+  dataDia
+) {
+
+  try {
+
+    const sql = `
+
+      SELECT DISTINCT
+
+          f.id,
+          f.nome
+
+      FROM funcionario_na_os fno
+
+      JOIN funcionarios f
+          ON f.id = fno.idfuncionario
+
+      WHERE DATE(fno.data) = ?
+
+      ORDER BY
+          f.nome ASC
+
+    `;
+
+    const [rows] =
+      await connection.query(
+        sql,
+        [dataDia]
+      );
+
+    return rows;
+
+  } catch (err) {
+
+    console.error(
+      "Erro listarColaboradoresPorData:",
+      err
+    );
+
+    return [];
+
+  }
+
+}
+
+// ============================================================
+// BUSCAR DISPONÍVEIS
+// ============================================================
+
+async function buscarDisponiveis(
+  dataDia
+) {
+
+  try {
+
+    // ========================================================
+    // QUERY
+    // ========================================================
+
+    const sql = `
+
+      WITH exames_func AS (
+
+            SELECT 
+                fce2.idfuncionario,
+
+                MAX(
+                    CASE
+                        WHEN e.nome = 'demissional'
+                        THEN fce2.data
+                    END
+                ) AS data_demissional
+
+            FROM funcionarios_contem_exames fce2
+
+            LEFT JOIN exames e
+                ON e.idexame = fce2.idexame
+
+            GROUP BY fce2.idfuncionario
+
+        )
+
+        SELECT
+            f.id,
+            f.nome
+
+        FROM funcionarios f
+
+        LEFT JOIN exames_func exf
+            ON exf.idfuncionario = f.id
+
+        WHERE f.id NOT IN (
+
+            SELECT
+                fno.idfuncionario
+
+            FROM funcionario_na_os fno
+
+            WHERE DATE(fno.data) = ?
+
+        )
+
+        AND exf.data_demissional IS NULL
+
+        ORDER BY
+            f.nome ASC
+            `;
+
+    // ========================================================
+    // EXECUTA
+    // ========================================================
+
+    const [rows] =
+      await connection.query(
+        sql,
+        [dataDia]
+      );
+
+    return rows;
+
+  } catch (err) {
+
+    console.error(
+      "Erro buscarDisponiveis:",
+      err
+    );
+
+    return [];
+
+  }
+
+}
+
 async function excluirColaboradorNaOS(idNaOS) {
   const sql = "DELETE FROM funcionario_na_os WHERE id = ?";
   const [result] = await connection.query(sql, [idNaOS]);
@@ -623,6 +1109,11 @@ module.exports = {
   getColaboradores,
   getColaboradorById,
   getStatusIntegracaoByColab,
+  buscarColaboradoresOSIA,
+  buscarColaboradorIA,
+  buscarRankingColaboradores,
+  listarColaboradoresPorData,
+  buscarDisponiveis,
   createColaborador,
   findByCPF,
   findByRG,

@@ -457,9 +457,457 @@ export async function initHome() {
   const btn = document.getElementById("online-button");
   const panel = document.getElementById("online-panel");
 
+  const onlineWidget = document.getElementById("online-widget");
+
+  // ============================================================
+  // ABRIR / FECHAR ONLINE
+  // ============================================================
+
   btn.onclick = () => {
+
     panel.classList.toggle("active");
+
+    // Move IA junto
+
+    if (panel.classList.contains("active")) {
+
+      onlineWidget.classList.add("open-ia-space");
+
+    } else {
+
+      onlineWidget.classList.remove("open-ia-space");
+
+    }
+
   };
+
+  // ============================================================
+  // MENU PERFIL
+  // ============================================================
+
+  const menuPerfil = document.querySelector(".menu_Perfil");
+  const avatar = document.getElementById("fotoavatarPerfil");
+
+  // abrir/fechar ao clicar na foto
+
+  avatar.addEventListener("click", (e) => {
+
+    e.stopPropagation();
+
+    menuPerfil.classList.toggle("aberto");
+
+  });
+
+  // clicar fora fecha
+
+  document.addEventListener("click", (e) => {
+
+    if (!menuPerfil.contains(e.target)) {
+
+      menuPerfil.classList.remove("aberto");
+
+    }
+
+  });
+
+
+  // ============================================================
+  // CHAT IA RTW
+  // ============================================================
+
+
+  const iaButton = document.getElementById("ia-button");
+  const iaChat = document.getElementById("ia-chat");
+  const iaClose = document.getElementById("ia-close");
+
+  const iaInput = document.getElementById("ia-input");
+  const iaSend = document.getElementById("ia-send");
+
+  const iaMessages = document.getElementById("ia-messages");
+
+  // ============================================================
+  // ABRIR CHAT
+  // ============================================================
+
+  iaButton.addEventListener("click", () => {
+
+    iaChat.classList.toggle("active");
+
+  });
+
+
+  // ============================================================
+  // BOTÃO ENVIAR
+  // ============================================================
+
+  iaSend.addEventListener("click", enviarMensagem);
+
+  // ============================================================
+  // ENTER INPUT
+  // ============================================================
+
+  iaInput.addEventListener("keypress", (e) => {
+
+    if (e.key === "Enter") {
+
+      enviarMensagem();
+
+    }
+
+  });
+
+  // ============================================================
+  // FUNÇÃO PRINCIPAL
+  // ============================================================
+
+  async function enviarMensagem() {
+
+    const texto = iaInput.value.trim();
+
+    if (!texto) return;
+
+    // ============================================================
+    // MENSAGEM USUÁRIO
+    // ============================================================
+
+    adicionarMensagem(texto, "user");
+
+    iaInput.value = "";
+
+    // ============================================================
+    // MENSAGEM LOADING
+    // ============================================================
+
+    const loadingDiv = document.createElement("div");
+
+    loadingDiv.classList.add("ia-msg");
+    loadingDiv.classList.add("ia-bot");
+
+    // ============================================================
+    // FRASES NORMAIS
+    // ============================================================
+
+    const mensagensNormais = [
+
+      "🔎 Consultando sistema",
+      "📂 Buscando informações",
+      "🤖 Processando consulta",
+      "📡 Verificando programação",
+      "🧠 Cruzando dados operacionais",
+      "📑 Lendo OS cadastradas",
+      "👷 Procurando colaboradores",
+      "⚡ Consultando programação da equipe",
+      "📋 Organizando informações",
+      "🔧 Sincronizando dados da engenharia",
+      "🛰️ Acessando banco operacional",
+      "📊 Analisando produtividade",
+      "🛠️ Verificando disponibilidade",
+      "🏭 Consultando empresas vinculadas",
+      "📅 Validando programação do dia",
+      "🧾 Gerando resposta operacional"
+
+    ];
+
+    // ============================================================
+    // FRASES ENGRAÇADAS
+    // ============================================================
+
+    const mensagensEngracadas = [
+
+      "☕ O eletricista foi tomar café... buscando ele",
+      "🔦 Procurando colaborador com lanterna",
+      "⚠️ Tentando entender a letra da OS",
+      "🧰 Conferindo quem pegou as ferramentas",
+      "🚧 Desviando dos cones da obra",
+      "🔌 Reconectando neurônios da IA",
+      "🧠 Perguntando pro estagiário",
+      "🪫 IA com baixa bateria emocional"
+
+    ];
+
+    // ============================================================
+    // CHANCE DE FRASE ENGRAÇADA
+    // ============================================================
+
+    // 15% de chance
+
+    const usarEngracada =
+      Math.random() < 0.15;
+
+    // ============================================================
+    // ESCOLHER FRASE
+    // ============================================================
+
+    const listaEscolhida =
+      usarEngracada
+        ? mensagensEngracadas
+        : mensagensNormais;
+
+    const mensagem =
+      listaEscolhida[
+      Math.floor(
+        Math.random() * listaEscolhida.length
+      )
+      ];
+
+    // ============================================================
+    // HTML
+    // ============================================================
+
+    loadingDiv.innerHTML = `
+  <span class="ia-loading-text">
+    ${mensagem}
+  </span>
+
+  <span class="ia-dots">
+    <span>.</span>
+    <span>.</span>
+    <span>.</span>
+  </span>
+`;
+
+    iaMessages.appendChild(loadingDiv);
+
+    iaMessages.scrollTop =
+      iaMessages.scrollHeight;
+
+    try {
+
+      // ========================================================
+      // CHAMADA IA
+      // ========================================================
+
+      const response =
+        await fetch("/api/ia/chat", {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            pergunta: texto
+          })
+
+        });
+
+      const data =
+        await response.json();
+
+      // remove loading
+
+      loadingDiv.remove();
+
+      // ========================================================
+      // RESPOSTA IA
+      // ========================================================
+
+      adicionarMensagem(
+        data.resposta || "Sem resposta.",
+        "bot"
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      loadingDiv.remove();
+
+      adicionarMensagem(
+        "❌ Erro ao consultar IA.",
+        "bot"
+      );
+
+    }
+
+  }
+  const helpBadge =
+    document.getElementById(
+      "ia-help-badge"
+    );
+
+  const msgInicial =
+    document.getElementById(
+      "is-msg-bot-inicio"
+    );
+
+  // ========================================================
+  // ABRIR / FECHAR AJUDA
+  // ========================================================
+
+  if (
+    helpBadge &&
+    msgInicial
+  ) {
+
+    helpBadge.addEventListener(
+      "click",
+      () => {
+
+        msgInicial.classList.toggle(
+          "ia-hidden"
+        );
+
+      }
+    );
+
+  }
+
+  // ============================================================
+  // ADICIONAR MENSAGEM
+  // ============================================================
+
+  function adicionarMensagem(texto, tipo) {
+
+    const div =
+      document.createElement("div");
+
+    div.classList.add("ia-msg");
+
+    if (tipo === "user") {
+
+      div.classList.add("ia-user");
+
+    } else {
+
+      div.classList.add("ia-bot");
+
+    }
+
+    let html = texto;
+
+    // ========================================================
+    // NOMES
+    // ========================================================
+
+    html = html.replace(
+      /\$%(.*?)\$%/g,
+      `<span class="ia-nome">$1</span>`
+    );
+
+    // ========================================================
+    // EMPRESAS
+    // ========================================================
+
+    html = html.replace(
+      /#%(.*?)#%/g,
+      `<span class="ia-empresa">$1</span>`
+    );
+
+    // ========================================================
+    // OS
+    // ========================================================
+
+    html = html.replace(
+      /@%(.*?)@%/g,
+      `<span class="ia-os-blue">$1</span>`
+    );
+
+    // ========================================================
+    // DIAS
+    // ========================================================
+
+    html = html.replace(
+      /X%(.*?)X%/g,
+      `<span class="ia-dias">$1</span>`
+    );
+
+    // ========================================================
+    // TITULOS
+    // ========================================================
+
+    html = html.replace(
+      /^###\s+(.*)$/gm,
+      `<div class="ia-title">$1</div>`
+    );
+
+    // ========================================================
+    // NEGRITO
+    // ========================================================
+
+    html = html.replace(
+      /\*\*(.*?)\*\*/g,
+      `<strong>$1</strong>`
+    );
+
+    // ========================================================
+    // LABELS
+    // ========================================================
+
+    html = html.replace(
+      /(Descrição:|Empresa:|Supervisor:|Colaboradores:|Data:)/gi,
+      `<span class="ia-label">$1</span>`
+    );
+
+    // ========================================================
+    // LISTAS
+    // ========================================================
+
+    html = html.replace(
+      /^\s*[*•-]\s+(.*)$/gm,
+      `<div class="ia-list-item">• $1</div>`
+    );
+
+    // ========================================================
+    // QUEBRA DE LINHA INTELIGENTE
+    // ========================================================
+
+    html = html
+      .split("\n")
+      .map(linha => {
+
+        // ==============================================
+        // NÃO ADICIONAR <br> EM LISTAS
+        // ==============================================
+
+        if (
+          linha.includes("ia-list-item")
+        ) {
+
+          return linha;
+
+        }
+
+        // ==============================================
+        // TITULOS
+        // ==============================================
+
+        if (
+          linha.includes("ia-title")
+        ) {
+
+          return linha;
+
+        }
+
+        return linha + "<br>";
+
+      })
+      .join("");
+
+
+
+    // ========================================================
+    // REMOVE <br> EXCESSIVOS
+    // ========================================================
+
+    html = html.replace(
+      /(<br>\s*){3,}/g,
+      ""
+    );
+
+    div.innerHTML = html;
+
+    iaMessages.appendChild(div);
+
+    iaMessages.scrollTop =
+      iaMessages.scrollHeight;
+
+  }
+
+
+
 
 
 

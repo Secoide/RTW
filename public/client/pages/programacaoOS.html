@@ -1,4 +1,4 @@
-<div class="painel_pagina glass">
+<div class="painel_pagina">
     <div class="painel_menuSuperior">
         <div id="bt_abrir_NovaOS" class="bt_submenu">
             <input type="button" data-roles="6,7,99" name="" value="➕ Ordem de Serviço" title="Cadastrar OS"
@@ -11,7 +11,7 @@
         </div>
         <div class="direitaflex"></div>
         <div class="painel_EsqBtAcoes" style="padding-right: 10px; ">
-            <div class="date-wrapper glass">
+            <div class="date-wrapper">
                 <label for="seletor_data" id="btnAbrirData" class="date-icon-btn">
                     <i class="fa-solid fa-calendar-days"></i>
                 </label>
@@ -310,6 +310,87 @@
 </div>
 
 
+<div id="modalAnotacao" class="modal" style="display: none;">
+
+    <div class="modal-conteudo modal_anotacao">
+
+        <h2 id="modalTitulo">Anotações</h2>
+        <label>Dia da anotação:</label>
+
+        <input type="text" id="dataAnotacaoVisual" readonly class="campo-readonly" />
+
+        <input type="hidden" id="datadiaAnot" />
+        <label>Ícone:</label>
+
+        <div id="iconeAnotacao" class="lista-icones">
+
+            <!-- Geral -->
+            <span data-icone="📌">📌</span>
+
+            <!-- RH / Colaborador -->
+            <span data-icone="🪪">🪪</span>
+            <span data-icone="🎓">🎓</span>
+            <span data-icone="🗳️">🗳️</span>
+            <span data-icone="📝">📝</span>
+
+            <!-- Segurança -->
+            <span data-icone="🦺">🦺</span>
+            <span data-icone="⚠️">⚠️</span>
+            <span data-icone="🔒">🔒</span>
+
+            <!-- Saúde -->
+            <span data-icone="🩺">🩺</span>
+            <span data-icone="💉">💉</span>
+            <span data-icone="💊">💊</span>
+
+            <!-- Engenharia / Elétrica -->
+            <span data-icone="⚡">⚡</span>
+            <span data-icone="🧰">🧰</span>
+
+            <!-- Financeiro -->
+            <span data-icone="💵">💵</span>
+
+            <!-- Transporte -->
+            <span data-icone="🚗">🚗</span>
+            <span data-icone="🛻">🛻</span>
+
+            <!-- Motivacional -->
+            <span data-icone="🚀">🚀</span>
+            <span data-icone="⭐">⭐</span>
+
+        </div>
+
+        <input type="hidden" id="datadiaAnot">
+
+        <label>Texto:</label>
+
+        <input type="text" id="anotacaoTexto">
+
+        <button id="btnAdicionarAnotacao" class="bt_padrao bt_cad">
+            + Adicionar anotação
+        </button>
+
+        <!-- LISTA -->
+        <div class="lista-anotacoes">
+
+
+        </div>
+
+        <div class="modal-botoes">
+
+            <button id="btnSalvarAnotacoes" class="bt_padrao bt_cad">
+                Salvar
+            </button>
+
+            <button id="btnCancelarAnotacoes" class="bt_padrao bt_cancel">
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 <div id="form_aviso"></div>
 <div id="form_debugws"></div>

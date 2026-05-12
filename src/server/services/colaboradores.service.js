@@ -135,6 +135,18 @@ async function atualizarColaborador(id, data) {
   }
 }
 
+// ============================================================
+// LISTAR COLABORADORES POR DATA
+// ============================================================
+
+async function listarColaboradoresPorData(dataDia) {
+
+    return await ColabModel
+        .listarColaboradoresPorData(
+            dataDia
+        );
+
+}
 
 // Atualizar dados profissional
 async function atualizarProfissionalColab(id, data) {
@@ -169,14 +181,84 @@ async function listarColaboradoresDisponiveis(dataDia) {
   }
 }
 
-async function listarColaboradoresEmOS(dataDia) {
+async function listarColaboradoresEmOS(
+  dataDia,
+  osID,
+  nomeColaborador
+) {
   try {
-    const colaboradores = await ColabModel.buscarColaboradoresEmOS(dataDia);
+    const colaboradores = await ColabModel.buscarColaboradoresEmOS(
+      dataDia,
+      osID,
+      nomeColaborador
+    );
     return colaboradores;
   } catch (err) {
     console.error("❌ Erro no service listarColaboradoresEmOS:", err.message);
     throw err;
   }
+}
+
+
+// ============================================================
+// BUSCAR COLABORADORES IA
+// ============================================================
+
+async function listarColaboradoresOSIA(
+  dataDia,
+  osID = null
+) {
+
+  return await ColabModel
+    .buscarColaboradoresOSIA(
+      dataDia,
+      osID
+    );
+
+}
+
+// ============================================================
+// BUSCAR COLABORADOR IA
+// ============================================================
+
+async function listarColaboradorIA(
+  dataDia,
+  nomeColaborador
+) {
+
+  return await ColabModel
+    .buscarColaboradorIA(
+      dataDia,
+      nomeColaborador
+    );
+
+}
+
+async function listarRankingColaboradores(
+  empresa
+) {
+
+  return await ColabModel
+    .buscarRankingColaboradores(
+      empresa
+    );
+
+}
+
+
+// ============================================================
+// LISTAR DISPONÍVEIS
+// ============================================================
+
+async function listarDisponiveis(
+  dataDia
+) {
+
+  return await ColabModel
+    .buscarDisponiveis(
+      dataDia
+    );
+
 }
 
 async function excluirColaboradorEmOS(osID, id, idNaOS) {
@@ -315,6 +397,11 @@ module.exports = {
   listarColaboradores,
   buscarColaborador,
   buscarStatusIntegracao,
+  listarColaboradoresOSIA,
+  listarColaboradorIA,
+  listarRankingColaboradores,
+  listarColaboradoresPorData,
+  listarDisponiveis,
   criarColaborador,
   atualizarColaborador,
   atualizarProfissionalColab,

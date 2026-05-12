@@ -133,3 +133,190 @@ $(document).on('click', '.iconeStatusDia i', async function (event, data) {
         }, 300);
     });
 });
+
+$(document).on('keydown', '#anotacaoTexto', function (e) {
+
+    if (e.key === 'Enter' && !e.shiftKey) {
+
+        e.preventDefault();
+
+        $('#btnAdicionarAnotacao').click();
+    }
+});
+
+$(document).on(
+    'click',
+    '.iconeAnotacaoDia i',
+    async function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const $icon = $(this);
+
+        const $painel =
+            $icon.closest('.painelDia');
+
+        // data
+        const dataDia =
+            $painel.attr('data-dia');
+
+        // salva hidden
+        $('#datadiaAnot').val(dataDia);
+
+        const [ano, mes, dia] =
+            dataDia.split('-');
+
+        $('#dataAnotacaoVisual').val(
+            `${dia}/${mes}/${ano}`
+        );
+
+        // limpa lista anterior
+        $('.lista-anotacoes').html('');
+
+        try {
+
+            // busca anotações
+            const dados = await $.get(
+                `/api/os/anotacoes/${dataDia}`
+            );
+            if (
+                dados &&
+                dados.anotacoes &&
+                dados.anotacoes.length > 0
+            ) {
+
+                dados.anotacoes.forEach(
+                    (texto, index) => {
+
+                        const icone =
+                            dados.icones?.[index] || '📝';
+
+                        $('.lista-anotacoes')
+                            .append(`
+                                <div class="item-anotacao">
+
+                                    <div class="anotacao-info">
+
+                                        <span class="anotacao-icone">
+                                            ${icone}
+                                        </span>
+
+                                        <span class="anotacao-texto">
+                                            ${texto}
+                                        </span>
+
+                                    </div>
+
+                                    <button class="btn-remover-anotacao">
+                                        ✖
+                                    </button>
+
+                                </div>
+                            `);
+                    }
+                );
+            }
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao carregar anotações:',
+                err
+            );
+        }
+
+        // abre modal
+        $('#modalAnotacao')
+            .css('display', 'flex');
+    }
+);
+
+
+// HOVER TOOLTIP
+
+$(document).on(
+    'mouseenter',
+    '.iconeAnotacaoDia',
+    async function () {
+
+        const $box = $(this);
+
+        const $painel =
+            $box.closest('.painelDia');
+
+        const dataDia =
+            $painel.attr('data-dia');
+
+        const $preview =
+            $box.find('.preview-anotacoes');
+
+        try {
+
+            const dados = await $.get(
+                `/api/os/anotacoes/${dataDia}`
+            );
+
+            $preview.html('');
+
+            if (
+                dados &&
+                dados.anotacoes &&
+                dados.anotacoes.length
+            ) {
+
+                dados.anotacoes.forEach(
+                    (texto, index) => {
+
+                        const icone =
+                            dados.icones?.[index]
+                            || '📝';
+
+                        $preview.append(`
+                            <div class="preview-anotacao-item">
+
+                                <span class="preview-anotacao-icone">
+                                    ${icone}
+                                </span>
+
+                                <span class="preview-anotacao-texto">
+                                    ${texto}
+                                </span>
+
+                            </div>
+                        `);
+                    }
+                );
+
+            } else {
+
+                $preview.html(`
+                    <div class="preview-anotacao-item">
+
+                        <span class="preview-anotacao-texto">
+                            Sem anotações
+                        </span>
+
+                    </div>
+                `);
+            }
+
+            $preview.css('display', 'flex');
+
+        } catch (err) {
+
+            console.error(err);
+        }
+    }
+);
+
+$(document).on(
+    'mouseleave',
+    '.iconeAnotacaoDia',
+    function () {
+
+        $(this)
+            .find('.preview-anotacoes')
+            .hide();
+    }
+);

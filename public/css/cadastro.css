@@ -152,6 +152,8 @@ g[id^="tool-"].selecionada {
     border-radius: 50%;
 }
 
+
+
 #crop-modal {
     position: fixed;
     inset: 0;

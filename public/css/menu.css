@@ -20,7 +20,7 @@ header,
 
 #conteudo {
     margin-left: 50px;
-    margin-top: 50px;
+    margin-top: 10px;
     border-radius: 8px;
     min-height: 300px;
     opacity: 0;
@@ -167,16 +167,7 @@ ul {
   border-bottom-right-radius: 20px;
 }
 
-.menu_Perfil .tb_fotoColab {
-  position: absolute;
-  left: -50px;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--bg-gradiente-padrao);
-  border-radius: 50%;
-  object-fit: cover;
-  image-rendering: -webkit-optimize-contrast;
-}
+
 
 .menu:hover,
 .menu_Colab:hover {
@@ -238,20 +229,48 @@ ul {
 
 .menu_Perfil {
   margin-block: 5px;
-  height: 30px;
-  width: 200px;
+  height: 50px;
+  width: 60px; /* fechado */
   position: fixed;
   z-index: 999;
   top: 0;
   right: 0;
+
   display: flex;
-  flex-wrap: nowrap;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+
   padding: 4px;
   border-radius: 10px 0 0 10px;
-  padding-left: 20px;
+
+  overflow: hidden; /* ESSENCIAL */
+  transition: width 0.3s ease-in-out;
+}
+
+.menu_Perfil.aberto {
+  width: 250px;
+}
+
+.menu_Perfil .menuSuperiorDir,
+.menu_Perfil .menuInferior {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.menu_Perfil.aberto .menuSuperiorDir,
+.menu_Perfil.aberto .menuInferior {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu_Perfil .tb_fotoColab {
+  position: absolute;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 99999;
 }
 
 .menu_Perfil a,
@@ -270,6 +289,7 @@ ul {
   display: flex;
   gap: 20px;
   align-items: center;
+  padding-left: 10px;
 }
 
 .menuSuperiorDir .notif {

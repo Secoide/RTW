@@ -5,7 +5,9 @@ const OSController = require('../controllers/os.controller');
 
 // Rotas específicas primeiro!
 router.post("/cad_OS", verificarAutenticacao, OSController.salvarOS);
+router.post("/anotacoes/salvar",verificarAutenticacao, OSController.salvarAnotacoesOS);
 router.get("/status/:dataDia", verificarAutenticacao, OSController.getStatusOS);
+router.get("/anotacoes/:dataDia", verificarAutenticacao, OSController.getAnotacoesOS);
 
 router.put('/editar/:id', verificarAutenticacao, OSController.updateOS);
 

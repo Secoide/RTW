@@ -19,27 +19,35 @@ export function initFiltros() {
 }
 
 function ativar_FiltroFoco($btn) {
-    modoFocoAtivo = !modoFocoAtivo;
-    const $icone = $btn.find("i");
+    const $botao = $btn;
+    const $icone = $botao.find('i');
+    const $painelDia = $botao.closest('.painelDia');
 
-    if (modoFocoAtivo) {
-        $btn.addClass("ativo");
-        $icone.attr("title", "Modo Foco Ativado");
+    const isAtivo = $botao.hasClass('ativo');
 
-        const $painelDia = $btn.closest(".painelDia");
+    if (isAtivo) {
+        // Desativa o filtro
+        $botao.removeClass('ativo');
+        $icone.attr('title', 'Ativar Modo Foco');
 
-        $painelDia.find(".painel_OS").each(function () {
-            const temColaboradores = $(this).find(".p_colabs .colaborador").length > 0;
-            const temPrioridade = $(this).hasClass("prioridade-alta");
+        $painelDia.find('.painel_OS').show();
+    } else {
+        // Ativa o filtro
+        $botao.addClass('ativo');
+        $icone.attr('title', 'Modo Foco Ativado');
+
+        $painelDia.find('.painel_OS').each(function () {
+            const $os = $(this);
+
+            const temColaboradores = $os.find('.p_colabs .colaborador').length > 0;
+            const temPrioridade = $os.hasClass('prioridade-alta');
 
             if (!temColaboradores && !temPrioridade) {
-                $(this).hide();
+                $os.hide();
+            } else {
+                $os.show(); // Garante visibilidade das OS válidas
             }
         });
-    } else {
-        $btn.removeClass("ativo");
-        $icone.attr("title", "Ativar Modo Foco");
-        $(".painel_OS").show();
     }
 }
 

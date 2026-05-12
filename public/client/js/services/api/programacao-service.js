@@ -1,4 +1,4 @@
-import { renderColaboradoresDisponiveis, renderOSComColaboradores, renderColoboradorEmOS, atualizarStatusDia } from "../../utils/dom/programacao-render.js";
+import { renderColaboradoresDisponiveis, renderOSComColaboradores, renderColoboradorEmOS, atualizarStatusDia, atualizarIconeAnotacoes } from "../../utils/dom/programacao-render.js";
 
 import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
 
@@ -40,7 +40,8 @@ export async function carregarOSComColaboradores(painel) {
     const container = painel.querySelector(".painel_dasOS");
     renderOSComColaboradores(OrdemServico, container);
     renderColoboradorEmOS();
-    atualizarStatusDia(painel.closest(".painelDia"));
+    await atualizarStatusDia(painel.closest(".painelDia"));
+    atualizarIconeAnotacoes(painel.closest(".painelDia"));
     atualizarPainel($(painel));
     return OrdemServico;
   } catch (err) {

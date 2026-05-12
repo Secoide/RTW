@@ -95,8 +95,6 @@ export function initColaboradoresSearch(socket) {
                 left: offset.left,
                 width: largura,
                 zIndex: 9999,
-                background: 'white',
-                border: '1px solid #ccc',
                 borderRadius: '0 0 10px 10px',
                 maxHeight: '250px',
                 overflowY: 'auto',

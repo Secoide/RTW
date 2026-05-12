@@ -620,3 +620,71 @@ function load_epis_colaborador(idFunc, $box) {
             $box.html('<div class="erro">Não foi possível carregar os EPIs.</div>');
         });
 }
+
+
+function load_estatisticas_func_empresa(idFunc, $box) {
+
+    if (idFunc == '') { return false };
+    // Primeiro cria o canvas no DOM
+    $box.html('<canvas id="graficoHistClientes"></canvas>');
+
+    // Só depois pega o contexto
+    const ctx = document.getElementById('graficoHistClientes').getContext('2d');
+
+    // Faz a requisição AJAX
+    $.getJSON(`/api/colaboradores/historico-empresas/${idFunc}`, function (resposta) {
+        const clientes = resposta.map(r => r.cliente);
+        const quantidades = resposta.map(r => r.quantidade);
+        const total = quantidades.reduce((soma, q) => soma + q, 0);
+
+        if (window.graficoHistClientes instanceof Chart) {
+            window.graficoHistClientes.destroy();
+        }
+
+        window.graficoHistClientes = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: clientes,
+                datasets: [{
+                    label: 'Participações',
+                    data: quantidades,
+                    backgroundColor: 'rgba(75, 192, 75, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false, // ← ESSENCIAL para permitir crescer em altura
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const valor = context.parsed.x;
+                                const perc = ((valor / total) * 100).toFixed(1);
+                                return `${valor} participações (${perc}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: false,
+                            text: 'Quantidade'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: false,
+                            text: 'Clientes'
+                        }
+                    }
+                }
+            }
+        });
+    });
+}

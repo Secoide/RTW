@@ -145,69 +145,59 @@ export function initColaboradoresDragDrop() {
   // drop
   $(document).on("drop.colabDragDrop", ".p_colabs", function (e) {
     e.preventDefault();
-    const payload = JSON.parse(e.originalEvent.dataTransfer.getData("text/plain"));
 
+    const payload = JSON.parse(e.originalEvent.dataTransfer.getData("text/plain"));
     $(".p_colabs").removeClass("destino-highlight destino-validado");
 
     const { ids, dataOrigem, osOrigem } = payload;
 
     const $destinoOS = $(this).closest(".painel_OS");
     const $painelDia = $(this).closest(".painelDia");
+
     const osID = $destinoOS.find(".lbl_OS").text().trim();
     const descOS = $destinoOS.find(".lbl_descricaoOS").text();
     const cliente = $destinoOS.find(".lbl_clienteOS").text();
+
     const dataDestino = $painelDia.attr("data-dia");
     const osDestino = $destinoOS.find(".p_infoOS").data("os");
 
-    // 🛑 DROP NA MESMA ORIGEM → apenas reset visual
-    if (!osDestino && !osOrigem) {
-      resetDragVisual();
-      return;
-    }
+    // 🔒 validações
+    if (!osDestino && !osOrigem) return;
+    if (osDestino === osOrigem) return;
 
-    if (osDestino === osOrigem) {
-      resetDragVisual();
-      return;
-    }
     if (dataOrigem !== dataDestino) {
       alert("Não é permitido mover colaboradores entre dias diferentes.");
       return;
     }
 
     ids.forEach(id => {
-      // tenta achar o colaborador no painel do dia, em qualquer lugar
-      let $colabBase = $painelDia.find(`.colaborador[data-id="${id}"]`).first();
+      const $colab = $painelDia.find(`.colaborador[data-id="${id}"]`);
 
-      if ($colabBase.length) {
-        const nome = $colabBase.find(".nome").text().trim();
+      // 🔥 loading visual apenas
+      $colab.addClass("salvando").attr("data-loading", "true");
 
-        // mostra na área de disponíveis que ele está ocupado (se aplicável)
-        const $colabDisp = $painelDia.find(`.p_colabsDisp .colaborador[data-id="${id}"]`);
-        if ($colabDisp.length) {
-          $colabDisp.find(".ocupadoEmOS")
-            .html(`<div title="${descOS} - ${cliente}">${osID}</div>`);
-          $colabDisp.addClass("colaboradorEmOS");
-        }
+      // atualizar visual de "ocupado"
+      const $colabDisp = $painelDia.find(`.p_colabsDisp .colaborador[data-id="${id}"]`);
+      if ($colabDisp.length) {
+        $colabDisp.find(".ocupadoEmOS")
+          .html(`<div title="${descOS} - ${cliente}">${osID}</div>`);
+        $colabDisp.addClass("colaboradorEmOS");
+      }
 
-        // se ele já estava em outra OS, remove de lá
-        const $osOrigem = $painelDia.find(`.painel_OS .p_colabs .colaborador[data-id="${id}"]`).closest(".painel_OS");
-        const idOSOrigem = $osOrigem.find(".p_infoOS").data("os");
+      // remover da OS antiga
+      const $osOrigem = $painelDia
+        .find(`.painel_OS .p_colabs .colaborador[data-id="${id}"]`)
+        .closest(".painel_OS");
 
-        if ($osOrigem.length && idOSOrigem && idOSOrigem !== osID) {
-          removerColaboradorDeOS(id, idOSOrigem, $painelDia);
-          removerColaboradores(idOSOrigem, dataOrigem, [id]);
-        }
+      const idOSOrigem = $osOrigem.find(".p_infoOS").data("os");
 
-        // adiciona ao destino se ainda não está
-        const jaExiste = $destinoOS.find(`.p_colabs .colaborador[data-id="${id}"]`).length > 0;
-
-        if (!jaExiste) {
-          adicionarColaboradorNaOS(id, nome, $destinoOS, dataOrigem);
-        }
+      if ($osOrigem.length && idOSOrigem && idOSOrigem !== osID) {
+        removerColaboradorDeOS(id, idOSOrigem, $painelDia);
+        removerColaboradores(idOSOrigem, dataOrigem, [id]);
       }
     });
 
-    // 🔄 chamada via service (alocação na OS destino)
+    // 🔄 envia pro backend (SEM renderizar)
     const nomesParaEnviar = montarNomesParaEnviar(ids, $painelDia);
     alocarColaboradores(osID, dataDestino, nomesParaEnviar);
 

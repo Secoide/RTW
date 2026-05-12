@@ -3,6 +3,7 @@ import { inciarRH } from "../../bootstrap/rh-init.js";
 import { initGestao } from "../../bootstrap/gestao-init.js";
 import { initFerias } from "../../bootstrap/ferias-init.js";
 import { initHome } from "../../bootstrap/home-init.js";
+import { initMaterial } from "../../bootstrap/material-init.js";
 
 // Funções de carregamento de páginas
 export function carregarPagina(pagina) {
@@ -33,6 +34,9 @@ export function carregarPagina(pagina) {
         }
         if (pagina.includes('inicio')) {
           initHome();
+        }
+        if (pagina.includes('material')) {
+          initMaterial();
         }
       })
       .catch(err => {

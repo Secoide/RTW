@@ -5,16 +5,41 @@ Todos os formatos de mudanças importantes neste projeto serão documentados nes
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [1.4.2] - 2025-12-15
-## Nome: 🔨 Ajustes
+## [1.5.0] - 2026-05-11
+## Nome: 🧠 Central IA
 ### Adicionado
-- Nova animação aonde mostra frases motivacionais na tela de login;
+- Consulta de colaboradores por OS, histórico operacional e localização atual
+- Consulta de colaboradores disponíveis, aniversariantes e serviços programados
+- Ranking de produtividade por empresa, período, mês, ano e dia da semana
+- Ranking por domingos, sábados e datas específicas
+- Interpretação automática de datas, períodos e perguntas operacionais
+- Reconhecimento inteligente de empresas e sistema de aliases (PMB, JTI, FEMSA, etc.)
+- Agrupamento inteligente de histórico por OS e datas de atuação
+- Destaques visuais para métricas, colaboradores e empresas
+- Loading inteligente com mensagens dinâmicas e frases operacionais
+- Cache inteligente de empresas
+- Integração operacional em tempo real com banco de dados
+
+
+## [1.4.2] - 2025-12-15
+## Nome: 📝 Anotações
+### Adicionado
+- Nova animação na tela de login com exibição de frases motivacionais;
+- Ao arrastar um colaborador para uma OS, será exibida uma borda amarela indicando que a ação está sendo salva. Caso a borda permaneça, o colaborador não será exibido no painel da OS, sendo necessário atualizar a página;
+- Adicionado indicador de anotações nos painéis diários da aba Programação, exibindo a quantidade de registros vinculados a cada dia;
+- Implementado novo modal de gerenciamento de anotações na Programação, permitindo inclusão de múltiplos apontamentos com ícones personalizados e remoção individual antes da gravação;
+- Implementado preview inteligente das anotações ao passar o mouse sobre o indicador do dia, possibilitando consulta rápida das informações sem necessidade de abrir o modal completo;
 
 ### Alterado
 - Melhores efeitos na tela de login para chuva e a noite estrelada;
+- Ajustado modo thema dark, paletas de cores aprimoradas;
+- Menu do usuario agora fica escondido, até clicar em sua foto;
 
 ### Corrigido
-- Não aparecia opção de registrar assinatura de EPI;
+- Problema que impedia a exibição da opção de registrar assinatura de EPI;
+- Corrigido erro que ocultava o botão de adicionar foto do usuário;
+- Falha na geração dos gráficos de estatísticas de funcionários por empresa;
+- Corrigido erro no “Modo Foco” que fazia o filtro afetar outros dias/painéis ao invés de atuar somente no dia selecionado.
 
 ### Removido
 - 

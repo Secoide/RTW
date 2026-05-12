@@ -14,8 +14,11 @@
 
   /* ---------- CINZAS (invertidos) ---------- */
   --cor-cinza-100: #272727;
+  --cor-cinza-150: #2b2b2b;
   --cor-cinza-200: #373839;
+  --cor-cinza-250: #434343;
   --cor-cinza-300: #474747;
+  --cor-cinza-350: #555555;
   --cor-cinza-400: #727272;
   --cor-cinza-500: #9b9b9b;
   --cor-cinza-600: #c0c0c0;
@@ -37,7 +40,9 @@
   --bg-bloco: #373839;
   --bg-overlay: rgba(0, 0, 0, 0.8);
 
-  --bg-gradiente-escuro: linear-gradient(35deg, #2e2e2e, #313131, #3a3a3a);
+  --bg-colaborador: #272727;
+
+  --bg-gradiente-escuro: linear-gradient(35deg, #1a1a1a, #1f1f1f, #222222);
 
   /* ---------- TEXTO ---------- */
   --texto-principal: #f1f1f1;
@@ -46,10 +51,10 @@
   --texto-invertido: #000000;
 
   /* ---------- BOTÃO AÇAO OS ---------- */
-  --bt-acao-os: rgb(168, 168, 168);
+  --bt-acao-os: rgb(141, 141, 141);
   --bt-salvar: #388321;
   --bt-hover: #636363;
-  --bt-bg: #2e2e2e;
+  --bt-bg: #202020;
 
   /* ---------- COMPONENTES ---------- */
   --input-bg: #373839;
@@ -79,8 +84,11 @@
 
   /* ---------- CINZAS ---------- */
   --cor-cinza-100: #f1f1f1;
+  --cor-cinza-150: #f3f3f3;
   --cor-cinza-200: #dbdbdb;
+  --cor-cinza-250: #c5c5c5;
   --cor-cinza-300: #c0c0c0;
+  --cor-cinza-350: #bbbbbb;
   --cor-cinza-400: #9b9b9b;
   --cor-cinza-500: #727272;
   --cor-cinza-600: #474747;
@@ -102,7 +110,9 @@
   --bg-bloco: #fbfbfb;
   --bg-overlay: rgba(0, 0, 0, 0.5);
 
-  --bg-gradiente-claro: linear-gradient(35deg, #f7f7f7, #f1f1f1, #e8e8e8);
+  --bg-colaborador: #ffffff;
+
+  --bg-gradiente-claro: linear-gradient(35deg, #e9e9e9, #eeeeee, #f0f0f0);
   
 
   /* ---------- TEXTO ---------- */
@@ -112,7 +122,7 @@
   --texto-invertido: #ffffff;
 
   /* ---------- BOTÃO AÇAO OS ---------- */
-  --bt-acao-os: #e4e4e4;
+  --bt-acao-os: #b6b6b6;
   --bt-salvar: #388321;
   --bt-hover: #cfcfcf;
   --bt-bg: #e4e4e4;
