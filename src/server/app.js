@@ -8,7 +8,12 @@ const securityConfig = require("./config/security");
 
 const app = express();
 
+
+
 app.set('trust proxy', 1);
+// Segurança (Helmet + CORS + Rate limit)
+securityConfig(app);
+
 // ---------------------------
 // Middlewares globais
 // ---------------------------
@@ -17,9 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Sessão centralizada
 app.use(sessionMiddleware);
-
-// Segurança (Helmet + CORS + Rate limit)
-securityConfig(app);
 
 // Arquivos estáticos (HTML, CSS, JS do front)
 app.use(express.static(path.join(__dirname, "../../public")));
