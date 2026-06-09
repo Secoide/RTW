@@ -6,11 +6,31 @@ module.exports = {
   port: Number(process.env.PORT) || 3000,
 
   db: {
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'bd_cadastro',
-    port: Number(process.env.DB_PORT) || 3306,
+    host:
+      process.env.RAILWAY_DB_HOST ||
+      process.env.DB_HOST ||
+      'localhost',
+
+    user:
+      process.env.RAILWAY_DB_USER ||
+      process.env.DB_USER ||
+      'root',
+
+    password:
+      process.env.RAILWAY_DB_PASSWORD ||
+      process.env.DB_PASSWORD ||
+      '',
+
+    database:
+      process.env.RAILWAY_DB_DATABASE ||
+      process.env.DB_NAME ||
+      'bd_cadastro',
+
+    port: Number(
+      process.env.RAILWAY_DB_PORT ||
+      process.env.DB_PORT ||
+      3306
+    ),
   },
 
   redis: {
@@ -36,7 +56,7 @@ module.exports = {
       process.env.RAILWAY_DB_DATABASE,
 
     port:
-       process.env.RAILWAY_DB_PORT
+      process.env.RAILWAY_DB_PORT
 
   },
   nodeEnv: process.env.NODE_ENV || 'development',

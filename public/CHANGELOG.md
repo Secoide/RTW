@@ -6,8 +6,6 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
-
-
 ## [1.5.0] - 2026-06-08
 ## Nome: 🧠 Central IA
 ### Adicionado
