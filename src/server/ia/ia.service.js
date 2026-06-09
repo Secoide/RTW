@@ -501,7 +501,7 @@ function identificarToolRapida(pergunta) {
 
     if (
         p.includes("versao atual") ||
-        p.includes("ultima versao")||
+        p.includes("ultima versao") ||
         p.includes("Qual a versão do sistema?")
     ) {
 
@@ -709,27 +709,45 @@ async function gerarComRetry(
 
         } catch (err) {
 
+            // Créditos esgotados
+            if (
+                err.message?.includes(
+                    "prepayment credits are depleted"
+                )
+            ) {
+
+                throw new Error(
+                    "Créditos Gemini esgotados. Recarrague."
+                );
+
+            }
+
+            console.error(
+                "Gemini erro completo:",
+                JSON.stringify(
+                    err,
+                    null,
+                    2
+                )
+            );
+
             const status =
-                err?.status;
+                err?.status ||
+                err?.response?.status;
 
             console.error(
                 `Erro Gemini tentativa ${tentativa}:`,
                 status
             );
 
-            // ====================================================
-            // RETRY APENAS ERROS TEMPORÁRIOS
-            // ====================================================
-
+            // Retry apenas para erros temporários
             if (
                 status === 503 ||
                 status === 429
             ) {
 
-                // espera progressiva
-
                 const tempo =
-                    tentativa * 2000;
+                    tentativa * 3000;
 
                 await new Promise(
                     resolve =>
@@ -743,8 +761,6 @@ async function gerarComRetry(
 
             }
 
-            // erro definitivo
-
             throw err;
 
         }
@@ -756,7 +772,6 @@ async function gerarComRetry(
     );
 
 }
-
 
 
 // ============================================================
@@ -1468,11 +1483,11 @@ ${JSON.stringify(dadosSistema, null, 2)}
 
     } catch (err) {
 
-        console.error(err);
+            console.error(err);
 
-        return `❌ Erro interno IA.`;
+            return `❌ ${err.message}`;
 
-    }
+        }
 
 }
 
