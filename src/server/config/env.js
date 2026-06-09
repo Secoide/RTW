@@ -1,36 +1,25 @@
 require('dotenv').config();
 
 const DOZE_HORAS = 1000 * 60 * 60 * 12; // 12h
-
+console.log("================================");
+console.log("DB_HOST =", process.env.DB_HOST);
+console.log("DB_PORT =", process.env.DB_PORT);
+console.log("DB_USER =", process.env.DB_USER);
+console.log("DB_NAME =", process.env.DB_NAME);
+console.log("================================");
 module.exports = {
   port: Number(process.env.PORT) || 3000,
 
   db: {
-    host:
-      process.env.RAILWAY_DB_HOST ||
-      process.env.DB_HOST ||
-      'localhost',
-
-    user:
-      process.env.RAILWAY_DB_USER ||
-      process.env.DB_USER ||
-      'root',
-
-    password:
-      process.env.RAILWAY_DB_PASSWORD ||
-      process.env.DB_PASSWORD ||
-      '',
-
-    database:
-      process.env.RAILWAY_DB_DATABASE ||
-      process.env.DB_NAME ||
-      'bd_cadastro',
-
+    host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
+    user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+    database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'bd_cadastro',
     port: Number(
-      process.env.RAILWAY_DB_PORT ||
+      process.env.MYSQLPORT ||
       process.env.DB_PORT ||
       3306
-    ),
+    )
   },
 
   redis: {
