@@ -23,6 +23,8 @@ async function getExame(req, res) {
   }
 }
 
+
+
 // POST /api/exame
 async function createExame(req, res) {
   try {
@@ -43,6 +45,7 @@ async function agendarExame(req, res) {
     res.status(400).json({ erro: err.message });
   }
 }
+
 
 // PUT /api/exame/:id
 async function updateExame(req, res) {

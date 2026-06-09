@@ -97,23 +97,18 @@ export async function initProgramacao() {
       $('.lista-anotacoes').append(html);
 
       $('#anotacaoTexto').val('');
+      salvarAnotacoesDia();  
     }
 
     if (ev.target.classList.contains('btn-remover-anotacao')) {
-
       ev.target.closest('.item-anotacao').remove();
+      salvarAnotacoesDia();
     }
 
 
     // Cancelar modal
     if (ev.target.id === "btnCancelarAnotacoes") {
       document.getElementById("modalAnotacao").style.display = "none";
-      return;
-    }
-
-    // Salvar aviso
-    if (ev.target.id === "btnSalvarAnotacoes") {
-      salvarAnotacoesDia();
       return;
     }
 
@@ -169,7 +164,6 @@ export async function initProgramacao() {
 
     const iconesFormatados =
         `{${icones.join(';')}}`;
-    console.log(iconesFormatados);
     try {
 
         await $.ajax({
@@ -200,7 +194,6 @@ export async function initProgramacao() {
                 });
         const dataSelecionada = new Date($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
-        $('#modalAnotacao').hide();
 
     } catch (err) {
 

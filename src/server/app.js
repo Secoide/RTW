@@ -61,6 +61,8 @@ app.use('/api/materiais', require('./routes/material.routes'));
 app.use("/api/fornecedor", require('./routes/fornecedor.routes'));
 
 app.use("/api/ia", require("./ia/ia.routes"));
+app.use("/api/ia2", require("./ia2/ia2.routes"));
+
 
 const rhRoutes = require("./routes/rh.routes");
 app.use("/api/rh", rhRoutes);

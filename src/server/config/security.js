@@ -55,7 +55,7 @@ function securityConfig(app) {
             "wss:",
             "https://ka-f.fontawesome.com",
             "https://cdn.jsdelivr.net",
-  "https://api.open-meteo.com"
+            "https://api.open-meteo.com"
           ],
         },
       },
@@ -67,33 +67,48 @@ function securityConfig(app) {
    * 2. CORS com domínios permitidos
   */
   const cors = require("cors");
- 
-  app.use(cors({
-    origin: "http://localhost:3000",  // frontend
-    credentials: true                 // permite envio de cookies
-  }));
- 
-/*
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || corsOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
-if (nodeEnv === 'development') {
-  console.log('⚠️  Security config: Helmet, CORS e Rate Limit ativos.');
-  console.log('   Allowed origins:', corsOrigins);
-}
 
-*/
+  app.use(cors({
+    origin: function (origin, callback) {
+
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (
+        origin.startsWith("http://localhost") ||
+        origin.startsWith("http://127.0.0.1")
+      ) {
+        return callback(null, true);
+      }
+
+      callback(null, true);
+    },
+
+    credentials: true
+  }));
+
+  /*
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        if (!origin || corsOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    })
+  );
+  if (nodeEnv === 'development') {
+    console.log('⚠️  Security config: Helmet, CORS e Rate Limit ativos.');
+    console.log('   Allowed origins:', corsOrigins);
+  }
+  
+  */
 
 
   /**

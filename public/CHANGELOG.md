@@ -5,20 +5,34 @@ Todos os formatos de mudanças importantes neste projeto serão documentados nes
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [1.5.0] - 2026-05-11
+
+
+## [1.5.0] - 2026-06-08
 ## Nome: 🧠 Central IA
 ### Adicionado
-- Consulta de colaboradores por OS, histórico operacional e localização atual
-- Consulta de colaboradores disponíveis, aniversariantes e serviços programados
-- Ranking de produtividade por empresa, período, mês, ano e dia da semana
-- Ranking por domingos, sábados e datas específicas
-- Interpretação automática de datas, períodos e perguntas operacionais
-- Reconhecimento inteligente de empresas e sistema de aliases (PMB, JTI, FEMSA, etc.)
-- Agrupamento inteligente de histórico por OS e datas de atuação
-- Destaques visuais para métricas, colaboradores e empresas
-- Loading inteligente com mensagens dinâmicas e frases operacionais
-- Cache inteligente de empresas
-- Integração operacional em tempo real com banco de dados
+- Consulta de colaboradores por OS, histórico operacional e localização atual;
+- Consulta de colaboradores disponíveis, aniversariantes e serviços programados;
+- Ranking de produtividade por empresa, período, mês, ano e dia da semana;
+- Ranking por domingos, sábados e datas específicas;
+- Interpretação automática de datas, períodos e perguntas operacionais;
+- Reconhecimento inteligente de empresas e sistema de aliases;
+- Agrupamento inteligente de histórico por OS e datas de atuação;
+- Destaques visuais para métricas, colaboradores e empresas;
+- Loading inteligente com mensagens dinâmicas e frases operacionais;
+- Cache inteligente de empresas;
+- Integração operacional em tempo real com banco de dados;
+- Sistema inteligente de perfil de colaboradores com cards dinâmicos e foto integrada;
+- Proteção de dados sensíveis com controle de permissão e bloqueio automático;
+- Renderização de gráficos e componentes inteligentes dentro do chat;
+- Parser avançado para reconhecimento contextual de colaboradores e consultas operacionais;
+- Rolagem inteligente e melhorias na experiência visual da Central IA;
+
+### Alterado
+- Implementado salvamento automático de anotações, com gravação imediata ao adicionar ou remover itens, eliminando a necessidade do botão "Salvar";
+
+### Corrigido
+- Corrigida a exibição da pré-visualização de anotações, evitando a abertura acidental do tooltip ao passar rapidamente o mouse sobre o ícone;
+
 
 
 ## [1.4.2] - 2025-12-15

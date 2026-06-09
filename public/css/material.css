@@ -126,7 +126,7 @@ h1 {
   border-radius: 15%;
   object-fit: cover;
   image-rendering: -webkit-optimize-contrast;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .col-material .tb_imgMaterialAutocomplete {

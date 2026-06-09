@@ -1107,3 +1107,61 @@ input:checked+.slider:before {
     width: 100% !important;
     height: 100% !important;
 }
+
+.painel_addConquista{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.painel_conquistasGrid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    max-height:330px;
+    overflow:auto;
+}
+
+.cardConquista{
+    width:120px;
+    min-height:100px;
+
+    background:var(--bg-card);
+
+    border-radius:10px;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:10px;
+}
+
+.cardConquistaGold{
+    border: 1px solid gold;
+    background: repeating-linear-gradient(48deg, #6363630a, transparent 100px);
+}
+
+
+.cardConquista .icone{
+    font-size:32px;
+}
+
+.cardConquista .titulo{
+    margin-top:8px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.cardConquista .data{
+    font-size:10px;
+    color:gray;
+}
+
+optgroup {
+    background-color: var(--bg-padrao);
+}

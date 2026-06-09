@@ -17,6 +17,9 @@ router.post('/atestar', verificarAutenticacao, colaboradoresController.cadastrar
 router.get("/historico-empresas/:idFuncionario", verificarAutenticacao, colaboradoresController.getHistoricoColabPorEmpresas);
 router.get("/cbx", verificarAutenticacao, colaboradoresController.getColaboradorCBX);
 router.get("/aniversariantes", verificarAutenticacao, colaboradoresController.getColaboradoresAniversariantes);
+router.get("/hall-experiencia", verificarAutenticacao, colaboradoresController.getHallExperiencia);
+router.post('/conquista',verificarAutenticacao, colaboradoresController.addConquista);
+router.get('/conquistas/:id', verificarAutenticacao, colaboradoresController.getConquistasColaborador);
 
 // Upload de foto
 router.post('/upload-foto', verificarAutenticacao, upload.single('fotoperfil'), colaboradoresController.uploadFoto);

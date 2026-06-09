@@ -1,5 +1,8 @@
 const iaService = require("./ia.service");
 
+const iaAlertas =
+    require("./ia.alertas");
+
 // ============================================================
 // CHAT IA
 // ============================================================
@@ -20,7 +23,7 @@ async function chatIA(req, res) {
         }
 
         const resposta =
-            await iaService.perguntarIA(pergunta);
+    await iaService.perguntarIA(pergunta, req.session.nivel_acesso, req.session.usuarioNome);
 
         return res.json({
             sucesso: true,
@@ -40,6 +43,34 @@ async function chatIA(req, res) {
 
 }
 
+
+async function buscarAlertasIA(
+    req,
+    res
+) {
+
+    try {
+
+        const alertas =
+            await iaAlertas
+                .buscarAlertasIA();
+
+        res.json(alertas);
+
+    } catch(err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            erro:
+                "Erro alertas IA"
+        });
+
+    }
+
+}
+
 module.exports = {
-    chatIA
+    chatIA,
+    buscarAlertasIA
 };

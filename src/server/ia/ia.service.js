@@ -9,6 +9,7 @@ let cacheEmpresas = [];
 
 let cacheEmpresasData = null;
 
+
 const {
     GoogleGenerativeAI
 } = require("@google/generative-ai");
@@ -58,6 +59,8 @@ const modelChat =
 
 let cacheColaboradores = null;
 let cacheColaboradoresTime = 0;
+
+
 
 // ============================================================
 // NORMALIZAR
@@ -498,7 +501,8 @@ function identificarToolRapida(pergunta) {
 
     if (
         p.includes("versao atual") ||
-        p.includes("ultima versao")
+        p.includes("ultima versao")||
+        p.includes("Qual a versão do sistema?")
     ) {
 
         return "buscarUltimaVersao";
@@ -510,7 +514,6 @@ function identificarToolRapida(pergunta) {
     // ========================================================
 
     if (
-
         p.includes("quem trabalhou") ||
         p.includes("quem trabalhou hoje") ||
         p.includes("quem trabalhou ontem") ||
@@ -518,11 +521,8 @@ function identificarToolRapida(pergunta) {
         p.includes("quais colaboradores trabalharam") ||
         p.includes("funcionarios trabalharam") ||
         p.includes("quem executou hoje")
-
     ) {
-
         return "buscarColaboradoresPorData";
-
     }
 
     // ========================================================
@@ -533,9 +533,7 @@ function identificarToolRapida(pergunta) {
         p.includes("disponiveis") ||
         p.includes("quem esta livre")
     ) {
-
         return "buscarDisponiveis";
-
     }
 
     // ========================================================
@@ -682,50 +680,7 @@ Resposta:
     }
 
 }
-// ============================================================
-// EXECUTAR TOOL
-// ============================================================
 
-async function executarTool(nome, args) {
-
-    switch (nome) {
-
-        case "buscarUltimaVersao":
-            return await tools.buscarUltimaVersao();
-
-        case "buscarColaboradoresPorData":
-            return await tools.buscarColaboradoresPorData(args);
-
-        case "buscarVersaoSistema":
-            return await tools.buscarVersaoSistema(args);
-
-        case "buscarColaboradoresDisponiveis":
-            return await tools.buscarColaboradoresDisponiveis(args);
-
-        case "buscarAniversariantes":
-            return await tools.buscarAniversariantes();
-
-        case "buscarOS":
-            return await tools.buscarOS(args);
-
-        case "buscarColaboradoresOSIA":
-            return await tools.buscarColaboradoresOSIA(args);
-
-        case "buscarColaborador":
-            return await tools.buscarColaborador(args);
-
-        case "buscarRankingColaboradores":
-            return await tools.buscarRankingColaboradores(args);
-
-        case "buscarDisponiveis":
-            return await tools.buscarDisponiveis(args);
-
-        default:
-            return null;
-
-    }
-
-}
 
 // ============================================================
 // RETRY GEMINI
@@ -809,8 +764,11 @@ async function gerarComRetry(
 // ============================================================
 
 
-async function perguntarIA(pergunta) {
-
+async function perguntarIA(
+    pergunta,
+    nivelAcesso,
+    nomeUsuario
+) {
     try {
 
         if (!pergunta) {
@@ -1106,7 +1064,35 @@ async function perguntarIA(pergunta) {
                     });
 
         }
+        // ====================================================
+        // DETALHES COLABORADOR
+        // ====================================================
 
+        else if (
+
+            parsed.intent ===
+            "colaborador_detalhes"
+
+        ) {
+
+            dadosSistema =
+                await iaModel
+                    .buscarDetalhesColaborador(
+                        parsed.nomeColaborador
+                    );
+
+            // ====================================================
+            // REMOVE DADOS SENSÍVEIS
+            // ====================================================
+
+            if (nivelAcesso < 4 && !dadosSistema) {
+                delete dadosSistema.cpf;
+                delete dadosSistema.rg;
+                delete dadosSistema.telefone;
+                delete dadosSistema.mail;
+            }
+
+        }
         // ====================================================
         // RANKING
         // ====================================================
@@ -1240,127 +1226,9 @@ Posso ajudar com:
         // PROMPT FINAL
         // ====================================================
 
-        const pro2222mpt = `
-Você é uma IA operacional da RTW Engenharia.
-
-REGRAS OBRIGATÓRIAS:
-
-- Responda SOMENTE utilizando os dados recebidos.
-- Responda com nível técnico e seja educado.
-- Nunca invente dados.
-- Nunca invente colaboradores.
-- Nunca invente OS.
-- Nunca responda JSON.
-- Nunca use markdown complexo.
-- Organize visualmente a resposta.
-- Comente sempre algo no final de cada resposta com dados.
-IMPORTANTE:
-
-Intent:${parsed.intent}
-
-Quando Dados possuir um array com objetos,
-isso significa que EXISTEM dados válidos.
-- Quando intent for "historico_colaborador":
-    • NÃO listar outros colaboradores
-    • NÃO mostrar equipe
-    • NÃO mostrar supervisor
-    • Sempre mostrar as datas de atuação
-    • Nunca omitir datas
-    • Mostrar datas abaixo da OS
-    • Agrupar datas da mesma OS
-    • Mostrar apenas:
-        - OS
-        - descrição
-        - empresa
-        - data
-
-Nunca responder:
-"Nenhum dado encontrado"
-se o array possuir itens.
-
-EXEMPLO OS HISTORICO:
-
-@%OS 1522@%
-
-Descrição: Ampliação Oficina
-Empresa: #%FEMSA#%
-Datas:
-• 08/10/2025
-• 23/09/2025
-
-FORMATAÇÃO OBRIGATÓRIA:
-
-- Títulos:
-### TITULO
-
-- Listas:
-• item
-
-- Labels:
-Descrição:
-Empresa:
-Supervisor:
-Colaboradores:
-Data:
-Datas:
-
-- Destaque nomes usando:
-$%NOME$%
-- NÃO destacar nome de supervisor.
-
-- Destaque empresas usando:
-#%EMPRESA#%
-
-- Destaque OS usando:
-@%OS 1523@%
-
-EXEMPLO CORRETO:
-
-### Colaboradores Disponíveis
-
-• $%Guilherme$%
-• $%Marcos$%
-• $%Felipe$%
-
-EXEMPLO OS:
-
-@%OS 1523@%
-
-Descrição: Reforma elétrica
-
-Empresa: #%PMB#%
-
-Supervisor:
-$%Guilherme$%
-
-Colaboradores:
-• $%Marcos$%
-• $%Felipe$%
-
-EXEMPLO RANKING:
-- Comente algo no começo sobre o ranking.
-- Adicione um icone de trofeu, citando o ganhador.
-
-1º: $%Guilherme$% - 12
-
-2º: $%Felipe$% - 11
-
-3º: $%Marcos$% - 7
-
-- Comente algo no final sobre os resutlados.
-
-Se os dados estiverem vazios:
-"Nenhum dado encontrado."
-
-
-Pergunta:
-${pergunta}
-
-Dados:
-${JSON.stringify(dadosSistema, null, 2)}
-`;
         const prompt = `
-Você é a IA operacional da RTW Engenharia.
+Você é a IA operacional da RTW Engenharia. 
+O nome do usuario que esta falando contigo é: ${nomeUsuario}.
 
 OBJETIVO:
 Responder consultas operacionais de forma:
@@ -1386,7 +1254,6 @@ REGRAS OBRIGATÓRIAS:
 
 PERMITIDO:
 
-- Fazer comentários mais longos no final.
 - Interagir de forma humana e agradável.
 
 EXEMPLOS DE COMENTÁRIOS VÁLIDOS:
@@ -1440,9 +1307,49 @@ Datas: (12 dias)
 • 23/09/2025
 
 
-- Quanto intente for aniversariantes coloque um comentario engraçado na resposta.
+- Quanto intent for aniversariantes coloque um comentario engraçado na resposta.
+
 EXEMPLO ANIVERSARIANTES:
 $%Marcos Lopes$% - 25/02/1994
+
+- Fale algo engraçado para os aniversariantes, com icones e mais paragrafos.
+
+- Quando intent for "colaborador_detalhes":
+ • Não usar:
+    "Espero que esta informação seja útil"
+• Destacar nome.     
+- Fale SEMPRE algo engraçado no começo sobre o colaborador detalhado, porem NÃO fale os dados neste paragrafo.
+- Quando tiver data demissional destaque que foi desligado no dia informado e o tempo que durou na empresa.
+- Quando tiver data admissional e sem data demissional, cite o tempo que esta na empresa.
+- NUNCA calcule tempo de empresa.
+- O campo "tempo_empresa" já vem calculado corretamente.
+- Apenas utilize exatamente o valor informado.
+
+Retorne obrigatoriamente:
+
+[COLABORADOR]
+{
+  "nome":"",
+  "cpf":"",
+  "rg":"",
+  "cargo":"",
+  "empresa":"",
+  "telefone":"",
+  "mail":"",
+  "endereco":"",
+  "cnh":"",
+  "nascimento_idade":"",
+  "data_admissional":"",
+  "data_demissional":"",
+  "fotoperfil":"",
+  "versao_foto":"",
+}
+[/COLABORADOR]
+
+- Use SOMENTE os dados recebidos
+- Nunca invente campos
+- Retorne JSON válido
+- Use aspas duplas
 
 FORMATAÇÃO OBRIGATÓRIA:
 
@@ -1510,16 +1417,30 @@ REGRAS:
 
 
 EXEMPLO RANKING:
-- Comente algo no começo sobre o ranking.
-- O ganhador do primeiro lugar, recebe um icone de troféu.
+- Quando houver rankings, estatísticas ou comparações,
+gere também um gráfico.
 
-1º: $%Guilherme$% - 12
+FORMATO OBRIGATÓRIO:
 
-2º: $%Felipe$% - 11
+[GRAFICO]
+{
+  "tipo":"bar",
+  "labels":["Nome1","Nome2","Nome3"],
+  "values":[10,8,5]
+}
+[/GRAFICO]
 
-3º: $%Marcos$% - 7
+REGRAS:
+- Retorne JSON válido
+- Use apenas:
+  "bar"
+  "pie"
+  "line"
+- labels e values devem possuir o mesmo tamanho
+- Nunca invente dados
+- Gere gráfico apenas quando fizer sentido
 
-- Finalize a resposta com um pequeno comentário operacional.
+
 - Sempre que houver dados suficientes, adicione uma curiosidade relevante sobre:
 • colaboradores
 • frequência de atuação
