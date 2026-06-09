@@ -86,12 +86,12 @@ export async function carregarConquistasColaborador(
         },
 
         DESTAQUE_MES: {
-            icone: '🏆',
+            icone: '🏅',
             nome: 'Destaque do Mês'
         },
 
         DESTAQUE_ANO: {
-            icone: '👑',
+            icone: '🏆',
             nome: 'Destaque do Ano'
         },
 
