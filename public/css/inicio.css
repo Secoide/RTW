@@ -17,7 +17,7 @@
 
     grid-template-rows:
         140px
-        450px
+        430px
         1fr;
 
     grid-template-areas:
@@ -1671,7 +1671,7 @@ LOCK
 
     flex: 0 0 180px;
 
-    height: 200px;
+    height: 215px;
 
     background: var(--bg-card);
 

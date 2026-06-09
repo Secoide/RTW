@@ -1,5 +1,5 @@
 const connection = require('../config/db');
-const connectionRB = require('../config/railway');
+const connectionRB = require('../config/db');
 
 // Listar todos
 async function getExames() {
