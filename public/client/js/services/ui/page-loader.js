@@ -4,6 +4,8 @@ import { initGestao } from "../../bootstrap/gestao-init.js";
 import { initFerias } from "../../bootstrap/ferias-init.js";
 import { initHome } from "../../bootstrap/home-init.js";
 import { initMaterial } from "../../bootstrap/material-init.js";
+import { initGuia } from "../../bootstrap/guia-init.js";
+
 
 // Funções de carregamento de páginas
 export function carregarPagina(pagina) {
@@ -37,6 +39,9 @@ export function carregarPagina(pagina) {
         }
         if (pagina.includes('material')) {
           initMaterial();
+        }
+        if (pagina.includes('guia')) {
+          initGuia();
         }
       })
       .catch(err => {

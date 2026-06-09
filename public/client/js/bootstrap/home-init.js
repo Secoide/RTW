@@ -15,6 +15,8 @@ import { observarPermissoesPorRoles } from "../state/role.js";
 let avisoIconeSelecionado = "📄";
 let avisoEditandoId = null;
 
+let nomeUsuario = sessionStorage.getItem("nome_usuario");
+
 const Toast = Swal.mixin({
   toast: true,
   position: "top-end",
@@ -27,7 +29,20 @@ const Toast = Swal.mixin({
   }
 });
 
+const msgInicial =
+  document.getElementById(
+    "is-msg-bot-inicio"
+  );
 
+const alertasBadge =
+  document.getElementById(
+    "ia-alertas-badge"
+  );
+
+const alertasMsg =
+  document.getElementById(
+    "ia-alertas-msg"
+  );
 
 
 
@@ -372,7 +387,7 @@ export async function initHome() {
   // Só agora DOM está completo
   await carregarAniversariantes();
   await carregarAvisos();
-
+  await carregarHallExperiencia();
   initSantaDropWalkWrapper();
   // ==========================================
   // SELEÇÃO DE ÍCONES → AGORA FUNCIONA
@@ -530,7 +545,8 @@ export async function initHome() {
   // ============================================================
 
   iaButton.addEventListener("click", () => {
-
+    iaAlertIcon.style.display =
+      "none";
     iaChat.classList.toggle("active");
 
   });
@@ -632,7 +648,7 @@ export async function initHome() {
     // 15% de chance
 
     const usarEngracada =
-      Math.random() < 0.15;
+      Math.random() < 0.01;
 
     // ============================================================
     // ESCOLHER FRASE
@@ -668,8 +684,16 @@ export async function initHome() {
 
     iaMessages.appendChild(loadingDiv);
 
-    iaMessages.scrollTop =
-      iaMessages.scrollHeight;
+    if (
+      usuarioEstaNoFinal(
+        iaMessages
+      )
+    ) {
+
+      iaMessages.scrollTop =
+        iaMessages.scrollHeight;
+
+    }
 
     try {
 
@@ -722,15 +746,14 @@ export async function initHome() {
     }
 
   }
+
+
   const helpBadge =
     document.getElementById(
       "ia-help-badge"
     );
 
-  const msgInicial =
-    document.getElementById(
-      "is-msg-bot-inicio"
-    );
+
 
   // ========================================================
   // ABRIR / FECHAR AJUDA
@@ -754,12 +777,51 @@ export async function initHome() {
 
   }
 
+  // ========================================================
+  // ABRIR / FECHAR ALERTAS
+  // ========================================================
+
+  if (
+    alertasBadge &&
+    alertasMsg
+  ) {
+
+    alertasBadge.addEventListener(
+      "click",
+      () => {
+
+        alertasMsg.classList.toggle(
+          "ia-hidden"
+        );
+
+      }
+    );
+
+  }
+  function usuarioEstaNoFinal(
+    elemento
+  ) {
+
+    const tolerancia = 120;
+
+    return (
+
+      elemento.scrollHeight
+      - elemento.scrollTop
+      - elemento.clientHeight
+
+    ) < tolerancia;
+
+  }
   // ============================================================
   // ADICIONAR MENSAGEM
   // ============================================================
 
   function adicionarMensagem(texto, tipo) {
-
+    const estavaNoFinal =
+      usuarioEstaNoFinal(
+        iaMessages
+      );
     const div =
       document.createElement("div");
 
@@ -776,7 +838,14 @@ export async function initHome() {
     }
 
     let html = texto;
+    // ========================================================
+    // REMOVE TAGS DE GRÁFICO DO HTML
+    // ========================================================
 
+    html = html.replace(
+      /\[GRAFICO\][\s\S]*?\[\/GRAFICO\]/g,
+      ""
+    );
     // ========================================================
     // NOMES
     // ========================================================
@@ -898,18 +967,276 @@ export async function initHome() {
     );
 
     div.innerHTML = html;
-
+    renderizarGraficos(
+      div,
+      texto
+    );
+    renderizarColaboradorIA(
+      div,
+      texto
+    );
     iaMessages.appendChild(div);
 
-    iaMessages.scrollTop =
-      iaMessages.scrollHeight;
+    if (
+      usuarioEstaNoFinal(
+        iaMessages
+      )
+    ) {
+
+      if (estavaNoFinal) {
+
+        iaMessages.scrollTop =
+          iaMessages.scrollHeight;
+
+      }
+
+    }
 
   }
 
+  verificarAlertasIA();
+}
 
+const iaAlertIcon =
+  document.getElementById(
+    "ia-alert-icon"
+  );
 
+function mostrarInsightIA(
+  icone = "💡"
+) {
 
+  iaAlertIcon.innerText =
+    icone;
 
+  iaAlertIcon.style.display =
+    "flex";
+
+}
+
+async function verificarAlertasIA() {
+
+  try {
+
+    const req =
+      await fetch(
+        "/api/ia/alertas"
+      );
+
+    const alertas =
+      await req.json();
+
+    if (
+      !alertas.length
+    ) {
+      return;
+    }
+    if (
+      alertas.length > 0
+    ) {
+      alertasBadge.classList.remove(
+        "ia-hidden"
+      );
+      alertasMsg.innerHTML =
+        `
+<strong>
+🧠 Central IA Operacional
+</strong>
+<br><br>
+` +
+
+        alertas.map(alerta => {
+
+          return `
+
+<div class="ia-list-item">
+
+${alerta.icone}
+${alerta.mensagem}
+
+</div>
+
+      `;
+
+        }).join("");
+
+    }
+
+    // ================================================
+    // MOSTRAR ÍCONE
+    // ================================================
+
+    mostrarInsightIA(
+      alertas[0].icone
+    );
+
+    // ================================================
+    // MENSAGEM AUTOMÁTICA
+    // ================================================
+
+    window.alertasIA =
+      alertas;
+
+  } catch (err) {
+
+    console.error(err);
+
+  }
+
+}
+
+// ======================================================
+// RENDERIZAR GRÁFICOS IA
+// ======================================================
+
+function renderizarGraficos(
+  container,
+  textoOriginal
+) {
+
+  const regex =
+    /\[GRAFICO\]([\s\S]*?)\[\/GRAFICO\]/g;
+
+  const htmlOriginal =
+    textoOriginal;
+
+  const matches =
+    [...htmlOriginal.matchAll(regex)];
+
+  if (!matches.length) {
+
+    return;
+
+  }
+
+  matches.forEach((match, index) => {
+
+    try {
+
+      const jsonTexto =
+        match[1].trim();
+
+      const grafico =
+        JSON.parse(jsonTexto);
+
+      // ==========================================
+      // REMOVE TAG DO TEXTO
+      // ==========================================
+
+      container.innerHTML =
+        container.innerHTML.replace(
+          match[0],
+          ""
+        );
+
+      // ==========================================
+      // WRAPPER
+      // ==========================================
+
+      const wrapper =
+        document.createElement("div");
+
+      wrapper.className =
+        "ia-chart-wrapper";
+
+      // ==========================================
+      // CANVAS
+      // ==========================================
+
+      const canvas =
+        document.createElement("canvas");
+
+      canvas.id =
+        `ia-chart-${Date.now()}-${index}`;
+
+      wrapper.appendChild(canvas);
+
+      container.appendChild(wrapper);
+
+      // ==========================================
+      // CHART
+      // ==========================================
+
+      console.log(grafico.tipo);
+      new Chart(canvas, {
+
+        type:
+          grafico.tipo || "bar",
+        data: {
+
+          labels:
+            grafico.labels || [],
+
+          datasets: [{
+
+            label:
+              "Dados",
+
+            data:
+              grafico.values || [],
+
+            borderWidth: 2,
+            borderRadius: 8
+
+          }]
+
+        },
+
+        options: {
+
+          responsive: true,
+
+          maintainAspectRatio: false,
+
+          plugins: {
+
+            legend: {
+
+              display:
+                grafico.tipo === "pie"
+
+            }
+
+          },
+          scales: {
+
+            x: {
+
+              ticks: {
+
+                maxRotation: 45,
+                minRotation: 45,
+
+                callback: function (value) {
+
+                  const label =
+                    this.getLabelForValue(value);
+
+                  return label.length > 12
+                    ? label.substring(0, 12) + "..."
+                    : label;
+
+                }
+
+              }
+
+            }
+
+          }
+        }
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        "Erro gráfico IA:",
+        err
+      );
+
+    }
+
+  });
 
 }
 
@@ -997,3 +1324,449 @@ const observer = new MutationObserver(() => {
 
 // Observar mudanças no body (onde o HTML será injetado)
 observer.observe(document.body, { childList: true, subtree: true });
+
+// ======================================================
+// RENDERIZAR CARD COLABORADOR
+// ======================================================
+
+function renderizarColaboradorIA(
+  container,
+  textoOriginal
+) {
+  // ======================================================
+  // NÍVEL ACESSO
+  // ======================================================
+
+  const rawNivel =
+    sessionStorage.getItem(
+      "nivel_acesso"
+    );
+
+  const nivelAcesso =
+    Number.isFinite(
+      Number(rawNivel)
+    )
+
+      ? Number(rawNivel)
+
+      : Number.POSITIVE_INFINITY;
+
+  // ======================================================
+  // PERMISSÃO DADOS SENSÍVEIS
+  // ======================================================
+
+  const podeVerSensivel =
+    nivelAcesso >= 4;
+  const regex =
+    /(<br>\s*)?\[COLABORADOR\]([\s\S]*?)\[\/COLABORADOR\](<br>\s*)?/g;
+
+  const matches =
+    [...textoOriginal.matchAll(regex)];
+
+  if (!matches.length) {
+    return;
+  }
+
+
+  // remove texto bruto
+
+  container.innerHTML =
+    container.innerHTML.replace(
+      regex,
+      ""
+    );
+
+  matches.forEach(match => {
+
+    try {
+
+      const dados =
+        JSON.parse(
+          match[2].trim()
+        );
+
+      const iniciais =
+        dados.nome
+          ?.split(" ")
+          .map(x => x[0])
+          .slice(0, 2)
+          .join("")
+        || "👤";
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "ia-colaborador-card";
+
+      const imgSrc = dados.fotoperfil
+        ? `${dados.fotoperfil}?v=${dados.versao_foto || ""}`
+        : "/imagens/user-default.webp";
+
+
+      card.innerHTML = `<div class="ia-colab-topo">
+                <div class="ia-colab-avatar">
+                    <img
+                        class="ia-colab-img"
+                        src="${imgSrc}"
+                    >
+                </div>
+                <div>
+                    <div class="ia-colab-nome">
+                        ${dados.nome || "-"}
+                    </div>
+                    <div class="ia-colab-cargo">
+                        ${dados.cargo || "-"}
+                    </div>
+                </div>
+            </div>
+            <!-- ===================================================== -->
+            <!-- DADOS SENSÍVEIS -->
+            <!-- ===================================================== -->
+            <div class="ia-colab-sensitive">
+                ${!podeVerSensivel
+          ?
+          `<div
+                class="ia-colab-lock"
+                data-tooltip="
+            Você não possui permissão
+            para visualizar dados sensíveis.
+            "
+            >
+                🔒
+            </div>`
+          :
+          ""
+        }
+                <div class="ia-colab-sensitive-title" tooltip="
+            Apenas usuários com permissão avançada
+            podem visualizar os dados sensíveis.
+            ">
+                    🛡️ Dados Protegidos
+                </div>
+                <div class="ia-colab-sensitive-grid">
+
+                    <div class="ia-colab-item">
+
+                        <div class="ia-colab-label">
+                            CPF
+                        </div>
+
+                        <div class="ia-colab-value">
+
+                            ${podeVerSensivel
+          ? (dados.cpf || "-")
+          : "***.***.***-**"
+        }
+                        </div>
+
+                    </div>
+
+                    <div class="ia-colab-item">
+
+                        <div class="ia-colab-label">
+                            RG
+                        </div>
+
+                        <div class="ia-colab-value">
+
+                            ${podeVerSensivel
+          ? (dados.rg || "-")
+          : "********"
+        }
+
+                        </div>
+
+                    </div>
+
+                    <div class="ia-colab-item">
+
+                        <div class="ia-colab-label">
+                            Telefone
+                        </div>
+
+                        <div class="ia-colab-value">
+
+                            ${podeVerSensivel
+          ? (dados.telefone || "-")
+          : "(**) *****-****"
+        }
+
+                        </div>
+
+                    </div>
+
+                    <div class="ia-colab-item">
+
+                        <div class="ia-colab-label">
+                            E-mail
+                        </div>
+
+                        <div class="ia-colab-value">
+
+                            ${podeVerSensivel
+          ? (dados.mail || "-")
+          : "*************"
+        }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- DADOS GERAIS -->
+            <!-- ===================================================== -->
+
+            <div class="ia-colab-section-title">
+
+                
+
+            </div>
+
+            <div class="ia-colab-grid">
+
+                <div class="ia-colab-item">
+
+                    <div class="ia-colab-label">
+                        Empresa
+                    </div>
+
+                    <div class="ia-colab-value">
+                        ${dados.empresa || "-"}
+                    </div>
+
+                </div>
+
+                <div class="ia-colab-item">
+
+                    <div class="ia-colab-label">
+                        CNH
+                    </div>
+
+                    <div class="ia-colab-value">
+                        ${dados.cnh || "-"}
+                    </div>
+
+                </div>
+
+                <div class="ia-colab-item">
+
+                    <div class="ia-colab-label">
+                        Nascimento (Idade)
+                    </div>
+
+                    <div class="ia-colab-value">
+                        ${dados.nascimento_idade || "-"}
+                    </div>
+
+                </div>
+
+                <div class="ia-colab-item">
+
+                    <div class="ia-colab-label">
+                        Sexo
+                    </div>
+
+                    <div class="ia-colab-value">
+                        ${dados.sexo || "-"}
+                    </div>
+
+                </div>
+
+            </div>
+
+            `;
+
+      container.appendChild(card);
+
+    } catch (err) {
+
+      console.error(
+        "Erro card colaborador:",
+        err
+      );
+
+    }
+
+  });
+
+}
+
+async function carregarHallExperiencia() {
+
+  const resp =
+    await fetch(
+      "/api/colaboradores/hall-experiencia",
+      {
+        headers: {
+          authorization:
+            "Bearer "
+            + sessionStorage.getItem("token")
+        }
+      }
+    );
+
+  const lista =
+    await resp.json();
+
+  const div =
+    document.getElementById(
+      "hall-ranking"
+    );
+
+  div.innerHTML = "";
+
+  lista.forEach((c, index) => {
+
+    div.innerHTML += `
+
+      <div class="
+          card-experiencia
+          ${index === 0 ? 'top1' : ''}
+          ${c.classeCard || ''}
+      ">
+
+        <div
+          class="foto-progress"
+          style="
+            --percent:${c.progresso}
+          "
+        >
+
+          <img
+            src="${c.fotoperfil}?v=${c.versao_foto}"
+          >
+
+        </div>
+
+        <div class="medalha">
+
+          ${index === 0
+        ? "🥇"
+        : index === 1
+          ? "🥈"
+          : index === 2
+            ? "🥉"
+            : `${index + 1}º`
+      }
+      
+      </div>
+
+        <div class="nome">
+          ${c.nome}
+        </div>
+
+        <div class="titulo">
+          ${c.titulo}
+        </div>
+
+        <div class="dias">
+
+          ${c.diasRestantes}
+          dias para
+
+          ${c.proximoMarco}
+          ${c.proximoMarco === 1 ? 'ano' : 'anos'}
+
+        </div>
+        <div class="medalhas">
+
+            ${c.medalhas
+        .map(m => `
+                  <span
+                    class="medalha-item"
+                    data-tooltip="${m.titulo}"
+                  >
+                    ${m.icone}
+                  </span>
+                `)
+        .join('')
+      }
+
+        </div>
+      </div>
+      
+    `;
+
+  });
+  const hallRanking =
+    document.getElementById(
+      "hall-ranking"
+    );
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  hallRanking.addEventListener(
+    "mousedown",
+    (e) => {
+
+      isDown = true;
+
+      hallRanking.classList.add(
+        "dragging"
+      );
+
+      startX =
+        e.pageX -
+        hallRanking.offsetLeft;
+
+      scrollLeft =
+        hallRanking.scrollLeft;
+
+    }
+  );
+
+  hallRanking.addEventListener(
+    "mouseleave",
+    () => {
+
+      isDown = false;
+
+      hallRanking.classList.remove(
+        "dragging"
+      );
+
+    }
+  );
+
+  hallRanking.addEventListener(
+    "mouseup",
+    () => {
+
+      isDown = false;
+
+      hallRanking.classList.remove(
+        "dragging"
+      );
+
+    }
+  );
+
+  hallRanking.addEventListener(
+    "mousemove",
+    (e) => {
+
+      if (!isDown)
+        return;
+
+      e.preventDefault();
+
+      const x =
+        e.pageX -
+        hallRanking.offsetLeft;
+
+      const walk =
+        (x - startX) * 2;
+
+      hallRanking.scrollLeft =
+        scrollLeft - walk;
+
+    }
+  );
+}

@@ -9,9 +9,10 @@ import {
     preencherCbxSetor,
     preencherCbxCargo
 } from "../forms/populate-combobox.js";
-
+import { carregarConquistasColaborador, initaddConquistas} from "./handle-conquistas.js"
 
 export function initAbrirInfoColabClick() {
+    initaddConquistas();
     $(document).on("click", "#bt_perfilhome", function () {
         const idUsuario = sessionStorage.getItem("id_usuario");
         if (idUsuario) {
@@ -41,10 +42,10 @@ export function initAbrirInfoColabClick() {
         const $wrap = $('#formColaboradorProfissional');
         const idSetor = $(this).val();
         if (!idSetor) {
-          return;
+            return;
         }
         await preencherCbxCargo(idSetor, $wrap);
-      });
+    });
 
 
     $(document).ready(function () {
@@ -114,10 +115,10 @@ export async function get_carregarPerfilUsuario(funcId) {
 
 
         // 🔹 4 - Ajustar painéis
-        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
+        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra,.painel_conquistas, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
         $('.painel_perfil').show();
 
-        
+
         $('#btn_upload').removeClass('hidden-inicial');
         $('#bt_cadColaborador').addClass('hidden-inicial');
         $('#bt_editColab').removeClass('hidden-inicial');;
@@ -160,15 +161,17 @@ export async function get_carregarPerfilUsuario(funcId) {
         $('#empresacontrato').val(dados.empresaContrato);
         $('#idColaboradorPro').val(dados.id);
         $('#selectSetor').val(dados.setor).trigger('change');
-        
-        await preencherCbxCargo(dados.setor, $wrap)    
+
+        await preencherCbxCargo(dados.setor, $wrap)
         setTimeout(() => {
             $('#selectCargo').val(dados.cargo);
         }, 100);
 
         initMaleta();
         preencherTabelaAtestar(dados.id);
-
+        await carregarConquistasColaborador(
+            dados.id
+        );
         return dados;
 
     } catch (error) {
@@ -248,13 +251,13 @@ function preencherCNH(cnh) {
 export function open_form_cad_colaborador() {
     $('#form_cadColab').empty().load('../html/forms/cadastrocolaborador.html', function () {
         initColabForm();
-        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
-        
+        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar,.painel_conquistas, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
+
         $('.painel_perfil').show();
         $('[data-target]').hide();     // esconde todos
         $('[data-target=".painel_perfil"]').show();  // mostra só o perfil
-        
-        
+
+
         $('#btn_upload').addClass('hidden-inicial');
         $('#bt_editColab').addClass('hidden-inicial');
         $('#bt_cadColaborador').removeClass('hidden-inicial');

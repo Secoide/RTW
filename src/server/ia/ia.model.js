@@ -472,7 +472,7 @@ async function buscarDadosOperacionais(
                 ) AS data,
 
                 f.nome AS colaborador,
-
+                f.fotoperfil, f.versao_foto,
                 e.nome AS empresa,
 
                 sup.nome AS supervisor
@@ -1028,16 +1028,27 @@ async function buscarAniversariantes(
 
             SELECT
 
-                nome,
+                f.nome,
 
                 DATE_FORMAT(
-                    nascimento,
+                    f.nascimento,
                     '%d/%m/%Y'
                 ) AS aniversario
 
-            FROM funcionarios
+            FROM funcionarios f
 
-            WHERE 1 = 1
+            WHERE NOT EXISTS (
+
+                SELECT 1
+
+                FROM funcionarios_contem_exames fce
+                JOIN exames e
+                    ON e.idexame = fce.idexame
+
+                WHERE fce.idfuncionario = f.id
+                  AND LOWER(e.nome) = 'demissional'
+
+            )
 
         `;
 
@@ -1050,7 +1061,7 @@ async function buscarAniversariantes(
         if (filtros.mes) {
 
             sql += `
-                AND MONTH(nascimento) = ?
+                AND MONTH(f.nascimento) = ?
             `;
 
             params.push(
@@ -1062,7 +1073,7 @@ async function buscarAniversariantes(
         sql += `
 
             ORDER BY
-                DAY(nascimento)
+                DAY(f.nascimento)
 
         `;
 
@@ -1071,6 +1082,7 @@ async function buscarAniversariantes(
                 sql,
                 params
             );
+
         return rows;
 
     } catch (err) {
@@ -1085,6 +1097,241 @@ async function buscarAniversariantes(
     }
 
 }
+
+
+// =====================================================
+// DETALHES COLABORADOR
+// =====================================================
+
+async function buscarDetalhesColaborador(
+    nomeColaborador
+) {
+
+    const nomeTexto =
+        String(nomeColaborador || "");
+    
+    const partes =
+        nomeTexto.split(" ");
+
+    const nome1 =
+        `%${partes[0]}%`;
+
+    const nome2 =
+        `%${partes[1] || partes[0]}%`;
+    console.log(nome1, nome2)
+    const [rows] =
+        await connection.query(`
+                WITH exames_func AS (
+
+            SELECT 
+                fce2.idfuncionario,
+
+                MAX(
+                    CASE 
+                        WHEN LOWER(e.nome) = 'admissional' 
+                        THEN fce2.data 
+                    END
+                ) AS data_admissional,
+
+                MAX(
+                    CASE 
+                        WHEN LOWER(e.nome) = 'demissional' 
+                        THEN fce2.data 
+                    END
+                ) AS data_demissional
+
+            FROM funcionarios_contem_exames fce2
+
+            LEFT JOIN exames e 
+                ON e.idexame = fce2.idexame
+
+            GROUP BY fce2.idfuncionario
+        )
+
+        SELECT
+            f.id,
+            f.nome,
+            f.cpf,
+            f.rg,
+            f.mail,
+            f.telefone,
+            f.endereco,
+            f.cnh,
+            c.cargo,
+            f.nascimento,
+
+            CASE
+                WHEN f.sexo = 1 THEN 'Masculino'
+                WHEN f.sexo = 0 THEN 'Feminino'
+                WHEN f.sexo = 2 THEN 'Indefinido'
+                ELSE '-'
+            END AS sexo,
+
+            CONCAT(
+                DATE_FORMAT(f.nascimento, '%d/%m/%Y'),
+                ' (',
+                TIMESTAMPDIFF(YEAR, f.nascimento, CURDATE()),
+                ' anos)'
+            ) AS nascimento_idade,
+
+            f.empresaContrato,
+            f.fotoperfil,
+            f.versao_foto,
+            f.sobre,
+
+            exf.data_admissional,
+            exf.data_demissional,
+
+            /* =========================================================
+            TEMPO DE EMPRESA
+            ========================================================= */
+
+            CASE
+
+                /* FUNCIONÁRIO DESLIGADO */
+
+                WHEN exf.data_demissional IS NOT NULL THEN
+
+                    CONCAT(
+
+                        TIMESTAMPDIFF(
+                            YEAR,
+                            exf.data_admissional,
+                            exf.data_demissional
+                        ),
+                        ' anos, ',
+
+                        TIMESTAMPDIFF(
+                            MONTH,
+                            DATE_ADD(
+                                exf.data_admissional,
+                                INTERVAL TIMESTAMPDIFF(
+                                    YEAR,
+                                    exf.data_admissional,
+                                    exf.data_demissional
+                                ) YEAR
+                            ),
+                            exf.data_demissional
+                        ),
+                        ' meses e ',
+
+                        DATEDIFF(
+                            exf.data_demissional,
+
+                            DATE_ADD(
+
+                                DATE_ADD(
+                                    exf.data_admissional,
+                                    INTERVAL TIMESTAMPDIFF(
+                                        YEAR,
+                                        exf.data_admissional,
+                                        exf.data_demissional
+                                    ) YEAR
+                                ),
+
+                                INTERVAL TIMESTAMPDIFF(
+                                    MONTH,
+
+                                    DATE_ADD(
+                                        exf.data_admissional,
+                                        INTERVAL TIMESTAMPDIFF(
+                                            YEAR,
+                                            exf.data_admissional,
+                                            exf.data_demissional
+                                        ) YEAR
+                                    ),
+
+                                    exf.data_demissional
+                                ) MONTH
+                            )
+                        ),
+                        ' dias'
+                    )
+
+                /* FUNCIONÁRIO ATIVO */
+
+                WHEN exf.data_admissional IS NOT NULL THEN
+
+                    CONCAT(
+
+                        TIMESTAMPDIFF(
+                            YEAR,
+                            exf.data_admissional,
+                            CURDATE()
+                        ),
+                        ' anos, ',
+
+                        TIMESTAMPDIFF(
+                            MONTH,
+                            DATE_ADD(
+                                exf.data_admissional,
+                                INTERVAL TIMESTAMPDIFF(
+                                    YEAR,
+                                    exf.data_admissional,
+                                    CURDATE()
+                                ) YEAR
+                            ),
+                            CURDATE()
+                        ),
+                        ' meses e ',
+
+                        DATEDIFF(
+                            CURDATE(),
+
+                            DATE_ADD(
+
+                                DATE_ADD(
+                                    exf.data_admissional,
+                                    INTERVAL TIMESTAMPDIFF(
+                                        YEAR,
+                                        exf.data_admissional,
+                                        CURDATE()
+                                    ) YEAR
+                                ),
+
+                                INTERVAL TIMESTAMPDIFF(
+                                    MONTH,
+
+                                    DATE_ADD(
+                                        exf.data_admissional,
+                                        INTERVAL TIMESTAMPDIFF(
+                                            YEAR,
+                                            exf.data_admissional,
+                                            CURDATE()
+                                        ) YEAR
+                                    ),
+
+                                    CURDATE()
+                                ) MONTH
+                            )
+                        ),
+                        ' dias'
+                    )
+
+                ELSE NULL
+
+            END AS tempo_empresa
+
+        FROM funcionarios f
+
+        LEFT JOIN tb_cargos c 
+            ON f.cargo = c.id
+
+        LEFT JOIN exames_func exf
+            ON exf.idfuncionario = f.id
+        WHERE
+            LOWER(f.nome) LIKE ?
+        AND
+            LOWER(f.nome) LIKE ?
+
+        LIMIT 1;
+
+    `, [nome1, nome2]);
+     console.log(rows[0]);       
+    return rows[0] || null;
+
+}
+
 /* ==========================================================
    EXPORTS
 ========================================================== */
@@ -1096,5 +1343,6 @@ module.exports = {
     buscarDisponiveis,
     buscarHistoricoColaborador,
     buscarEstatisticaColaborador,
+    buscarDetalhesColaborador,
     buscarAniversariantes
 };

@@ -8,6 +8,9 @@ const verificarAutenticacao =
 const iaController =
     require("./ia.controller");
 
+
+router.get('/alertas', verificarAutenticacao, iaController.buscarAlertasIA);
+
 // ============================================================
 // CHAT IA
 // ============================================================
@@ -17,5 +20,6 @@ router.post(
     verificarAutenticacao,
     iaController.chatIA
 );
+
 
 module.exports = router;

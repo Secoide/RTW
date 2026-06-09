@@ -1,29 +1,30 @@
 const connection = require('../config/db');
+const connectionRB = require('../config/railway');
 
 // Listar todos
 async function getExames() {
-    const [rows] = await connection.query(`
+  const [rows] = await connection.query(`
     SELECT *
       FROM exames
       ORDER BY nome ASC;
   `);
-    return rows;
+  return rows;
 }
 
 // Buscar por ID
 async function getExameById(id) {
-    const [rows] = await connection.query(
-        `SELECT telefone, email
+  const [rows] = await connection.query(
+    `SELECT telefone, email
       FROM exames 
       WHERE id_supervisores = ?`,
-        [id]
-    );
-    return rows[0] || null;
+    [id]
+  );
+  return rows[0] || null;
 }
 
 // Buscar supervisor por ID da empresa
 async function getExameByColaborador(idFunc) {
-    const [rows] = await connection.query(`
+  const [rows] = await connection.query(`
       WITH ultimos AS (
           SELECT
             f.id                                  AS idfunc,
@@ -94,28 +95,104 @@ async function getExameByColaborador(idFunc) {
           DATE_ADD(u.data, INTERVAL u.vencimento MONTH) ASC;
       `, [idFunc]);
 
-    return rows || [];  // sempre retorna array
+  return rows || [];  // sempre retorna array
+}
+
+
+// ============================================================
+// ALERTAS IA
+// ============================================================
+
+async function buscarAlertasExames() {
+
+  const [rows] =
+    await connectionRB.query(`
+
+        WITH ultimos AS (
+
+    SELECT
+        f.id,
+        f.nome AS colaborador,
+        e.nome AS exame,
+        fce.data,
+        fce.vencimento,
+
+        ROW_NUMBER() OVER (
+            PARTITION BY f.id, e.idexame
+            ORDER BY fce.data DESC
+        ) AS rn
+
+    FROM funcionarios f
+
+    JOIN funcionarios_contem_exames fce
+        ON f.id = fce.idfuncionario
+
+    JOIN exames e
+        ON e.idexame = fce.idexame
+
+    WHERE LOWER(e.nome) <> 'demissional'
+
+    AND NOT EXISTS (
+        SELECT 1
+        FROM funcionarios_contem_exames fd
+        JOIN exames ed
+            ON ed.idexame = fd.idexame
+        WHERE fd.idfuncionario = f.id
+          AND LOWER(ed.nome) = 'demissional'
+    )
+
+)
+
+SELECT
+    colaborador,
+    exame,
+
+    DATE_FORMAT(
+        DATE_ADD(data, INTERVAL vencimento MONTH),
+        '%d/%m/%Y'
+    ) AS vencimento,
+
+    DATEDIFF(
+        DATE_ADD(data, INTERVAL vencimento MONTH),
+        CURDATE()
+    ) AS dias_restantes
+
+FROM ultimos
+
+WHERE rn = 1
+  AND vencimento > 0
+  AND DATEDIFF(
+        DATE_ADD(data, INTERVAL vencimento MONTH),
+        CURDATE()
+      ) <= 30
+
+ORDER BY dias_restantes ASC;
+
+    `);
+
+  return rows;
+
 }
 
 // Criar novo supervisor
 async function createExame(data) {
-    // 1) Insere supervisor
-    const sql = `
+  // 1) Insere supervisor
+  const sql = `
     INSERT INTO exames (nome, descricao, icone)
     VALUES (?, ?, ?)
   `;
-    const [supervisorResult] = await connection.query(sql, [
-        data.nome,
-        data.descricao,
-        ''
-    ]);
+  const [supervisorResult] = await connection.query(sql, [
+    data.nome,
+    data.descricao,
+    ''
+  ]);
 
-    await connection.query(insertSeuEmpSQL, [data.idCliente, idExame]);
+  await connection.query(insertSeuEmpSQL, [data.idCliente, idExame]);
 
-    return {
-        message: "Exame cadastrado com sucesso!",
-        nome: data.nome
-    };
+  return {
+    message: "Exame cadastrado com sucesso!",
+    nome: data.nome
+  };
 }
 
 
@@ -138,37 +215,37 @@ async function agendarExame(data) {
 
 // Atualizar
 async function updateExame(id, data) {
-    const sql = `
+  const sql = `
     UPDATE exames
     SET nome = ?, descricao = ?
     WHERE idexame = ?
   `;
-    const [result] = await connection.query(sql, [
-        data.nome,
-        data.descricao,
-        id
-    ]);
-    return result.affectedRows > 0;
+  const [result] = await connection.query(sql, [
+    data.nome,
+    data.descricao,
+    id
+  ]);
+  return result.affectedRows > 0;
 }
 
 // Deletar
 async function deleteExame(id) {
-    const [result] = await connection.query('DELETE FROM exames WHERE idexame = ?', [id]);
-    return result.affectedRows > 0;
+  const [result] = await connection.query('DELETE FROM exames WHERE idexame = ?', [id]);
+  return result.affectedRows > 0;
 }
 
 // Deletar curso por funcionario
 async function deleteExameByColaborador(id) {
-    const [result] = await connection.query('DELETE FROM funcionarios_contem_exames WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+  const [result] = await connection.query('DELETE FROM funcionarios_contem_exames WHERE id = ?', [id]);
+  return result.affectedRows > 0;
 }
 
 // Cancelar agendamento de exame
 async function cancelarAgendamentoExame(id) {
-    const [result] = await connection.query(`UPDATE funcionarios_contem_exames
+  const [result] = await connection.query(`UPDATE funcionarios_contem_exames
     SET horarioAgendando = NULL, observacao = NULL
     WHERE id = ?`, [id]);
-    return result.affectedRows > 0;
+  return result.affectedRows > 0;
 }
 
 //Anexar exame em colaborador
@@ -200,15 +277,16 @@ async function buscarExamePorId(id) {
 
 
 module.exports = {
-    getExames,
-    getExameById,
-    createExame,
-    agendarExame,
-    updateExame,
-    cancelarAgendamentoExame,
-    deleteExame,
-    getExameByColaborador,
-    deleteExameByColaborador,
-    inserirExame,
-    buscarExamePorId
+  getExames,
+  getExameById,
+  createExame,
+  agendarExame,
+  updateExame,
+  cancelarAgendamentoExame,
+  deleteExame,
+  getExameByColaborador,
+  deleteExameByColaborador,
+  inserirExame,
+  buscarExamePorId,
+  buscarAlertasExames
 };

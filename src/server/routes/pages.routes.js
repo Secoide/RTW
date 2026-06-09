@@ -17,7 +17,6 @@ router.get('/assinar-epi', (req, res) => {
   res.sendFile(path.resolve('public/client/pages/ass_epi.html'));
 });
 
-
 // 🔐 ROTAS PROTEGIDAS
 router.get('/home', protegerPagina, refreshSession, (req, res) => {
   res.sendFile(path.resolve('public/client/pages/home.html'));

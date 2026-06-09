@@ -1,37 +1,67 @@
 /* ============================================================
    LAYOUT PRINCIPAL (DIV PAI COM LADO ESQUERDO + DIREITA)
 ============================================================ */
+#conteudoInicio {
 
-.painel_inicio {
-    display: flex;
-    flex-direction: row;
-    height: 98vh;
-    width: 100%;
-    overflow: hidden;
+    display: grid;
+    gap: 12px;
+
+    padding: 12px;
+
+    height: calc(100vh - 50px);
+
+    grid-template-columns:
+        280px
+        1fr
+        300px;
+
+    grid-template-rows:
+        140px
+        450px
+        1fr;
+
+    grid-template-areas:
+
+        "bemvindo mural aniversarios"
+        "versao mural aniversarios"
+        "experiencia experiencia experiencia";
 }
 
-/* ============================================================
-   CONTEÚDO CENTRAL (ESQUERDA)
-============================================================ */
-
-#conteudo-central {
-    flex: 1;
-    padding: 20px;
+#bemvindo {
+    grid-area: bemvindo;
 }
+
+#versao-info {
+    grid-area: versao;
+}
+
+#painel-inicio {
+    grid-area: mural;
+}
+
+#hall-experiencia {
+    grid-area: experiencia;
+}
+
+#painel-aniversarios {
+    grid-area: aniversarios;
+}
+
 
 /* ============================================================
    PAINEL DE ANIVERSÁRIANTES (DIREITA)
 ============================================================ */
 
 #painel-aniversarios {
-    width: 280px;
-    padding: 15px;
-    background: var(--bg-bloco);
-    color: var(--texto-principal);
     display: flex;
     flex-direction: column;
     gap: 20px;
     border-left: 1px solid rgba(255, 255, 255, .1);
+    padding: 10px;
+    /* não seleciona texto */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 #painel-aniversarios h4 {
@@ -185,27 +215,36 @@
 
 /* Painéis de comunicados (4 categorias) */
 #painel-avisos {
-    width: 100%;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     /* 4 colunas */
     gap: 20px;
     padding: 0 40px;
     margin-top: 20px;
-    width: 97%;
+    min-height: 70%;
 }
 
 /* Cada painel individual */
 .painel-comunicado {
-    background: var(--bg-bloco);
-    border-radius: 10px;
-    padding: 12px;
-    box-shadow: 0 0 6px #00000055;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    height: 60vh;
+    
+    max-height: 55vh;
     /* limite vertical */
-    overflow-y: auto;
     scrollbar-width: none;
+}
+
+.panel-rh:empty,
+.panel-diretoria,
+.panel-seguranca,
+.panel-treinamentos{
+    display:flex;
+    flex-direction: column;
+}
+
+.panel-rh:empty,
+.panel-diretoria:empty,
+.panel-seguranca:empty,
+.panel-treinamentos:empty{
+    display:none;
 }
 
 .painel-comunicado::-webkit-scrollbar {
@@ -377,7 +416,7 @@
 /* Botões */
 .modal-botoes {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 20px;
 }
 
@@ -407,7 +446,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 270px;
+    min-width: 194px;
     flex-direction: row-reverse;
 }
 
@@ -526,7 +565,7 @@
 
 /* Modal box */
 .modal_anotacao {
-    width: 450px !important;   
+    width: 450px !important;
 }
 
 
@@ -618,7 +657,7 @@
     padding: 10px;
 
     box-shadow:
-        0 10px 25px rgba(0,0,0,.45);
+        0 10px 25px rgba(0, 0, 0, .45);
 
     z-index: 9999;
 
@@ -635,7 +674,7 @@
 
     display: flex;
     align-items: center;
-     text-align: left;
+    text-align: left;
     gap: 8px;
 
     padding: 5px 6px;
@@ -650,7 +689,7 @@
 }
 
 .preview-anotacao-item:hover {
-    background: rgba(255,255,255,.05);
+    background: rgba(255, 255, 255, .05);
 }
 
 .preview-anotacao-icone {
@@ -659,7 +698,7 @@
 
 .preview-anotacao-texto {
     flex: 1;
-    word-break: break-word; 
+    word-break: break-word;
     text-align: left;
 }
 
@@ -692,7 +731,7 @@
 
 /* Quando painel online abrir */
 
-#online-widget.open-ia-space + #ia-widget {
+#online-widget.open-ia-space+#ia-widget {
     bottom: 310px;
 }
 
@@ -718,7 +757,7 @@
     gap: 8px;
 
     box-shadow:
-        0 0 15px rgba(0,0,0,.35);
+        0 0 15px rgba(0, 0, 0, .35);
 
     transition: .2s;
 }
@@ -728,13 +767,13 @@
     transform: scale(1.04);
 
     box-shadow:
-        0 0 20px rgba(0,0,0,.45);
+        0 0 20px rgba(0, 0, 0, .45);
 }
 
 #ia-chat {
 
-    width: 650px;
-    height: 550px;
+    width: 600px;
+    height: 750px;
 
     background: #1f1f1f;
 
@@ -751,7 +790,7 @@
     border: 1px solid #3b3b3b;
 
     box-shadow:
-        0 15px 35px rgba(0,0,0,.55);
+        0 15px 35px rgba(0, 0, 0, .55);
 }
 
 #ia-chat.active {
@@ -987,7 +1026,7 @@
 
 .ia-os-badge {
 
-    background: rgba(0,200,83,.15);
+    background: rgba(0, 200, 83, .15);
     color: #00e676;
     padding: 6px 10px;
     border-radius: 8px;
@@ -1056,7 +1095,7 @@
     font-weight: 700;
 
     text-shadow:
-        0 0 8px rgba(0,230,118,.25);
+        0 0 8px rgba(0, 230, 118, .25);
 }
 
 /* ============================================================
@@ -1087,10 +1126,12 @@
 
     margin-bottom: 2px;
 }
+
 .ia-msg br {
 
     line-height: 1;
 }
+
 /* ============================================================
    TITULOS
 ============================================================ */
@@ -1105,7 +1146,7 @@
 
     margin-bottom: 10px;
 
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
 
     padding-bottom: 6px;
 }
@@ -1179,7 +1220,7 @@ ESCONDER
 ============================================================ */
 
 .ia-loading-text {
-  opacity: 0.9;
+    opacity: 0.9;
 }
 
 /* ============================================================
@@ -1187,17 +1228,17 @@ ESCONDER
 ============================================================ */
 
 .ia-dots span {
-  animation: iaBlink 1.4s infinite;
-  font-weight: bold;
-  font-size: 14px;
+    animation: iaBlink 1.4s infinite;
+    font-weight: bold;
+    font-size: 14px;
 }
 
 .ia-dots span:nth-child(2) {
-  animation-delay: 0.2s;
+    animation-delay: 0.2s;
 }
 
 .ia-dots span:nth-child(3) {
-  animation-delay: 0.4s;
+    animation-delay: 0.4s;
 }
 
 /* ============================================================
@@ -1206,19 +1247,762 @@ ESCONDER
 
 @keyframes iaBlink {
 
-  0% {
-    opacity: 0.2;
-    transform: translateY(0px);
-  }
+    0% {
+        opacity: 0.2;
+        transform: translateY(0px);
+    }
 
-  50% {
+    50% {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    100% {
+        opacity: 0.2;
+        transform: translateY(0px);
+    }
+
+}
+
+/* ==========================================
+   GRÁFICOS IA
+========================================== */
+
+.ia-chart-wrapper {
+
+    width: 100%;
+
+    height: 280px;
+
+    margin-top: 15px;
+
+    padding: 10px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.04);
+
+}
+
+#ia-alert-icon {
+
+    position: absolute;
+
+    top: -4px;
+
+    right: -4px;
+
+    width: 22px;
+
+    height: 22px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(10px);
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 14px;
+
+    box-shadow:
+        0 0 12px rgba(255, 255, 255, .08);
+
+    animation:
+        iaPulse 2s infinite;
+
+}
+
+@keyframes iaPulse {
+
+    0% {
+
+        transform: scale(1);
+
+        opacity: .8;
+
+    }
+
+    50% {
+
+        transform: scale(1.12);
+
+        opacity: 1;
+
+    }
+
+    100% {
+
+        transform: scale(1);
+
+        opacity: .8;
+
+    }
+
+}
+
+/* =========================================================
+BADGE ALERTAS
+========================================================= */
+
+#ia-alertas-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    background: #3b2f1e;
+
+    color: #ffe082;
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    margin-bottom: 10px;
+
+    transition: .2s ease;
+
+    border: 1px solid #5d4b2c;
+
+}
+
+#ia-alertas-badge:hover {
+
+    background: #4e3d20;
+
+}
+
+/* =========================================================
+CARD COLABORADOR IA
+========================================================= */
+
+.ia-colaborador-card {
+
+    margin-top: 12px;
+
+    border-radius: 18px;
+
+    padding: 16px;
+
+    background:
+        linear-gradient(145deg,
+            rgba(255, 255, 255, .05),
+            rgba(255, 255, 255, .02));
+
+    border:
+        1px solid rgba(255, 255, 255, .06);
+
+    backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, .25);
+
+}
+
+.ia-colab-topo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    margin-bottom: 15px;
+
+}
+
+.ia-colab-avatar img {
+
+    width: 86px;
+
+    height: 86px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(135deg,
+            #00ff88,
+            #00bfff);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 26px;
+
+    font-weight: bold;
+
+    color: #111;
+
+}
+
+.ia-colab-nome {
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    color: white;
+
+}
+
+.ia-colab-cargo {
+
+    font-size: 13px;
+
+    opacity: .7;
+
+}
+
+.ia-colab-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+}
+
+.ia-colab-item {
+
+    background:
+        rgba(255, 255, 255, .03);
+
+    border-radius: 12px;
+
+    padding: 5px;
+
+    font-size: 12px;
+
+}
+
+.ia-colab-label {
+
+    opacity: .6;
+
+    font-size: 10px;
+
+}
+
+.ia-colab-value {
+    padding-left: 5px;
+
+}
+
+/* =========================================================
+CARD SENSÍVEL
+========================================================= */
+
+.ia-colab-sensitive {
+
+    position: relative;
+
+    margin-top: 14px;
+    margin-bottom: 10px;
+    padding: 10px;
+
+    border-radius: 16px;
+
+    background:
+        rgba(255, 80, 80, .04);
+
+    border:
+        1px solid rgba(255, 80, 80, .12);
+
+}
+
+/* =========================================================
+LOCK
+========================================================= */
+
+.ia-colab-lock {
+
+    position: absolute;
+
+    top: 5px;
+
+    right: 5px;
+
+    width: 28px;
+
+    height: 28px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(0, 0, 0, .25);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: help;
+
+    font-size: 14px;
+
+}
+
+.ia-colab-lock:hover::after {
+
+    content:
+        attr(data-tooltip);
+
+    position: absolute;
+
+    top: 35px;
+
+    right: 0;
+
+    width: 220px;
+
+    padding: 8px 10px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(20, 20, 20, .96);
+
+    color: white;
+
+    font-size: 11px;
+
+    line-height: 1.4;
+
+    border:
+        1px solid rgba(255, 255, 255, .06);
+
+    z-index: 999999;
+
+}
+
+.ia-colab-sensitive-title {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    margin-bottom: 12px;
+
+    color: #ffb3b3;
+
+}
+
+.ia-colab-sensitive-grid {
+
+    display: grid;
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+}
+
+.ia-colab-section-title {
+
+    margin-top: 16px;
+
+    margin-bottom: 12px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    opacity: .8;
+
+}
+
+#hall-ranking {
+
+    display: flex;
+    gap: 12px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 10px;
+
+    /* mãozinha */
+    cursor: grab;
+
+    /* não seleciona texto */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+
+    -webkit-overflow-scrolling: touch;
+
+    touch-action: pan-x;
+    /* remove barra */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#hall-ranking::-webkit-scrollbar {
+    display: none;
+}
+
+#hall-ranking.dragging {
+    cursor: grabbing;
+}
+
+.card-experiencia {
+
+    flex: 0 0 180px;
+
+    height: 200px;
+
+    background: var(--bg-card);
+
+    border-radius: 12px;
+
+    padding: 10px;
+
+    text-align: center;
+
+    transition: .2s;
+
+    border: 1px solid rgba(255, 255, 255, .05);
+
+}
+
+.card-experiencia:hover {
+
+    transform: translateY(-3px);
+
+}
+
+.foto-progress {
+
+    --percent: 50;
+
+    width: 90px;
+    height: 90px;
+
+    margin: auto;
+
+    border-radius: 50%;
+
+    background:
+    conic-gradient(
+        from 0deg,
+
+        #8a3bbe 0%,
+        #feb47b calc(var(--percent) * 0.5%),
+        #57c1cf calc(var(--percent) * 1%),
+
+        rgba(255,255,255,.08) calc(var(--percent) * 1%),
+        rgba(255,255,255,.08) 100%
+    );
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+.foto-progress img {
+
+    width: 80px;
+    height: 80px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+}
+
+
+.card-cipa::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: -2px;
+    left: 15px;
+
+    width: 25px;
+    height: 50px;
+
+    background: linear-gradient(
+    180deg,
+    #38ef7d,
+    #11998e
+);
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 75%,
+        50% 100%,
+        0 75%
+    );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+
+    z-index: 10;
+
+}
+
+.card-brigadista::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: -2px;
+    left: 15px;
+
+    width: 25px;
+    height: 50px;
+
+    background: linear-gradient(
+    180deg,
+    #ff512f,
+    #dd2476
+);
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 75%,
+        50% 100%,
+        0 75%
+    );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+
+    z-index: 10;
+
+}
+
+.card-destaque-mes::before {
+
+    content: "🏅";
+
+    position: absolute;
+
+    top: -2px;
+    left: 15px;
+
+    width: 25px;
+    height: 50px;
+
+    background: linear-gradient(
+    180deg,
+    #ffffff,
+    #acacac
+);
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 75%,
+        50% 100%,
+        0 75%
+    );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+
+    z-index: 10;
+
+}
+
+.card-destaque-ano::before {
+
+    content: "🏆";
+
+    position: absolute;
+
+    top: -2px;
+    left: 15px;
+
+    width: 25px;
+    height: 50px;
+
+    background: linear-gradient(
+    180deg,
+    #fff12f,
+    #ddb224
+);
+
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 75%,
+        50% 100%,
+        0 75%
+    );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+
+    z-index: 10;
+
+}
+
+
+#hall-experiencia {
+    min-height: 220px;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.219);
+}
+
+#hall-experiencia h4 {
+
+    margin: 0 0 8px 0;
+
+    font-size: 16px;
+
+    color: var(--texto-principal);
+
+}
+
+.card-experiencia .nome {
+
+    font-size: 12px;
+
+    margin-top: 6px;
+
+    line-height: 14px;
+
+    height: 30px;
+
+    overflow: hidden;
+
+}
+
+.card-experiencia .titulo {
+
+    font-size: 11px;
+
+    color: #ffd700;
+
+    margin-top: 4px;
+
+}
+
+.card-experiencia .medalha {
+    color: gray;
+}
+
+.card-experiencia .dias {
+
+    font-size: 11px;
+
+    opacity: .8;
+
+    margin-top: 4px;
+
+}
+
+.card-experiencia {
+
+    position: relative;
+
+}
+.medalhas {
+
+    margin-top: 10px;
+    border-top:
+        1px solid rgba(255, 255, 255, .08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+}
+
+.medalha-item {
+    position: relative;
+    cursor: help;
+    font-size: 14px;
+    transition: .2s;
+}
+
+.medalha-item:hover {
+    transform: scale(1.15);
+}
+
+.medalha-item::after {
+
+    content: attr(data-tooltip);
+
+    position: absolute;
+
+    bottom: 130%;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    background: #1f1f1f;
+
+    color: white;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: .2s;
+
+    border:
+        1px solid rgba(255, 255, 255, .08);
+
+    z-index: 9999999;
+
+}
+
+.medalha-item:hover::after {
+
     opacity: 1;
-    transform: translateY(-2px);
-  }
-
-  100% {
-    opacity: 0.2;
-    transform: translateY(0px);
-  }
 
 }

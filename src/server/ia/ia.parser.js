@@ -413,6 +413,7 @@ function identificarIntent(pergunta) {
     const patternsAniversariantes = [
 
         /aniversariantes/i,
+        /aniversariantes d/i,
         /quem faz aniversario/i,
         /quem faz aniversário/i,
         /aniversario/i,
@@ -657,7 +658,8 @@ function extrairNome(
     pergunta,
     colaboradores = []
 ) {
-
+    console.log('Extrair nome... Pergunta: ', pergunta);
+    console.log('Extrair nome... colaboradores: ', colaboradores);
     const perguntaNorm =
         normalizar(pergunta);
 
@@ -823,6 +825,9 @@ async function parsePergunta(
         diaSemana = 5;
 
     }
+    if (diaSemana !== null) {
+        dataExtraida = null;
+    }
 
     // ====================================================
     // EVITAR CONFLITO:
@@ -897,7 +902,112 @@ async function parsePergunta(
         }
 
     }
+    // =====================================================
+    // DETALHES COLABORADOR
+    // =====================================================
 
+    const textoLower =
+        texto.toLowerCase().trim();
+
+    // -----------------------------------------------------
+    // PREFIXOS
+    // -----------------------------------------------------
+
+    const prefixosColaborador = [
+
+        "dados do",
+        "dados da",
+        "informações de",
+        "informacoes de",
+        "perfil de",
+        "perfil do",
+        "colaborador",
+        "funcionário",
+        "funcionario"
+
+    ];
+
+    // -----------------------------------------------------
+    // TENTA EXTRAIR NOME
+    // -----------------------------------------------------
+
+    let nomeDetectado = null;
+
+    for (const prefixo of prefixosColaborador) {
+
+        if (textoLower.startsWith(prefixo)) {
+
+            nomeDetectado =
+                texto
+                    .substring(prefixo.length)
+                    .trim();
+
+            break;
+
+        }
+
+    }
+
+    // -----------------------------------------------------
+    // NOME PURO
+    // -----------------------------------------------------
+
+    if (
+
+        !nomeDetectado &&
+
+        texto.split(" ").length >= 2 &&
+
+        texto.split(" ").length <= 5
+
+    ) {
+
+        const palavrasBloqueadas = [
+
+            "quem",
+            "aniversariantes",
+            "aniversario",
+            "trabalhou",
+            "ranking",
+            "ontem",
+            "hoje",
+            "amanhã",
+            "amanha",
+            "quantos",
+            "empresa",
+            "os",
+            "colaboradores"
+
+        ];
+
+        const palavrasTexto =
+            textoLower.split(/\s+/);
+
+        const possuiBloqueada =
+            palavrasBloqueadas.some(p =>
+
+                palavrasTexto.includes(p)
+
+            );
+
+        if (!possuiBloqueada) {
+
+            nomeDetectado =
+                texto.trim();
+
+        }
+
+    }
+
+    let intentColaborador =
+        null;
+
+    if (nomeDetectado) {
+
+        intentColaborador =
+            "colaborador_detalhes";
+
+    }
     // ====================================================
     // RETORNO
     // ====================================================
@@ -905,6 +1015,7 @@ async function parsePergunta(
     return {
 
         intent:
+            intentColaborador ||
             identificarIntent(pergunta),
 
         osID:
@@ -920,10 +1031,15 @@ async function parsePergunta(
             await extrairEmpresa(pergunta),
 
         nomeColaborador:
+
             extrairNome(
-                pergunta,
+                nomeDetectado || pergunta,
                 colaboradores
-            ),
+            )
+
+            ||
+
+            nomeDetectado,
 
         mes,
         ano

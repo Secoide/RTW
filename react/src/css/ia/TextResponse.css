@@ -1,0 +1,65 @@
+.ia-text-response {
+
+    width: 100%;
+
+    max-width: 900px;
+
+    background: rgba(255,255,255,.03);
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    border-radius: 16px;
+
+    padding: 18px;
+
+}
+
+.ia-text-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+
+}
+
+.ia-text-avatar {
+
+    width: 38px;
+
+    height: 38px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: rgba(59,130,246,.15);
+
+    font-size: 18px;
+
+}
+
+.ia-text-title {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+.ia-text-body {
+
+    line-height: 1.6;
+
+    font-size: 14px;
+
+    opacity: .9;
+
+}

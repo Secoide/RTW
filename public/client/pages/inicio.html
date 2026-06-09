@@ -1,184 +1,141 @@
+<div id="conteudoInicio">
+    <div id="bemvindo">
 
-<div class="painel_inicio">
-    <div id="conteudo-central">
-
-        <div>
-
-            <h2 class="textoHome">Bem-vindo à página inicial!</h2>
-            <p class="textoHome">Escolha uma seção no menu à esquerda para navegar.</p>
-
-            <section aria-labelledby="release-notes-title" class="release-notes">
-                <article aria-labelledby="v108-title">
-                    <header>
-                        <h2 id="v108-title" style="color: rgb(251, 255, 0);text-shadow: 1px 1px 2px #1a1a1a;">Versão
-                            1.4.2</h2>
-                    </header>
-                </article>
-            </section>
-        </div>
-        <!-- BOTÃO NOVO AVISO  -->
-        <button id="btnNovoAviso" class="btn-novo-aviso bt_padrao bt_cad">+ Novo aviso</button>
-        <div id="painel-avisos">
-
-            <div class="painel-comunicado">
-                <h3>🧑‍💼 Avisos do RH</h3>
-                <div class="panel-rh"></div>
-            </div>
-            <div class="painel-comunicado">
-                <h3>📢 Comunicados da Diretoria</h3>
-                <div class="panel-diretoria"></div>
-            </div>
-            <div class="painel-comunicado">
-                <h3>⛑️ Avisos de Segurança</h3>
-                <div class="panel-seguranca"></div>
-            </div>
-            <div class="painel-comunicado">
-                <h3>🎓 Treinamentos Futuros</h3>
-                <div class="panel-treinamentos"></div>
-            </div>
-        </div>
-
+        <h2 class="textoHome">Bem-vindo à página inicial!</h2>
+        <p class="textoHome">Escolha uma seção no menu à esquerda para navegar.</p>
+    </div>
+    <div id="versao-info">
+        <section aria-labelledby="release-notes-title" class="release-notes">
+            <article aria-labelledby="v108-title">
+                <header>
+                    <h2 id="v108-title" style="color: rgb(251, 255, 0);text-shadow: 1px 1px 2px #1a1a1a;">Versão
+                        1.5.0</h2>
+                </header>
+            </article>
+        </section>
     </div>
 
-    <!-- MODAL -->
-    <div id="modalAviso" class="modal">
-        <div class="modal-conteudo">
+    <div class="painel_inicio">
+        <div id="conteudo-central">
+            <!-- BOTÃO NOVO AVISO  -->
+            <button id="btnNovoAviso" class="btn-novo-aviso bt_padrao bt_cad">+ Novo aviso</button>
+            <div id="painel-avisos">
 
-            <h2 id="modalTitulo">Novo Aviso</h2>
-
-            <label>Categoria:</label>
-            <select id="avisoCategoria">
-                <option value="rh">Avisos do RH</option>
-                <option value="diretoria">Comunicados da Diretoria</option>
-                <option value="seguranca">Avisos de Segurança</option>
-                <option value="treinamentos">Treinamentos Futuros</option>
-            </select>
-
-            <label>Ícone:</label>
-            <div id="iconeLista" class="lista-icones">
-                <span data-icone="📝">📝</span>
-                <span data-icone="📂">📂</span>
-                <span data-icone="📊">📊</span>
-                <span data-icone="📈">📈</span>
-
-                <!-- Elétrica -->
-                <span data-icone="⚡">⚡</span>
-                <span data-icone="🔌">🔌</span>
-                <span data-icone="💡">💡</span>
-                <span data-icone="🧰">🧰</span>
-                <span data-icone="🔧">🔧</span>
-
-                <!-- Engenharia / Construção -->
-                <span data-icone="📐">📐</span>
-                <span data-icone="🧱">🧱</span>
-                <span data-icone="🛠️">🛠️</span>
-
-                <!-- Gestão / Administração / RH -->
-                <span data-icone="🧑‍💼">🧑‍💼</span>
-                <span data-icone="📆">📆</span>
-                <span data-icone="⏱️">⏱️</span>
-                <span data-icone="💼">💼</span>
-                <span data-icone="💬">💬</span>
-                <span data-icone="🧾">🧾</span>
-
-                <!-- Saude -->
-                <span data-icone="🩺">🩺</span>
-                <span data-icone="💉">💉</span>
-                <span data-icone="💊">💊</span>
-
-                <!-- Saude -->
-                <span data-icone="💸">💸</span>
-                <span data-icone="💲">💲</span>
-
-                <!-- Segurança -->
-                <span data-icone="🦺">🦺</span>
-                <span data-icone="🔒">🔒</span>
-                <span data-icone="📌">📌</span>
-                <span data-icone="⚠️">⚠️</span>
-
-                <!-- Veículos -->
-                <span data-icone="🚗">🚗</span>
-                <span data-icone="🚚">🚚</span>
-                <span data-icone="🚌">🚌</span>
-                <span data-icone="🏍️">🏍️</span>
-
-                <!-- Outros -->
-                <span data-icone="💎">💎</span>
-                <span data-icone="🎗️">🎗️</span>
-                <span data-icone="🏆">🏆</span>
-                <span data-icone="🐈">🐈</span>
+                <div class="painel-comunicado">
+                    <h3>Avisos do RH</h3>
+                    <div class="panel-rh"></div>
+                </div>
+                <div class="painel-comunicado">
+                    <h3>Comunicados da Diretoria</h3>
+                    <div class="panel-diretoria"></div>
+                </div>
+                <div class="painel-comunicado">
+                    <h3>Avisos de Segurança</h3>
+                    <div class="panel-seguranca"></div>
+                </div>
+                <div class="painel-comunicado">
+                    <h3>Treinamentos Futuros</h3>
+                    <div class="panel-treinamentos"></div>
+                </div>
             </div>
+        </div>
 
-            <label>Título:</label>
-            <input type="text" id="avisoTitulo">
+        <!-- MODAL -->
+        <div id="modalAviso" class="modal">
+            <div class="modal-conteudo">
 
-            <label>Texto:</label>
-            <textarea id="avisoTexto"></textarea>
+                <h2 id="modalTitulo">Novo Aviso</h2>
 
-            <div class="modal-botoes">
-                <button id="btnSalvarAviso" class="bt_padrao bt_cad">Salvar</button>
-                <button id="btnCancelarAviso" class="bt_padrao bt_cancel">Cancelar</button>
+                <label>Categoria:</label>
+                <select id="avisoCategoria">
+                    <option value="rh">Avisos do RH</option>
+                    <option value="diretoria">Comunicados da Diretoria</option>
+                    <option value="seguranca">Avisos de Segurança</option>
+                    <option value="treinamentos">Treinamentos Futuros</option>
+                </select>
+
+                <label>Ícone:</label>
+                <div id="iconeLista" class="lista-icones">
+                    <span data-icone="📝">📝</span>
+                    <span data-icone="📂">📂</span>
+                    <span data-icone="📊">📊</span>
+                    <span data-icone="📈">📈</span>
+
+                    <!-- Elétrica -->
+                    <span data-icone="⚡">⚡</span>
+                    <span data-icone="🔌">🔌</span>
+                    <span data-icone="💡">💡</span>
+                    <span data-icone="🧰">🧰</span>
+                    <span data-icone="🔧">🔧</span>
+
+                    <!-- Engenharia / Construção -->
+                    <span data-icone="📐">📐</span>
+                    <span data-icone="🧱">🧱</span>
+                    <span data-icone="🛠️">🛠️</span>
+
+                    <!-- Gestão / Administração / RH -->
+                    <span data-icone="🧑‍💼">🧑‍💼</span>
+                    <span data-icone="📆">📆</span>
+                    <span data-icone="⏱️">⏱️</span>
+                    <span data-icone="💼">💼</span>
+                    <span data-icone="💬">💬</span>
+                    <span data-icone="🧾">🧾</span>
+
+                    <!-- Saude -->
+                    <span data-icone="🩺">🩺</span>
+                    <span data-icone="💉">💉</span>
+                    <span data-icone="💊">💊</span>
+
+                    <!-- Saude -->
+                    <span data-icone="💸">💸</span>
+                    <span data-icone="💲">💲</span>
+
+                    <!-- Segurança -->
+                    <span data-icone="🦺">🦺</span>
+                    <span data-icone="🔒">🔒</span>
+                    <span data-icone="📌">📌</span>
+                    <span data-icone="⚠️">⚠️</span>
+
+                    <!-- Veículos -->
+                    <span data-icone="🚗">🚗</span>
+                    <span data-icone="🚚">🚚</span>
+                    <span data-icone="🚌">🚌</span>
+                    <span data-icone="🏍️">🏍️</span>
+
+                    <!-- Outros -->
+                    <span data-icone="💎">💎</span>
+                    <span data-icone="🎗️">🎗️</span>
+                    <span data-icone="🏆">🏆</span>
+                    <span data-icone="🐈">🐈</span>
+                </div>
+
+                <label>Título:</label>
+                <input type="text" id="avisoTitulo">
+
+                <label>Texto:</label>
+                <textarea id="avisoTexto"></textarea>
+
+                <div class="modal-botoes">
+                    <button id="btnSalvarAviso" class="bt_padrao bt_cad">Salvar</button>
+                    <button id="btnCancelarAviso" class="bt_padrao bt_cancel">Cancelar</button>
+                </div>
+
             </div>
-
         </div>
     </div>
 
-
-
-    <!-- CARDS INFORMATIVOS (EM BAIXO) -->
-    <div id="painel-infos-bottom" class="glass" style="display: none;">
-
-        <div class="card-info-bottom">
-            <div class="icon">👷</div>
-            <div>
-                <div class="titulo">Colaboradores hoje</div>
-                <div class="valor" id="info-colab-hoje">--</div>
-            </div>
-        </div>
-
-        <div class="card-info-bottom">
-            <div class="icon">🛠️</div>
-            <div>
-                <div class="titulo">OSs em execução</div>
-                <div class="valor" id="info-oss-hoje">--</div>
-            </div>
-        </div>
-
-        <div class="card-info-bottom">
-            <div class="icon">⚠️</div>
-            <div>
-                <div class="titulo">Documentos</div>
-                <div class="valor" id="info-docs">--</div>
-            </div>
-        </div>
-
-        <div class="card-info-bottom">
-            <div class="icon">📝</div>
-            <div>
-                <div class="titulo">Integrações</div>
-                <div class="valor" id="info-integracoes">--</div>
-            </div>
-        </div>
-
-        <div class="card-info-bottom">
-            <div class="icon">🏥</div>
-            <div>
-                <div class="titulo">Atestados</div>
-                <div class="valor" id="info-atestados">--</div>
-            </div>
-        </div>
-
+    <div id="hall-experiencia"  data-roles="99" >
+        <h5>Tempo de empresa e Reconhecimentos</h5>
+        <div id="hall-ranking"></div>
     </div>
 
 
     <!-- PAINEL DE ANIVERSARIANTES (DIREITA) -->
-    <div id="painel-aniversarios" class="glass">
+    <div id="painel-aniversarios">
         <h4>🎂 Aniversariantes do mês</h4>
         <div id="lista-aniversarios" class="area-cards"></div>
 
         <h4 style="margin-top: 25px;">⏳ Próximos aniversários</h4>
         <div id="lista-proximos" class="area-cards"></div>
     </div>
-
-
 </div>

@@ -53,6 +53,10 @@
                         <i class="fa-solid fa-calendar-days"></i>
                         <span class="menu-text">Atestar</span>
                     </a>
+                    <a class="bt_menu" data-roles="*" data-target=".painel_conquistas">
+                        <i class="fa-solid fa-medal"></i>
+                        <span class="menu-text">Conquistas</span>
+                    </a>
                     <div class="push"></div>
 
                     <a class="bt_menu" data-roles="5,6,7,99" data-target=".painel_vestimentas">
@@ -140,8 +144,8 @@
                             <div class="div_botoesAcao">
                                 <input id="bt_cadColaborador" class="bt_padrao bt_cad" data-roles="4,6,7,99"
                                     type="submit" name="cadColab" value="Cadastrar">
-                                <input id="bt_editColab"  class="bt_padrao bt_cad hidden-inicial" data-roles="4,6,7,99" type="submit"
-                                    name="editColab" value="Salvar">
+                                <input id="bt_editColab" class="bt_padrao bt_cad hidden-inicial" data-roles="4,6,7,99"
+                                    type="submit" name="editColab" value="Salvar">
                             </div>
                         </form>
                     </div>
@@ -281,6 +285,135 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="painel_conquistas" data-roles="6, 99">
+
+                        <p>Conquistas e Medalhas</p>
+
+                        <div class="painel_addConquista"  data-roles="99>
+
+                            <select id="cbxConquista" class="cbx_teste glass info_padrao opcoes" >
+
+                                <option value="" disabled selected>
+                                    Selecione uma conquista...
+                                </option>
+                                <optgroup label="Segurança e Reconhecimento">
+
+                                    <option value="CIPA">
+                                        ♻️ Membro da CIPA
+                                    </option>
+
+                                    <option value="BRIGADISTA">
+                                        ⛑️ Brigadista
+                                    </option>
+
+                                    <option value="DESTAQUE_MES">
+                                        🏅 Destaque do Mês
+                                    </option>
+
+                                    <option value="DESTAQUE_ANO">
+                                        🏆 Destaque do Ano
+                                    </option>
+
+                                </optgroup>
+
+                                <optgroup label="Cultura">
+
+                                    <option value="INOVADOR">
+                                        💡 Inovador
+                                    </option>
+
+                                    <option value="ESPIRITO_EQUIPE">
+                                        🤝 Espírito de Equipe
+                                    </option>
+
+                                    <option value="HEROI_SEGURANCA">
+                                        🚨 Herói da Segurança
+                                    </option>
+
+                                    <option value="MENTOR">
+                                        🎓 Mentor
+                                    </option>
+
+                                    <option value="EMBAIXADOR">
+                                        🌎 Embaixador
+                                    </option>
+
+                                    <option value="CLIENTE_DESTAQUE">
+                                        💬 Elogiado pelo Cliente
+                                    </option>
+
+                                    <option value="RESOLVE_TUDO">
+                                        🧩 Resolve Tudo
+                                    </option>
+
+                                    <option value="LIDERANCA">
+                                        👔 Liderança Inspiradora
+                                    </option>
+
+                                    <option value="SUPERACAO">
+                                        🏔️ Superação
+                                    </option>
+
+                                    <option value="ORGULHO_RTW">
+                                        ❤️ Orgulho RTW
+                                    </option>
+
+                                    <option value="SOLUCAO_INTELIGENTE">
+                                        🧠 Solução Inteligente
+                                    </option>
+
+                                </optgroup>
+
+                                <optgroup label="Excelência Operacional">
+
+                                    <option value="CORUJA_RTW">
+                                        🦉 Coruja
+                                    </option>
+
+                                    <option value="PRECISAO_RTW">
+                                        🎯 Precisão
+                                    </option>
+
+                                    <option value="ORGANIZACAO_EXEMPLAR">
+                                        📋 Organização Exemplar
+                                    </option>
+
+                                    <option value="RESPOSTA_RAPIDA">
+                                        ⚡ Resposta Rápida
+                                    </option>
+
+                                    <option value="COMUNICADOR_RTW">
+                                        📡 Comunicador
+                                    </option>
+
+                                    <option value="ALTA_PERFORMANCE">
+                                        🦾 Alta Performance
+                                    </option>
+
+                                    <option value="PONTUALIDADE_OURO">
+                                        ⏱️ Pontualidade de Ouro
+                                    </option>
+
+                                    <option value="GUARDIAO_QUALIDADE">
+                                        🔐 Guardião da Qualidade
+                                    </option>
+
+                                </optgroup>
+
+                            </select>
+
+                            <button id="btAdicionarConquista" class="bt_padrao bt_cad">
+                                Adicionar
+                            </button>
+
+                        </div>
+
+                        <hr style="border: none; height: 1px; background-color: #424242; margin-bottom: 10px;">
+
+                        <div id="listaConquistasColaborador" class="painel_conquistasGrid">
+                        </div>
+
                     </div>
                     <div class="painel_estatistica">
                         <div class="indiceQtdeCliente">
@@ -986,7 +1119,7 @@
 
 
 
-   
+
     function verificarForcaSenha(senha) {
         let score = 0;
 
@@ -1234,13 +1367,16 @@
     });
 
 
+
+
+
     // Controle dos botões do menu
     $('.bt_menu').on('click', function () {
         const target = $(this).data('target');
 
         $('.bt_menu').removeClass('ativo');
         $(this).addClass('ativo');
-         const idFunc = $('#idColaborador').val();
+        const idFunc = $('#idColaborador').val();
         // Se o painel for exames, chama a função
         if (target === '.painel_exames') {
             load_exames_colaborador(idFunc, $('#carregarExamesAqui'));
@@ -1259,7 +1395,7 @@
             load_integracoes_colaborador(idFunc, $('#carregarIntegracoesAqui'));
 
         }
-         if (target === '.painel_estatistica') {
+        if (target === '.painel_estatistica') {
             load_estatisticas_func_empresa(idFunc, $('#areaGraficoHist'));
 
         }
@@ -1267,12 +1403,11 @@
             $('#idColab').val(idFunc);
         }
         // Oculta todos os painéis
-        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
+        $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra, .painel_conquistas, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
 
         // Mostra o painel clicado
         $(target).fadeIn(200);
     });
-
 
 
 

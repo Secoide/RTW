@@ -393,6 +393,33 @@ async function salvarFotoPerfil(userId, file) {
   return publicURL;
 }
 
+async function getHallExperienciaRTW() {
+  return await ColabModel.getHallExperienciaRTW();
+}
+
+async function addConquista(
+  dados
+) {
+
+  return await
+    ColabModel
+      .addConquista(
+        dados
+      );
+
+}
+
+async function getConquistasColaborador(
+  idColaborador
+) {
+
+  return await ColabModel
+    .getConquistasColaborador(
+      idColaborador
+    );
+
+}
+
 module.exports = {
   listarColaboradores,
   buscarColaborador,
@@ -419,5 +446,8 @@ module.exports = {
   buscarDadosCPFRG,
   cadastrarAtestado,
   buscarHistoricoColabPorEmpresa,
-  salvarFotoPerfil
+  salvarFotoPerfil,
+  getHallExperienciaRTW,
+  addConquista,
+  getConquistasColaborador
 };

@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="css/ferias.css">
     <link rel="stylesheet" href="css/inicio.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/ia/ia2.css">
+    <link rel="stylesheet" href="css/guia.css">
 
     <!-- Libs externas -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -80,14 +82,17 @@
 
 
     </div>
-    <div id="ia-widget" data-roles="99" style="display: none;">
+    <div id="ia-widget" data-roles="5,6,7,99">
 
         <div id="ia-button">
             🧠 Central IA
+
+            <div id="ia-alert-icon">
+                💡
+            </div>
         </div>
 
         <div id="ia-chat">
-
             <div id="ia-messages">
 
                 <div id="ia-help-badge">
@@ -98,64 +103,62 @@
 
                     <strong>Olá, eu sou a IA Operacional da RTW Engenharia 👋</strong><br><br>
 
-                    Posso consultar, analisar e interpretar informações operacionais em tempo real do sistema.<br><br>
+                    Posso consultar, interpretar e analisar informações operacionais em tempo real diretamente do
+                    sistema.<br><br>
 
                     <strong>📋 Consultas Operacionais</strong><br>
 
                     🔹 Colaboradores disponíveis<br>
-                    🔹 Equipes alocadas em OS<br>
-                    🔹 Programações diárias<br>
-                    🔹 Colaboradores escalados<br>
-                    🔹 Serviços programados<br>
-                    🔹 Informações de Ordens de Serviço<br>
-                    🔹 Colaboradores por data<br>
-                    🔹 Colaboradores por empresa<br>
-                    🔹 Histórico operacional<br>
-                    🔹 Histórico de colaboradores<br>
+                    🔹 Equipes e colaboradores por OS<br>
+                    🔹 Programações e serviços diários<br>
+                    🔹 Histórico operacional e histórico de colaboradores<br>
                     🔹 Localização atual de colaboradores<br>
                     🔹 Quantidade de dias trabalhados<br>
-                    🔹 Ranking de produtividade<br>
-                    🔹 Ranking por empresa<br>
-                    🔹 Ranking por período<br>
-                    🔹 Ranking por dia da semana<br>
+                    🔹 Rankings operacionais e produtividade<br>
+                    🔹 Colaboradores por empresa, período e data<br>
+                    🔹 Informações completas de colaboradores<br>
                     🔹 Aniversariantes<br>
-                    🔹 Versões e atualizações do sistema<br><br>
+                    🔹 Informações e versões do sistema<br><br>
 
                     <strong>💡 Exemplos de perguntas</strong><br><br>
 
                     • Quem trabalhou hoje?<br>
                     • Quem vai trabalhar amanhã?<br>
-                    • Quais colaboradores estão disponíveis hoje?<br>
                     • Quem está na OS 1582?<br>
-                    • Quais os serviços programados para amanhã?<br>
-                    • Quais foram as OS do dia 08/07/2025?<br>
+                    • Quais colaboradores estão disponíveis?<br>
                     • Onde o Regis Paiva está trabalhando?<br>
                     • Em quais OS o Regis já trabalhou?<br>
                     • Quantas vezes Marcos trabalhou na PMB?<br>
-                    • Quem mais trabalhou esse mês?<br>
-                    • Quem mais trabalhou em 2025?<br>
-                    • Quem mais trabalhou no domingo?<br>
                     • Ranking da PMB<br>
-                    • Quem executou serviços em janeiro?<br>
-                    • Qual colaborador possui mais dias trabalhados?<br>
-                    • Aniversariantes de Julho?<br>
+                    • Quem mais trabalhou esse mês?<br>
+                    • Quem mais trabalhou no domingo?<br>
+                    • Yuri Back<br>
+                    • Dados do Guilherme Schvaickardt<br>
+                    • Aniversariantes de Julho<br>
                     • Qual a versão do sistema?<br><br>
 
                     <strong>🧠 Recursos Inteligentes</strong><br>
 
-                    ⚡ Interpretação automática de datas<br>
-                    ⚡ Entendimento de períodos<br>
-                    ⚡ Filtros inteligentes<br>
-                    ⚡ Reconhecimento de empresas<br>
-                    ⚡ Análise operacional automática<br>
-                    ⚡ Ranking inteligente por atuação<br><br>
+                    ⚡ Interpretação automática de datas e períodos<br>
+                    ⚡ Reconhecimento inteligente de empresas e colaboradores<br>
+                    ⚡ Cards dinâmicos de colaboradores com foto integrada<br>
+                    ⚡ Proteção automática de dados sensíveis por nível de acesso<br>
+                    ⚡ Gráficos automáticos para rankings e estatísticas<br>
+                    ⚡ Renderização inteligente de componentes dentro do chat<br>
+                    ⚡ Análise operacional automática em tempo real<br><br>
 
                     <strong>⚙️ Versão:</strong> v0.1 Beta<br>
 
                     Novas funções inteligentes serão adicionadas futuramente. ❤️
 
                 </div>
+                <div id="ia-alertas-badge" class="ia-hidden">
+                    💡 Alertas Operacionais
+                </div>
 
+                <div id="ia-alertas-msg" class="ia-msg ia-bot ia-hidden">
+
+                </div>
             </div>
 
             <div id="ia-input-area">

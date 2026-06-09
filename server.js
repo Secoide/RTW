@@ -23,7 +23,7 @@ function heartbeat() {
 wss.on("connection", function (ws) {
 
   ws.isAlive = true;
-
+  
   
   ws.on("pong", heartbeat);
 

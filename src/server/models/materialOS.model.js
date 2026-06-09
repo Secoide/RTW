@@ -8,64 +8,65 @@ async function getMateriaisByOS(idOS) {
   const [rows] = await connection.query(`
     SELECT 
       mo.id,
-      m.nome,
-      m.categoria,
-      mv.imagem,
-      mv.versao_foto,
-      mv.codigo,
-      mv.fabricante,
 
-      forn_min.menor_valor,
-      forn.nome AS fornecedor_nome,
-      fsel.valor AS valor_escolhido,
+      MAX(m.nome) AS nome,
+      MAX(m.categoria) AS categoria,
+      MAX(mv.imagem) AS imagem,
+      MAX(mv.versao_foto) AS versao_foto,
+      MAX(mv.codigo) AS codigo,
+      MAX(mv.fabricante) AS fabricante,
+
+      MAX(forn_min.menor_valor) AS menor_valor,
+      MAX(forn.nome) AS fornecedor_nome,
+      MAX(fsel.valor) AS valor_escolhido,
 
       GROUP_CONCAT(
-        DISTINCT CONCAT(av.valor)
+        DISTINCT av.valor
         ORDER BY a.nome ASC
         SEPARATOR ' | '
       ) AS atributos,
 
-      mo.quantidade,
-      mo.quantidade_separada,
-      mo.quantidade_comprada,
-      mo.id_fornecedor,
-      mo.status
+      MAX(mo.quantidade) AS quantidade,
+      MAX(mo.quantidade_separada) AS quantidade_separada,
+      MAX(mo.quantidade_comprada) AS quantidade_comprada,
+      MAX(mo.id_fornecedor) AS id_fornecedor,
+      MAX(mo.status) AS status
 
-    FROM tb_materiais_os mo
+FROM tb_materiais_os mo
 
-    JOIN tb_materiais_variacoes mv 
-      ON mv.id = mo.id_variacao
+JOIN tb_materiais_variacoes mv 
+  ON mv.id = mo.id_variacao
 
-    JOIN tb_materiais m 
-      ON m.id = mv.id_material
+JOIN tb_materiais m 
+  ON m.id = mv.id_material
 
-    LEFT JOIN tb_materiais_atributos_valores av 
-      ON av.id_variacao = mv.id
+LEFT JOIN tb_materiais_atributos_valores av 
+  ON av.id_variacao = mv.id
 
-    LEFT JOIN tb_atributos a 
-      ON a.id = av.id_atributo
+LEFT JOIN tb_atributos a 
+  ON a.id = av.id_atributo
 
-    LEFT JOIN tb_materiais_os_fornecedores fsel 
-      ON fsel.id_material_os = mo.id 
-      AND fsel.selecionado = TRUE
+LEFT JOIN tb_materiais_os_fornecedores fsel 
+  ON fsel.id_material_os = mo.id 
+  AND fsel.selecionado = TRUE
 
-    LEFT JOIN (
-      SELECT 
-        id_material_os,
-        MIN(valor) AS menor_valor
-      FROM tb_materiais_os_fornecedores
-      GROUP BY id_material_os
-    ) forn_min 
-      ON forn_min.id_material_os = mo.id
+LEFT JOIN (
+  SELECT 
+    id_material_os,
+    MIN(valor) AS menor_valor
+  FROM tb_materiais_os_fornecedores
+  GROUP BY id_material_os
+) forn_min 
+  ON forn_min.id_material_os = mo.id
 
-    LEFT JOIN tb_fornecedores forn 
-      ON forn.id = mo.id_fornecedor
+LEFT JOIN tb_fornecedores forn 
+  ON forn.id = mo.id_fornecedor
 
-    WHERE mo.id_os = ?
+WHERE mo.id_os = ?
 
-    GROUP BY mo.id
+GROUP BY mo.id
 
-    ORDER BY m.nome ASC
+ORDER BY nome ASC;
   `, [idOS]);
 
   return rows;

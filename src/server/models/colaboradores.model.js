@@ -1104,6 +1104,235 @@ async function incrementarVersaoFoto(userId) {
   return result;
 }
 
+async function getHallExperienciaRTW() {
+
+  const sql = `
+
+    WITH admissional AS (
+
+      SELECT
+        fce.idfuncionario,
+        MIN(fce.data) AS data_admissao
+
+      FROM funcionarios_contem_exames fce
+
+      INNER JOIN exames e
+        ON e.idexame = fce.idexame
+
+      WHERE LOWER(e.nome) = 'admissional'
+
+      GROUP BY fce.idfuncionario
+    ),
+
+    demissional AS (
+
+      SELECT DISTINCT
+        fce.idfuncionario
+
+      FROM funcionarios_contem_exames fce
+
+      INNER JOIN exames e
+        ON e.idexame = fce.idexame
+
+      WHERE LOWER(e.nome) = 'demissional'
+
+    )
+
+    SELECT
+
+      f.id,
+      f.nome,
+      f.cnh,
+      f.fotoperfil,
+      f.versao_foto,
+
+      a.data_admissao,
+
+      GROUP_CONCAT(
+        CONCAT(
+          tc.tipo,
+          '|',
+          DATE_FORMAT(
+            tc.data_conquista,
+            '%Y-%m-%d'
+          )
+        )
+        SEPARATOR ','
+      ) AS conquistas,
+    IFNULL(
+      viagem.cidades,
+      0
+  ) AS cidades_atendidas,
+   IFNULL(
+    multi.clientes,
+    0
+) AS clientes_atendidos,
+IFNULL(
+    osstats.total_os,
+    0
+) AS total_os
+    FROM funcionarios f
+
+    INNER JOIN admissional a
+      ON a.idfuncionario = f.id
+
+    LEFT JOIN demissional d
+      ON d.idfuncionario = f.id
+
+    LEFT JOIN tb_conquistas_colaborador tc
+      ON tc.id_colaborador = f.id
+      AND tc.ativo = 1
+    LEFT JOIN (
+
+    SELECT
+
+        idfuncionario,
+
+        COUNT(
+            DISTINCT id_OS
+        ) AS total_os
+
+    FROM funcionario_na_os
+
+    GROUP BY
+        idfuncionario
+
+) osstats
+
+    ON osstats.idfuncionario = f.id
+    LEFT JOIN (
+
+        SELECT
+            fno.idfuncionario,
+            COUNT(
+                DISTINCT o.id_empresa
+            ) AS clientes
+        FROM funcionario_na_os fno
+        INNER JOIN tb_obras o
+            ON o.id_OSs = fno.id_OS
+        GROUP BY fno.idfuncionario
+    ) multi
+        ON multi.idfuncionario = f.id
+    LEFT JOIN (
+
+        SELECT
+
+            fno.idfuncionario,
+
+            COUNT(
+                DISTINCT o.id_cidade
+            ) AS cidades
+
+        FROM funcionario_na_os fno
+
+        INNER JOIN tb_obras o
+            ON o.id_OSs = fno.id_OS
+
+        GROUP BY fno.idfuncionario
+
+    ) viagem
+
+        ON viagem.idfuncionario = f.id
+    WHERE
+
+      f.id <> 999
+      AND f.cargo NOT IN (27,29)
+      AND d.idfuncionario IS NULL
+
+    GROUP BY
+      f.id
+
+    ORDER BY
+      a.data_admissao ASC
+
+    LIMIT 50
+
+  `;
+
+  const [rows] =
+    await connection.query(sql);
+
+  return rows;
+}
+
+async function getConquistasColaborador(idColaborador) {
+
+  const sql = `
+
+    SELECT
+      tipo,
+      observacao,
+      data_conquista
+
+    FROM tb_conquistas_colaborador
+
+    WHERE
+      id_colaborador = ?
+      AND ativo = 1
+
+    ORDER BY data_conquista DESC
+
+  `;
+
+  const [rows] =
+    await connection.query(
+      sql,
+      [idColaborador]
+    );
+
+  return rows;
+}
+
+
+async function addConquista(
+  dados
+) {
+
+  const sql = `
+
+    INSERT INTO
+      tb_conquistas_colaborador
+
+    (
+
+      id_colaborador,
+      tipo,
+      data_conquista,
+      ativo
+
+    )
+
+    VALUES
+
+    (
+
+      ?,
+      ?,
+      NOW(),
+      1
+
+    )
+
+  `;
+
+  const [result] =
+    await connection.query(
+
+      sql,
+
+      [
+
+        dados.id_colaborador,
+
+        dados.tipo
+
+      ]
+
+    );
+
+  return result;
+
+}
 
 module.exports = {
   getColaboradores,
@@ -1134,5 +1363,8 @@ module.exports = {
   inserirAtestado,
   getHistoricoColabPorEmpresa,
   atualizarFotoPerfil,
-  incrementarVersaoFoto
+  incrementarVersaoFoto,
+  getHallExperienciaRTW,
+  getConquistasColaborador,
+  addConquista
 };
