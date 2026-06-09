@@ -7,25 +7,14 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
+
 ## [1.5.0] - 2026-06-08
 ## Nome: 🧠 Central IA
 ### Adicionado
-- Consulta de colaboradores por OS, histórico operacional e localização atual;
-- Consulta de colaboradores disponíveis, aniversariantes e serviços programados;
-- Ranking de produtividade por empresa, período, mês, ano e dia da semana;
-- Ranking por domingos, sábados e datas específicas;
-- Interpretação automática de datas, períodos e perguntas operacionais;
-- Reconhecimento inteligente de empresas e sistema de aliases;
-- Agrupamento inteligente de histórico por OS e datas de atuação;
-- Destaques visuais para métricas, colaboradores e empresas;
-- Loading inteligente com mensagens dinâmicas e frases operacionais;
-- Cache inteligente de empresas;
-- Integração operacional em tempo real com banco de dados;
-- Sistema inteligente de perfil de colaboradores com cards dinâmicos e foto integrada;
-- Proteção de dados sensíveis com controle de permissão e bloqueio automático;
-- Renderização de gráficos e componentes inteligentes dentro do chat;
-- Parser avançado para reconhecimento contextual de colaboradores e consultas operacionais;
-- Rolagem inteligente e melhorias na experiência visual da Central IA;
+- Adicionada a Central IA Operacional (canto inferior direito), integrada em tempo real ao banco de dados corporativo para consultas e análises operacionais;
+- Implementada inteligência contextual capaz de interpretar perguntas em linguagem natural sobre colaboradores, empresas, OSs, programações e indicadores de produtividade;
+- Adicionados gráficos dinâmicos, perfis inteligentes de colaboradores, alertas operacionais e mecanismos avançados de segurança para proteção de informações sensíveis;
+- Adicionado novo menu 'Guia Geral', com Guia completo do sistema de Programação, RH, Colaboradores, IA Operacional e FAQs;
 
 ### Alterado
 - Implementado salvamento automático de anotações, com gravação imediata ao adicionar ou remover itens, eliminando a necessidade do botão "Salvar";
