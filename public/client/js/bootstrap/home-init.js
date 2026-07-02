@@ -362,7 +362,7 @@ async function iniciarVersaoHome(tentativas = 0) {
   const textoVersao = document.getElementById("homeVersaoAtual");
   const popup = document.getElementById("homePopupAtualizacao");
 
-  if (!btnVersao || !textoVersao || !popup) {
+  if (!textoVersao || !popup) {
     if (tentativas < 20) {
       setTimeout(() => iniciarVersaoHome(tentativas + 1), 100);
     }
@@ -370,7 +370,7 @@ async function iniciarVersaoHome(tentativas = 0) {
   }
 
   changelogHomeCarregado = false;
-  btnVersao.textContent = VERSAO_SISTEMA;
+  if (btnVersao) btnVersao.textContent = VERSAO_SISTEMA;
   textoVersao.textContent = VERSAO_SISTEMA;
 
   await carregarDetalhesVersaoHome();

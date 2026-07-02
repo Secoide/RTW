@@ -1,6 +1,17 @@
+async function buscarTextoChangelog() {
+  const response = await fetch(`/CHANGELOG.md?t=${Date.now()}`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel carregar o changelog.");
+  }
+
+  return response.text();
+}
+
 export async function carregarChangelog(versao) {
-  const response = await fetch("/CHANGELOG.md");
-  const texto = await response.text();
+  const texto = await buscarTextoChangelog();
 
   const linhas = texto.split(/\r?\n/);
   let dentroDaVersao = false;
@@ -18,6 +29,13 @@ export async function carregarChangelog(versao) {
   }
 
   const blocoTexto = bloco.join("\n");
+
+  if (!blocoTexto.trim()) {
+    return `
+      <h4 class="nomeDaversao">Atualizacao</h4>
+      <p class="home-changelog-loading">Nenhuma novidade encontrada para a versao ${versao}.</p>
+    `;
+  }
 
   // 👉 PEGAR NOME DO MÓDULO (ex: 🔐 Login e Senhas)
   let tituloModulo = "Atualização";
