@@ -25,6 +25,7 @@ async function getListaGeralRH() {
             fce.idfuncionario,
             e.idexame,
             e.nome AS nome_exame,
+            COALESCE(e.vencimento, 1) AS controla_vencimento,
             fce.data,
             fce.vencimento,
 			fce.horarioAgendando,
@@ -43,6 +44,7 @@ async function getListaGeralRH() {
                 MAX(
                     CASE
                         WHEN LOWER(ue.nome_exame) IN ('admissional','demissional') THEN 0
+                        WHEN COALESCE(ue.controla_vencimento, 1) = 0 OR COALESCE(ue.vencimento, 0) = 0 THEN 0
 
                         -- 🔴 VENCIDO e NÃO agendado = prioridade máxima
                         WHEN DATEDIFF(DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH), CURDATE()) < 0

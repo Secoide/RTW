@@ -10,6 +10,7 @@ export async function carregarFornecedores() {
 
 export async function carregarOS() {
   const lista = await $.get("/api/os");
+  const osFoco = sessionStorage.getItem("material_focus_os");
 
   const $cbx = $("#cbxOS");
   $cbx.empty().append(`<option value="">Selecione uma OS</option>`);
@@ -21,6 +22,12 @@ export async function carregarOS() {
         `<option value="${o.id_OSs}">OS ${o.id_OSs} - ${o.descricao}</option>`
       );
     });
+
+  if (osFoco && $cbx.find(`option[value="${osFoco}"]`).length) {
+    state.osSelecionada = osFoco;
+    $cbx.val(osFoco);
+    sessionStorage.removeItem("material_focus_os");
+  }
 }
 
 export async function carregarMateriais() {

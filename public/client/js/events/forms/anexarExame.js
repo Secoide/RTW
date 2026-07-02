@@ -17,6 +17,7 @@ async function open_form_AnexarExame(idColab, idExame) {
         // espera preencher os combos
         await preencherCbxColaborador();
         await preencherCbxExame();
+        initControleVencimentoExame();
         initSubmit();
         // agora seleciona o colaborador
         if (idColab != null) {
@@ -28,6 +29,32 @@ async function open_form_AnexarExame(idColab, idExame) {
     } catch (err) {
         alert(`Erro ao carregar janela: ${err.status || ''} ${err.statusText || err.message}`);
     }
+}
+
+function initControleVencimentoExame() {
+    const aplicarRegra = () => {
+        const $option = $("#selectExame option:selected");
+        const controlaVencimento = Number($option.data("vencimento") ?? 1) === 1;
+        const $vencimento = $("#vencimentoExame");
+        const $status = $("#statusVencimentoExame");
+
+        if (!controlaVencimento) {
+            $vencimento.data("valorAnterior", $vencimento.val() || "12");
+            $vencimento.val("0").prop("readonly", true).addClass("campo-bloqueado");
+            $status.addClass("ativo").html('<i class="fa-solid fa-circle-check"></i><span>Sem vencimento</span>');
+            return;
+        }
+
+        $vencimento
+            .val($vencimento.data("valorAnterior") || ($vencimento.val() === "0" ? "12" : $vencimento.val() || "12"))
+            .prop("readonly", false)
+            .removeClass("campo-bloqueado");
+        $status.removeClass("ativo").empty();
+    };
+
+    $(document).off("change.controleVencimentoExame", "#selectExame");
+    $(document).on("change.controleVencimentoExame", "#selectExame", aplicarRegra);
+    aplicarRegra();
 }
 
 function initSubmit() {    

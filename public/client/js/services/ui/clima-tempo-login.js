@@ -354,16 +354,20 @@ function fogEffect() {
 ========================================================= */
 
 function starsEffect() {
-
+    
+    const formlogin = document.getElementById("form_login_id");
+    formlogin.classList.add("noite");
+    const formloginfundo = document.getElementById("fundo_img_id");
+    formloginfundo.classList.add("fundo_img_noite");
     const container = createLayer("stars-layer");
-
+    
     for (let i = 0; i < 80; i++) {
 
         const star = document.createElement("span");
 
         // camada aleatória
         const layer = Math.floor(Math.random() * 3) + 1;
-
+        
         star.classList.add("parallax-star");
         star.dataset.layer = layer;
 
@@ -532,16 +536,6 @@ function createMoonGradient() {
         right: "0",
         width: "1220px",
         height: "1020px",
-        background: `
-        radial-gradient(
-            circle at top right,
-            rgba(0,0,0,0.75) 0%,
-            rgba(0,0,0,0.55) 25%,
-            rgba(0,0,0,0.35) 50%,
-            rgba(0,0,0,0.15) 70%,
-            transparent 100%
-        )
-        `,
         pointerEvents: "none",
         zIndex: "1"
     });

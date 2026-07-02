@@ -343,7 +343,7 @@ function load_exames_colaborador(idFunc, $box) {
                             ? `Agendado para ${formatarDataHora(exame.horario_marcado)}`
                             : (exame.dias_restantes != null
                                 ? `Vence em ${exame.dias_restantes} dias`
-                                : '—');
+                                : 'Sem vencimento');
 
                 return `
                 <div class="bloco_exame status-${statusK}" data-status="${status}" data-idexame="${exame.idexame}"  data-idfce="${exame.idfce}" title="${exame.descricao ?? ''}">
@@ -371,7 +371,19 @@ function load_exames_colaborador(idFunc, $box) {
 
 function formatarDataHora(dataHora) {
     if (!dataHora) return '—';
-    return new Date(dataHora).toLocaleString('pt-BR', {
+
+    const texto = String(dataHora).trim();
+    const partes = texto.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::\d{2})?)?/);
+
+    if (partes) {
+        const [, ano, mes, dia, hora = '00', minuto = '00'] = partes;
+        return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+    }
+
+    const data = new Date(texto);
+    if (Number.isNaN(data.getTime())) return '—';
+
+    return data.toLocaleString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',

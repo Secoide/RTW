@@ -58,9 +58,9 @@ async function updateFerias(req, res) {
 
   } catch (error) {
     console.error('❌ Erro ao atualizar férias:', error.message);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       sucesso: false,
-      mensagem: 'Erro ao atualizar férias.'
+      mensagem: error.statusCode ? error.message : 'Erro ao atualizar f?rias.'
     });
   }
 }
@@ -80,9 +80,9 @@ async function criarFerias(req, res) {
 
   } catch (error) {
     console.error('❌ Erro ao criar férias:', error.message);
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       sucesso: false,
-      mensagem: 'Erro ao criar férias.'
+      mensagem: error.statusCode ? error.message : 'Erro ao criar f?rias.'
     });
   }
 }

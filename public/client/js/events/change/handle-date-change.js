@@ -2,6 +2,14 @@ import { carregarColaboradoresDisp, carregarOSComColaboradores } from "../../ser
 import { formatarData_Semana } from "../../utils/formatters/date-format.js";
 import { mostrarErroUI } from "../../utils/dom/error-handler.js";
 
+function limparDestaqueStatusDiaProgramacao() {
+  $(".painelDia.iluminar_verde").each(function () {
+    const $painel = $(this);
+    clearTimeout($painel.data("timerIluminarVerde"));
+    $painel.removeClass("iluminar_verde");
+    $painel.removeData("timerIluminarVerde");
+  });
+}
 
 export function initDateChangeHandler() {
   document.addEventListener("change", async (e) => {
@@ -17,6 +25,7 @@ export async function atualizarProgramacao(dataBase){
   try {
         document.body.style.cursor = "wait";
         if (isNaN(dataBase.getTime())) return;
+        limparDestaqueStatusDiaProgramacao();
 
         document.querySelectorAll(".painelDia").forEach((painel, index) => {
           const novaData = new Date(dataBase);
@@ -35,6 +44,8 @@ export async function atualizarProgramacao(dataBase){
         );
         
         restaurarOSPrioridade();
+        limparDestaqueStatusDiaProgramacao();
+        document.dispatchEvent(new CustomEvent("programacao:atualizada"));
       } catch (err) {
         console.error("Erro ao atualizar os painéis:", err);
         mostrarErroUI("Falha ao aplicar pesquisa. Tente novamente."); // exemplo de handler central

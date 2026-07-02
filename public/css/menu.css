@@ -8,64 +8,64 @@
 
 html,
 body {
-    width: 100%;
-    background: var(--bg-gradiente-padrao);
+  width: 100%;
+  background: var(--bg-gradiente-padrao);
 }
 
 header,
 #conteudo {
-    max-width: 96.5%;
-    margin: auto;
+  max-width: 96.5%;
+  margin: auto;
 }
 
 #conteudo {
-    margin-left: 50px;
-    margin-top: 10px;
-    border-radius: 8px;
-    min-height: 300px;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+  margin-left: 50px;
+  margin-top: 10px;
+  border-radius: 8px;
+  min-height: 300px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
 #conteudo .textoHome {
-    margin: 10px;
+  margin: 10px;
 }
 
 .visivel {
-    opacity: 1 !important;
+  opacity: 1 !important;
 }
 
 details summary {
-    cursor: pointer;
-    font-weight: 500;
-    padding: 6px 0;
-    font-size: 15px;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 6px 0;
+  font-size: 15px;
 }
 
 details[open] summary {
-    color: #4ec93e;
+  color: #4ec93e;
 }
 
 ul {
-    margin-left: 60px;
-    line-height: 1.4;
-    font-size: 13px;
+  margin-left: 60px;
+  line-height: 1.4;
+  font-size: 13px;
 }
 
 .article {
-    margin-left: 60px;
-    font-size: 13px;
+  margin-left: 60px;
+  font-size: 13px;
 }
 
 .release-notes {
-    margin-left: 40px;
-    font-size: 13px;
+  margin-left: 40px;
+  font-size: 13px;
 }
 
 .release-notes h1,
 .release-notes h2 {
-    color: #111;
-    font-family: 'Segoe UI', sans-serif;
+  color: #111;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 
@@ -144,7 +144,7 @@ ul {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 998;
 }
 
@@ -161,10 +161,19 @@ ul {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: space-between;
   transition: width 0.3s ease-in-out;
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
+}
+
+.menuSuperior,
+.menuInferiorEsq {
+  width: 100%;
+}
+
+.menuInferiorEsq {
+  padding-bottom: 18px;
 }
 
 
@@ -175,6 +184,7 @@ ul {
 }
 
 .menu a,
+.menu button,
 .menu_Colab a {
   position: relative;
   display: flex;
@@ -188,9 +198,14 @@ ul {
   /* arredondado para dentro */
   text-decoration: none;
   color: var(--texto-principal);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .menu a:hover,
+.menu button:hover,
 .menu_Colab a:hover {
   background-color: var(--hover-bg);
   color: var(--texto-invertido);
@@ -200,6 +215,7 @@ ul {
 
 
 .menu i,
+.menu button i,
 .menu_Colab i {
   font-size: 22px;
   margin-right: 10px;
@@ -220,114 +236,480 @@ ul {
 
 
 .menu i,
-.menu_Perfil i,
+.menu button i,
 .menu_Colab i {
   font-size: small;
   cursor: pointer;
 }
 
-
-.menu_Perfil {
-  margin-block: 5px;
-  height: 50px;
-  width: 60px; /* fechado */
-  position: fixed;
-  z-index: 999;
-  top: 0;
-  right: 0;
-
-  display: flex;
-  align-items: center;
-
-  padding: 4px;
-  border-radius: 10px 0 0 10px;
-
-  overflow: hidden; /* ESSENCIAL */
-  transition: width 0.3s ease-in-out;
-}
-
-.menu_Perfil.aberto {
-  width: 250px;
-}
-
-.menu_Perfil .menuSuperiorDir,
-.menu_Perfil .menuInferior {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
-.menu_Perfil.aberto .menuSuperiorDir,
-.menu_Perfil.aberto .menuInferior {
-  opacity: 1;
+.bt_menuP.saas-locked {
+  opacity: 0.42;
   pointer-events: auto;
 }
 
-.menu_Perfil .tb_fotoColab {
+.menu-version-link {
+  opacity: 0.72;
+}
+
+.menu-version-link:hover {
+  opacity: 1;
+}
+
+/* =========================================================
+   MENU PERFIL - DOCK LIMPO
+========================================================= */
+.menu_Perfil {
+  position: fixed;
+  z-index: 999;
+  top: 0px;
+  right: 0px;
+  width: 75px;
+  height: 75px;
+  margin: 0;
+  padding: 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition:
+    width 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 260ms ease,
+    box-shadow 260ms ease,
+    background 260ms ease;
+}
+
+.menu_Perfil::after {
+  content: "";
   position: absolute;
-  right: 10px;
-  width: 40px;
-  height: 40px;
+  inset: 1px;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.menu_Perfil::before {
+  content: "";
+  position: absolute;
+  inset: auto 14px 5px 75px;
+  z-index: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8a3bbe, #feb47b, #aeb6bd);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.menu_Perfil.aberto {
+  width: 344px;
+  right: -17px;
+  padding-right: 26px;
+  border: 1px solid rgba(66, 66, 66, 0.747);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #242424, #151515);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+}
+
+.menu_Perfil.tem-notificacao {
+  animation: perfilNotifDock 2.4s ease-in-out infinite;
+}
+
+.menu_Perfil.tem-notificacao::before {
+  opacity: 1;
+  transform: translateY(0);
+  background: linear-gradient(90deg, #ee7722, #efda38, #ffffff);
+}
+
+.menu_Perfil.aberto::before {
+  opacity: 0.72;
+  transform: translateY(0);
+}
+
+.perfil-avatar-area {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  isolation: isolate;
+  margin-right: 10px;
+}
+
+.perfil-avatar-area::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  z-index: 1;
+  padding: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  opacity: 0.86;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 180ms ease;
+}
+
+.menu_Perfil.aberto .perfil-avatar-area::after,
+.perfil-avatar-area:hover::after {
+  opacity: 1;
+}
+
+.menu_Perfil.tem-notificacao .perfil-avatar-area::after {
+  opacity: 1;
+  animation: perfilNotifRing 1.8s ease-in-out infinite;
+}
+
+.perfil-notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  z-index: 50;
+  display: none;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border: 2px solid #161616;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  color: #161616;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 16px;
+  text-align: center;
+  box-shadow:
+    0 8px 18px rgba(238, 119, 34, 0.34),
+    0 0 0 3px rgba(239, 218, 56, 0.12);
+  box-sizing: border-box;
+  transform-origin: center;
+  animation: perfilBadgePulse 1.25s ease-in-out infinite;
+}
+
+.menu_Perfil .tb_fotoColab {
+  position: relative;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border: 1px solid rgba(230, 233, 236, 0.38);
   border-radius: 50%;
   object-fit: cover;
-  z-index: 99999;
+  object-position: center;
+  box-shadow: none;
+  cursor: pointer;
+  image-rendering: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.menu_Perfil a,
-.notif {
-  padding-right: 4px;
-  text-decoration: none;
-  color: var(--texto-principal);
-  display: block;
+.menu_Perfil .tb_fotoColab:hover {
+  border-color: rgba(255, 255, 255, 0.70);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
 }
 
-#iconeNotif i {
-  font-size: 18px;
-}
-
-.menuSuperiorDir {
-  display: flex;
-  gap: 20px;
+.menu_Perfil .menuSuperiorDir {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  padding-left: 10px;
+  gap: 12px;
+  padding-left: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(8px);
+  transition: opacity 180ms ease 60ms, transform 220ms ease 60ms;
 }
 
-.menuSuperiorDir .notif {
-  font-size: 18px;
+.menu_Perfil.aberto .menuSuperiorDir {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
-.menuInferior a {
-  padding-right: 4px;
-  text-decoration: none;
-  color: rgb(202, 36, 36);
+.perfil-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.perfil-kicker {
+  color: rgba(244, 247, 248, 0.42);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .nomePerfil {
-  font-size: 11px;
-  width: 77px;
+  display: -webkit-box;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  overflow: hidden;
+  color: rgba(244, 247, 248, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 14px;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  cursor: pointer;
+  transition: color 180ms ease;
 }
 
-.menu_Perfil a:hover {
-  color: var(--white);
-  scale: 1.1;
+.nomePerfil:hover {
+  color: #ffffff !important;
 }
 
-.menu_Perfil i:hover {
-  color: var(--white);
-  scale: 1.1;
+.perfil-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.perfil-action,
+#notification-container {
+  position: relative;
+  display: inline-grid !important;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(244, 247, 248, 0.58) !important;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.perfil-action:hover,
+#notification-container:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.075);
+  transform: translateY(-1px);
+}
+
+.menu_Perfil i,
+#notification-container i {
+  margin: 0;
+  font-size: 13px;
+}
+
+#notification-count {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  color: #161616;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 17px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #1d1d1d;
+  box-sizing: border-box;
 }
 
 .notification-lista {
   display: none;
-  position: absolute;
+  position: fixed;
+  top: 76px;
+  right: 12px;
+  width: min(340px, calc(100vw - 28px));
+  max-height: min(430px, calc(100vh - 100px));
+  overflow-y: auto;
+  padding: 0;
+  border: 1px solid rgba(230, 233, 236, 0.10);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #242424, #151515) !important;
+  color: rgba(244, 247, 248, 0.86) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.44);
+  z-index: 100010;
+  transform-origin: top right;
+  animation: perfilNotifIn 160ms ease;
+}
+
+.notification-lista::before {
+  content: "Notificações";
+  display: block;
+  padding: 15px 16px 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(244, 247, 248, 0.90);
   font-size: 12px;
-  right: 0;
-  top: 40px;
-  background: var(--bg-gradiente-padrao) !important;
-  border-radius: 10px;
-  padding: 10px;
-  width: auto;
-  min-width: 150px;
-  z-index: 100;
-  color: var(--texto-principal) !important;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.notification-item,
+.notification-empty {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+  color: rgba(244, 247, 248, 0.74);
+  font-size: 12px;
+  line-height: 1.42;
+}
+
+.notification-item:hover {
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.notification-item:last-child,
+.notification-empty:last-child {
+  border-bottom: 0;
+}
+
+.notification-empty {
+  text-align: center;
+  color: rgba(244, 247, 248, 0.48);
+}
+
+@keyframes perfilNotifIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes perfilNotifRing {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(238, 119, 34, 0));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 8px rgba(239, 218, 56, 0.30));
+  }
+}
+
+@keyframes perfilBadgePulse {
+
+  0%,
+  82%,
+  100% {
+    transform: translateY(0);
+  }
+
+  76% {
+    transform: translateY(-1px);
+  }
+
+  80% {
+    transform: translateY(2px);
+  }
+
+  94% {
+    transform: translateY(-1px);
+  }
+}
+
+
+
+:root[data-theme='light'] .menu_Perfil {
+  border-color: rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme='light'] .menu_Perfil.aberto {
+  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+}
+
+:root[data-theme='light'] .menu_Perfil.tem-notificacao {
+  border-color: rgba(238, 119, 34, 0.78);
+  box-shadow:
+    0 14px 38px rgba(15, 23, 42, 0.13),
+    0 0 0 2px rgba(238, 119, 34, 0.14);
+}
+
+:root[data-theme='light'] .menu_Perfil::before {
+  opacity: 0.74;
+}
+
+:root[data-theme='light'] .perfil-avatar-area::after {
+  opacity: 0.92;
+}
+
+:root[data-theme='light'] .perfil-kicker {
+  color: rgba(17, 24, 39, 0.42);
+}
+
+:root[data-theme='light'] .nomePerfil {
+  color: rgba(17, 24, 39, 0.86);
+}
+
+:root[data-theme='light'] .perfil-actions {
+  background: rgba(15, 23, 42, 0.045);
+}
+
+:root[data-theme='light'] .perfil-action,
+:root[data-theme='light'] #notification-container {
+  color: rgba(17, 24, 39, 0.58) !important;
+}
+
+:root[data-theme='light'] .perfil-action:hover,
+:root[data-theme='light'] #notification-container:hover {
+  color: #111827 !important;
+  background: rgba(15, 23, 42, 0.075);
+}
+
+:root[data-theme='light'] #notification-count {
+  box-shadow: 0 0 0 2px #f8fafc;
+}
+
+:root[data-theme='light'] .perfil-notification-badge {
+  border-color: #f8fafc;
+}
+
+:root[data-theme='light'] .notification-lista {
+  border-color: rgba(15, 23, 42, 0.10);
+  background: linear-gradient(145deg, #ffffff, #f3f4f6) !important;
+  color: rgba(17, 24, 39, 0.84) !important;
+  box-shadow: 0 24px 62px rgba(15, 23, 42, 0.16);
+}
+
+:root[data-theme='light'] .notification-lista::before {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+  color: rgba(17, 24, 39, 0.88);
+}
+
+:root[data-theme='light'] .notification-item,
+:root[data-theme='light'] .notification-empty {
+  border-bottom-color: rgba(15, 23, 42, 0.07);
+  color: rgba(17, 24, 39, 0.68);
+}
+
+:root[data-theme='light'] .notification-item:hover {
+  background: rgba(15, 23, 42, 0.04);
+  color: #111827;
 }

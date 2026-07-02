@@ -330,12 +330,12 @@ body.modal-open {
 }
 
 .bt_menu.ativo {
-    color: var(--verde_1);
+    color: #efda38;
     border-radius: 0 7px 7px 0;
 }
 
 .bt_menuP.ativo {
-    color: var(--verde_1);
+    color: #efda38;
     border-radius: 0 7px 7px 0;
 }
 
@@ -691,13 +691,6 @@ body.modal-open {
     width: 58px;
 }
 
-.painel_Paineis>div,
-.painel_Paineis form,
-.painel_Paineis {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
 
 .div_botoesAcao {
     margin-top: auto;
@@ -1162,6 +1155,388 @@ input:checked+.slider:before {
     color:gray;
 }
 
+.menuConquistaManual {
+    position: absolute;
+    z-index: 99999;
+    min-width: 150px;
+    padding: 5px;
+    border: 1px solid rgba(239, 218, 56, 0.35);
+    border-radius: 8px;
+    background: #202020;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.menuConquistaManual button {
+    width: 100%;
+    min-height: 30px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #f4f4f4;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+}
+
+.menuConquistaManual button:hover {
+    background: rgba(239, 218, 56, 0.12);
+    color: #efda38;
+}
+
 optgroup {
     background-color: var(--bg-padrao);
+}
+
+
+.painel_status {
+  display: none;
+  width: 100%;
+  height: 100%;
+  color: var(--cor_letraFundo);
+}
+
+.painel_complementos {
+  display: none;
+  width: 100%;
+  height: 100%;
+  color: var(--cor_letraFundo);
+}
+
+.os-complementos-wrap {
+  display: grid;
+  gap: 14px;
+  padding: 10px;
+}
+
+.os-complementos-grid {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+}
+
+.os-complementos-box {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.os-complementos-dados {
+  grid-template-columns: minmax(150px, 0.8fr) minmax(260px, 1.2fr) auto;
+  align-items: end;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.os-complementos-restante {
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: end;
+}
+
+.os-servicos-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.os-servico-card {
+  display: grid;
+  grid-template-columns: 1fr 26px;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 6px 6px 10px;
+  border: 1px solid rgba(239, 218, 56, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.os-servico-card span {
+  overflow: hidden;
+  color: rgba(244, 247, 248, 0.82);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.os-servico-card button {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.70);
+  cursor: pointer;
+}
+
+.os-servico-card button:hover {
+  border-color: rgba(255, 107, 107, 0.35);
+  color: #ff6b6b;
+}
+
+.os-complementos-checks {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(240px, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.os-complementos-paineis {
+  grid-template-columns: minmax(240px, 1fr) auto;
+}
+
+.os-complemento-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.os-complemento-field span,
+.os-complemento-check span {
+  color: rgba(230, 230, 230, 0.68);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.os-complemento-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px dashed rgba(239, 218, 56, 0.36);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.os-complemento-check-painel {
+  border-color: rgba(238, 119, 34, 0.42);
+  background: rgba(238, 119, 34, 0.08);
+}
+
+#btnSalvarComplementosOS {
+  min-width: 112px;
+  white-space: nowrap;
+}
+
+.os-complemento-check input {
+  accent-color: #efda38;
+}
+
+.os-complementos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+  max-height: 280px;
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.os-complementos-lista::-webkit-scrollbar {
+  display: none;
+}
+
+.os-complemento-empty {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: rgba(230, 230, 230, 0.52);
+  text-align: center;
+}
+
+.os-painel-card {
+  display: grid;
+  grid-template-columns: 34px 1fr 30px;
+  gap: 9px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+}
+
+.os-painel-open,
+.os-painel-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(244, 247, 248, 0.80);
+  cursor: pointer;
+}
+
+.os-painel-open {
+  color: #efda38;
+}
+
+.os-painel-remove:hover {
+  color: #ff6b6b;
+}
+
+.os-painel-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.os-painel-info strong {
+  color: #f4f7f8;
+  font-size: 13px;
+}
+
+.os-painel-info span,
+.os-painel-info small {
+  overflow: hidden;
+  color: rgba(244, 247, 248, 0.62);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.painel_materiais_os {
+  display: none;
+  width: 100%;
+  height: 100%;
+  color: var(--cor_letraFundo);
+}
+
+.painel_estatistica{
+  display: none;
+  width: 100%;
+  height: 100%;
+  color: var(--cor_letraFundo);
+}
+
+.os-materiais-lista {
+  display: grid;
+  gap: 12px;
+  padding: 10px;
+}
+
+.os-material-card {
+  display: grid;
+  gap: 10px;
+  width: min(560px, 100%);
+  min-height: 118px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  color: #f4f4f4;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+.os-material-card:hover {
+  border-color: rgba(239, 218, 56, 0.28);
+  background: rgba(255, 255, 255, 0.065);
+  transform: translateY(-1px);
+}
+
+.os-material-card.vazio {
+  min-height: 100px;
+  border-style: dashed;
+}
+
+.os-material-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.os-material-topo div {
+  display: grid;
+  gap: 3px;
+}
+
+.os-material-topo strong,
+.os-material-card strong {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.os-material-topo span,
+.os-material-card span,
+.os-material-card small {
+  color: rgba(244, 244, 244, 0.62);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.os-material-topo em {
+  min-width: 112px;
+  padding: 5px 12px;
+  border: 1px solid rgba(239, 218, 56, 0.28);
+  border-radius: 999px;
+  color: #efda38;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.os-material-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.os-material-info span {
+  color: rgba(244, 244, 244, 0.50);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.os-material-progresso-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.os-material-progresso-label span,
+.os-material-progresso-label b {
+  color: rgba(244, 247, 248, 0.70);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.os-material-progresso {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.os-material-progresso span {
+  display: block;
+  min-width: 3px;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  transition: width 0.22s ease;
+}
+
+@media (max-width: 1100px) {
+  .os-complementos-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

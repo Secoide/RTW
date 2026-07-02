@@ -8,6 +8,7 @@ let usuarioAtual = null;
 let reconnectTimeout = null;
 let tentativas = 0;
 const MAX_TENTATIVAS = 5;
+let fechamentoManual = false;
 
 let estado = "offline";
 // offline | connecting | connected
@@ -18,16 +19,22 @@ function getWebSocketURL() {
 }
 
 function criarSocket() {
+  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+
+  fechamentoManual = false;
+
   if (socket) {
     socket.onopen = null;
     socket.onclose = null;
     socket.onerror = null;
     socket.onmessage = null;
   }
-  if (socket && socket.readyState === WebSocket.OPEN) return;
   estado = "connecting";
   const url = getWebSocketURL();
   socket = new WebSocket(url);
+  window.rtwSocket = socket;
 
   socket.addEventListener("open", () => {
 
@@ -62,6 +69,11 @@ function criarSocket() {
 
   socket.addEventListener("close", () => {
     estado = "offline";
+
+    if (fechamentoManual) {
+      return;
+    }
+
     document.dispatchEvent(new Event("ws:disconnected"));
     tentarReconectar();
   });
@@ -103,6 +115,7 @@ function tentarReconectar() {
 
 export function conectarSocket(nomeUsuario) {
   if (nomeUsuario) usuarioAtual = nomeUsuario;
+  fechamentoManual = false;
 
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
     return socket;
@@ -117,9 +130,28 @@ export function getSocket() {
 }
 
 export function fecharSocket() {
-  if (reconnectTimeout) clearTimeout(reconnectTimeout);
-  if (socket) socket.close();
+  fechamentoManual = true;
+  usuarioAtual = null;
+
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+
+  if (socket) {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ acao: "logout" }));
+    }
+
+    socket.close();
+    socket = null;
+  }
+
+  window.rtwSocket = null;
+  document.dispatchEvent(new Event("chat-online:limpar"));
 }
+
+window.fecharSocketTempoReal = fecharSocket;
 
 window.addEventListener("offline", () => {
   console.warn("🌐 Internet perdida");

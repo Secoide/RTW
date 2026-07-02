@@ -1,0 +1,313 @@
+<main id="ferramentas">
+  
+  <nav class="ferramentas-tabs" aria-label="Ferramentas disponíveis">
+    <button type="button" class="ferramentas-tab active" data-tool-tab="numdocs" data-feature="tool.numdocs">
+      <i class="fa-solid fa-file-signature"></i>
+      <span>Numeração Documentos</span>
+    </button>
+    <button type="button" class="ferramentas-tab" data-tool-tab="paineis" data-feature="tool.paineis">
+      <i class="fa-solid fa-table-list"></i>
+      <span>Registros Painel Elétrico</span>
+    </button>
+  </nav>
+
+  <section class="ferramenta-card ferramenta-numdocs ferramentas-tool-panel active" data-tool-panel="numdocs">
+    <div class="ferramenta-card-head">
+      <div>
+        <span>Primeira ferramenta</span>
+        <h3>Numeração de documentos</h3>
+      </div>
+      <button type="button" id="btnLimparNumeracao" class="ferramenta-btn ferramenta-btn-ghost">
+        <i class="fa-solid fa-eraser"></i>
+        <span>Limpar campos</span>
+      </button>
+    </div>
+
+    <form id="formNumeracaoDocumento" class="numdoc-form" autocomplete="off">
+      <input type="hidden" id="numdocEditId">
+
+      <label class="numdoc-field">
+        <span>OS</span>
+        <input id="numdocOs" type="text" inputmode="numeric" placeholder="2508" required>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Contratada</span>
+        <input id="numdocContratada" type="text" placeholder="RTW" required>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Contratante</span>
+        <select id="numdocContratante" required>
+          <option value="" disabled selected>Carregando clientes...</option>
+        </select>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Tipo de documento</span>
+        <select id="numdocTipo" required></select>
+      </label>
+
+      <label class="numdoc-field numdoc-field-small">
+        <span>Sequência</span>
+        <input id="numdocSequencia" type="text" inputmode="numeric" placeholder="00" required>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Área / nome</span>
+        <input id="numdocArea" type="text" placeholder="Opcional">
+      </label>
+
+      <label class="numdoc-field numdoc-field-small">
+        <span>Mês.ano</span>
+        <input id="numdocMesAno" type="text" placeholder="02.2026" required>
+      </label>
+
+      <label class="numdoc-field numdoc-field-small">
+        <span>Rev</span>
+        <input id="numdocRev" type="text" placeholder="REV00" required>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Motivo da revisão</span>
+        <input id="numdocMotivo" type="text" placeholder="Opcional">
+      </label>
+
+      <label class="numdoc-field numdoc-result-field">
+        <span>Resultado</span>
+        <div class="numdoc-result-wrap">
+          <input id="numdocResultado" type="text" readonly>
+          <button type="button" id="btnCopiarResultadoAtual" title="Copiar resultado">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+        </div>
+      </label>
+
+      <div class="numdoc-form-actions">
+        <button type="submit" class="ferramenta-btn ferramenta-btn-primary">
+          <i class="fa-solid fa-plus"></i>
+          <span id="numdocSubmitText">Adicionar</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="numdoc-table-wrap">
+      <table class="numdoc-table">
+        <thead>
+          <tr>
+            <th>OS</th>
+            <th>Contratada</th>
+            <th>Contratante</th>
+            <th>Tipo</th>
+            <th>Seq.</th>
+            <th>Área / nome</th>
+            <th>Mês.ano</th>
+            <th>Rev</th>
+            <th>Motivo</th>
+            <th>Resultado</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="numdocTabelaBody">
+          <tr class="numdoc-empty-row">
+            <td colspan="11">Nenhum documento adicionado ainda.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ferramenta-card ferramenta-paineis ferramentas-tool-panel" data-tool-panel="paineis">
+    <div class="ferramenta-card-head">
+      <div>
+        <span>Controle de produção</span>
+        <h3>Registros Painel Elétrico</h3>
+      </div>
+      <button type="button" id="btnLimparPainel" class="ferramenta-btn ferramenta-btn-ghost">
+        <i class="fa-solid fa-eraser"></i>
+        <span>Limpar campos</span>
+      </button>
+    </div>
+
+    <form id="formPainelEletrico" class="painel-form" autocomplete="off">
+      <input type="hidden" id="painelEditId">
+
+      <label class="numdoc-field painel-field-large painel-field-main">
+        <span>Cliente</span>
+        <select id="painelCliente" required>
+          <option value="" disabled selected>Carregando clientes...</option>
+        </select>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Nº de série</span>
+        <input id="painelNumeroSerie" type="text" placeholder="26.109" readonly required>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Tensão</span>
+        <select id="painelTensao">
+          <option value="">Selecione...</option>
+          <option>12V</option>
+          <option>24V</option>
+          <option>110V</option>
+          <option>110/220V</option>
+          <option>220V</option>
+          <option>220/380V</option>
+          <option>380V</option>
+        </select>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Frequência</span>
+        <select id="painelFrequencia">
+          <option value="">Selecione...</option>
+          <option>50Hz</option>
+          <option>60Hz</option>
+        </select>
+      </label>
+
+      <label class="numdoc-field painel-field-optional">
+        <span>Peso opcional</span>
+        <input id="painelPeso" type="number" min="0" step="0.01" placeholder="0,00">
+      </label>
+
+      <label class="numdoc-field">
+        <span>Projetista</span>
+        <select id="painelProjetista">
+          <option value="">Carregando responsáveis...</option>
+        </select>
+      </label>
+
+      <label class="numdoc-field">
+        <span>Montador</span>
+        <input id="painelMontador" type="text" placeholder="Responsável">
+      </label>
+
+      <label class="numdoc-field">
+        <span>Atuação do painel</span>
+        <input id="painelAtuacao" type="text" placeholder="Iluminação, processo...">
+      </label>
+
+      <label class="numdoc-field painel-field-optional">
+        <span>ART opcional</span>
+        <input id="painelArt" type="text" placeholder="Opcional">
+      </label>
+
+      <label class="numdoc-field">
+        <span>Data mês/ano</span>
+        <input id="painelData" type="month">
+      </label>
+
+      <label class="numdoc-field">
+        <span>Tamanho</span>
+        <select id="painelDimensoes">
+          <option value="">Selecione...</option>
+          <option>740X400X120</option>
+          <option>Personalizado</option>
+        </select>
+      </label>
+
+      <label class="numdoc-field painel-custom-size" id="painelDimensoesCustomWrap">
+        <span>Dimensão personalizada</span>
+        <input id="painelDimensoesCustom" type="text" placeholder="LxAxP">
+      </label>
+
+      <label class="numdoc-field painel-link-field painel-field-dashed">
+        <span>Link externo</span>
+        <input id="painelLinkExterno" type="url" placeholder="https://...">
+      </label>
+
+      <label class="numdoc-field painel-field-dashed">
+        <span>Senha</span>
+        <input id="painelSenha" type="text" placeholder="Opcional">
+      </label>
+
+      <div class="numdoc-form-actions painel-form-actions">
+        <button type="submit" class="ferramenta-btn ferramenta-btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span id="painelSubmitText">Salvar painel</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="numdoc-table-wrap painel-table-wrap">
+      <table class="numdoc-table painel-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Atuação</th>
+            <th>ART</th>
+            <th>Nº série</th>
+            <th>Data</th>
+            <th>Tensão</th>
+            <th>Freq.</th>
+            <th>Dimensões</th>
+            <th>Ano</th>
+            <th>Senha</th>
+            <th>Peso kg</th>
+            <th>Projetista</th>
+            <th>Montador</th>
+            <th>Link externo</th>
+            <th>Checklist</th>
+            <th>Imagem</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="paineisTabelaBody">
+          <tr class="numdoc-empty-row">
+            <td colspan="17">Nenhum painel cadastrado ainda.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div id="painelQrModal" class="painel-qr-modal" aria-hidden="true">
+    <div class="painel-qr-card" role="dialog" aria-modal="true" aria-labelledby="painelQrTitulo">
+      <button type="button" id="painelQrFechar" class="numdoc-icon-btn painel-qr-close" title="Fechar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <span>Link externo</span>
+      <h3 id="painelQrTitulo">QR Code do painel</h3>
+      <img id="painelQrImagem" alt="QR Code do link externo">
+      <a id="painelQrLink" href="#" target="_blank" rel="noopener">Abrir link</a>
+    </div>
+  </div>
+
+  <div id="painelGaleriaModal" class="painel-gallery-modal" aria-hidden="true">
+    <div class="painel-gallery-card" role="dialog" aria-modal="true" aria-labelledby="painelGaleriaTitulo">
+      <div class="painel-gallery-head">
+        <div>
+          <span>Imagens do painel</span>
+          <h3 id="painelGaleriaTitulo">Visualização</h3>
+        </div>
+        <button type="button" id="painelGaleriaFechar" class="numdoc-icon-btn" title="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="painel-gallery-stage">
+        <button type="button" id="painelGaleriaAnterior" class="numdoc-icon-btn painel-gallery-nav" title="Imagem anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <img id="painelGaleriaImagem" alt="Imagem do painel montado">
+        <button type="button" id="painelGaleriaProxima" class="numdoc-icon-btn painel-gallery-nav" title="Próxima imagem">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="painel-gallery-foot">
+        <span id="painelGaleriaContador">0/0</span>
+        <div class="painel-row-actions">
+          <a id="painelGaleriaAbrir" class="numdoc-icon-btn" href="#" target="_blank" rel="noopener" title="Abrir imagem em nova aba">
+            <i class="fa-solid fa-up-right-from-square"></i>
+          </a>
+          <button type="button" id="painelGaleriaExcluir" class="numdoc-icon-btn delete" title="Excluir imagem">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

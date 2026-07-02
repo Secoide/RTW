@@ -85,7 +85,7 @@ async function createColaborador(data) {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '0')
   `;
 
-  await connection.query(sql, [
+  const [result] = await connection.query(sql, [
     data.nome,
     data.sexo,
     data.nascimento,
@@ -98,15 +98,19 @@ async function createColaborador(data) {
     data.senha,
     data.fotoperfil || '/imagens/user-default.webp'
   ]);
+  const [rows] = await connection.execute(
+    `SELECT id FROM funcionarios WHERE cpf = ? LIMIT 1`,
+    [data.cpf]
+  );
 
-  // buscar o último registro criado
-  const [rows] = await connection.query(`
-    SELECT id FROM funcionarios 
-    ORDER BY created_at DESC 
-    LIMIT 1
-  `);
+  if (!rows.length) {
+    throw new Error('Colaborador criado, mas o ID não foi localizado.');
+  }
 
-  return { id: rows[0].id, ...data };
+  return {
+    ...data,
+    id: rows[0].id
+  };
 }
 
 
@@ -186,6 +190,7 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         fce.idfuncionario,
         e.idexame,
         e.nome,
+        COALESCE(e.vencimento, 1) AS controla_vencimento,
         fce.data,
         fce.vencimento,
         fce.horarioAgendando,  -- NOVA COLUNA
@@ -202,11 +207,13 @@ async function buscarColaboradoresDisponiveis(dataDia) {
         ue.nome,
         ue.data,
         ue.vencimento,
+        ue.controla_vencimento,
         ue.horarioAgendando, -- PROPAGADA
         DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH) AS dt_venc
       FROM ultimos_exames ue
       WHERE ue.rn = 1
         AND LOWER(ue.nome) NOT IN ('admissional','demissional')
+        AND COALESCE(ue.controla_vencimento, 1) = 1
         AND COALESCE(ue.vencimento,0) > 0
     ),
     score_por_func AS (
@@ -305,6 +312,7 @@ async function buscarColaboradoresEmOS(dataDia) {
       fce.idfuncionario,
       e.idexame,
       LOWER(e.nome) AS nome_exame,
+      COALESCE(e.vencimento, 1) AS controla_vencimento,
       fce.data,
       fce.vencimento,
       ROW_NUMBER() OVER (
@@ -321,10 +329,12 @@ async function buscarColaboradoresEmOS(dataDia) {
       ue.nome_exame,
       ue.data,
       ue.vencimento,
+      ue.controla_vencimento,
       DATE_ADD(ue.data, INTERVAL ue.vencimento MONTH) AS dt_venc
     FROM ultimos_exames ue
     WHERE ue.rn = 1
       AND ue.nome_exame NOT IN ('admissional','demissional')
+      AND COALESCE(ue.controla_vencimento, 1) = 1
       AND COALESCE(ue.vencimento,0) > 0
   ),
 
@@ -389,6 +399,8 @@ async function buscarColaboradoresEmOS(dataDia) {
       END) AS status_OS, 
       ANY_VALUE(o.descricao) AS descricao, 
       ANY_VALUE(e.nome) AS nomeEmpresa,
+      ANY_VALUE(COALESCE(oc.pta_alocada, 0)) AS pta_alocada,
+      ANY_VALUE(COALESCE(oc.painel_eletrico_previsto, 0)) AS painel_eletrico_previsto,
       ANY_VALUE(IFNULL(c.nome, 'VERIFICAR GERÊNCIA')) AS nomeCidade, 
       ANY_VALUE(IFNULL(f.id, '')) AS idfuncionario, 
       ANY_VALUE(
@@ -441,6 +453,7 @@ async function buscarColaboradoresEmOS(dataDia) {
   FROM tb_obras o 
   JOIN tb_empresa e           ON e.id_empresas = o.id_empresa 
   LEFT JOIN tb_cidades c      ON c.id_cidades = o.id_cidade 
+  LEFT JOIN os_complementos oc ON oc.id_os = o.id_OSs
   LEFT JOIN funcionario_na_os fno 
          ON fno.id_OS = o.id_OSs 
         AND fno.data  = (SELECT ref_date FROM params)
@@ -1104,7 +1117,7 @@ async function incrementarVersaoFoto(userId) {
   return result;
 }
 
-async function getHallExperienciaRTW() {
+async function getHallExperienciaConnectPear() {
 
   const sql = `
 
@@ -1283,6 +1296,30 @@ async function getConquistasColaborador(idColaborador) {
   return rows;
 }
 
+async function removerConquista(idColaborador, tipo) {
+
+  const sql = `
+
+    UPDATE tb_conquistas_colaborador
+    SET ativo = 0
+    WHERE id_colaborador = ?
+      AND tipo = ?
+      AND ativo = 1
+
+  `;
+
+  const [result] =
+    await connection.query(
+      sql,
+      [
+        idColaborador,
+        tipo
+      ]
+    );
+
+  return result;
+}
+
 
 async function addConquista(
   dados
@@ -1290,27 +1327,20 @@ async function addConquista(
 
   const sql = `
 
-    INSERT INTO
-      tb_conquistas_colaborador
-
-    (
-
+    INSERT INTO tb_conquistas_colaborador (
       id_colaborador,
       tipo,
       data_conquista,
       ativo
-
     )
-
-    VALUES
-
-    (
-
-      ?,
-      ?,
-      NOW(),
-      1
-
+    SELECT ?, ?, NOW(), 1
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM tb_conquistas_colaborador
+      WHERE id_colaborador = ?
+        AND tipo = ?
+        AND ativo = 1
+      LIMIT 1
     )
 
   `;
@@ -1321,6 +1351,10 @@ async function addConquista(
       sql,
 
       [
+
+        dados.id_colaborador,
+
+        dados.tipo,
 
         dados.id_colaborador,
 
@@ -1364,7 +1398,8 @@ module.exports = {
   getHistoricoColabPorEmpresa,
   atualizarFotoPerfil,
   incrementarVersaoFoto,
-  getHallExperienciaRTW,
+  getHallExperienciaConnectPear,
   getConquistasColaborador,
+  removerConquista,
   addConquista
 };

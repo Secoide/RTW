@@ -101,6 +101,19 @@ async function getExamesByColaborador(req, res) {
   }
 }
 
+async function getHistoricoExameColaborador(req, res) {
+  try {
+    const exames = await ExameService.buscarHistoricoExameColaborador(
+      req.params.idFunc,
+      req.params.idExame
+    );
+
+    res.json(exames);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar histórico do exame' });
+  }
+}
+
 async function uploadExame(req, res) {
   try {
     const { datarealizadaExame, vencimento, idColab, exame } = req.body;
@@ -170,6 +183,29 @@ async function checkExame(req, res) {
   }
 }
 
+async function updateRegistroExame(req, res) {
+  try {
+    const result = await ExameService.atualizarRegistroExame(req.params.id, {
+      datarealizadaExame: req.body.datarealizadaExame,
+      vencimento: req.body.vencimento,
+      file: req.file
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ erro: err.message });
+  }
+}
+
+async function deleteAnexoRegistroExame(req, res) {
+  try {
+    const result = await ExameService.removerAnexoRegistroExame(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ erro: err.message });
+  }
+}
+
 
 
 
@@ -184,7 +220,10 @@ module.exports = {
   deleteExame,
   getExamesByColaborador,
   deleteExameByColaborador,
+  getHistoricoExameColaborador,
   uploadExame,
   downloadExame,
-  checkExame
+  checkExame,
+  updateRegistroExame,
+  deleteAnexoRegistroExame
 };

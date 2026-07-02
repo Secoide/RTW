@@ -1,9 +1,13 @@
 import { initAbrirInfoColabClick } from "../events/click/handle-abrir-info-colab.js";
 import "../events/click/handle-atestados.js";
 import { initColaboradoresContextMenu } from "../events/contextmenu/handle-colaboradores-contextmenu.js";
-import { getSocket } from "../services/sockets/socket-service.js";
+import { fecharSocket, getSocket } from "../services/sockets/socket-service.js";
 import { carregarAniversariantes } from "../services/api/aniversariantes.js";
 import { reduzirNome } from "../utils/formatters/strings-format.js";
+import { VERSAO_SISTEMA } from "../config/system-version.js";
+import { carregarChangelog } from "../services/ui/changelog-loader.js";
+import { initPreferenciasUsuario } from "../services/ui/user-preferences.js";
+import { initNotificacoesSininho } from "../services/sockets/socket-notifications.js";
 
 import { } from "../services/sockets/reconnect-service.js";
 import { initSantaDropWalkWrapper } from "../services/ui/christmas-painel-inicio.js";
@@ -16,6 +20,7 @@ let avisoIconeSelecionado = "📄";
 let avisoEditandoId = null;
 
 let nomeUsuario = sessionStorage.getItem("nome_usuario");
+let changelogHomeCarregado = false;
 
 const Toast = Swal.mixin({
   toast: true,
@@ -309,6 +314,15 @@ async function carregarAvisosExames() {
 // EVENTO GLOBAL PARA BOTÕES (DELEGAÇÃO)
 // =======================================================
 document.addEventListener("click", (ev) => {
+  if (ev.target.closest("#homeVersaoBtn, #menuVersaoBtn")) {
+    abrirDetalhesVersaoHome();
+    return;
+  }
+
+  if (ev.target.id === "homeBtnPopupOk" || ev.target.id === "homePopupAtualizacao") {
+    fecharDetalhesVersaoHome();
+    return;
+  }
 
   // Abrir modal novo aviso
   if (ev.target.id === "btnNovoAviso") {
@@ -343,6 +357,73 @@ document.addEventListener("click", (ev) => {
   }
 });
 
+async function iniciarVersaoHome(tentativas = 0) {
+  const btnVersao = document.getElementById("homeVersaoBtn");
+  const textoVersao = document.getElementById("homeVersaoAtual");
+  const popup = document.getElementById("homePopupAtualizacao");
+
+  if (!btnVersao || !textoVersao || !popup) {
+    if (tentativas < 20) {
+      setTimeout(() => iniciarVersaoHome(tentativas + 1), 100);
+    }
+    return;
+  }
+
+  changelogHomeCarregado = false;
+  btnVersao.textContent = VERSAO_SISTEMA;
+  textoVersao.textContent = VERSAO_SISTEMA;
+
+  await carregarDetalhesVersaoHome();
+
+  if (localStorage.getItem("versao_sistema_vista") !== VERSAO_SISTEMA) {
+    popup.style.display = "flex";
+  }
+}
+
+async function abrirDetalhesVersaoHome() {
+  garantirPopupVersaoHome();
+  const popup = document.getElementById("homePopupAtualizacao");
+
+  if (!popup) return;
+
+  popup.style.display = "flex";
+  await carregarDetalhesVersaoHome();
+}
+
+async function carregarDetalhesVersaoHome() {
+  garantirPopupVersaoHome();
+  const container = document.querySelector(".home-changelog-container");
+
+  if (!container) return;
+
+  if (changelogHomeCarregado) return;
+
+  container.innerHTML = "<p class=\"home-changelog-loading\">Carregando detalhes...</p>";
+  container.innerHTML = await carregarChangelog(VERSAO_SISTEMA);
+  changelogHomeCarregado = true;
+}
+
+function fecharDetalhesVersaoHome() {
+  const popup = document.getElementById("homePopupAtualizacao");
+  if (popup) popup.style.display = "none";
+  localStorage.setItem("versao_sistema_vista", VERSAO_SISTEMA);
+}
+
+function garantirPopupVersaoHome() {
+  if (document.getElementById("homePopupAtualizacao")) return;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div id="homePopupAtualizacao" class="atualizacao-overlay home-atualizacao-overlay">
+      <div class="atualizacao-box home-atualizacao-box">
+        <h2>🚀 Nova atualização lançada!</h2>
+        <p><strong>Versão:</strong> <span id="homeVersaoAtual">${VERSAO_SISTEMA}</span></p>
+        <div class="home-changelog-container"></div>
+        <button type="button" id="homeBtnPopupOk">OBRIGADO</button>
+      </div>
+    </div>
+  `);
+}
+
 
 // =======================================================
 // SELEÇÃO DE ÍCONES
@@ -362,6 +443,7 @@ document.querySelectorAll("#iconeLista span").forEach(el => {
 export async function initHome() {
 
   const socket = getSocket();
+  iniciarVersaoHome();
   observarPermissoesPorRoles();
   initColaboradoresContextMenu(socket);
 
@@ -381,6 +463,8 @@ export async function initHome() {
         sessionStorage.getItem("nome_usuario");
 
       initAbrirInfoColabClick();
+      initPreferenciasUsuario();
+      initNotificacoesSininho();
     });
 
   carregarFotoPerfil();
@@ -405,13 +489,19 @@ export async function initHome() {
   document.getElementById("btnLogout").addEventListener("click", async (e) => {
     e.preventDefault();
 
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include"
-    });
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+    } catch (err) {
+      console.warn("Nao foi possivel encerrar a sessao no servidor.", err);
+    }
+
+    fecharSocket();
 
     // limpa estado local
-    //localStorage.clear();
+    localStorage.removeItem("nome_usuario");
     sessionStorage.clear();
 
     window.location.href = "/login";
@@ -473,6 +563,7 @@ export async function initHome() {
   const panel = document.getElementById("online-panel");
 
   const onlineWidget = document.getElementById("online-widget");
+  const iaWidget = document.getElementById("ia-widget");
 
   // ============================================================
   // ABRIR / FECHAR ONLINE
@@ -486,11 +577,18 @@ export async function initHome() {
 
     if (panel.classList.contains("active")) {
 
+      document.getElementById("ia-chat")?.classList.remove("active");
       onlineWidget.classList.add("open-ia-space");
+      requestAnimationFrame(() => {
+        const alturaOnline = onlineWidget.getBoundingClientRect().height;
+        const offset = Math.ceil(alturaOnline + 12);
+        iaWidget?.style.setProperty("--online-widget-offset", `${offset}px`);
+      });
 
     } else {
 
       onlineWidget.classList.remove("open-ia-space");
+      iaWidget?.style.removeProperty("--online-widget-offset");
 
     }
 
@@ -527,7 +625,7 @@ export async function initHome() {
 
 
   // ============================================================
-  // CHAT IA RTW
+  // CHAT IA ConnectPear
   // ============================================================
 
 
@@ -1244,8 +1342,8 @@ function carregarFotoPerfil() {
   const id = sessionStorage.getItem("id_usuario");;
 
   if (!id) {
-    alert('ID do colaborador não encontrado!');
-    return reject("ID não encontrado");
+    console.warn('ID do colaborador nao encontrado.');
+    return;
   }
 
   $.ajax({
@@ -1257,8 +1355,8 @@ function carregarFotoPerfil() {
       const dados = res;
 
       if (!dados || !dados.id) {
-        alert("Colaborador não encontrado.");
-        return reject("Colaborador não encontrado");
+        console.warn("Colaborador nao encontrado.");
+        return;
       }
       const fotoURL = dados.fotoperfil + "?v=" + dados.versao_foto;
 
@@ -1275,8 +1373,14 @@ function carregarFotoPerfil() {
     },
 
     error: function (err) {
-      alert('Erro ao logar. Tente novamente.');
-      reject(err);
+      if (err?.status === 401) {
+        if (typeof window.tratarErro401 === "function") {
+          window.tratarErro401();
+        }
+        return;
+      }
+
+      console.warn('Erro ao carregar foto do perfil.', err);
     }
   });
 }
@@ -1597,7 +1701,7 @@ function renderizarColaboradorIA(
 }
 
 async function carregarHallExperiencia() {
-
+  return; //DESATIVADO por enquanto.
   const resp =
     await fetch(
       "/api/colaboradores/hall-experiencia",

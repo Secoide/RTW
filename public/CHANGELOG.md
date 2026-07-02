@@ -6,6 +6,154 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
+----- VERSÕES FUTURAS
+## [2.5.0] - 2026-05-20
+## Nome: 📦 Materiais
+### Adicionado
+- Adicionado guia geral da tela Materiais.
+- Adicionada nova aba 'Materiais' na OS com resumo visual da lista de materiais, progresso/status e atalho para abrir a lista completa na tela de Materiais;
+
+### Alterado
+
+### Corrigido
+
+## [2.4.0] - 2026-05-20
+## Nome:  Férias
+### Adicionado
+- Novo sistema de Férias com calendário visual por colaborador;
+- Controle de férias por status: avaliar, aprovado e reprovado;
+- Cálculo automático de ciclo aquisitivo, prazo concessivo, saldo usado e dias restantes;
+- Tooltip detalhada com informações do período, saldo e limite para gozar férias;
+- Menu de clique direito para aprovar, reprovar ou apagar períodos de férias;
+
+### Alterado
+
+
+
+## [2.3.0] - 2026-05-20
+## Nome: 🏅 Conquitas e Experiências
+### Adicionado
+- Sistema de Conquistas e Medalhas para reconhecimento dos colaboradores;
+- Nova aba "Conquistas" no perfil dos colaboradores;
+- Cadastro manual de conquistas diretamente pelo perfil;
+- Integração das conquistas com o Hall da Experiência;
+- Exibição de medalhas automáticas e manuais, sistema de tooltip com descrição das medalhas;
+- Adicionado Guia completo de Medalhas e Conquistas;
+- Clique com o direito em medalhas manuais do colaborador para mostrar opção para remover medalha;
+
+### Alterado
+- Reestruturação visual da pagina Home com novo Hall da Experiência;
+
+### Corrigido
+
+
+
+
+
+
+## [2.2.0] - 2026-06-16
+## Nome: 🛠️ Ferramentas e Complementos
+- Adicionado novo menu 'Ferramentas';
+- Ferramentas não contratadas podem aparecer bloqueadas com prévia visual;
+- Nova ferramenta 'Numeração de Documentos', permitindo gerar, copiar, editar e apagar padrões de nomes para arquivos;
+- Nova ferramenta 'Registros Painel Elétrico' com cadastro em banco, edição, exclusão, checklist de produção e upload de imagem do painel montado;
+- Checklist visual dos painéis elétricos com etapas de produção e barra de progresso colorida conforme avanço;
+- Upload de múltiplas imagens para painéis elétricos, com galeria para visualizar fotos do painel montado;
+- Geração de QR Code para links externos dos painéis elétricos;
+- Nova aba Complementos no cadastro de OS;
+- Complementos da OS agora permitem informar tipo de serviço, observação complementar, PTA alocada e previsão de painel para montar/instalar;
+- Integração entre OS e Painéis Elétricos, permitindo vincular painel cadastrado a uma OS;
+- Atalho no painel vinculado da OS para abrir diretamente a tela de Ferramentas no painel correspondente;
+- Tipo de serviço da OS separado em duas combos: Categoria e Serviço, com serviços filtrados conforme a categoria escolhida;
+
+
+
+## [2.1.0] - 2026-06-16
+## Nome: 🎨💬 Chat online
+### Adicionado
+- Widget Online ganhou aba de chat em tempo real, agora usuários conectados conseguem trocar mensagens rápidas pelo sistema;
+- Mensagens do chat permanecem só durante a sessão da página e Contador indica novas mensagens quando o chat está fechado;
+- Chat Online avisa quando o usuário é mencionado com @nome e mensagens com colaboradores citados (#nome) mostram atalhos rápidos de Info;
+- Adicionado novo guia de 'Chat Online' no Guia Geral;
+
+### Alterado
+- Lista Online deixou de exibir o próprio usuário logado;
+
+### Corrigido
+
+### Removido
+
+
+
+----- VERSAO ATUAL
+## [2.0.0] - 2026-06-16
+## Nome: 🎨 Nova Identidade Visual 
+
+### Adicionado
+- Tela de login, carregamento, inicio e alguns avisos totalmente renovada;
+- Tela carregamento com progresso animado, mensagens inteligentes por etapa;
+- Nova mensagem de sessão encerrada agora abre em uma janela personalizada;
+- Adicionado o logo como ícone da página nas abas do navegador;
+- Aviso de Caps Lock ativado e botão para mostrar senha;
+- Novo ícone de consulta de versão no rodapé do menu lateral;
+- Adicionado busca global e filtro avançado por OS, cliente, cidade, colaborador, descrição e status na tela 'Programação OS';
+- Filtros rápidos para as programação, sendo: prioridade, com equipe, sem equipe e sem responsável;
+- Dicas visual para lembrete de teclas rapidas para adicionar colaboradores (líder e terceiros);
+- Adicionado busca melhorada e avançada por nome, ID, cargo, setor ou status na tela 'RH';
+- Filtros rápidos em chips: Todos, Vencidos, A vencer, Agendados, Férias, Afastados e EPI, alem de Cards rápidos mostrando colaboradores visíveis, pendências e ausências para tabela do RH;
+- Um bloco de “leitura rápida” com insight automático para quem está mexendo na tela do RH;
+- Menu de perfil redesenhado com visual mais limpo, foto destacada e notificações melhor organizadas;
+- Logo configurado como ícone da aba do navegador;
+- Adicionado status do banco de dados na tela de login, exibindo separadamente a disponibilidade do servidor e a conexão com o banco;
+- Informação de clima no login com temperatura, vento e umidade na tela Login (por enquaanto apenas para Santa Cruz do Sul - RS);
+- Se a sessão expirar ou a conexão falhar ao adicionar colaborador na OS, o sistema avisa o usuário e não mostra a alteração como salva sem confirmação;
+- Após sessão expirada, a tela retorna automaticamente para o login;
+- Adicionada opção Editar Exame e Curso no menu de clique direito da aba Exames e Cursos do colaborador. Criada tabela para editar todos os registros anexados daquele exame/curso. Permitida alteração de data realizada e data de vencimento. Permitida substituição ou remoção do PDF anexado;
+- Adicionado controle de vencimento em Exames e Cursos na tela 'Gestão', permitindo marcar quais cadastros vencem e removendo alertas de vencido quando o item estiver configurado como “Sem vencimento”;
+- Adicionado novo guia de 'Gestão' no Guia Geral;
+- Adicionada janela de configurações no menu perfil, permitindo salvar preferências locais do usuário, como tema, densidade da interface, animações, notificações, abertura automática do chat online e alteração de senha;
+- Adicionado aviso de erro quando a programação não conseguir ser finalizada por falha de conexão ou servidor;
+- Agora a notificação salva para usuários que não estavam online no momento do lançamento da programação;
+- Adicionada busca de terceiros na OS usando $;
+
+
+### Alterado
+- Ajustado o aviso automático de atualização para aparecer na home após o login;
+- Atualizado o visual das janelas de anexar Exame e Curso, deixando os forms mais padronizados, organizados e fáceis de usar.
+- Guia de Exames Ocupacionais atualizado com a opção Editar Exame;
+- Guia de Cursos e Treinamentos atualizado com a opção Editar Exame;
+- Ajustado o tempo de inatividade para encerrar a sessão automaticamente após 5 horas sem uso;
+- Melhorado o login com recuperação de acesso guiada;
+- Agora login permite acesso usando ID do usuário ou e-mail cadastrado;
+- Login passou a carregar contexto da empresa vinculada ao usuário;
+- Ajustada verificação de RG para ignorar campo vazio;
+- Ajustada mensagem da OS para diferenciar falha ao salvar de falha ao atualizar a tela após salvar;
+- O status da programação do dia só aparece como finalizado depois que o sistema confirma que salvou;
+- Destaque verde da programação lançada permanece visível por no máximo 3 segundos (antes 60 segundos);
+
+### Corrigido
+- Ajustada a autenticação por sessão para permitir chamadas seguras da API;
+- Atualizar curso abria formulario com lista de exames;
+- Corrigida criação de OS que podia salvar parcialmente mesmo com erro;
+- Usuário não recebia aviso em alguns momentos quando a sessão expirava;
+- Login não bloqueava excesso de tentativas corretamente, mensagem de bloqueio retornava em formato não compatível com o sistema;
+- Ações bloqueadas por sessão expirada deixam de falhar sem aviso;
+- Central IA não recolhia automaticamente ao abrir o painel Online;
+- Logout agora encerra a sessão corretamente, sistema identifica 30 minutos de inatividade; 
+- Melhorada a estabilidade da conexão em tempo real, evitando reconexões repetidas, impedindo que o sistema tente reconectar após sair da conta e protegendo as notificações contra mensagens inválidas;
+- Cadastro de colaborador retornava erro depois de já ter gravado o CPF;
+- Horário de exame agendado no perfil do colaborador não respeitava o horário local cadastrado;
+- Destaque verde da programação para não sumia ao trocar de data;
+
+### Removido
+- Removido versão na tela Inicial;
+- Removido aba de Config/Senha no perfil dos colaboradores;
+- Removido a possibilidade de apagar usuario ja cadastrada; (Solicitar suporte)
+- Removido temporariamente status de EPI na tabela do RH;
+- Removido terceiros disponiveis na programação; 
+- Removido botão Registrar/Anexar na tela principal do RH;
+
+
 ## [1.5.0] - 2026-06-08
 ## Nome: 🧠 Central IA
 ### Adicionado

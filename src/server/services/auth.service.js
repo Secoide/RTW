@@ -1,5 +1,6 @@
 const { gerarHash, verificarHash } = require('../utils/crypto/hash');
 const AuthModel = require('../models/auth.model');
+const SaasService = require('./saas.service');
 const crypto = require('crypto');
 const emailService = require('../services/email.service');
 
@@ -29,13 +30,26 @@ async function login(username, password) {
     return { sucesso: false, mensagem: 'Usuário ou senha incorretos' };
   }
 
+  const saas = await SaasService.buscarContextoUsuario(usuario.id);
+  if (!saas.modo_saas || !saas.empresa) {
+    return {
+      sucesso: false,
+      mensagem: 'Seu usuário ainda não está associado a uma empresa. Entre em contato com o suporte ConnectPear para avaliação e vínculo com a empresa correspondente.'
+    };
+  }
+
+  if (saas.bloqueado) {
+    return { sucesso: false, mensagem: 'Empresa sem acesso ativo ao sistema.' };
+  }
+
   return {
     sucesso: true,
     usuario: {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.mail,
-      nivel: usuario.nivel_acesso
+      nivel: usuario.nivel_acesso,
+      saas
     }
   };
 }
@@ -75,7 +89,7 @@ async function solicitarRecuperacao(idColab, email) {
 
   await emailService.enviarEmail({
     para: usuario.mail,
-    assunto: "Recuperação de senha - RTW",
+    assunto: "Recuperação de senha - ConnectPear",
     html: `
       <p>Olá ${usuario.nome},</p>
       <p>Para redefinir sua senha clique no link abaixo:</p>

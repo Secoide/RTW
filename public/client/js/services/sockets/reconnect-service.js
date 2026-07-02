@@ -5,6 +5,10 @@ function getNomeUsuario() {
   return localStorage.getItem("nome_usuario");
 }
 
+function estaNaTelaCarregamento() {
+  return window.location.pathname.includes("carregamento");
+}
+
 export function analisarConexao() {
   const nomeUsuario = getNomeUsuario();
   conectarSocket(nomeUsuario);
@@ -34,15 +38,17 @@ document.addEventListener("ws:connected", () => {
 
   Swal.close();
 
-  Toast.fire({
-    icon: "success",
-    title: "Conectado ao servidor",
-    customClass: {
-      popup: 'swal-toast-custom',
-      title: 'toast-title-custom',
-      htmlContainer: 'toast-text-custom'
-      },
-  });
+  if (!estaNaTelaCarregamento()) {
+    Toast.fire({
+      icon: "success",
+      title: "Conectado ao servidor",
+      customClass: {
+        popup: 'swal-toast-custom',
+        title: 'toast-title-custom',
+        htmlContainer: 'toast-text-custom'
+        },
+    });
+  }
 
   const nomeUsuario = getNomeUsuario();
 

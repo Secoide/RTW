@@ -6,10 +6,12 @@ const authController = require('../controllers/auth.controller');
 const verificarAutenticacao = require('../middlewares/auth.middleware');
 
 router.post('/login', validate(loginSchema), authController.loginController);
+router.get('/status', verificarAutenticacao, authController.statusController);
 router.post('/alterar-senha', verificarAutenticacao, authController.alterarSenhaController);
 // 🆕 Recuperação de senha
 router.post('/recuperar-senha', authController.recuperarSenhaController);
 router.post('/resetar-senha', authController.resetarSenhaController);
-router.post('/logout', verificarAutenticacao, authController.logoutController);
+router.post('/logout', authController.logoutController);
+router.post('/logout-all', verificarAutenticacao, authController.logoutAllController);
 
 module.exports = router;

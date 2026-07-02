@@ -1,5 +1,5 @@
 export async function carregarChangelog(versao) {
-  const response = await fetch("./CHANGELOG.md");
+  const response = await fetch("/CHANGELOG.md");
   const texto = await response.text();
 
   const linhas = texto.split(/\r?\n/);

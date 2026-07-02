@@ -48,6 +48,18 @@ function initUsuariosSocket(wss) {
         usuariosOnline.set(data.nome, ws);
         broadcastUsuarios(wss);
       }
+
+      if (data.acao === "logout") {
+        usuariosConectados.delete(ws);
+
+        if (ws.usuario) {
+          usuariosOnline.delete(ws.usuario);
+          ws.usuario = null;
+        }
+
+        atualizarTodosUsuariosOnline(wss);
+        broadcastUsuarios(wss);
+      }
     });
 
     ws.on("close", () => {

@@ -9,3 +9,479 @@
     border: 1px solid var(--border-form);
     padding: 20px;
 }
+
+.modal-anexo-documento {
+    position: fixed;
+    inset: 0;
+    z-index: 1000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-anexo-backdrop {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, .72);
+}
+
+.painel-anexo-documento {
+    width: min(520px, 94vw);
+    display: block;
+    justify-content: initial;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: linear-gradient(145deg, rgb(86 86 86 / 5%), rgb(0 0 0 / 24%)), var(--pretoMedio, var(--bg-padrao));
+    border: 1px solid rgba(238, 119, 34, .35);
+    box-shadow: 0 22px 54px rgba(0, 0, 0, .58);
+}
+
+.painel-anexo-documento form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.modal-anexo-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
+}
+
+.modal-anexo-header h3 {
+    margin: 0;
+    color: var(--texto-principal);
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: 0;
+}
+
+.modal-anexo-header p {
+    margin: 4px 0 0;
+    color: var(--cinzaMedioEscuro, #a6a6a6);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.modal-anexo-close {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffb8b8;
+    background: rgba(157, 45, 45, .14);
+    border: 1px solid rgba(255, 107, 107, .28);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.modal-anexo-close:hover {
+    transform: translateY(-1px);
+    color: #ffffff;
+    border-color: rgba(255, 107, 107, .55);
+    background: rgba(157, 45, 45, .28);
+}
+
+.modal-anexo-body {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.35fr) minmax(180px, 1.35fr);
+    gap: 12px;
+    padding: 2px 20px 0;
+}
+
+.modal-anexo-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-anexo-field.span-2,
+.modal-anexo-upload.span-2 {
+    grid-column: 1 / -1;
+}
+
+.modal-anexo-field > span {
+    color: var(--cinzaMedioEscuro, #b7b7b7);
+    font-size: 11px;
+    font-weight: 650;
+    text-transform: uppercase;
+}
+
+.modal-anexo-field select,
+.modal-anexo-field input {
+    width: 100% !important;
+    min-height: 38px;
+    box-sizing: border-box;
+}
+
+.modal-anexo-field input.campo-bloqueado {
+    color: var(--cinzaMedioEscuro, #a6a6a6);
+    border-style: dashed;
+    opacity: .78;
+    cursor: not-allowed;
+}
+
+.modal-anexo-status {
+    min-height: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    align-self: end;
+    justify-content: center;
+    padding: 0 10px;
+    color: var(--texto-principal);
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 8px;
+    user-select: none;
+    visibility: hidden;
+}
+
+.modal-anexo-status.ativo {
+    visibility: visible;
+    color: #efda38;
+    border-color: rgba(239, 218, 56, .42);
+    background: rgba(239, 218, 56, .08);
+}
+
+.modal-anexo-status i {
+    font-size: 13px;
+}
+
+.modal-anexo-status span {
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.modal-anexo-upload {
+    min-height: 72px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: var(--texto-principal);
+    background: rgba(255, 255, 255, .045);
+    border: 1px dashed rgba(238, 119, 34, .45);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color .16s ease, background .16s ease;
+}
+
+.modal-anexo-upload:hover {
+    border-color: rgba(239, 218, 56, .72);
+    background: rgba(255, 255, 255, .065);
+}
+
+.modal-anexo-upload input {
+    display: none;
+}
+
+.modal-anexo-upload i {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #efda38;
+    background: rgba(255, 255, 255, .06);
+    border-radius: 8px;
+    font-size: 18px;
+}
+
+.modal-anexo-upload b {
+    display: block;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.modal-anexo-upload small {
+    display: block;
+    margin-top: 2px;
+    color: var(--cinzaMedioEscuro, #a6a6a6);
+    font-size: 11px;
+}
+
+.modal-anexo-progress {
+    padding: 0 20px;
+}
+
+.modal-anexo-progress .progress {
+    height: 9px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 99px;
+}
+
+.modal-anexo-progress .progress-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #ee7722, #efda38) !important;
+    color: #111;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 9px;
+    text-align: center;
+}
+
+.modal-anexo-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px 18px;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+}
+
+.modal-anexo-footer input {
+    height: 38px;
+    min-width: 116px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.modal-anexo-footer input[type="submit"] {
+    color: #101010 !important;
+    border-color: rgba(255, 255, 255, .22) !important;
+    background: linear-gradient(90deg, #ee7722, #efda38) !important;
+    box-shadow: none !important;
+}
+
+.modal-anexo-footer input[type="submit"]:hover {
+    box-shadow: 0 0 18px rgba(238, 119, 34, .22) !important;
+}
+
+.modal-anexo-footer input[type="reset"] {
+    color: #ffd4d4;
+    background: rgba(157, 45, 45, .22);
+    border: 1px solid rgba(255, 107, 107, .32);
+}
+
+.modal-anexo-footer input[type="reset"]:hover {
+    color: #ffffff;
+    background: rgba(157, 45, 45, .34);
+    box-shadow: 0 0 18px rgba(255, 107, 107, .18);
+}
+
+@media (max-width: 560px) {
+    .modal-anexo-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+.painel_editor_exames {
+    width: min(860px, 92vw);
+    max-height: 84vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 14px;
+    background: var(--pretoMedio, var(--bg-padrao));
+    border-color: var(--cinzaEscuro2, var(--border-form));
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .55);
+}
+
+.editor-exames-colaborador {
+    position: fixed;
+    inset: 0;
+    z-index: 1000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+}
+
+.swal2-container {
+    z-index: 1000001 !important;
+}
+
+.editor-exames-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--cinzaEscuro2, var(--border-form));
+}
+
+.editor-exames-header h3 {
+    margin: 0 0 4px;
+    color: var(--texto-principal);
+    font-size: 17px;
+}
+
+.editor-exames-header p {
+    margin: 0;
+    color: var(--cinzaMedioEscuro);
+    font-size: 12px;
+}
+
+.editor-exames-conteudo {
+    min-height: 120px;
+}
+
+.editor-exames-table-wrap {
+    max-height: 54vh;
+    overflow: auto;
+    border: 1px solid var(--cinzaEscuro2, var(--border-form));
+    border-radius: 8px;
+    background: rgba(0, 0, 0, .15);
+}
+
+.editor-exames-table {
+    border-collapse: collapse;
+    font-size: 12px;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.editor-exames-table th,
+.editor-exames-table td {
+    height: 60px;
+    padding: 6px;
+    border-bottom: 1px solid var(--cinzaEscuro2, var(--border-form));
+    vertical-align: middle;
+}
+
+.editor-exames-table th {
+    position: sticky;
+    top: 0;
+    background: var(--pretoForte, var(--bg-padrao));
+    color: var(--texto-principal);
+    z-index: 1;
+    font-size: 11px;
+}
+
+.editor-exames-table th:nth-child(1) {
+    width: 5%;
+}
+.editor-exames-table th:nth-child(3) {
+    width: 18%;
+}
+.editor-exames-table th:nth-child(3) {
+    width: 22%;
+}
+
+.editor-exames-table input[type="date"] {
+    width: min(110px, 100%);
+}
+
+.editor-exames-table input[type="number"] {
+    width: 58px;
+    text-align: center;
+}
+
+.editor-vencimento-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editor-vencimento-preview {
+    color: var(--verdeMedio, #4caf50);
+    font-size: 11px;
+    line-height: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.editor-anexo-exame {
+    max-width: 132px;
+    font-size: 11px;
+}
+
+.editor-exames-acoes,
+.editor-pdf-acoes {
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.editor-exames-acoes button,
+.editor-pdf-acoes button {
+    display: inline-block;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    font-size: 11px;
+    padding: 0;
+    border-radius: 6px;
+    line-height: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-indent: -999px;
+    position: relative;
+    vertical-align: middle;
+}
+
+.editor-exames-acoes button + button,
+.editor-pdf-acoes button + button {
+    margin-left: 6px;
+}
+
+.editor-exames-acoes button::after,
+.editor-pdf-acoes button::after {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-indent: 0;
+    font-size: 13px;
+}
+
+.bt_salvar_registro_exame::after {
+    content: "\f0c7";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+}
+
+.bt_visualizar_registro_exame::after {
+    content: "\f06e";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+}
+
+.bt_remover_anexo_exame::after {
+    content: "\f00d";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: var(--vermelhoClaro, #e74c4c);
+    font-size: 16px;
+}
+
+.bt_excluir_registro_exame::after {
+    content: "\f2ed";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: var(--vermelhoClaro, #e74c4c);
+}
+
+.editor-exames-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px solid var(--cinzaEscuro2, var(--border-form));
+}
+
+.editor-exames-footer button {
+    min-width: 120px;
+}

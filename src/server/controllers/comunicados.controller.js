@@ -93,10 +93,12 @@ async function update(req, res) {
         }
 
         // 🛡 PERMISSÃO
-        const isCriador = req.user.id === avisoExistente.criado_por;
-        const nivel = req.user.role; // ← vem da sessão
-        const isDiretoria = nivel == 5;
-        const isAdmin = nivel == 99;
+        const usuarioId = Number(req.user.id);
+        const criadorId = Number(avisoExistente.criado_por);
+        const nivel = Number(req.user.role); // vem da sessao
+        const isCriador = usuarioId === criadorId;
+        const isDiretoria = nivel === 5;
+        const isAdmin = nivel === 99;
 
         if (!isCriador && !isDiretoria && !isAdmin) {
             return res.status(403).json({ erro: "Sem permissão para editar este aviso" });
@@ -123,11 +125,12 @@ async function deleteItem(req, res) {
         }
 
         // 🛡 PERMISSÃO
-        const isCriador = req.user.id === avisoExistente.criado_por;
-        const nivel = req.user.role; // ← vem da sessão
-        const isDiretoria = nivel == 5;
-        const isAdmin = nivel == 99;
-        console.log(nivel);
+        const usuarioId = Number(req.user.id);
+        const criadorId = Number(avisoExistente.criado_por);
+        const nivel = Number(req.user.role); // vem da sessao
+        const isCriador = usuarioId === criadorId;
+        const isDiretoria = nivel === 5;
+        const isAdmin = nivel === 99;
 
         if (!isCriador && !isDiretoria && !isAdmin) {
             return res.status(403).json({ erro: "Sem permissão para excluir este aviso" });

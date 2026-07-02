@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 async function enviarEmail({ para, assunto, html }) {
     try {
         await transporter.sendMail({
-            from: `"Recuperar Senha - RTW Engenharia" <${process.env.EMAIL_USER}>`,
+            from: `"Recuperar Senha - ConnectPear" <${process.env.EMAIL_USER}>`,
             to: para,
             subject: assunto,
             html: html

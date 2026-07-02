@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo_GS.png">
+  <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
 
   <link rel="stylesheet" type="text/css" href="css/padrao/cores.css">
   <link rel="stylesheet" type="text/css" href="css/padrao/padrao.css">
@@ -12,21 +14,42 @@
   
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-  <div class="fundo_img">
-    <img src="../fundos2.webp" class="bg" alt="">
+  <div id="fundo_img_id" class="fundo_img">
     <div id="snow-layer"></div>
-    <div class="painel_login centralizada glass">
+    <div  id="form_login_id" class="painel_login centralizada glass">
+      <aside class="login_brand">
+        <img src="logo_teste.png" alt="Logo ConnectPear" class="login_logo" style="padding-left: 80px;">
+        <div class="login_brand_text">
+          <span>ConnectPear</span>
+          <h1>Estratégia, agilidade e pessoas conectadas.</h1>
+          <p>Acesse o ambiente da sua empresa para conectar operação, recursos humanos e decisões do dia a dia.</p>
+        </div>
+      </aside>
+
       <div class="form_login">
         <p class="tituloLogin">Faça seu login.</p>
+        <p class="subtituloLogin">Entre com seu usuário da empresa cadastrada.</p>
         <form id="formLogin" method="POST" autocomplete="on">
-          <label for="username">Usuário</label><br>
-          <input id="username" type="text" name="username" autocomplete="username" required>
+          <label for="username">Usuário ou E-mail</label><br>
+          <input id="username" type="text" name="username" autocomplete="username email" placeholder="Digite seu usuário ou e-mail" required>
 
           <label for="password">Senha</label><br>
-          <input id="password" type="password" name="password" autocomplete="current-password" required>
+          <div class="senha-wrap">
+            <input id="password" type="password" name="password" autocomplete="current-password" required>
+            <button id="togglePassword" type="button" title="Mostrar senha" aria-label="Mostrar senha">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <div id="capsLockAviso" class="caps-lock-aviso">Caps Lock ativo</div>
+
+          <label class="lembrar-login" for="lembrarLogin">
+            <input id="lembrarLogin" type="checkbox">
+            <span>Lembrar usuário/e-mail neste dispositivo</span>
+          </label>
 
           <a class="esquecisenha" href="#">Esqueci minha senha</a>
           <div class="divbutton">
@@ -34,15 +57,47 @@
             <a class="semconta" href="#">Não consigo acessar minha conta</a>
           </div>
         </form>
+        <div id="loginAssociationNotice" class="login-association-notice" hidden>
+          <span>Sem associação com empresa. Contate o suporte ConnectPear para avaliação e ví­nculo correto.</span>
+          <button type="button" id="loginAssociationOk">OK</button>
+        </div>
       </div>
     </div>
-    <div class="versao" title="Verificar as atualizações da versão atual."></div>
+    <div id="loginWeatherStatus" class="login-weather-status" aria-label="Clima atual">
+      <span>
+        <i class="fa-solid fa-temperature-half"></i>
+        <strong id="loginWeatherTemp">--°C</strong>
+      </span>
+      <span>
+        <i class="fa-solid fa-wind"></i>
+        <strong id="loginWeatherWind">-- km/h</strong>
+      </span>
+      <span id="loginWeatherHumidityWrap">
+        <i class="fa-solid fa-droplet"></i>
+        <strong id="loginWeatherHumidity">--%</strong>
+      </span>
+    </div>
+    <div class="login-footer-status" aria-label="Versão e status do sistema">
+      <span class="versao" title="Versão atual do sistema."></span>
+      <span class="footer-separator">|</span>
+      <span class="login-developer-credit">Idealizado por: <strong>Guilherme Schvaickardt</strong></span>
+      <span class="footer-separator">|</span>
+      <span id="loginServerStatus" class="login-server-status">
+        <span class="status-dot checking"></span>
+        <span>Servidor...</span>
+      </span>
+      <span class="footer-separator">|</span>
+      <span id="loginDatabaseStatus" class="login-server-status">
+        <span class="status-dot checking"></span>
+        <span>Banco...</span>
+      </span>
+    </div>
   </div>
   <!-- POPUP DE ATUALIZAÇÃO DO SISTEMA -->
   <div id="popupAtualizacao" class="atualizacao-overlay">
     <div class="atualizacao-box">
 
-      <h2>🚀 Nova atualização lançada!</h2>
+      <h2>Nova atualização lançada!</h2>
       <p><strong>Versão:</strong> <span id="versaoAtual"></span></p>
 
       <div class="changelog-container"></div>
@@ -50,7 +105,6 @@
       <button id="btnPopupOk">OBRIGADO</button>
     </div>
   </div>
-  <!-- Agora só carrega o main-login.js -->
   <script type="module" src="/client/js/main-login.js"></script>
 </body>
 

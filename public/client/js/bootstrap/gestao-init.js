@@ -155,6 +155,7 @@ export function initGestao() {
                     id: e.idexame ?? null,
                     nome: e.nome ?? e.razao_social ?? "",
                     descricao: e.descricao ?? null,
+                    vencimento: !!Number(e.vencimento ?? 1),
                 }));
             } else if (entidadeAtual === "Curso") {
                 const data = await $.ajax({
@@ -167,6 +168,7 @@ export function initGestao() {
                     id: e.id ?? null,
                     nome: e.nome ?? "",
                     descricao: e.descricao ?? null,
+                    vencimento: !!Number(e.vencimento ?? 1),
                 }));
             } else if (entidadeAtual === "Supervisor") {
                 const data = await $.ajax({
@@ -720,7 +722,7 @@ export function initGestao() {
         lastCols.forEach(async (col, i) => {
             if (col === "id") return;
             // NÃO transformar booleans em input — manter checkbox
-            if (["disponivel", "integracao", "liberacao", "seguranca"].includes(col)) return;
+            if (["disponivel", "integracao", "liberacao", "seguranca", "vencimento"].includes(col)) return;
             if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) return;
             if (entidadeAtual === "Setor" && (col === "cargos")) return;
             // 🔒 BLOQUEIA supervisor e cidade inicialmente (OS)
@@ -962,7 +964,7 @@ export function initGestao() {
                 const $td = $linha.find("td").eq(i);
                 if (!col) return;
                 // Se era checkbox, restaura checked/unchecked
-                if (["disponivel", "integracao", "liberacao", "seguranca"].includes(col)) {
+                if (["disponivel", "integracao", "liberacao", "seguranca", "vencimento"].includes(col)) {
                     // encontra checkbox nessa célula (se existir)
                     const $chk = $td.find("input[type='checkbox']");
                     if ($chk.length) {
@@ -1002,7 +1004,9 @@ export function initGestao() {
 
             $linha.find("[data-editing='true']").each((_, el) => {
                 const campo = $(el).data("field");
-                let valor = $(el).val();
+                let valor = $(el).attr("type") === "checkbox"
+                    ? ($(el).is(":checked") ? "1" : "0")
+                    : $(el).val();
 
                 // Se for telefone, remove máscara antes de enviar
                 if (campo.toLowerCase().includes("telefone") || campo.toLowerCase().includes("celular")) {
@@ -1123,6 +1127,13 @@ export function initGestao() {
             // 🔒 Cargo: bloquear disponivel
             else if (entidadeAtual === "Cargo" && ["disponivel"].includes(col)) {
                 $td.text("—").attr("title", "Disponível após salvar o Cargo");
+            } else if (["Exame", "Curso"].includes(entidadeAtual) && col === "vencimento") {
+                const $input = $("<input>").attr({
+                    type: "checkbox",
+                    "data-field": col,
+                    "data-editing": "true"
+                }).prop("checked", true);
+                $td.append($input);
             } else {
                 // Campos editáveis
                 let $input;
@@ -1202,7 +1213,9 @@ export function initGestao() {
             const novo = {};
             $tr.find("[data-editing='true']").each((_, el) => {
                 const campo = $(el).data("field");
-                let valor = $(el).val();
+                let valor = $(el).attr("type") === "checkbox"
+                    ? ($(el).is(":checked") ? "1" : "0")
+                    : $(el).val();
 
                 // Se for telefone, remove máscara antes de enviar
                 if (campo.toLowerCase().includes("telefone") || campo.toLowerCase().includes("celular")) {
@@ -2018,6 +2031,29 @@ export function initGestao() {
 
                 // ======== Colunas booleanas (checkbox Empresa) ========
                 else if (entidadeAtual === "Cargo" && ["disponivel"].includes(c)) {
+                    const $chk = $("<input>").attr({
+                        type: "checkbox",
+                        "data-id": item.id,
+                        "data-field": c,
+                        "data-entity": entidadeAtual
+                    }).prop("checked", item[c] == 1);
+
+                    $chk.on("change", async function () {
+                        const id = $(this).data("id");
+                        const field = $(this).data("field");
+                        const valor = $(this).is(":checked") ? 1 : 0;
+                        try {
+                            await updateRegistro(entidadeAtual, id, { [field]: valor });
+                            Toast.fire({ icon: "success", theme: 'dark', title: `${field} atualizado!` });
+                        } catch {
+                            Toast.fire({ icon: "error", theme: 'dark', title: `Falha ao atualizar ${field}` });
+                        }
+                    });
+
+                    $td.append($chk);
+                }
+
+                else if (["Exame", "Curso"].includes(entidadeAtual) && c === "vencimento") {
                     const $chk = $("<input>").attr({
                         type: "checkbox",
                         "data-id": item.id,

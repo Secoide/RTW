@@ -5,7 +5,8 @@
 const WebSocket = require("ws");
 const connection = require("../config/db");
 const ColaboradoresService = require("../services/colaboradores.service");
-const { emitirStatusProgDia } = require("./status-dia-socket.js");
+const NotificacoesModel = require("../models/notificacoes.model");
+const { emitirStatusProgDia, criarMensagemStatusDia } = require("./status-dia-socket.js");
 
 // ======================================================
 // 🔌 Inicialização do WebSocket
@@ -177,8 +178,18 @@ async function handleTransferirColaboradores(wss, ws, { colaboradores, datas }) 
   }
 }
 
-async function handleMudarStatusProgDia(wss, ws, { statuss, dia }) {
-  if (!dia || statuss === undefined) return;
+async function handleMudarStatusProgDia(wss, ws, { statuss, dia, requestId }) {
+  const statusNormalizado = Number(statuss);
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dia)) || ![0, 1].includes(statusNormalizado)) {
+    ws.send(JSON.stringify({
+      acao: "mudar_statusProgDia_ok",
+      sucesso: false,
+      requestId,
+      mensagem: "Dados invalidos para alterar o status do dia."
+    }));
+    return;
+  }
 
   const sqlInsert = `
     INSERT INTO tb_programacaostatus (datadia, statuss)
@@ -187,10 +198,27 @@ async function handleMudarStatusProgDia(wss, ws, { statuss, dia }) {
   `;
 
   try {
-    await connection.query(sqlInsert, [dia, statuss]);
-    emitirStatusProgDia(wss, dia, statuss, ws);
+    await connection.query(sqlInsert, [dia, statusNormalizado]);
+
+    if (statusNormalizado === 1) {
+      await NotificacoesModel.criarGlobal({
+        tipo: "programacao_lancada",
+        referencia: dia,
+        mensagem: criarMensagemStatusDia(dia, statusNormalizado)
+      });
+    }
+
+    ws.send(JSON.stringify({
+      acao: "mudar_statusProgDia_ok",
+      sucesso: true,
+      requestId,
+      dia,
+      statuss: statusNormalizado
+    }));
+
+    emitirStatusProgDia(wss, dia, statusNormalizado, ws);
   } catch (err) {
-    sendError(ws, `Erro ao alterar status do dia ${dia}`, err);
+    sendError(ws, `Erro ao alterar status do dia ${dia}`, err, requestId);
   }
 }
 
@@ -220,9 +248,13 @@ function broadcast(wss, ws, data) {
   });
 }
 
-function sendError(ws, mensagem, err) {
-  console.error(`❌ ${mensagem}:`, err);
-  ws.send(JSON.stringify({ acao: "erro", mensagem: `${mensagem}: ${err.message}` }));
+function sendError(ws, mensagem, err, requestId = null) {
+  console.error(mensagem, err);
+  ws.send(JSON.stringify({
+    acao: "erro",
+    mensagem: `${mensagem}: ${err.message}`,
+    requestId
+  }));
 }
 
 module.exports = { initColaboradoresSocket };

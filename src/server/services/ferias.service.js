@@ -38,6 +38,37 @@ function addDias(data, qtd) {
     return d;
 }
 
+function normalizarDataISO(valor) {
+    if (!valor) return null;
+
+    if (valor instanceof Date) {
+        if (Number.isNaN(valor.getTime())) return null;
+        return [
+            valor.getFullYear(),
+            String(valor.getMonth() + 1).padStart(2, '0'),
+            String(valor.getDate()).padStart(2, '0')
+        ].join('-');
+    }
+
+    const texto = String(valor).slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return null;
+
+    const data = new Date(`${texto}T00:00:00`);
+    return Number.isNaN(data.getTime()) ? null : texto;
+}
+
+function criarDataLocal(valor) {
+    const iso = normalizarDataISO(valor);
+    if (!iso) return null;
+
+    const [ano, mes, dia] = iso.split('-').map(Number);
+    return new Date(ano, mes - 1, dia);
+}
+
+function calcularDiasPeriodo(inicio, fim) {
+    return Math.round((fim - inicio) / 86400000) + 1;
+}
+
 function addMeses(data, qtd) {
     const d = new Date(data);
     const dia = d.getDate();
@@ -57,66 +88,105 @@ function proximaSegunda(data) {
 }
 
 /* =====================================================
-   GERAR CICLOS PELO GOZO REAL
+   CICLOS POR ANIVERSARIO DE ADMISSAO
 ===================================================== */
-function gerarCiclosPorGozo(dataAdmissao, ferias) {
-
-    const feriasOrdenadas = ferias
-        .filter(f => f.status !== 'sugerida')
-        .sort((a, b) => a.inicio - b.inicio);
-
+function montarCiclosAdquiridos(dataAdmissao, hoje = new Date()) {
     const ciclos = [];
-    let cicloAtual = {
-        inicio: new Date(dataAdmissao),
-        diasUsados: 0,
-        quantidadePeriodos: 0,
-        ferias: []
-    };
+    let inicio = criarDataLocal(dataAdmissao);
+    const ref = criarDataLocal(hoje);
 
-    feriasOrdenadas.forEach(f => {
-        const dias = Math.round((f.fim - f.inicio) / 86400000) + 1;
+    for (let i = 0; i < 80; i++) {
+        const aquisitivoInicio = new Date(inicio);
+        const aquisitivoFim = new Date(aquisitivoInicio);
+        aquisitivoFim.setFullYear(aquisitivoFim.getFullYear() + 1);
+        aquisitivoFim.setDate(aquisitivoFim.getDate() - 1);
 
-        if (cicloAtual.diasUsados + dias <= DIAS_CICLO) {
-            cicloAtual.ferias.push(f);
-            cicloAtual.diasUsados += dias;
-            cicloAtual.quantidadePeriodos++;
-        } else {
-            ciclos.push(cicloAtual);
-            cicloAtual = {
-                inicio: new Date(cicloAtual.inicio),
-                diasUsados: dias,
-                quantidadePeriodos: 1,
-                ferias: [f]
-            };
-        }
-    });
+        const concessivoInicio = addDias(aquisitivoFim, 1);
+        const concessivoFim = new Date(concessivoInicio);
+        concessivoFim.setFullYear(concessivoFim.getFullYear() + 1);
+        concessivoFim.setDate(concessivoFim.getDate() - 1);
 
-    ciclos.push(cicloAtual);
+        if (concessivoInicio > ref) break;
+
+        ciclos.push({
+            id: `ciclo-${i + 1}`,
+            aquisitivoInicio,
+            aquisitivoFim,
+            concessivoInicio,
+            concessivoFim,
+            diasUsados: 0,
+            quantidadePeriodos: 0,
+            ferias: []
+        });
+
+        inicio.setFullYear(inicio.getFullYear() + 1);
+    }
 
     return ciclos;
 }
 
-/* =====================================================
-   SALDO DO CICLO ATUAL
-===================================================== */
-function calcularSaldoCicloAtual(ciclo) {
+function atribuirFeriasAosCiclos(ciclos, ferias) {
+    const feriasOrdenadas = ferias
+        .filter(f => !['sugerida', 'reprovado'].includes(f.status))
+        .sort((a, b) => criarDataLocal(a.inicio) - criarDataLocal(b.inicio));
+
+    feriasOrdenadas.forEach(f => {
+        const dias = calcularDiasPeriodo(criarDataLocal(f.inicio), criarDataLocal(f.fim));
+        const inicioFerias = criarDataLocal(f.inicio);
+
+        const ciclo = ciclos.find(c =>
+            c.diasUsados < DIAS_CICLO &&
+            inicioFerias >= c.concessivoInicio
+        ) || ciclos.find(c => c.diasUsados < DIAS_CICLO);
+
+        if (!ciclo) return;
+
+        ciclo.ferias.push(f);
+        ciclo.diasUsados += dias;
+        ciclo.quantidadePeriodos++;
+
+        f.cicloId = ciclo.id;
+    });
+
+    ciclos.forEach(ciclo => {
+        const cicloFront = montarCicloFront(ciclo, false);
+        ciclo.ferias.forEach(f => {
+            f.ciclo = cicloFront;
+        });
+    });
+}
+
+function montarCicloFront(ciclo, cicloAtual = false) {
+    const diasUsados = Math.min(DIAS_CICLO, ciclo.diasUsados);
+    const diasRestantes = Math.max(0, DIAS_CICLO - diasUsados);
+    const ultimaFerias = ciclo.ferias[ciclo.ferias.length - 1] || null;
+
     return {
-        diasUsados: ciclo.diasUsados,
-        diasRestantes: Math.max(0, DIAS_CICLO - ciclo.diasUsados),
-        quantidadePeriodos: ciclo.quantidadePeriodos,
-        podeCriarNovoPeriodo:
-            ciclo.quantidadePeriodos < 3 &&
-            ciclo.diasUsados < DIAS_CICLO
+        id: ciclo.id,
+        aquisitivoInicio: ciclo.aquisitivoInicio,
+        aquisitivoFim: ciclo.aquisitivoFim,
+        concessivoInicio: ciclo.concessivoInicio,
+        concessivoFim: ciclo.concessivoFim,
+        saldo: {
+            diasUsados,
+            diasRestantes,
+            quantidadePeriodos: ciclo.quantidadePeriodos,
+            podeCriarNovoPeriodo: ciclo.quantidadePeriodos < 3 && diasRestantes > 0
+        },
+        cicloAtual,
+        cicloEncerradoEm: diasRestantes === 0 && ultimaFerias ? ultimaFerias.fim : null,
+        ultimaFeriasFim: ultimaFerias ? ultimaFerias.fim : null
     };
 }
 
 /* =====================================================
    LISTAR FÉRIAS (FRONT READY)
 ===================================================== */
-async function listarFerias() {
+async function listarFerias(inicioFiltro = null, fimFiltro = null) {
 
-    const [feriasRows, admissoes] = await Promise.all([
+    const [feriasRows, colaboradoresBase, admissoes] = await Promise.all([
         FeriasModel.listarFerias(),
+        FeriasModel.listarColaboradoresBase(),
         listarAdmissoes()
     ]);
 
@@ -125,17 +195,18 @@ async function listarFerias() {
     /* ===============================
        MONTA MAPA DE COLABORADORES
     ============================== */
-    feriasRows.forEach(row => {
-        if (!mapa[row.id_func]) {
-            mapa[row.id_func] = {
-                id: row.id_func,
-                nome: row.nome,
-                fotoperfil: row.fotoperfil,
-                versao_foto: row.versao_foto,
-                ferias: []
-            };
-        }
+    colaboradoresBase.forEach(row => {
+        mapa[row.id] = {
+            id: row.id,
+            nome: row.nome,
+            fotoperfil: row.fotoperfil,
+            versao_foto: row.versao_foto,
+            ferias: []
+        };
+    });
 
+    feriasRows.forEach(row => {
+        if (!mapa[row.id_func]) return;
         mapa[row.id_func].ferias.push({
             id: row.id,
             inicio: new Date(row.datainicio),
@@ -162,84 +233,25 @@ async function listarFerias() {
         /* ===============================
            LIMITES CLT (sempre por admissão)
         ============================== */
-        const hojeagora = new Date();
-        
-        const aquisitivoInicio = calcularAquisitivoAtual(dataAdm, hojeagora);
-
-        const aquisitivoFim = new Date(aquisitivoInicio);
-        aquisitivoFim.setFullYear(aquisitivoFim.getFullYear() + 1);
-        aquisitivoFim.setDate(aquisitivoFim.getDate() - 1);
-
-        // ⚠️ ISSO É CONCESSIVO DE VERDADE
-        const concessivoInicio = new Date(aquisitivoFim);
-        concessivoInicio.setDate(concessivoInicio.getDate() + 1);
-
-        const concessivoFim = new Date(aquisitivoFim);
-        concessivoFim.setFullYear(concessivoFim.getFullYear() + 1);
-
-        /* ===============================
-           CICLOS POR GOZO REAL
-        ============================== */
-        const ciclos = gerarCiclosPorGozo(dataAdm, colab.ferias);
-        const cicloAnterior = ciclos[ciclos.length - 1];
-
-        const saldoAnterior = calcularSaldoCicloAtual(cicloAnterior);
-
-        // data de encerramento do ciclo (se fechou 30 dias)
-        let dataEncerramento = null;
-        if (saldoAnterior.diasUsados === 30 && cicloAnterior.ferias.length) {
-            const ultima = cicloAnterior.ferias[cicloAnterior.ferias.length - 1];
-            dataEncerramento = ultima.fim;
-        }
-
-        /* ===============================
-           🔑 REGRA NOVA (EXPLÍCITA)
-           - saldo novo nasce NO INÍCIO DO CONCESSIVO
-           - somente se o ciclo anterior já fechou
-        ============================== */
         const hoje = new Date();
+        const ciclos = montarCiclosAdquiridos(dataAdm, hoje);
 
-        let saldoAtual;
-
-        if (
-            saldoAnterior.diasUsados === 30 &&
-            hoje >= concessivoInicio
-        ) {
-            // novo ciclo liberado legalmente
-            saldoAtual = {
-                diasUsados: 0,
-                diasRestantes: 30,
-                quantidadePeriodos: 0,
-                podeCriarNovoPeriodo: true
-            };
-        } else {
-            // ainda estamos no ciclo anterior
-            saldoAtual = saldoAnterior;
+        if (!ciclos.length) {
+            colab.ciclos = [];
+            return;
         }
 
-        colab.ciclos = [{
-            aquisitivoInicio,
-            aquisitivoFim,
-            concessivoInicio, // ✅ ADICIONAR
-            concessivoFim,
-            saldo: saldoAtual,
-            cicloAtual: true,
-            cicloEncerradoEm: dataEncerramento
-        }];
-
+        atribuirFeriasAosCiclos(ciclos, colab.ferias);
+        const cicloAtivo = ciclos.find(c => c.diasUsados < DIAS_CICLO) || ciclos[ciclos.length - 1];
+        const cicloFront = montarCicloFront(cicloAtivo, true);
+        const saldoAtual = cicloFront.saldo;
+        colab.ciclos = [cicloFront];
 
         /* ===============================
-           SUGESTÃO AUTOMÁTICA
+           SUGESTAO AUTOMATICA
         ============================== */
-        if ((saldoAtual.diasRestantes <= 0) || (hoje < concessivoInicio)) return;
-            console.log({
-            funcionario: colab.id,
-            nome: colab.nome,
-            dataAdm: dataAdm,
-            concessivoInicio: concessivoInicio
-        });
-        
-        let baseData = dataEncerramento || concessivoInicio;
+        if ((saldoAtual.diasRestantes <= 0) || (hoje < cicloAtivo.concessivoInicio)) return;
+        let baseData = cicloFront.ultimaFeriasFim || cicloAtivo.concessivoInicio;
 
         let inicioSug = addMeses(baseData, INTERVALO_MIN_MESES);
 
@@ -254,38 +266,97 @@ async function listarFerias() {
             inicio: inicioSug,
             fim: fimSug,
             status: 'sugerida',
-            tipo: 'sugerida'
+            tipo: 'sugerida',
+            cicloId: cicloAtivo.id,
+            ciclo: cicloFront
         });
     });
 
-    return Object.values(mapa);
+    const inicioVisivel = inicioFiltro ? criarDataLocal(inicioFiltro) : null;
+    const fimVisivel = fimFiltro ? criarDataLocal(fimFiltro) : null;
+
+    return Object.values(mapa)
+        .map(colab => {
+            if (!inicioVisivel || !fimVisivel) return colab;
+
+            return {
+                ...colab,
+                ferias: colab.ferias.filter(f => f.inicio <= fimVisivel && f.fim >= inicioVisivel)
+            };
+        })
+        .filter(colab => !inicioVisivel || !fimVisivel || colab.ferias.length > 0);
 }
 
 
-function calcularAquisitivoAtual(dataAdm, hoje = new Date()) {
-    const adm = new Date(dataAdm);
-    adm.setHours(0, 0, 0, 0);
+async function validarFerias(payload, idIgnorado = null) {
+    const idFunc = Number(payload.id_func);
+    const dataInicioISO = normalizarDataISO(payload.data_inicio || payload.datainicio);
+    const dataFimISO = normalizarDataISO(payload.data_fim || payload.datafinal);
 
-    const ref = new Date(hoje);
-    ref.setHours(0, 0, 0, 0);
-
-    let inicio = new Date(adm);
-
-    // trava de segurança (12 anos)
-    for (let i = 0; i < 12; i++) {
-
-        const fim = new Date(inicio);
-        fim.setFullYear(fim.getFullYear() + 1);
-        fim.setDate(fim.getDate() - 1);
-
-        if (ref >= inicio && ref <= fim) {
-            return inicio;
-        }
-
-        inicio.setFullYear(inicio.getFullYear() + 1);
+    if (!Number.isFinite(idFunc) || idFunc <= 0) {
+        const err = new Error('Colaborador invalido.');
+        err.statusCode = 400;
+        throw err;
     }
 
-    return null;
+    if (!dataInicioISO || !dataFimISO) {
+        const err = new Error('Data inicial e final sao obrigatorias.');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    const inicio = criarDataLocal(dataInicioISO);
+    const fim = criarDataLocal(dataFimISO);
+
+    if (fim < inicio) {
+        const err = new Error('Data final nao pode ser menor que a data inicial.');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    const dias = calcularDiasPeriodo(inicio, fim);
+    if (dias < 1 || dias > DIAS_CICLO) {
+        const err = new Error('Periodo de ferias deve ter entre 1 e 30 dias.');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    if (!(await FeriasModel.existeColaborador(idFunc))) {
+        const err = new Error('Colaborador nao encontrado.');
+        err.statusCode = 404;
+        throw err;
+    }
+
+    const feriasExistentes = await FeriasModel.listarFeriasColaborador(idFunc, idIgnorado);
+    const sobrepoe = feriasExistentes.some((f) => {
+        const existenteInicio = criarDataLocal(f.datainicio);
+        const existenteFim = criarDataLocal(f.datafinal);
+        return inicio <= existenteFim && fim >= existenteInicio;
+    });
+
+    if (sobrepoe) {
+        const err = new Error('Ja existe ferias cadastrada nesse periodo para o colaborador.');
+        err.statusCode = 409;
+        throw err;
+    }
+
+    const diasUsadosNoAno = feriasExistentes.reduce((total, f) => {
+        const existenteInicio = criarDataLocal(f.datainicio);
+        if (existenteInicio.getFullYear() !== inicio.getFullYear()) return total;
+        return total + calcularDiasPeriodo(existenteInicio, criarDataLocal(f.datafinal));
+    }, 0);
+
+    if (diasUsadosNoAno + dias > DIAS_CICLO) {
+        const err = new Error('O colaborador excederia 30 dias de ferias nesse ciclo/ano.');
+        err.statusCode = 400;
+        throw err;
+    }
+
+    return {
+        id_func: idFunc,
+        data_inicio: dataInicioISO,
+        data_fim: dataFimISO
+    };
 }
 
 
@@ -296,25 +367,37 @@ function calcularAquisitivoAtual(dataAdm, hoje = new Date()) {
    CRUD
 ===================================================== */
 async function criarFerias(payload) {
-    const { id_func, data_inicio, data_fim, status } = payload;
+    const { status } = payload;
+    const dados = await validarFerias(payload);
 
     return FeriasModel.criarFerias({
-        datainicio: data_inicio,
-        datafinal: data_fim,
-        id_func,
+        datainicio: dados.data_inicio,
+        datafinal: dados.data_fim,
+        id_func: dados.id_func,
         status: status || 'avaliar'
     });
 }
 
 async function atualizarFerias(idFerias, payload) {
+    const existente = await FeriasModel.buscarFeriasPorId(idFerias);
+    if (!existente) return false;
+
+    const dados = await validarFerias({
+        ...payload,
+        id_func: existente.id_func
+    }, idFerias);
+
     return FeriasModel.atualizarFerias(idFerias, {
-        datainicio: payload.data_inicio,
-        datafinal: payload.data_fim,
+        datainicio: dados.data_inicio,
+        datafinal: dados.data_fim,
         descricao: payload.descricao || ''
     });
 }
 
 async function atualizarStatus(idFerias, status) {
+    const existente = await FeriasModel.buscarFeriasPorId(idFerias);
+    if (!existente) return false;
+
     return FeriasModel.atualizarStatus(idFerias, status);
 }
 

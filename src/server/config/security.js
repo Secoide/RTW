@@ -114,7 +114,7 @@ function securityConfig(app) {
   /**
    * 3. Rate limiter
    * - Geral: 500 req/15min por IP
-   * - Login: 5 req/min por IP
+   * - Login: 20 req/min por IP
    */
   const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
@@ -124,15 +124,18 @@ function securityConfig(app) {
   });
 
   const loginLimiter = rateLimit({
-    windowMs: 60 * 1, // 1 minuto
-    max: 200, // máximo 20 tentativas de login por minuto
-    message: 'Muitas tentativas de login, tente novamente mais tarde.',
+    windowMs: 60 * 1000, // 1 minuto
+    max: 20, // máximo 20 tentativas de login por minuto
+    message: {
+      sucesso: false,
+      mensagem: 'Muitas tentativas de login, tente novamente mais tarde.'
+    },
     standardHeaders: true,
     legacyHeaders: false,
   });
 
   app.use('/api/colaboradores', generalLimiter); // aplica para todas as rotas
-  app.use('/login', loginLimiter); // aplica somente para login
+  app.use('/api/auth/login', loginLimiter); // aplica somente para login
 }
 
 module.exports = securityConfig;

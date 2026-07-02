@@ -24,12 +24,16 @@ async function getColaborador(req, res) {
 // POST /api/colaboradores
 async function createColaborador(req, res) {
   try {
-    const novo = await ColabService.criarColaborador(req.body);
+    const novo = await ColabService.criarColaborador(req.body, {
+      empresaSaas: req.user?.saas.empresa || null
+    });
 
     res.status(201).json({
       sucesso: true,
       id: novo.id,
-      senhaPadrao: novo.senhaPadrao || null
+      senhaPadrao: novo.senhaPadrao || null,
+      empresaSaasVinculada: !!novo.empresaSaasVinculada,
+      avisoSaas: novo.avisoSaas || null
     });
 
   } catch (err) {
@@ -338,7 +342,7 @@ async function getHallExperiencia(req, res) {
     ];
 
     const lista =
-      await ColabService.getHallExperienciaRTW();
+      await ColabService.getHallExperienciaConnectPear();
 
     const hoje = new Date();
 
@@ -716,7 +720,7 @@ async function getHallExperiencia(req, res) {
 
           const data =
             new Date(
-              destaqueAno.data + 1
+              destaqueAno.data
             );
 
           medalhas.push({
@@ -897,7 +901,7 @@ async function getHallExperiencia(req, res) {
             icone: "🚀",
 
             titulo:
-              "Desbravador RTW (+50 cidades)"
+              "Desbravador (+50 cidades)"
 
           });
 
@@ -911,7 +915,7 @@ async function getHallExperiencia(req, res) {
             icone: "✈️",
 
             titulo:
-              "Explorador RTW (+20 cidades)"
+              "Explorador (+20 cidades)"
 
           });
 
@@ -925,7 +929,7 @@ async function getHallExperiencia(req, res) {
             icone: "🚁",
 
             titulo:
-              "Viajante RTW (+10 cidades)"
+              "Viajante (+10 cidades)"
 
           });
 
@@ -968,7 +972,7 @@ async function getHallExperiencia(req, res) {
             icone: "🚧",
 
             titulo:
-              "Multifunção RTW (+10 clientes atendidos)"
+              "Multifunção (+10 clientes atendidos)"
 
           });
 
@@ -1011,7 +1015,7 @@ async function getHallExperiencia(req, res) {
             icone: "🔧",
 
             titulo:
-              "Centurião RTW (+100 OS)"
+              "Centurião (+100 OS)"
 
           });
 
@@ -1025,7 +1029,7 @@ async function getHallExperiencia(req, res) {
             icone: "🪚",
 
             titulo:
-              "Operador RTW (+50 OS)"
+              "Operador (+50 OS)"
 
           });
 
@@ -1284,6 +1288,37 @@ async function getConquistasColaborador(
 
 }
 
+async function removerConquista(
+  req,
+  res
+) {
+
+  try {
+
+    const resultado =
+      await ColabService
+        .removerConquista(
+          req.params.idColaborador,
+          req.params.tipo
+        );
+
+    res.json(resultado);
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+
+      erro:
+        err.message
+
+    });
+
+  }
+
+}
+
 module.exports = {
   getColaboradores,
   getColaborador,
@@ -1306,5 +1341,6 @@ module.exports = {
   uploadFoto,
   getHallExperiencia,
   addConquista,
-  getConquistasColaborador
+  getConquistasColaborador,
+  removerConquista
 };

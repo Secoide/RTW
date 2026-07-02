@@ -31,6 +31,7 @@ app.use(express.static(path.join(__dirname, "../../public")));
 // ---------------------------
 const authRoutes = require("./routes/auth.routes");
 app.use("/api/auth", authRoutes);
+app.use("/api/owner", require("./routes/owner.routes"));
 
 const colaboradoresRoutes = require("./routes/colaboradores.routes");
 app.use("/api/colaboradores", colaboradoresRoutes);
@@ -53,12 +54,14 @@ app.use("/api/atestado", atestadosRoutes);
 
 const comunicadosRoutes = require("./routes/comunicados.routes");
 app.use("/api/comunicados", comunicadosRoutes);
+app.use("/api/notificacoes", require("./routes/notificacoes.routes"));
 
 app.use('/api/ferias', require('./routes/ferias.routes'));
 app.use('/api/cargo', require('./routes/cargo.routes'));
 app.use('/api/setor', require('./routes/setor.routes'));
 
 app.use('/api/materiais', require('./routes/material.routes'));
+app.use("/api/paineis-eletricos", require("./routes/paineisEletricos.routes"));
 
 app.use("/api/fornecedor", require('./routes/fornecedor.routes'));
 
@@ -88,12 +91,22 @@ app.use("/", pagesRoutes);
 // ---------------------------
 const errorHandler = require("./middlewares/error.middleware");
 app.use(errorHandler);
+const dbConnection = require("./config/db");
 
 // ---------------------------
 // Healthcheck (útil p/ monitorar uptime)
 // ---------------------------
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: Date.now() });
+});
+
+app.get("/health/db", async (req, res) => {
+  try {
+    await dbConnection.query("SELECT 1 AS ok");
+    res.json({ status: "ok", database: "connected", timestamp: Date.now() });
+  } catch (err) {
+    res.status(503).json({ status: "error", database: "disconnected", timestamp: Date.now() });
+  }
 });
 
 module.exports = app;

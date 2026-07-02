@@ -4,7 +4,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTW Engenharia Elétrica</title>
+    <link rel="icon" type="image/png" href="/logo_GS.png">
+    <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
+    <title>ConnectPear</title>
 
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
@@ -22,6 +24,7 @@
     <link rel="stylesheet" href="css/forms/anexoExames.css">
     <link rel="stylesheet" href="css/cadastrosList.css">
     <link rel="stylesheet" href="css/material.css">
+    <link rel="stylesheet" href="css/ferramentas.css">
     <link rel="stylesheet" href="css/ferias.css">
     <link rel="stylesheet" href="css/inicio.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -77,7 +80,25 @@
         <div id="online-popup"></div>
 
         <div id="online-panel">
-            <div id="online-list"></div>
+            <div class="online-panel-header">
+                <button type="button" class="online-tab active" data-online-tab="users">Online</button>
+                <button type="button" class="online-tab" data-online-tab="chat" data-roles="99">
+                    Chat <span id="online-chat-unread">0</span>
+                </button>
+            </div>
+
+            <div id="online-list" class="online-tab-panel active"></div>
+
+            <div id="online-chat" class="online-tab-panel">
+                <div id="online-chat-messages"></div>
+                <form id="online-chat-form">
+                    <button id="online-chat-emoji" type="button" title="Emoticons">☺</button>
+                    <input id="online-chat-input" type="text" maxlength="300" placeholder="Mensagem rapida..." autocomplete="off">
+                    <button id="online-chat-send" type="submit">Enviar</button>
+                </form>
+                <div id="online-chat-emojis"></div>
+                <div id="online-chat-suggestions"></div>
+            </div>
         </div>
 
 
@@ -96,12 +117,12 @@
             <div id="ia-messages">
 
                 <div id="ia-help-badge">
-                    🤖 IA Operacional RTW • Clique para ver exemplos e funções disponíveis
+                    🤖 IA Operacional ConnectPear • Clique para ver exemplos e funções disponíveis
                 </div>
 
                 <div id="is-msg-bot-inicio" class="ia-msg ia-bot ia-hidden">
 
-                    <strong>Olá, eu sou a IA Operacional da RTW Engenharia 👋</strong><br><br>
+                    <strong>Olá, eu sou a IA Operacional da ConnectPear 👋</strong><br><br>
 
                     Posso consultar, interpretar e analisar informações operacionais em tempo real diretamente do
                     sistema.<br><br>

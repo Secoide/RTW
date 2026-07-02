@@ -143,7 +143,7 @@ export function initColaboradoresDragDrop() {
   });
 
   // drop
-  $(document).on("drop.colabDragDrop", ".p_colabs", function (e) {
+  $(document).on("drop.colabDragDrop", ".p_colabs", async function (e) {
     e.preventDefault();
 
     const payload = JSON.parse(e.originalEvent.dataTransfer.getData("text/plain"));
@@ -167,6 +167,13 @@ export function initColaboradoresDragDrop() {
 
     if (dataOrigem !== dataDestino) {
       alert("Não é permitido mover colaboradores entre dias diferentes.");
+      return;
+    }
+
+    const nomesParaEnviar = montarNomesParaEnviar(ids, $painelDia);
+    const enviado = await alocarColaboradores(osID, dataDestino, nomesParaEnviar);
+    if (!enviado) {
+      resetDragVisual();
       return;
     }
 
@@ -196,10 +203,6 @@ export function initColaboradoresDragDrop() {
         removerColaboradores(idOSOrigem, dataOrigem, [id]);
       }
     });
-
-    // 🔄 envia pro backend (SEM renderizar)
-    const nomesParaEnviar = montarNomesParaEnviar(ids, $painelDia);
-    alocarColaboradores(osID, dataDestino, nomesParaEnviar);
 
     colaboradoresSelecionados = [];
     $(".colaborador").removeClass("selecionado");

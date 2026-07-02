@@ -11,6 +11,10 @@ import {
 } from "../forms/populate-combobox.js";
 import { carregarConquistasColaborador, initaddConquistas} from "./handle-conquistas.js"
 
+function erroDeSessaoExpirada(error) {
+    return error?.status === 401 || /401|sessao|session|nao autorizado|nÃ£o autorizado/i.test(error?.message || "");
+}
+
 export function initAbrirInfoColabClick() {
     initaddConquistas();
     $(document).on("click", "#bt_perfilhome", function () {
@@ -19,7 +23,7 @@ export function initAbrirInfoColabClick() {
 
             get_carregarPerfilUsuario(idUsuario);
         } else {
-            console.warn("⚠️ Nenhum usuário logado na sessão.");
+            console.warn("âš ï¸ Nenhum usuÃ¡rio logado na sessÃ£o.");
         }
     });
     $(document).on("click", ".bt_form_cad_colab", function () {
@@ -47,38 +51,6 @@ export function initAbrirInfoColabClick() {
         await preencherCbxCargo(idSetor, $wrap);
     });
 
-
-    $(document).ready(function () {
-        const $html = $('html');
-        const $btn = $('#toggle-theme');
-        const $icon = $btn.find('i');
-
-        // Verifica tema salvo ou preferência do sistema
-        let tema = localStorage.getItem('tema');
-        if (!tema) {
-            tema = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-
-        // Define o tema inicial no <html>
-        $html.attr('data-theme', tema);
-        $icon.attr('class', tema === 'dark' ? 'fas fa-moon' : 'fas fa-sun');
-
-        // Alterna ao clicar
-        $btn.on('click', function () {
-            const temaAtual = $html.attr('data-theme');
-            const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
-
-            // Atualiza atributo e salva
-            $html.attr('data-theme', novoTema);
-            localStorage.setItem('tema', novoTema);
-
-            // Animação e troca de ícone
-            $icon.addClass('rotate');
-            setTimeout(() => $icon.removeClass('rotate'), 400);
-            $icon.attr('class', novoTema === 'dark' ? 'fas fa-moon' : 'fas fa-sun');
-        });
-    });
-
 }
 
 // ABRIR Form Colaborador com os dados do colaborador clicado
@@ -88,12 +60,23 @@ export async function get_carregarPerfilUsuario(funcId) {
         initColabForm();
 
         if (!funcId) {
-            alert('ID do colaborador não encontrado!');
-            throw new Error("ID não encontrado");
+            alert('ID do colaborador nÃ£o encontrado!');
+            throw new Error("ID nÃ£o encontrado");
         }
 
-        // 🔹 1 - Buscar dados do colaborador
-        const response = await fetch(`/api/colaboradores/${funcId}`);
+        // ðŸ”¹ 1 - Buscar dados do colaborador
+        const response = typeof window.apiFetch === "function"
+            ? await window.apiFetch(`/api/colaboradores/${funcId}`)
+            : await fetch(`/api/colaboradores/${funcId}`, { credentials: "include" });
+
+        if (response.status === 401 || (response.redirected && response.url.includes("/login"))) {
+            if (typeof window.tratarErro401 === "function") {
+                await window.tratarErro401();
+            }
+            const erro = new Error("Sessao expirada");
+            erro.status = 401;
+            throw erro;
+        }
 
         if (!response.ok) {
             throw new Error("Erro ao buscar colaborador");
@@ -102,19 +85,19 @@ export async function get_carregarPerfilUsuario(funcId) {
         const dados = await response.json();
 
         if (!dados || !dados.id) {
-            alert("Colaborador não encontrado.");
-            throw new Error("Colaborador não encontrado");
+            alert("Colaborador nÃ£o encontrado.");
+            throw new Error("Colaborador nÃ£o encontrado");
         }
 
-        // 🔹 2 - Carregar HTML do formulário como Promise
+        // ðŸ”¹ 2 - Carregar HTML do formulÃ¡rio como Promise
         await carregarFormulario();
 
-        // 🔹 3 - Preencher combobox setor
+        // ðŸ”¹ 3 - Preencher combobox setor
         const $wrap = $('#formColaboradorProfissional');
         await preencherCbxSetor($wrap);
 
 
-        // 🔹 4 - Ajustar painéis
+        // ðŸ”¹ 4 - Ajustar painÃ©is
         $('.painel_perfil, .painel_profissional, .painel_vestimentas, .painel_exames, .painel_cursos, .painel_integra,.painel_conquistas, .painel_atestar, .painel_nivel, .painel_estatistica, .painel_ferramentas, .painel_senha').hide();
         $('.painel_perfil').show();
 
@@ -124,7 +107,7 @@ export async function get_carregarPerfilUsuario(funcId) {
         $('#bt_editColab').removeClass('hidden-inicial');;
         $('.bt_menu[data-target=".painel_atestar"]').show();
 
-        // 🔹 5 - Resumo perfil
+        // ðŸ”¹ 5 - Resumo perfil
         const statusPerfil = dados.motivo?.toLowerCase() || "ativo";
 
         $('#nomeCompletoResumo').text(dados.nome);
@@ -138,7 +121,7 @@ export async function get_carregarPerfilUsuario(funcId) {
             .removeClass('ativo inativo afastado')
             .addClass(statusPerfil);
 
-        // 🔹 6 - Foto
+        // ðŸ”¹ 6 - Foto
         const fotoURL = dados.fotoperfil
             ? `${dados.fotoperfil}?v=${dados.versao_foto}`
             : null;
@@ -151,13 +134,13 @@ export async function get_carregarPerfilUsuario(funcId) {
                 $(this).attr('src', '/imagens/user-default.webp');
             });
 
-        // 🔹 7 - Preencher campos
+        // ðŸ”¹ 7 - Preencher campos
         preencherCamposBasicos(dados);
 
-        // 🔹 8 - CNH
+        // ðŸ”¹ 8 - CNH
         preencherCNH(dados.cnh);
 
-        // 🔹 9 - Profissional
+        // ðŸ”¹ 9 - Profissional
         $('#empresacontrato').val(dados.empresaContrato);
         $('#idColaboradorPro').val(dados.id);
         $('#selectSetor').val(dados.setor).trigger('change');
@@ -176,6 +159,8 @@ export async function get_carregarPerfilUsuario(funcId) {
 
     } catch (error) {
         console.error("Erro ao carregar perfil:", error);
+        if (erroDeSessaoExpirada(error)) return null;
+
         alert("Erro ao carregar perfil do colaborador.");
         throw error;
     }
@@ -191,7 +176,7 @@ function carregarFormulario() {
                 if (status === "success") {
                     resolve();
                 } else {
-                    reject(new Error("Erro ao carregar formulário"));
+                    reject(new Error("Erro ao carregar formulÃ¡rio"));
                 }
 
             });
@@ -255,7 +240,7 @@ export function open_form_cad_colaborador() {
 
         $('.painel_perfil').show();
         $('[data-target]').hide();     // esconde todos
-        $('[data-target=".painel_perfil"]').show();  // mostra só o perfil
+        $('[data-target=".painel_perfil"]').show();  // mostra sÃ³ o perfil
 
 
         $('#btn_upload').addClass('hidden-inicial');
@@ -263,3 +248,4 @@ export function open_form_cad_colaborador() {
         $('#bt_cadColaborador').removeClass('hidden-inicial');
     });
 }
+

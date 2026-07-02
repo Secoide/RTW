@@ -1,24 +1,43 @@
 <div id="conteudoInicio">
     <div id="bemvindo">
+        <div class="inicio-brand">
+            <img src="/logo_trans.png" alt="Logo do sistema" class="inicio-logo">
 
-        <h2 class="textoHome">Bem-vindo à página inicial!</h2>
-        <p class="textoHome">Escolha uma seção no menu à esquerda para navegar.</p>
+            <div>
+                <span class="inicio-eyebrow">Ambiente operacional RTW</span>
+
+                <h2 class="textoHome">
+                    Bem-vindo à RTW Engenharia!
+                </h2>
+
+                <p class="textoHome">
+                    Olá, colaborador. Este é o seu centro de informações para acompanhar comunicados,
+                    treinamentos, eventos, documentos e atividades da empresa.
+                </p>
+
+            </div>
+        </div>
     </div>
-    <div id="versao-info">
-        <section aria-labelledby="release-notes-title" class="release-notes">
-            <article aria-labelledby="v108-title">
-                <header>
-                    <h2 id="v108-title" style="color: rgb(251, 255, 0);text-shadow: 1px 1px 2px #1a1a1a;">Versão
-                        1.5.0</h2>
-                </header>
-            </article>
-        </section>
+
+    <div id="homePopupAtualizacao" class="atualizacao-overlay home-atualizacao-overlay">
+        <div class="atualizacao-box home-atualizacao-box">
+            <h2>🚀 Nova atualização lançada!</h2>
+            <p><strong>Versão:</strong> <span id="homeVersaoAtual">2.0.0</span></p>
+            <div class="home-changelog-container"></div>
+            <button type="button" id="homeBtnPopupOk">OBRIGADO</button>
+        </div>
     </div>
 
     <div class="painel_inicio">
         <div id="conteudo-central">
-            <!-- BOTÃO NOVO AVISO  -->
-            <button id="btnNovoAviso" class="btn-novo-aviso bt_padrao bt_cad">+ Novo aviso</button>
+            <!-- BOTÃO NOVO AVISO -->
+            <div class="inicio-section-head">
+                <div>
+                    <span>Comunicados</span>
+                    <h3>Painel de avisos</h3>
+                </div>
+                <button id="btnNovoAviso" class="btn-novo-aviso bt_padrao bt_cad">+ Novo aviso</button>
+            </div>
             <div id="painel-avisos">
 
                 <div class="painel-comunicado">
@@ -81,12 +100,12 @@
                     <span data-icone="💬">💬</span>
                     <span data-icone="🧾">🧾</span>
 
-                    <!-- Saude -->
+                    <!-- Saúde -->
                     <span data-icone="🩺">🩺</span>
                     <span data-icone="💉">💉</span>
                     <span data-icone="💊">💊</span>
 
-                    <!-- Saude -->
+                    <!-- Financeiro -->
                     <span data-icone="💸">💸</span>
                     <span data-icone="💲">💲</span>
 
@@ -106,7 +125,7 @@
                     <span data-icone="💎">💎</span>
                     <span data-icone="🎗️">🎗️</span>
                     <span data-icone="🏆">🏆</span>
-                    <span data-icone="🐈">🐈</span>
+                    <span data-icone="⭐">⭐</span>
                 </div>
 
                 <label>Título:</label>
@@ -124,9 +143,9 @@
         </div>
     </div>
 
-    <div id="hall-experiencia"  data-roles="99" >
+    <div id="hall-experiencia">
         <h5>Tempo de empresa e Reconhecimentos</h5>
-        <div id="hall-ranking"></div>
+        <div id="hall-ranking" style="font-size: 11px; color: rgb(255, 196, 0);">Em desenvolvimento...</div>
     </div>
 
 

@@ -13,7 +13,7 @@ function TextResponse({ mensagem }) {
                 </div>
 
                 <div className="ia-text-title">
-                    IA RTW
+                    IA ConnectPear
                 </div>
 
             </div>

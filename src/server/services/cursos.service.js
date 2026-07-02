@@ -106,6 +106,80 @@ async function baixarCurso(id) {
   return curso;
 }
 
+async function buscarHistoricoCursoColaborador(idFunc, idCurso) {
+  return await CursoModel.getHistoricoCursoColaborador(idFunc, idCurso);
+}
+
+async function atualizarRegistroCurso(id, { datarealizadaCurso, vencimento, file }) {
+  const registroAtual = await CursoModel.buscarCursoPorId(id);
+  if (!registroAtual) {
+    throw new Error("Registro de curso não encontrado.");
+  }
+
+  const dados = {
+    datarealizado: datarealizadaCurso,
+    vencimento: parseInt(vencimento, 10)
+  };
+
+  if (Number.isNaN(dados.vencimento)) {
+    throw new Error("Vencimento inválido.");
+  }
+
+  if (file && file.buffer) {
+    const nomeArquivo = `${id}_${Date.now()}.pdf`;
+
+    const { error } = await supabase.storage
+      .from("cursos")
+      .upload(nomeArquivo, file.buffer, {
+        contentType: "application/pdf",
+        upsert: true
+      });
+
+    if (error) {
+      console.error(error);
+      throw new Error("Erro ao enviar PDF ao Supabase.");
+    }
+
+    if (registroAtual.anexoCursoPDF) {
+      await supabase.storage
+        .from("cursos")
+        .remove([registroAtual.anexoCursoPDF]);
+    }
+
+    dados.anexoCursoPDF = nomeArquivo;
+  }
+
+  const ok = await CursoModel.atualizarRegistroCurso(id, dados);
+  if (!ok) {
+    throw new Error("Registro de curso não encontrado.");
+  }
+
+  return { message: "Curso atualizado com sucesso." };
+}
+
+async function removerAnexoRegistroCurso(id) {
+  const registroAtual = await CursoModel.buscarCursoPorId(id);
+  if (!registroAtual) {
+    throw new Error("Registro de curso não encontrado.");
+  }
+
+  if (registroAtual.anexoCursoPDF) {
+    await supabase.storage
+      .from("cursos")
+      .remove([registroAtual.anexoCursoPDF]);
+  }
+
+  const ok = await CursoModel.atualizarRegistroCurso(id, {
+    anexoCursoPDF: null
+  });
+
+  if (!ok) {
+    throw new Error("Registro de curso não encontrado.");
+  }
+
+  return { message: "Anexo removido com sucesso." };
+}
+
 
 module.exports = {
   listarCursos,
@@ -118,5 +192,8 @@ module.exports = {
   buscarCursosByColaborador,
   deletarCursosByColaborador,
   salvarCurso,
-  baixarCurso
+  baixarCurso,
+  buscarHistoricoCursoColaborador,
+  atualizarRegistroCurso,
+  removerAnexoRegistroCurso
 };

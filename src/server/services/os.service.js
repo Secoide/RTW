@@ -1,5 +1,26 @@
 const OSModel = require('../models/os.model');
 
+function validarCadastroOS(dados) {
+  const camposObrigatorios = [
+    ['idos', 'Número da OS'],
+    ['descricao', 'Descrição da OS'],
+    ['cliente', 'Cliente'],
+    ['cidade', 'Cidade']
+  ];
+
+  const campoInvalido = camposObrigatorios.find(([campo]) => {
+    return !String(dados[campo] ?? '').trim();
+  });
+
+  if (campoInvalido) {
+    return `${campoInvalido[1]} é obrigatório.`;
+  }
+
+  dados.idos = String(dados.idos).trim();
+  dados.descricao = String(dados.descricao).trim();
+  return null;
+}
+
 // Listar todas as OS
  async function listarOrdemServico() {
    return await OSModel.getOrdemServico();
@@ -24,6 +45,11 @@ async function salvarOS(dados) {
   }
 
   if (dados.acao === "cadOS") {
+    const erroValidacao = validarCadastroOS(dados);
+    if (erroValidacao) {
+      return { sucesso: false, mensagem: erroValidacao };
+    }
+
     const existente = await OSModel.verificarOSExistente(dados.idos);
     if (existente.length > 0) {
       return { sucesso: false, mensagem: "OS já cadastrada." };
@@ -88,6 +114,46 @@ async function buscarAnotacoesOS(dataDia) {
   return await OSModel.getAnotacoesOS(dataDia);
 }
 
+async function listarPaineisOS(idOS) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+  return await OSModel.listarPaineisOS(idOS);
+}
+
+async function vincularPainelOS(idOS, dados) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+  if (!dados.id_painel) throw new Error('Selecione um painel para vincular.');
+
+  await OSModel.vincularPainelOS({
+    id_os: idOS,
+    id_painel: dados.id_painel
+  });
+
+  return await OSModel.listarPaineisOS(idOS);
+}
+
+async function removerPainelOS(idOS, idPainel) {
+  if (!idOS || !idPainel) throw new Error('OS e painel são obrigatórios');
+  await OSModel.removerPainelOS(idOS, idPainel);
+  return await OSModel.listarPaineisOS(idOS);
+}
+
+async function buscarComplementosOS(idOS) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+  return await OSModel.buscarComplementosOS(idOS);
+}
+
+async function salvarComplementosOS(idOS, dados) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+
+  return await OSModel.salvarComplementosOS({
+    id_os: idOS,
+    tipo_servico: dados.tipo_servico,
+    pta_alocada: dados.pta_alocada === true || dados.pta_alocada === '1' || dados.pta_alocada === 'on',
+    painel_eletrico_previsto: dados.painel_eletrico_previsto === true || dados.painel_eletrico_previsto === '1' || dados.painel_eletrico_previsto === 'on',
+    observacao: dados.observacao
+  });
+}
+
 // Deletar
 async function deletarOS(id) {
   return await OSModel.deleteOS(id);
@@ -104,5 +170,10 @@ module.exports = {
   salvarAnotacoesOS,
   buscarStatusOS,
   buscarAnotacoesOS,
+  listarPaineisOS,
+  vincularPainelOS,
+  removerPainelOS,
+  buscarComplementosOS,
+  salvarComplementosOS,
   deletarOS
 };

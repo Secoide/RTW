@@ -4,32 +4,16 @@
             <div class="painelSubMenu">
                 <div class="painelAcoes">
                     <div class="bt_submenu">
-                        <input type="button" name="" value="➕ Cadastrar Colaborador" data-roles="4,6,7,99" title="Cadastrar Colaborador"
-                            class="bt_padrao bt_cad bt_form_cad_colab">
-                    </div>
-                    <div class="menuSuspensoRegistar bt_submenu" id="menuRegistrar">
-                        <input type="button" value="📋 Registrar / Anexar" title="Registrar / Anexar" class="bt_padrao">
-                        <div class="submenu-container glass">
-                            <div class="bt_submenu">
-                                <input type="button" data-roles="6,7,99" value=" EPI" title="Registrar EPI"
-                                    class="bt_padrao bt_form_anexar_epi">
-                            </div>
-                            <div class="bt_submenu">
-                                <input type="button" data-roles="4,6,7,99" value="Exame" title="Anexar Exame"
-                                    class="bt_padrao bt_form_anexar_exame">
-                            </div>
-                            <div class="bt_submenu">
-                                <input type="button" data-roles="4,6,7,99" value="Curso" title="Anexar Curso"
-                                    class="bt_padrao bt_form_anexar_curso">
-                            </div>
+                        <div id="popup-novocolaborador" class="popup-option-menu bt_form_cad_colab" data-type="novocolaborador"
+                            data-roles="4,6,7,99" title="Novo colaborador">
+                            <i class="fa-solid fa-user-plus"></i> Novo colaborador
                         </div>
                     </div>
-
-
-                    <div class="bt_submenu" style="width: 20px; text-align: center;">|</div>
                     <div id="bt_atualizarRH" class="bt_submenu">
-                        <input type="button" name="" value="🔄 Atualizar tabela" title="Atualizar tabela"
-                            class="bt_padrao bt_atualizar">
+                        <button type="button" class="programacao-top-btn bt_atualizar" title="Atualizar tabela">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>Atualizar</span>
+                        </button>
                     </div>
                 </div>
                 <div class="painelBuscar">
@@ -42,6 +26,81 @@
                     <div class="bt_submenu">
                         <input id="myInputPesquisaNomeRH" class="tbx_teste glass" type="text" name=""
                             placeholder="Pesquisar Colaborador..." title="pesquisa_nomeRH" class="pesquisa_nomeRH">
+                    </div>
+                    <button type="button" id="btnBuscaAvancadaRH" class="rh-btn-filtro" title="Abrir busca avançada">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                    <div class="rh-filtros-rapidos">
+                        <button type="button" class="rh-chip ativo" data-rh-filter="todos">
+                            <i class="fa-solid fa-table-list"></i> Todos
+                        </button>
+                        <button type="button" class="rh-chip" data-rh-filter="vencidos">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Vencidos
+                        </button>
+                        <button type="button" class="rh-chip" data-rh-filter="alerta">
+                            <i class="fa-solid fa-clock"></i> A vencer
+                        </button>
+                        <button type="button" class="rh-chip" data-rh-filter="agendado">
+                            <i class="fa-solid fa-calendar-check"></i> Agendados
+                        </button>
+                        <button type="button" class="rh-chip" data-rh-filter="ferias">
+                            <i class="fa-solid fa-umbrella-beach"></i> Férias
+                        </button>
+                        <button type="button" class="rh-chip" data-rh-filter="afastados">
+                            <i class="fa-solid fa-user-clock"></i> Afastados
+                        </button>
+                        <button type="button" class="rh-chip" data-rh-filter="epi">
+                            <i class="fa-solid fa-helmet-safety"></i> EPI
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rh-busca-avancada" id="rhBuscaAvancadaPainel">
+                    <div class="rh-avancado-campo">
+                        <label for="rhFiltroCargo">Cargo</label>
+                        <input id="rhFiltroCargo" type="text" placeholder="Ex.: eletricista">
+                    </div>
+                    <div class="rh-avancado-campo">
+                        <label for="rhFiltroSetor">Setor</label>
+                        <input id="rhFiltroSetor" type="text" placeholder="Ex.: produção">
+                    </div>
+                    <div class="rh-avancado-campo">
+                        <label for="rhFiltroStatus">Status</label>
+                        <select id="rhFiltroStatus">
+                            <option value="">Todos</option>
+                            <option value="ferias">Férias</option>
+                            <option value="afastamento">Afastamento</option>
+                            <option value="saude">Saúde</option>
+                            <option value="maternidade">Maternidade</option>
+                            <option value="paternidade">Paternidade</option>
+                            <option value="exame agendado">Exame agendado</option>
+                            <option value="desligado">Desligado</option>
+                        </select>
+                    </div>
+                    <button type="button" id="btnLimparFiltrosRH" class="rh-btn-limpar">
+                        <i class="fa-solid fa-eraser"></i>
+                        Limpar
+                    </button>
+                </div>
+
+                <div class="rh-submenu-info">
+                    <div class="rh-resumo-rapido" title="Resumo dos colaboradores visíveis">
+                        <div class="rh-resumo-card">
+                            <span id="rhResumoVisiveis">0</span>
+                            <small>visíveis</small>
+                        </div>
+                        <div class="rh-resumo-card alerta">
+                            <span id="rhResumoPendencias">0</span>
+                            <small>atenção</small>
+                        </div>
+                        <div class="rh-resumo-card">
+                            <span id="rhResumoAusentes">0</span>
+                            <small>ausências</small>
+                        </div>
+                    </div>
+                    <div class="rh-insight" id="rhInsight">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>Carregando leitura rápida do RH...</span>
                     </div>
                 </div>
 

@@ -1,4 +1,4 @@
-import { atualizarUsuariosOnline , atualizarListaOnline } from "./socket-users.js";
+import { atualizarUsuariosOnline, atualizarListaOnline, receberMensagemChat } from "./socket-users.js";
 import { atualizarUI } from "./socket-notifications.js";
 import {
     handleAlocarColaborador,
@@ -8,6 +8,20 @@ import {
     handlePrioridadeOS
 } from "./colaboradores-socket-service.js";
 import { handleMudarStatusProgDia } from "./statusDiaOS-socket-service.js";
+import { registrarResultadoStatusProgDia } from "./status-dia-socket.js";
+
+function tratarErroSocket(data) {
+    document.dispatchEvent(new CustomEvent("ws:action-failed", {
+        detail: {
+            mensagem: data.mensagem || "Nao foi possivel salvar a alteracao."
+        }
+    }));
+
+    const seletor = document.getElementById("seletor_data");
+    if (seletor) {
+        seletor.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+}
 
 export function handleSocketMessage(data, socket) {
     switch (data.acao) {
@@ -35,8 +49,18 @@ export function handleSocketMessage(data, socket) {
         case "mudar_statusProgDia":
             handleMudarStatusProgDia(data);
             break;
+        case "mudar_statusProgDia_ok":
+            registrarResultadoStatusProgDia(data);
+            break;
         case "notificacao":
             atualizarUI(data);
+            break;
+        case "mensagem_chat":
+            receberMensagemChat(data);
+            break;
+        case "erro":
+            registrarResultadoStatusProgDia({ ...data, sucesso: false });
+            tratarErroSocket(data);
             break;
         default:
             console.warn("⚠️ Ação WS desconhecida:", data.acao);

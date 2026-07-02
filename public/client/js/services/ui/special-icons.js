@@ -30,7 +30,7 @@ function initSnow() {
         const flake = document.createElement("span");
         flake.classList.add("snowflake");
 
-        const isSpecial = Math.random() < 0.02;
+        const isSpecial = Math.random() < 0.01;
         flake.innerText = isSpecial
             ? specialIcons[Math.floor(Math.random() * specialIcons.length)]
             : "❄️";
@@ -66,8 +66,8 @@ function initSantaHatsWrap() {
 
     Object.assign(tocaFundo.style, {
         position: "absolute",
-        top: "calc(50% - 258px)",
-        left: "calc(50% - 215px)",
+        top: "calc(50% - 295px)",
+        left: "calc(50% - 484px)",
         width: "190px",
         transform: "rotate(-22deg)",
         zIndex: "1",
@@ -82,20 +82,19 @@ function initSantaHatsWrap() {
 
     Object.assign(tocaFrente.style, {
         position: "absolute",
-        top: "-60px",
-        left: "-75px",
-        width: "200px",
-        transform: "rotate(-14deg)",
+        top: "calc(50% - 297px)",
+        left: "calc(50% - 484px)",
+        width: "190px",
+        transform: "rotate(-22deg)",
         zIndex: "20",
-        pointerEvents: "none",
-        filter: "drop-shadow(2px 4px 6px rgba(0,0,0,0.35))"
+        pointerEvents: "none"
     });
 
     // 🔑 adiciona a de fundo ANTES do painel
     parent.insertBefore(tocaFundo, painel);
 
     // adiciona a da frente DENTRO do painel
-    painel.appendChild(tocaFrente);
+    parent.insertBefore(tocaFrente, painel);
 }
 
 
@@ -105,7 +104,7 @@ export function initNewYearFireworks() {
     const day = now.getDate();
 
     const isNewYear =
-        (month === 11 && day >= 31) ||
+        (month === 11 && day >= 30) ||
         (month === 0 && day <= 10);
 
     if (!isNewYear) return;

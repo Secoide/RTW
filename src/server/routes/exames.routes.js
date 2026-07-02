@@ -7,7 +7,10 @@ const exameController = require('../controllers/exames.controller');
 // Rotas específicas primeiro!
 router.post('/cadastrar', verificarAutenticacao, exameController.createExame);
 router.get('/por-colaborador/:idFunc', verificarAutenticacao, exameController.getExamesByColaborador);
+router.get('/historico/:idFunc/:idExame', verificarAutenticacao, exameController.getHistoricoExameColaborador);
 router.put('/editar/:id', verificarAutenticacao, exameController.updateExame);
+router.put('/registro/:id', verificarAutenticacao, uploadExamePDF.single('documento'), exameController.updateRegistroExame);
+router.delete('/registro/:id/anexo', verificarAutenticacao, exameController.deleteAnexoRegistroExame);
 
 router.put('/agendar', verificarAutenticacao, exameController.agendarExame);
 

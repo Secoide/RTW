@@ -57,7 +57,34 @@ $(document).on("click", "#chkDesligados", function (e) {
 });
 
 $(document).on("input", "#myInputPesquisaNomeRH", function (e) {
-    filterTableOS();
+    aplicarFiltrosRH();
+});
+
+$(document).on("click", "#btnBuscaAvancadaRH", function () {
+    $("#rhBuscaAvancadaPainel").toggleClass("ativo");
+    $(this).toggleClass("ativo");
+});
+
+$(document).on("input change", "#rhFiltroCargo, #rhFiltroSetor, #rhFiltroStatus", function () {
+    aplicarFiltrosRH();
+    atualizarEstadoBuscaAvancadaRH();
+});
+
+$(document).on("click", ".rh-chip", function () {
+    $(".rh-chip").removeClass("ativo");
+    $(this).addClass("ativo");
+    aplicarFiltrosRH();
+});
+
+$(document).on("click", "#btnLimparFiltrosRH", function () {
+    $("#myInputPesquisaNomeRH").val("");
+    $("#rhFiltroCargo").val("");
+    $("#rhFiltroSetor").val("");
+    $("#rhFiltroStatus").val("");
+    $(".rh-chip").removeClass("ativo");
+    $('.rh-chip[data-rh-filter="todos"]').addClass("ativo");
+    atualizarEstadoBuscaAvancadaRH();
+    aplicarFiltrosRH();
 });
 
 $(document).on("click", "#bt_excluirConta", function () {
@@ -165,12 +192,147 @@ function filterTableOS() {
 
 export function toggleDesligados(chk) {
     $("#rh").toggleClass("mostrar-desligados", $(chk).is(":checked"));
+    aplicarFiltrosRH();
+}
+
+function normalizarTexto(valor = "") {
+    return valor
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+function getFiltroRapidoRH() {
+    return $(".rh-chip.ativo").data("rh-filter") || "todos";
+}
+
+function linhaPassaFiltroRapido($row, filtro) {
+    if (filtro === "todos") return true;
+
+    const exames = normalizarTexto($row.data("exames"));
+    const status = normalizarTexto($row.data("status"));
+    const epi = normalizarTexto($row.data("epi"));
+
+    if (filtro === "vencidos") return exames.includes("vencido") || $row.find(".status-vencido, .VENCIDO").length > 0;
+    if (filtro === "alerta") return exames.includes("alerta") || $row.find(".status-alerta, .ALERTA").length > 0;
+    if (filtro === "agendado") return exames.includes("agendado") || status.includes("exame agendado") || $row.find(".status-agendado, .AGENDADO").length > 0;
+    if (filtro === "ferias") return status.includes("ferias") || $row.hasClass("Ferias");
+    if (filtro === "afastados") return ["afastamento", "saude", "maternidade", "paternidade"].some(item => status.includes(item)) || $row.is(".Afastamento, .Saude, .Maternidade, .Paternidade");
+    if (filtro === "epi") return epi.includes("atencao") || epi.includes("avaliar") || $row.find(".text-danger, .text-warning").length > 0;
+
+    return true;
+}
+
+function aplicarFiltrosRH() {
+    const termo = normalizarTexto($("#myInputPesquisaNomeRH").val());
+    const cargo = normalizarTexto($("#rhFiltroCargo").val());
+    const setor = normalizarTexto($("#rhFiltroSetor").val());
+    const statusFiltro = normalizarTexto($("#rhFiltroStatus").val());
+    const filtroRapido = getFiltroRapidoRH();
+    const mostrarDesligados = $("#chkDesligados").is(":checked");
+
+    $("tr.rh_tb_lin_colob").each(function () {
+        const $row = $(this);
+        const textoLinha = normalizarTexto($row.text());
+        const cargoLinha = normalizarTexto($row.data("cargo"));
+        const setorLinha = normalizarTexto($row.data("setor"));
+        const statusLinha = normalizarTexto($row.data("status"));
+        const contrato = normalizarTexto($row.data("contrato"));
+
+        const passaTermo = !termo || textoLinha.includes(termo);
+        const passaCargo = !cargo || cargoLinha.includes(cargo);
+        const passaSetor = !setor || setorLinha.includes(setor);
+        const passaStatus = !statusFiltro || statusLinha.includes(statusFiltro) || contrato.includes(statusFiltro);
+        const passaRapido = linhaPassaFiltroRapido($row, filtroRapido);
+        const passaDesligado = mostrarDesligados || contrato !== "desligado";
+
+        $row.toggle(passaTermo && passaCargo && passaSetor && passaStatus && passaRapido && passaDesligado);
+    });
+
+    atualizarResumoRH();
+}
+
+function atualizarEstadoBuscaAvancadaRH() {
+    const temFiltroAvancado =
+        normalizarTexto($("#rhFiltroCargo").val()) ||
+        normalizarTexto($("#rhFiltroSetor").val()) ||
+        normalizarTexto($("#rhFiltroStatus").val());
+
+    $("#btnBuscaAvancadaRH").toggleClass("tem-filtro", !!temFiltroAvancado);
+}
+
+function atualizarResumoRH() {
+    const $visiveis = $("tr.rh_tb_lin_colob:visible");
+    const $todas = $("tr.rh_tb_lin_colob");
+    let pendencias = 0;
+    let ausencias = 0;
+    let desligadosOcultos = 0;
+    const detalhes = {
+        vencidos: 0,
+        alertas: 0,
+        agendados: 0,
+        epi: 0
+    };
+
+    $visiveis.each(function () {
+        const $row = $(this);
+        const exames = normalizarTexto($row.data("exames"));
+        const epi = normalizarTexto($row.data("epi"));
+        const status = normalizarTexto($row.data("status"));
+        const temVencido = exames.includes("vencido") || $row.find(".status-vencido, .VENCIDO").length > 0;
+        const temAlerta = exames.includes("alerta") || $row.find(".status-alerta, .ALERTA").length > 0;
+        const temAgendado = exames.includes("agendado") || status.includes("exame agendado") || $row.find(".status-agendado, .AGENDADO").length > 0;
+        const temEpi = epi.includes("atencao") || epi.includes("avaliar") || $row.find(".text-danger, .text-warning").length > 0;
+
+        if (temVencido) detalhes.vencidos += 1;
+        if (temAlerta) detalhes.alertas += 1;
+        if (temAgendado) detalhes.agendados += 1;
+        if (temEpi) detalhes.epi += 1;
+
+        if (temVencido || temAlerta || temAgendado || temEpi) {
+            pendencias += 1;
+        }
+
+        if (["ferias", "afastamento", "saude", "maternidade", "paternidade", "exame agendado"].some(item => status.includes(item))) {
+            ausencias += 1;
+        }
+    });
+
+    $todas.each(function () {
+        if (normalizarTexto($(this).data("contrato")) === "desligado" && !$("#chkDesligados").is(":checked")) {
+            desligadosOcultos += 1;
+        }
+    });
+
+    $("#rhResumoVisiveis").text($visiveis.length);
+    $("#rhResumoPendencias").text(pendencias);
+    $("#rhResumoAusentes").text(ausencias);
+
+    const partesAtencao = [];
+    if (detalhes.vencidos) partesAtencao.push(`${detalhes.vencidos} vencido(s)`);
+    if (detalhes.alertas) partesAtencao.push(`${detalhes.alertas} a vencer`);
+    if (detalhes.agendados) partesAtencao.push(`${detalhes.agendados} agendado(s)`);
+    if (detalhes.epi) partesAtencao.push(`${detalhes.epi} EPI`);
+
+    let insight = "Leitura rápida: equipe sem pendências críticas visíveis.";
+    if (pendencias > 0) {
+        insight = `${pendencias} colaborador(es) precisam de atenção: ${partesAtencao.join(" | ")}.`;
+    } else if (ausencias > 0) {
+        insight = `${ausencias} colaborador(es) visível(is) estão com férias, afastamento ou situação especial.`;
+    } else if (desligadosOcultos > 0) {
+        insight = `${desligadosOcultos} desligado(s) estão ocultos. Ative o filtro para consultar históricos.`;
+    }
+
+    $("#rhInsight span").text(insight);
 }
 
 
 
 
 //Prenche hitorico tabela atestar
+//${colab.status_epi}
 export function preencherTabelaColaboradoresRH() {
     const tbody = $('#tb_colaboradoresRH tbody');
     let buscarExame;
@@ -183,17 +345,25 @@ export function preencherTabelaColaboradoresRH() {
         success: function (data) {
             data.forEach(colab => {
                 const linha = `
-                        <tr class="rh_tb_lin_colob ${colab.exames} ${colab.contrato === "desligado" ? colab.contrato : colab.motivo}" style="font-size: 13px;" data-id="${colab.idFunc}">
-                            <td>${colab.idFunc}</td>
+                        <tr class="rh_tb_lin_colob ${colab.exames} ${colab.contrato === "desligado" ? colab.contrato : colab.motivo}" style="font-size: 13px;"
+                            data-id="${colab.idFunc}"
+                            data-nome="${colab.nome || ''}"
+                            data-cargo="${colab.cargo || ''}"
+                            data-setor="${colab.categoria || ''}"
+                            data-status="${colab.contrato === "desligado" ? "Desligado" : colab.motivo || ''}"
+                            data-contrato="${colab.contrato || ''}"
+                            data-exames="${colab.exames || ''}"
+                            data-epi="${(colab.status_epi || '').replace(/<[^>]*>/g, ' ').replace(/"/g, '&quot;')}">
+                            <td  style="color: #bbbbbb;">${colab.idFunc}</td>
                            <td>
                             <img class="tb_fotoColab"
                                     src="${colab.fotoperfil}?v=${colab.versao_foto}"
                                     onerror="this.src='/imagens/user-default.webp'">
                             </img>${colab.nome}</td>
-                            <td>${colab.nascimento_idade}</td>
-                            <td>${colab.cargo}</td>
-                            <td>${colab.categoria}</td>
-                            <td>${colab.status_epi}</td>
+                            <td style="color: #bbbbbb;">${colab.nascimento_idade}</td>
+                            <td style="color: #bbbbbb;;">${colab.cargo}</td>
+                            <td style="color: #bbbbbb;">${colab.categoria}</td>
+                            <td></td>
                             <td><div id="integracoes_${colab.idFunc}" class="rh_integracao"></div></td>
                             <td><div id="exames_${colab.idFunc}" class="rh_exames"></div></td>
                             <td><div id="cursos_${colab.idFunc}" class="tb_coluna_NRs"></div></td>
@@ -210,7 +380,7 @@ export function preencherTabelaColaboradoresRH() {
                 load_minicursos_colaborador(colab.idFunc, $(buscarCurso))
             });
 
-            filterTableOS();
+            aplicarFiltrosRH();
         },
         error: function (xhr) {
             alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');

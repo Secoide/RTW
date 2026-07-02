@@ -4,6 +4,10 @@ import { removerAcentos } from "../../utils/formatters/text-formatter.js";
 // Estado interno
 let OS_FOCUS = null;
 let indiceSelecionado2 = -1;
+const FILTROS_ATALHO_COLAB = {
+    "#": "lider",
+    "$": "terceiro"
+};
 
 /**
  * Fecha sugestões visíveis e reseta índice
@@ -24,37 +28,32 @@ export function initColaboradoresSearch(socket) {
     $(document).on("input", ".buscarColab input", function () {
         const input = $(this);
         const termoBruto = input.val();
-        const termo = removerAcentos(termoBruto.toLowerCase());
+        const buscaLimpa = termoBruto.trim();
+        const prefixoBusca = buscaLimpa.charAt(0);
+        const classeFiltro = FILTROS_ATALHO_COLAB[prefixoBusca] || null;
+        const termoDigitado = classeFiltro ? buscaLimpa.substring(1) : buscaLimpa;
+        const termo = removerAcentos(termoDigitado.toLowerCase());
         const painelDia = input.closest(".painelDia");
 
         $(".sugestoes").remove();
         indiceSelecionado2 = -1;
 
-        if (termo.length < 1) return;
+        if (termo.length < 1 && !classeFiltro) return;
 
         const disponiveis = getColaboradoresDisponiveis(painelDia);
 
-        let filtrados = [];
-        const buscandoLider = termoBruto.trim().startsWith('#');
-        const termoLider = removerAcentos(termoBruto.trim().substring(1).toLowerCase());
+        const filtrados = disponiveis.filter(colab => {
+            const $colabEl = painelDia.find('.colaborador').filter(function () {
+                return $(this).data('id') === colab.id;
+            }).first();
+            const $nome = $colabEl.find('p.nome');
+            const nomeNormalizado = removerAcentos(colab.nome.toLowerCase());
 
-        if (buscandoLider) {
-            filtrados = disponiveis.filter(colab => {
-                const $colabEl = painelDia.find('.colaborador').filter(function () {
-                    return $(this).data('id') === colab.id;
-                }).first();
-                return $colabEl.find('p.nome').hasClass('lider') &&
-                    removerAcentos(colab.nome.toLowerCase()).includes(termoLider);
-            });
-        } else {
-            filtrados = disponiveis.filter(colab => {
-                const $colabEl = painelDia.find('.colaborador').filter(function () {
-                    return $(this).data('id') === colab.id;
-                }).first();
-                return !$colabEl.find('p.nome').hasClass('lider') &&
-                    removerAcentos(colab.nome.toLowerCase()).includes(termo);
-            });
-        }
+            if (!nomeNormalizado.includes(termo)) return false;
+            if (classeFiltro) return $nome.hasClass(classeFiltro);
+
+            return !$nome.hasClass('lider');
+        });
 
         if (filtrados.length > 0) {
             const $lista = $('<div class="sugestoes"></div>');

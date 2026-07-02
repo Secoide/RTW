@@ -1,10 +1,90 @@
 .painelBuscar {
   display: flex;
-  width: 400px;
-  justify-content: flex-end;
-  padding-right: 40px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.painelBuscar .bt_submenu {
+  min-width: 0;
+}
+
+.painelBuscar .bt_submenu:has(#chkDesligados) {
+  order: 3;
+  flex: 0 0 auto;
+}
+
+.painelBuscar .bt_submenu:has(#myInputPesquisaNomeRH) {
+  order: 1;
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  max-width: none;
+  min-width: 220px;
+  height: 34px;
+  padding: 0 8px 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.painelBuscar .bt_submenu:has(#myInputPesquisaNomeRH)::before {
+  content: "\f002";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  color: #efda38;
+  font-size: 12px;
+  margin-right: 7px;
+}
+
+.painelBuscar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: auto !important;
+  white-space: nowrap;
+}
+
+.painelBuscar .bt_submenu:has(#chkDesligados) label {
+  min-height: 32px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(244, 244, 244, 0.72);
+  font-size: 12px !important;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.painelBuscar .bt_submenu:has(#chkDesligados) input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.painelBuscar .bt_submenu:has(#chkDesligados) label::before {
+  content: "\f2bb";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  color: rgba(244, 244, 244, 0.72);
+  font-size: 12px;
+}
+
+.painelBuscar .bt_submenu:has(#chkDesligados) label:hover,
+.painelBuscar .bt_submenu:has(#chkDesligados:checked) label {
+  color: #efda38;
+  border-color: rgba(239, 218, 56, 0.58);
+  background: rgba(239, 218, 56, 0.16);
+  transform: translateY(-1px);
+}
+
+.painelBuscar .bt_submenu:has(#chkDesligados:checked) label::before {
+  color: #efda38;
 }
 
 .menuSuspensoRegistar {
@@ -38,10 +118,27 @@
     width: 100%;
 }
 
-#myInputPesquisaNomeRH{
-  background-color: rgb(209, 209, 209);
-  color: var(--preto);
+#myInputPesquisaNomeRH {
+  height: 34px;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #f4f4f4;
+  font-size: 12px;
+  padding: 0;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
 
+#myInputPesquisaNomeRH:focus {
+  box-shadow: none;
+  background: transparent;
+}
+
+#myInputPesquisaNomeRH::placeholder {
+  color: rgba(244, 244, 244, 0.45);
 }
 
 
@@ -150,7 +247,7 @@
   border-radius: 10px;
 }
 
-#rh .tb_zebrada td:nth-child(10) .Ferias {
+#rh .tb_zebrada td:nth-child(10) .ferias {
   display: inline-block;
   min-width: 80px;
   background-color: var(--ferias);
@@ -196,18 +293,286 @@
 }
 
 #rh .painelSubMenu {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content minmax(280px, 1fr);
   align-items: center;
-  justify-content: space-between;
-  padding-right: 50px;
+  position: relative;
+  gap: 8px 10px;
+  min-height: 44px;
+  padding: 8px 78px 8px 10px;
+  margin: 0 10px 10px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(36, 36, 36, 0.96), rgba(18, 18, 18, 0.98));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.20);
+  color: #f4f4f4;
 }
 
 #rh .painelAcoes {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  gap: 10px;
-  padding: 10px;
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 0;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+#rh .painelAcoes .bt_submenu {
+  margin: 0;
+}
+
+#rh .painelAcoes .popup-option-menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 32px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 218, 56, 0.32);
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  color: #181818;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 0 11px;
+  white-space: nowrap;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+#rh .painelAcoes .popup-option-menu:hover {
+  color: #181818;
+  background: linear-gradient(90deg, #efda38, #ee7722);
+  transform: translateY(-1px);
+}
+
+#rh .painelAcoes .bt_padrao,
+#rh .menuSuspensoRegistar > .bt_padrao,
+#bt_atualizarRH .bt_padrao,
+.rh-btn-filtro,
+.rh-btn-limpar {
+  min-height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(244, 244, 244, 0.86);
+  font-size: 12px;
+  font-weight: 650;
+  padding: 0 10px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+#rh .painelAcoes .bt_padrao:hover,
+#rh .menuSuspensoRegistar > .bt_padrao:hover,
+#bt_atualizarRH .bt_padrao:hover,
+.rh-btn-filtro:hover,
+.rh-btn-filtro.ativo,
+.rh-btn-filtro.tem-filtro,
+.rh-btn-limpar:hover {
+  transform: translateY(-1px);
+  border-color: rgba(239, 218, 56, 0.38);
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+}
+
+#rh .painelAcoes .bt_cad {
+  border-color: rgba(239, 218, 56, 0.32);
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  color: #181818;
+}
+
+#rh .painelAcoes .bt_cad:hover {
+  color: #181818;
+  background: linear-gradient(90deg, #efda38, #ee7722);
+}
+
+.rh-btn-filtro.tem-filtro {
+  color: #efda38;
+  box-shadow: 0 0 0 1px rgba(239, 218, 56, 0.28), 0 0 12px rgba(238, 119, 34, 0.18);
+}
+
+.rh-btn-filtro {
+  order: 2;
+  width: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+}
+
+.rh-filtros-rapidos {
+  order: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  overflow: hidden;
+  padding: 5px 0px;
+}
+
+.rh-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(244, 244, 244, 0.72);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.rh-chip:hover,
+.rh-chip.ativo {
+  color: #efda38;
+  border-color: rgba(239, 218, 56, 0.58);
+  background: rgba(239, 218, 56, 0.16);
+  transform: translateY(-1px);
+}
+
+.rh-busca-avancada {
+  display: none;
+  position: absolute;
+  top: calc(40% + 8px);
+  left: 280px;
+  z-index: 2000;
+  align-items: end;
+  grid-template-columns: repeat(3, minmax(130px, 1fr)) auto;
+  gap: 8px;
+  width: min(650px, calc(100vw - 90px));
+  padding: 12px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #242424, #141414);
+  border: 1px solid rgba(239, 218, 56, 0.22);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.38);
+}
+
+.rh-busca-avancada.ativo {
+  display: grid;
+}
+
+.rh-avancado-campo {
+  display: grid;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.rh-avancado-campo label {
+  color: rgba(244, 244, 244, 0.58);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.rh-avancado-campo input,
+.rh-avancado-campo select {
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f4f4;
+  font-size: 12px;
+  padding: 0 9px;
+  outline: none;
+}
+
+.rh-btn-limpar {
+  color: #efda38;
+}
+
+.rh-submenu-info {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.rh-resumo-rapido {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rh-resumo-card {
+  min-width: 64px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.rh-resumo-card span {
+  color: var(--branco);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rh-resumo-card small {
+  color: var(--cor-cinza-500);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.rh-resumo-card.alerta span {
+  color: #efda38;
+}
+
+.rh-insight {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(239, 218, 56, 0.18);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(244, 244, 244, 0.62);
+  font-size: 12px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.rh-insight span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+@media (max-width: 1280px) {
+  #rh .painelSubMenu {
+    grid-template-columns: 1fr;
+    padding-right: 14px;
+  }
+
+  .painelBuscar {
+    justify-content: flex-start;
+  }
+
+  .painelBuscar .bt_submenu:has(#myInputPesquisaNomeRH) {
+    max-width: none;
+  }
+
+  .rh-submenu-info {
+    flex-wrap: wrap;
+  }
+}
+
+.rh-insight i {
+  color: #efda38;
 }
 
 .bt_teste {

@@ -1,4 +1,5 @@
 import { alterarStatusProgDia } from "../../services/sockets/status-dia-socket.js";
+import { destacarStatusDia, limparDestaqueStatusDia } from "../../utils/dom/status-dia-ui.js";
 
 
 
@@ -70,20 +71,38 @@ $(document).on('click', '.iconeStatusDia i', async function (event, data) {
             return false;
         }
 
-        if (msg.includes("finalizar")) {
-            Toast.fire({
-                icon: "success",
-                theme: 'dark',
-                title: "Programação do dia finalizada!"
-            });
-        }
-
         return true;
     }
 
     // Define status desejado com base no estado atual do ícone
     // (ideal: ler/gravar em data-status no wrapper)
     let statusDesejado = $icon.hasClass('fa-file-signature') ? 1 : 0;
+
+    try {
+        if (!isProgramatico) {
+            await alterarStatusProgDia($icon, statusDesejado);
+        }
+    } catch (err) {
+        console.error(err);
+        $wrapper.data('busy', false);
+
+        Swal.fire({
+            icon: "error",
+            theme: "dark",
+            title: "Não foi possível salvar",
+            text: err.message || "Tente novamente em instantes."
+        });
+
+        return false;
+    }
+
+    if (statusDesejado === 1) {
+        Toast.fire({
+            icon: "success",
+            theme: 'dark',
+            title: "Programação do dia finalizada!"
+        });
+    }
 
     // Animação (limpa fila antes)
     $wrapper.stop(true, true);
@@ -97,9 +116,9 @@ $(document).on('click', '.iconeStatusDia i', async function (event, data) {
         setTimeout(() => {
             if (statusDesejado === 1) {
                 $icon.removeClass('fa-file-signature').addClass('fa-file-circle-check');
-                $painel.addClass('iluminar_verde');
+                destacarStatusDia($painel);
             } else {
-                $painel.removeClass('iluminar_verde');
+                limparDestaqueStatusDia($painel);
                 $icon.removeClass('fa-file-circle-check').addClass('fa-file-signature');
             }
         }, 150);
@@ -108,27 +127,8 @@ $(document).on('click', '.iconeStatusDia i', async function (event, data) {
         setTimeout(async () => {
             $wrapper.removeClass('rotate');
 
-            $wrapper.animate({ top: '+=40px' }, 150, async function () {
-                try {
-                    if (!isProgramatico) {
-                        // Aguarda backend e valida sucesso
-                        const ok = await alterarStatusProgDia($icon, statusDesejado);
-                        if (ok === false) throw new Error('Falha ao atualizar status no servidor.');
-                    }
-                } catch (err) {
-                    // Reverte UI em caso de erro
-                    if (statusDesejado === 1) {
-                        $icon.removeClass('fa-file-circle-check').addClass('fa-file-signature');
-                        $painel.removeClass('iluminar_verde');
-                    } else {
-                        $icon.removeClass('fa-file-signature').addClass('fa-file-circle-check');
-                        $painel.addClass('iluminar_verde');
-                    }
-                    console.error(err);
-                    alert('Não foi possível salvar a alteração. Tente novamente.');
-                } finally {
-                    $wrapper.data('busy', false);
-                }
+            $wrapper.animate({ top: '+=40px' }, 150, function () {
+                $wrapper.data('busy', false);
             });
         }, 300);
     });

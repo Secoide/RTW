@@ -3,6 +3,7 @@ import { initColaboradoresDragDrop } from "../events/dragdrop/handle-colaborador
 import { initColaboradoresSearch } from "../events/search/handle-colaboradores-search.js";
 import { initRemoverColaboradorClick } from "../events/click/handle-remover-colaborador.js";
 import { initPesquisarOS } from "../events/controls/handle-pesquisar-os.js";
+import { initProgramacaoTopbar } from "../events/controls/handle-programacao-topbar.js";
 import { initAbrirOSClick } from "../events/click/handle-abrir-os.js";
 import { getSocket } from "../services/sockets/socket-service.js";
 
@@ -25,9 +26,36 @@ const Toast = Swal.mixin({
         }
     });
 
+let listenersSessaoRegistrados = false;
+
+function registrarListenersSessaoProgramacao() {
+  if (listenersSessaoRegistrados) return;
+  listenersSessaoRegistrados = true;
+
+  document.addEventListener("auth:session-expired", () => {
+    Swal.fire({
+      icon: "warning",
+      title: "Sessao expirada",
+      text: "Entre novamente para continuar alterando a programacao.",
+      confirmButtonText: "Ir para login"
+    }).then(() => {
+      window.location.href = "/login";
+    });
+  });
+
+  document.addEventListener("ws:action-failed", (ev) => {
+    Swal.fire({
+      icon: "error",
+      title: "Alteracao nao salva",
+      text: ev.detail?.mensagem || "Nao foi possivel salvar a alteracao."
+    });
+  });
+}
+
 export async function initProgramacao() {
   try {
-    
+
+    registrarListenersSessaoProgramacao();
 
     const socket = getSocket(); // 🔗 cria ou retorna o mesmo socket
     initDateChangeHandler();
@@ -48,6 +76,7 @@ export async function initProgramacao() {
     initColaboradoresSearch(socket);
     initRemoverColaboradorClick();
     initPesquisarOS();
+    initProgramacaoTopbar();
     initAbrirOSClick();
     initColaboradoresTransferencia(socket);
     initFiltros();

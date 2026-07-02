@@ -1,19 +1,72 @@
 import { getSocket } from "./socket-service.js";
 import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
 
+function notificarSessaoExpirada() {
+  if (typeof window.encerrarSessaoExpirada === "function") {
+    window.encerrarSessaoExpirada();
+    return;
+  }
+
+  document.dispatchEvent(new CustomEvent("auth:session-expired"));
+}
+
+function notificarFalhaSocket(mensagem) {
+  document.dispatchEvent(new CustomEvent("ws:action-failed", {
+    detail: { mensagem }
+  }));
+}
+
+async function sessaoAtiva() {
+  try {
+    const res = await fetch("/api/auth/status", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store"
+    });
+
+    if (res.status === 401) {
+      if (typeof window.tratarErro401 === "function") {
+        await window.tratarErro401();
+        return false;
+      }
+
+      notificarSessaoExpirada();
+      return false;
+    }
+
+    if (!res.ok) {
+      notificarFalhaSocket("Nao foi possivel confirmar sua sessao. Atualize a pagina e tente novamente.");
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    notificarFalhaSocket("Falha de conexao ao confirmar a sessao.");
+    return false;
+  }
+}
+
 // =============================
 // ENVIO PARA O SERVIDOR
 // =============================
-export function alocarColaboradores(osID, dataDia, nomes) {
+export async function alocarColaboradores(osID, dataDia, nomes) {
   const socket = getSocket();
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({
-      acao: "alocar_colaborador",
-      osID,
-      dataDia,   // 👈 padronizado
-      nomes,
-    }));
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    notificarFalhaSocket("Sem conexao com o servidor. A programacao nao foi salva.");
+    return false;
   }
+
+  const podeEnviar = await sessaoAtiva();
+  if (!podeEnviar) return false;
+
+  socket.send(JSON.stringify({
+    acao: "alocar_colaborador",
+    osID,
+    dataDia,
+    nomes,
+  }));
+
+  return true;
 }
 
 export function transferirColaboradores(colaboradores, datas) {

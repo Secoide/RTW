@@ -90,6 +90,19 @@ async function getCursosByColaborador(req, res) {
     }
 }
 
+async function getHistoricoCursoColaborador(req, res) {
+  try {
+    const cursos = await CursoService.buscarHistoricoCursoColaborador(
+      req.params.idFunc,
+      req.params.idCurso
+    );
+
+    res.json(cursos);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar histórico do curso' });
+  }
+}
+
 async function uploadCurso(req, res) {
   try {
     const { datarealizadaCurso, vencimento, idColab, curso } = req.body;
@@ -159,6 +172,29 @@ async function checkCurso(req, res) {
   }
 }
 
+async function updateRegistroCurso(req, res) {
+  try {
+    const result = await CursoService.atualizarRegistroCurso(req.params.id, {
+      datarealizadaCurso: req.body.datarealizadaCurso,
+      vencimento: req.body.vencimento,
+      file: req.file
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ erro: err.message });
+  }
+}
+
+async function deleteAnexoRegistroCurso(req, res) {
+  try {
+    const result = await CursoService.removerAnexoRegistroCurso(req.params.id);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ erro: err.message });
+  }
+}
+
 
 
 
@@ -170,8 +206,11 @@ module.exports = {
     updateCurso,
     deleteCurso,
     getCursosByColaborador,
+    getHistoricoCursoColaborador,
     deleteCursoByColaborador,
     uploadCurso,
     downloadCurso,
-    checkCurso
+    checkCurso,
+    updateRegistroCurso,
+    deleteAnexoRegistroCurso
 };

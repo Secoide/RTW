@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Dono</title>
+  <link rel="icon" type="image/png" href="/logo_GS.png">
+  <link rel="stylesheet" href="/css/owner.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <main id="ownerApp">
+    <section id="ownerLogin" class="owner-login">
+      <div class="owner-login-box">
+        <span>Painel restrito</span>
+        <h1>Controle SaaS</h1>
+        <p>Gerencie empresas, pacotes, menus e ferramentas contratadas.</p>
+        <form id="ownerLoginForm">
+          <input id="ownerSenha" type="password" placeholder="Senha do dono" autocomplete="current-password" required>
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="ownerPanel" class="owner-panel" hidden>
+      <header class="owner-header">
+        <div>
+          <span>ConnectPear</span>
+          <h1>Empresas clientes</h1>
+        </div>
+        <div class="owner-actions">
+          <button type="button" id="btnSyncRecursos">
+            <i class="fa-solid fa-rotate"></i>
+            Recursos padrão
+          </button>
+          <button type="button" id="btnNovaEmpresa">
+            <i class="fa-solid fa-plus"></i>
+            Nova empresa
+          </button>
+          <button type="button" id="btnOwnerLogout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="owner-layout">
+        <aside class="owner-list">
+          <input id="ownerBuscaEmpresa" type="search" placeholder="Buscar empresa...">
+          <div id="ownerEmpresasLista"></div>
+        </aside>
+
+        <section class="owner-detail">
+          <form id="ownerEmpresaForm" class="owner-card">
+            <input type="hidden" id="ownerEmpresaId">
+            <div class="owner-form-grid">
+              <label>
+                <span>Código</span>
+                <input id="ownerEmpresaCodigo" type="text" required placeholder="EMP001">
+              </label>
+              <label>
+                <span>Nome</span>
+                <input id="ownerEmpresaNome" type="text" required placeholder="Nome da empresa">
+              </label>
+              <label>
+                <span>CNPJ</span>
+                <input id="ownerEmpresaCnpj" type="text" placeholder="Opcional">
+              </label>
+              <label>
+                <span>Plano</span>
+                <select id="ownerEmpresaPlano">
+                  <option>Básico</option>
+                  <option>Profissional</option>
+                  <option>Premium</option>
+                  <option selected>Personalizado</option>
+                </select>
+              </label>
+              <label>
+                <span>Status</span>
+                <select id="ownerEmpresaStatus">
+                  <option value="ativo">Ativo</option>
+                  <option value="teste">Teste</option>
+                  <option value="bloqueado">Bloqueado</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </label>
+              <label>
+                <span>Início</span>
+                <input id="ownerEmpresaInicio" type="date">
+              </label>
+              <label>
+                <span>Vencimento</span>
+                <input id="ownerEmpresaVencimento" type="date">
+              </label>
+              <label class="owner-span-2">
+                <span>Observação interna</span>
+                <input id="ownerEmpresaObs" type="text">
+              </label>
+            </div>
+            <div class="owner-form-actions">
+              <button type="submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Salvar empresa
+              </button>
+              <button type="button" id="btnExcluirEmpresa" class="danger">
+                <i class="fa-solid fa-trash"></i>
+                Excluir
+              </button>
+            </div>
+          </form>
+
+          <section class="owner-card">
+            <div class="owner-section-title">
+              <h2>Menus e ferramentas contratadas</h2>
+              <button type="button" id="btnSalvarRecursos">Salvar acessos</button>
+            </div>
+            <div id="ownerRecursosLista" class="owner-resources"></div>
+          </section>
+
+          <section class="owner-card">
+            <div class="owner-section-title">
+              <div class="owner-user-search">
+                <h2>Usuários vinculados</h2>
+                <input id="ownerBuscaUsuario" type="search" placeholder="Buscar nome ou ID">
+              </div>
+              <form id="ownerUsuarioForm" class="owner-user-form">
+                <input id="ownerUsuarioId" type="number" placeholder="ID usuário">
+                <button type="submit">Vincular</button>
+              </form>
+            </div>
+            <div id="ownerUsuariosLista" class="owner-users"></div>
+          </section>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="/client/js/owner-admin.js"></script>
+</body>
+
+</html>

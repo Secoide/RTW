@@ -18,11 +18,8 @@ async function buscarExameIDEmpresa(idEmpresa) {
 
 // Criar
 async function criarExame(data) {
-  if (!data.nomesupervisor || (!data.telefoneSup && !data.emailSup)) {
-    throw new Error('Informe o nome e pelo menos um meio de contato (telefone ou e-mail)');
-  }
-  if (!data.idCliente) {
-    throw new Error('Necessário informar cliente (Empresa responsavel do exames)');
+  if (!data.nome) {
+    throw new Error('Informe pelo menos o nome do exame');
   }
   const result = await ExameModel.createExame(data);
 
@@ -128,6 +125,80 @@ async function baixarExame(id) {
   return exame;
 }
 
+async function buscarHistoricoExameColaborador(idFunc, idExame) {
+  return await ExameModel.getHistoricoExameColaborador(idFunc, idExame);
+}
+
+async function atualizarRegistroExame(id, { datarealizadaExame, vencimento, file }) {
+  const registroAtual = await ExameModel.buscarExamePorId(id);
+  if (!registroAtual) {
+    throw new Error("Registro de exame não encontrado.");
+  }
+
+  const dados = {
+    data: datarealizadaExame,
+    vencimento: parseInt(vencimento, 10)
+  };
+
+  if (Number.isNaN(dados.vencimento)) {
+    throw new Error("Vencimento inválido.");
+  }
+
+  if (file && file.buffer) {
+    const nomeArquivo = `${id}_${Date.now()}.pdf`;
+
+    const { error } = await supabase.storage
+      .from("exames")
+      .upload(nomeArquivo, file.buffer, {
+        contentType: "application/pdf",
+        upsert: true
+      });
+
+    if (error) {
+      console.error(error);
+      throw new Error("Erro ao enviar PDF ao Supabase.");
+    }
+
+    if (registroAtual.anexoExamePDF) {
+      await supabase.storage
+        .from("exames")
+        .remove([registroAtual.anexoExamePDF]);
+    }
+
+    dados.anexoExamePDF = nomeArquivo;
+  }
+
+  const ok = await ExameModel.atualizarRegistroExame(id, dados);
+  if (!ok) {
+    throw new Error("Registro de exame não encontrado.");
+  }
+
+  return { message: "Exame atualizado com sucesso." };
+}
+
+async function removerAnexoRegistroExame(id) {
+  const registroAtual = await ExameModel.buscarExamePorId(id);
+  if (!registroAtual) {
+    throw new Error("Registro de exame não encontrado.");
+  }
+
+  if (registroAtual.anexoExamePDF) {
+    await supabase.storage
+      .from("exames")
+      .remove([registroAtual.anexoExamePDF]);
+  }
+
+  const ok = await ExameModel.atualizarRegistroExame(id, {
+    anexoExamePDF: null
+  });
+
+  if (!ok) {
+    throw new Error("Registro de exame não encontrado.");
+  }
+
+  return { message: "Anexo removido com sucesso." };
+}
+
 
 module.exports = {
   listarExames,
@@ -141,5 +212,8 @@ module.exports = {
   buscarExamesByColaborador,
   deletarExameByColaborador,
   salvarExame,
-  baixarExame
+  baixarExame,
+  buscarHistoricoExameColaborador,
+  atualizarRegistroExame,
+  removerAnexoRegistroExame
 };

@@ -130,6 +130,8 @@ function carregarGuia(
 
         programacao: getProgramacao(),
 
+        ferias: getFerias(),
+
         colaboradores: getColaboradores(),
 
         rh: getRH(),
@@ -143,6 +145,14 @@ function carregarGuia(
         conquistas: getConquistas(),
 
         ia: getIA(),
+
+        ferramentas: getFerramentas(),
+
+        gestao: getGestao(),
+
+        materiais: getMateriais(),
+
+        'chat-online': getChatOnline(),
 
         faq: getFAQ()
 
@@ -163,13 +173,13 @@ function getIntroducao() {
 <div id="introducao-principal"
      class="guiaTitulo">
 
-    📖 Guia Geral RTW
+    📖 Guia Geral ConnectPear
 
 </div>
 
 <div class="guiaCard">
 
-    <h4>Bem-vindo ao Sistema RTW</h4>
+    <h4>Bem-vindo ao Sistema ConnectPear</h4>
 
     <p>
 
@@ -225,7 +235,7 @@ function getIntroducao() {
 <div class="guiaCard guiaInfo">
 
     📖 Este guia é atualizado constantemente conforme novas funcionalidades
-    são adicionadas ao sistema RTW.
+    são adicionadas ao sistema ConnectPear.
 
 </div>
 
@@ -255,7 +265,7 @@ O Cadastro de Colaboradores é o módulo responsável por armazenar todas as inf
 
 <p>
 
-Nele é possível cadastrar, editar, consultar e acompanhar toda a trajetória do colaborador dentro da RTW, incluindo documentos, exames, cursos, integrações, EPIs, conquistas, histórico profissional e muito mais.
+Nele é possível cadastrar, editar, consultar e acompanhar toda a trajetória do colaborador dentro da empresa, incluindo documentos, exames, cursos, integrações, EPIs, conquistas, histórico profissional e muito mais.
 
 </p>
 
@@ -514,9 +524,75 @@ Além dos exames é possível:
 
 <li>Controlar vencimentos</li>
 
+<li>Identificar exames configurados como <b>não vence</b></li>
+
 <li>Consultar histórico completo</li>
 
 </ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Menu de ações dos exames</h4>
+
+<p>
+
+Na aba Exames do colaborador, clique com o botão direito sobre um exame para acessar as ações disponíveis.
+
+</p>
+
+<ul>
+
+<li><b>Atualizar Exame:</b> registra uma nova realização para o exame selecionado.</li>
+
+<li><b>Editar Exame:</b> abre a tabela com todos os registros anexados daquele tipo de exame.</li>
+
+<li><b>Agendar Exame:</b> registra data e horário para um exame futuro.</li>
+
+<li><b>Visualizar Exame:</b> abre o PDF anexado, quando existir.</li>
+
+<li><b>Apagar Exame:</b> remove o registro selecionado do colaborador.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Edição dos registros anexados</h4>
+
+<p>
+
+A opção <b>Editar Exame</b> exibe uma tabela com todos os registros daquele exame para o colaborador.
+Essa tela permite corrigir dados sem precisar apagar e cadastrar tudo novamente.
+
+</p>
+
+<ul>
+
+<li>Editar a data realizada.</li>
+
+<li>Editar a data de vencimento.</li>
+
+<li>Quando o cadastro do exame estiver marcado como <b>não vence</b>, o sistema mostra essa informação e não calcula alerta de vencimento.</li>
+
+<li>Adicionar um novo PDF ao registro.</li>
+
+<li>Substituir o PDF já anexado.</li>
+
+<li>Remover somente o PDF, mantendo o registro do exame.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Dica:</b><br>
+
+Use <b>Atualizar Exame</b> quando houver uma nova realização.
+Use <b>Editar Exame</b> quando precisar corrigir uma data ou trocar/remover o anexo de um registro existente.
 
 </div>
 
@@ -580,7 +656,71 @@ Cada curso pode possuir:
 
 <li>Histórico de renovações</li>
 
+<li>Controle para cursos que vencem ou não vencem</li>
+
 </ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Menu de ações dos cursos</h4>
+
+<p>
+
+Na aba Cursos do colaborador, clique com o botão direito sobre um curso para acessar as ações disponíveis.
+
+</p>
+
+<ul>
+
+<li><b>Atualizar Curso:</b> registra uma nova realização ou renovação para o curso selecionado.</li>
+
+<li><b>Editar Curso:</b> abre a tabela com todos os registros anexados daquele tipo de curso.</li>
+
+<li><b>Visualizar Curso:</b> abre o PDF anexado, quando existir.</li>
+
+<li><b>Apagar Curso:</b> remove o registro selecionado do colaborador.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Edição dos registros anexados</h4>
+
+<p>
+
+A opção <b>Editar Curso</b> exibe uma tabela com todos os registros daquele curso para o colaborador.
+Essa tela permite corrigir dados, trocar anexos e manter o histórico de renovações organizado.
+
+</p>
+
+<ul>
+
+<li>Editar a data realizada.</li>
+
+<li>Editar o vencimento em meses.</li>
+
+<li>Quando o cadastro do curso estiver marcado como <b>não vence</b>, o sistema mantém o histórico sem gerar alerta de vencimento.</li>
+
+<li>Adicionar um novo PDF ao registro.</li>
+
+<li>Substituir ou remover o PDF já anexado.</li>
+
+<li>Excluir o registro completo do curso quando necessário.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Dica:</b><br>
+
+Use <b>Atualizar Curso</b> para lançar uma nova realização.
+Use <b>Editar Curso</b> para corrigir informações de um registro já existente.
 
 </div>
 
@@ -911,6 +1051,68 @@ alocação de equipes e indicadores de produtividade.
 
 </div>
 
+
+<div id="prog-topbar" class="guiaSubtitulo">
+
+🔎 Topo, Busca Global e Filtros
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Barra superior da Programação</h4>
+
+<p>
+
+O topo da Programação reúne os principais comandos para localizar, filtrar e atualizar a agenda operacional.
+Ele foi pensado para reduzir cliques e permitir análise rápida de todas as OS exibidas na semana.
+
+</p>
+
+<ul>
+
+<li><b>Nova OS:</b> abre o cadastro de Ordem de Serviço.</li>
+<li><b>Atualizar:</b> recarrega a programação da data selecionada.</li>
+<li><b>Data:</b> define o dia base da visualização semanal.</li>
+<li><b>Busca global:</b> pesquisa em todas as OS carregadas, considerando número da OS, descrição, cliente, cidade, colaborador e status.</li>
+<li><b>Busca avançada:</b> permite filtrar separadamente por OS, cliente, cidade, colaborador e status.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Filtros rápidos globais</h4>
+
+<p>
+
+Os filtros do topo atuam sobre todos os painéis da programação. Quando um filtro global está ativo,
+os painéis encontrados recebem destaque com sombra amarela e os demais painéis são ocultados para facilitar a leitura.
+
+</p>
+
+<ul>
+
+<li><b>Prioridade:</b> mostra apenas OS marcadas como prioridade alta.</li>
+<li><b>Com equipe:</b> mostra apenas OS com colaboradores alocados.</li>
+<li><b>Sem equipe:</b> mostra OS ainda sem colaboradores.</li>
+<li><b>Sem responsável:</b> mostra OS sem responsável definido.</li>
+<li><b>Limpar filtros:</b> remove busca global, busca avançada e filtros rápidos.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Atalhos úteis:</b><br>
+
+Dentro do campo <b>Buscar colaborador</b> de cada OS, use <b>#</b> para listar responsáveis/líderes e <b>$</b> para listar terceiros.
+Exemplo: <b>#gui</b> busca responsáveis com esse nome; <b>$jo</b> busca terceiros com esse nome.
+
+</div>
+
 <div id="prog-gestao-colaboradores" class="guiaSubtitulo">
 
 👷 Gestão de Colaboradores
@@ -957,6 +1159,23 @@ para alocação em Ordens de Serviço.
 <li>O sistema atualizará automaticamente a programação.</li>
 
 </ol>
+
+<p>
+
+Também é possível adicionar colaboradores usando o campo <b>Buscar colaborador</b> dentro da própria OS.
+Esse campo aceita busca normal e atalhos por tipo de colaborador.
+
+</p>
+
+<ul>
+
+<li><b>Busca normal:</b> digite parte do nome para localizar colaboradores disponíveis.</li>
+<li><b>#</b> lista responsáveis/líderes.</li>
+<li><b>$</b> lista terceiros.</li>
+<li>Use as setas do teclado para navegar nas sugestões e <b>Enter</b> ou <b>Tab</b> para selecionar.</li>
+<li>A alocação é enviada em tempo real para os demais usuários conectados.</li>
+
+</ul>
 
 </div>
 
@@ -1268,7 +1487,7 @@ Colaborador temporariamente indisponível.
 
 <p>
 
-A Programação RTW utiliza uma estrutura hierárquica para organizar as equipes e facilitar a identificação das responsabilidades de cada profissional durante a execução dos serviços.
+A Programação ConnectPear utiliza uma estrutura hierárquica para organizar as equipes e facilitar a identificação das responsabilidades de cada profissional durante a execução dos serviços.
 
 </p>
 
@@ -1614,11 +1833,76 @@ facilitando o dimensionamento das equipes e a análise rápida da distribuição
 </div>
 
 </div>
+<!--
+<div data-roles="99">
+    <div id="prog-complementos" class="guiaSubtitulo">
+    🧩 Complementos da OS
+    </div>
+    <div class="guiaCard">
+    <p>
+    A aba <b>Complementos</b> do formulário da OS registra informações adicionais que ajudam a organizar melhor o serviço antes da execução.
+    Ela não substitui a programação principal; ela complementa a OS com detalhes úteis para análise, preparação e integração com outras telas.
+    </p>
+    <ul>
+    <li><b>Categoria:</b> separa o tipo geral do serviço, como Instalação, Manutenção, SPDA, Engenharia, Solar, Automação, Incêndio ou Telecom.</li>
+    <li><b>Serviço:</b> mostra opções filtradas conforme a categoria selecionada.</li>
+    <li><b>Mais de um serviço:</b> a OS pode receber vários serviços, exibidos em cards com largura padronizada.</li>
+    <li><b>Remover serviço:</b> cada card possui um botão para retirar o serviço quando necessário.</li>
+    <li><b>PTA alocada:</b> indica que a execução exige PTA, mantendo essa informação separada dos painéis elétricos.</li>
+    <li><b>Painel para montar/instalar:</b> sinaliza que a OS terá painel elétrico relacionado.</li>
+    <li><b>Observação complementar:</b> registra detalhes rápidos que ajudam no entendimento operacional da OS.</li>
+    </ul>
+    </div>
+    <div class="guiaCard guiaInfo">
+    📌 <b>Importante:</b><br>
+    Quando a OS já possui número salvo, a aba permite vincular painéis elétricos cadastrados na tela Ferramentas.
+    O painel vinculado aparece com número de série e atuação, permitindo abrir os detalhes rapidamente.
+    </div>
+    <div class="guiaCard">
+    <h4>Ícones no card da OS</h4>
+    <p>
+    Quando a OS possui informações importantes em Complementos, a Programação mostra ícones pequenos no rodapé do card,
+    ao lado do total de colaboradores. Esses ícones ajudam a identificar rapidamente necessidades especiais sem abrir o formulário da OS.
+    </p>
+    <ul>
+    <li><b>🚚 PTA:</b> indica que a OS possui PTA alocada ou prevista para execução.</li>
+    <li><b>⚡ Painel:</b> indica que a OS possui painel elétrico previsto para montar ou instalar.</li>
+    <li>Os ícones aparecem somente quando as opções correspondentes estiverem marcadas na aba Complementos da OS.</li>
+    <li>Use essa indicação para conferir rapidamente recursos críticos antes de liberar ou acompanhar a programação do dia.</li>
+    </ul>
+    </div>
+</div>
+
+
+<div  data-roles="99">
+    <div id="prog-materiais-os" class="guiaSubtitulo">
+    📦 Materiais da OS
+    </div>
+    <div class="guiaCard">
+    <p>
+    A aba <b>Materiais</b> da OS resume as listas de materiais vinculadas à ordem de serviço, usando os dados da tela Lista de Materiais.
+    Ela foi criada para o usuário acompanhar o andamento sem precisar sair do perfil da OS.
+    </p>
+    <ul>
+    <li>Exibe as listas vinculadas à OS selecionada.</li>
+    <li>Mostra número da lista, descrição, quantidade de itens e quantidade total.</li>
+    <li>Apresenta o progresso no mesmo padrão visual usado nos painéis elétricos.</li>
+    <li>Indica quantidades compradas, separadas e faltantes.</li>
+    <li>Mostra o status atual da lista, como pendente, comprando, separado ou concluído.</li>
+    <li>Ao clicar na lista, o sistema direciona para a tela Materiais com a lista completa carregada.</li>
+    </ul>
+    </div>
+    <div class="guiaCard guiaInfo">
+    💡 <b>Dica:</b><br>
+    Use essa aba para conferir rapidamente se os materiais da OS estão avançando junto com a programação.
+    Quando houver divergência entre execução e material, abra a lista completa para ajustar compras, separação ou pendências.
+    </div>
+</div>
+-->
+
 
 <div id="prog-boas-praticas" class="guiaSubtitulo">
-
 🚀 Boas Práticas
-
 </div>
 
 <div class="guiaCard">
@@ -1651,6 +1935,320 @@ facilitando o dimensionamento das equipes e a análise rápida da distribuição
 
 A Programação Operacional é a principal ferramenta de planejamento do sistema.
 Todas as alocações, movimentações e indicadores operacionais são refletidos automaticamente nesta tela.
+
+</div>
+
+`;
+
+}
+
+function getFerias() {
+
+    return `
+
+<div id="ferias-topo" class="guiaTitulo">
+
+🏖️ Sistema de Férias
+
+</div>
+
+<div class="guiaCard">
+
+<h4>O que é o sistema de Férias?</h4>
+
+<p>
+
+O módulo de Férias centraliza o planejamento, visualização e controle dos períodos de férias dos colaboradores.
+Ele foi criado para ajudar o usuário a enxergar rapidamente quem está de férias, quais períodos estão em avaliação,
+quais já foram aprovados e qual é a situação do saldo de cada ciclo.
+
+</p>
+
+<p>
+
+A tela trabalha com calendário visual, cálculo automático de ciclo aquisitivo, prazo concessivo, saldo utilizado,
+dias restantes, sugestões automáticas e controle de status.
+
+</p>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Dica:</b><br>
+
+Use a tela de Férias como apoio ao RH e à Programação. Quando um colaborador está em férias, essa informação impacta
+diretamente a disponibilidade operacional.
+
+</div>
+
+<div id="ferias-visao-geral" class="guiaSubtitulo">
+
+📋 Visão Geral
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Exibe colaboradores com férias cadastradas ou sugeridas.</li>
+<li>Mostra períodos diretamente em uma linha de calendário.</li>
+<li>Permite cadastrar novos períodos de férias.</li>
+<li>Permite aprovar, reprovar ou apagar períodos pelo menu de contexto.</li>
+<li>Calcula automaticamente saldo, ciclo aquisitivo e prazo concessivo.</li>
+<li>Aponta períodos vencidos ou fora do prazo esperado.</li>
+
+</ul>
+
+</div>
+
+<div id="ferias-calendario" class="guiaSubtitulo">
+
+📅 Calendário de Férias
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+O calendário mostra os períodos de férias em barras horizontais, alinhadas aos dias do mês.
+Cada barra representa um período vinculado a um colaborador.
+
+</p>
+
+<ul>
+
+<li>A barra mostra a foto e o nome do colaborador.</li>
+<li>A posição da barra indica a data de início e fim do período.</li>
+<li>A cor/borda da barra ajuda a identificar o status.</li>
+<li>Ao passar o mouse, o sistema exibe uma tooltip detalhada.</li>
+<li>Períodos aprovados e sugestões possuem regras próprias de edição.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Cadastro de férias</h4>
+
+<ol>
+
+<li>Clique no botão para abrir o cadastro de férias.</li>
+<li>Selecione o colaborador.</li>
+<li>Informe a data inicial e a data final.</li>
+<li>Escolha o status inicial, quando disponível.</li>
+<li>Salve para registrar o período.</li>
+
+</ol>
+
+<p class="guiaMedalhaDescricao">
+
+O sistema valida datas obrigatórias, ordem das datas, períodos sobrepostos e limite de dias.
+
+</p>
+
+</div>
+
+<div id="ferias-ciclos" class="guiaSubtitulo">
+
+🔁 Ciclos, Saldos e Prazo
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+O sistema calcula os ciclos a partir da data de admissão do colaborador.
+Cada ciclo possui um período aquisitivo, um período concessivo e um saldo de até 30 dias.
+
+</p>
+
+<ul>
+
+<li><b>Ciclo aquisitivo:</b> período em que o colaborador adquire direito às férias.</li>
+<li><b>Prazo concessivo:</b> período limite para gozar as férias adquiridas.</li>
+<li><b>Dias usados:</b> quantidade já lançada no ciclo.</li>
+<li><b>Dias restantes:</b> saldo ainda disponível.</li>
+<li><b>Quantidade de períodos:</b> controle de quantos períodos já foram usados.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📌 <b>Importante:</b><br>
+
+As férias aprovadas consomem saldo do ciclo correspondente. Férias reprovadas e sugestões não consomem saldo definitivo.
+
+</div>
+
+<div id="ferias-status" class="guiaSubtitulo">
+
+🚦 Status das Férias
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaIconesProgramacao">🔓</div>
+<div>
+<div class="guiaMedalhaTitulo">Avaliar</div>
+<div class="guiaMedalhaDescricao">Período cadastrado, mas ainda aguardando conferência ou aprovação.</div>
+</div>
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaIconesProgramacao">🔒</div>
+<div>
+<div class="guiaMedalhaTitulo">Aprovado</div>
+<div class="guiaMedalhaDescricao">Férias confirmadas e consideradas no saldo do colaborador.</div>
+</div>
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaIconesProgramacao">❌</div>
+<div>
+<div class="guiaMedalhaTitulo">Reprovado</div>
+<div class="guiaMedalhaDescricao">Período recusado ou desconsiderado para o planejamento.</div>
+</div>
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaIconesProgramacao">💡</div>
+<div>
+<div class="guiaMedalhaTitulo">Sugerida</div>
+<div class="guiaMedalhaDescricao">Sugestão automática criada pelo sistema com base no saldo disponível.</div>
+</div>
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaIconesProgramacao">⚠️</div>
+<div>
+<div class="guiaMedalhaTitulo">Alerta</div>
+<div class="guiaMedalhaDescricao">Indica prazo crítico, período fora da regra esperada ou férias vencidas.</div>
+</div>
+
+</div>
+
+<div id="ferias-tooltip" class="guiaSubtitulo">
+
+📊 Tooltip e Indicadores
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Ao passar o mouse sobre uma barra de férias, o sistema exibe uma tooltip personalizada com informações úteis para análise.
+
+</p>
+
+<ul>
+
+<li>Nome do colaborador.</li>
+<li>Período lançado.</li>
+<li>Dias do período.</li>
+<li>Ciclo aquisitivo.</li>
+<li>Prazo concessivo.</li>
+<li>Saldo de férias usado e restante.</li>
+<li>Quantidade de períodos utilizados.</li>
+<li>Tempo limite para gozar férias.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Barras de progresso</h4>
+
+<ul>
+
+<li><b>Saldo de férias:</b> mostra quantos dias do ciclo já foram utilizados.</li>
+<li><b>Tempo limite:</b> mostra a proximidade do fim do prazo concessivo.</li>
+<li>A barra de prazo troca de cor por estágio: verde, amarelo, laranja, vermelho e vermelho escuro quando vencido.</li>
+
+</ul>
+
+</div>
+
+<div id="ferias-acoes" class="guiaSubtitulo">
+
+🖱️ Ações e Menu de Contexto
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+O menu de contexto é aberto com o botão direito do mouse sobre uma barra de férias.
+
+</p>
+
+<ul>
+
+<li><b>Aprovar:</b> confirma o período e atualiza o saldo.</li>
+<li><b>Reprovar:</b> marca o período como reprovado.</li>
+<li><b>Apagar:</b> remove o período selecionado.</li>
+<li><b>Aprovar sugestão:</b> transforma uma sugestão automática em férias reais.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaAlerta">
+
+⚠️ <b>Atenção:</b><br>
+
+Ao apagar ou alterar férias, confira se a mudança está correta. Essas informações afetam RH, disponibilidade do colaborador
+e planejamento da Programação.
+
+</div>
+
+<div id="ferias-boas-praticas" class="guiaSubtitulo">
+
+🚀 Boas Práticas
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Cadastre férias assim que forem combinadas ou aprovadas.</li>
+<li>Use o status <b>Avaliar</b> quando ainda houver pendência de validação.</li>
+<li>Aprove apenas períodos realmente confirmados.</li>
+<li>Confira saldo, ciclo aquisitivo e prazo concessivo antes de aprovar.</li>
+<li>Use a tooltip para verificar rapidamente se há risco de vencimento.</li>
+<li>Evite lançar períodos sobrepostos para o mesmo colaborador.</li>
+<li>Revise colaboradores com férias vencidas ou próximas do limite.</li>
+<li>Alinhe as férias com a Programação para evitar alocação indevida.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+🏖️ <b>Resumo:</b><br>
+
+O sistema de Férias ajuda a controlar saldo, prazos e aprovações, reduzindo risco de erros manuais e melhorando a
+visibilidade operacional da equipe.
 
 </div>
 
@@ -1797,6 +2395,42 @@ Permitindo alternar entre:
 <li>Todos os colaboradores (ativos e desligados)</li>
 
 </ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Busca avançada e filtros rápidos</h4>
+
+<p>
+
+O topo do RH possui busca rápida, filtros rápidos e busca avançada. A busca principal pesquisa em várias informações da tabela,
+como nome, ID, cargo, setor e status. A busca avançada permite refinar por cargo, setor e status específico.
+
+</p>
+
+<ul>
+
+<li><b>Todos:</b> volta para a visão completa dos colaboradores visíveis.</li>
+<li><b>Vencidos:</b> mostra colaboradores com itens vencidos ou críticos.</li>
+<li><b>A vencer:</b> mostra colaboradores com alertas próximos do vencimento.</li>
+<li><b>Agendados:</b> mostra colaboradores com exame agendado.</li>
+<li><b>Férias:</b> mostra colaboradores em período de férias.</li>
+<li><b>Afastados:</b> mostra colaboradores em afastamento, saúde, maternidade ou paternidade.</li>
+<li><b>EPI:</b> mostra colaboradores com atenção ou avaliação necessária em EPI.</li>
+<li><b>Mostrar desligados:</b> exibe colaboradores desligados, mantendo o histórico disponível para consulta.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Leitura rápida do topo:</b><br>
+
+O resumo mostra quantos colaboradores estão visíveis depois dos filtros, quantos precisam de atenção e quantos estão em ausência.
+No RH, <b>ausência</b> significa que o colaborador está fora da disponibilidade normal, como férias, afastamento, saúde,
+maternidade, paternidade ou exame agendado.
 
 </div>
 
@@ -2135,6 +2769,16 @@ O RH foi desenvolvido para funcionar como um painel de monitoramento contínuo.
 <li>Pendências de EPIs</li>
 
 </ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📌 <b>Controle de vencimento:</b><br>
+
+Exames e cursos cadastrados na tela <b>Gestão</b> possuem a coluna <b>Vencimento</b>.
+Quando essa opção estiver desmarcada, o item continua aparecendo no histórico do colaborador,
+mas não entra nos indicadores de vencido, próximo do vencimento ou alerta do RH.
 
 </div>
 
@@ -3614,6 +4258,1401 @@ Não é necessário cadastrá-las manualmente.
     </div>
 
 </div>
+`;
+
+}
+
+function getFerramentas() {
+
+    return `
+
+<div id="ferramentas-topo" class="guiaTitulo">
+
+🧰 Ferramentas
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tela <b>Ferramentas</b> reúne recursos auxiliares do sistema. Ela foi criada para concentrar funções que ajudam no trabalho técnico,
+administrativo e operacional, sem misturar essas rotinas com Programação, RH ou Materiais.
+
+</p>
+
+<p>
+
+Atualmente a tela possui duas ferramentas principais: <b>Numeração de Documentos</b> e <b>Registros de Painel Elétrico</b>.
+Cada ferramenta fica em uma aba própria; ao clicar no submenu, somente a ferramenta escolhida é exibida.
+
+</p>
+
+</div>
+
+<div id="ferramentas-visao-geral" class="guiaSubtitulo">
+
+📌 Visão Geral
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>As ferramentas são organizadas por abas internas.</li>
+<li>Ferramentas não contratadas podem aparecer bloqueadas, conforme o pacote da empresa.</li>
+<li>Os dados de ferramentas podem ser usados por outras telas, como Complementos da OS.</li>
+<li>Algumas ferramentas salvam dados no banco e outras geram resultados rápidos para copiar e utilizar fora do sistema.</li>
+
+</ul>
+
+</div>
+
+<div id="ferramentas-numdocs" class="guiaSubtitulo">
+
+🔢 Numeração de Documentos
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A ferramenta <b>Numeração de Documentos</b> monta o nome padronizado de arquivos técnicos, ajudando o usuário a copiar o resultado
+e renomear documentos com o mesmo formato.
+
+</p>
+
+<ul>
+
+<li><b>OS:</b> número da Ordem de Serviço.</li>
+<li><b>Contratada:</b> empresa responsável pela execução.</li>
+<li><b>Contratante:</b> cliente selecionado entre os cadastros existentes.</li>
+<li><b>Tipo de documento:</b> sigla selecionada na lista, como ART, LM, IO, RT, PE, DE e outras.</li>
+<li><b>Sequência:</b> número sequencial do documento; se ficar em branco, essa parte não entra no resultado.</li>
+<li><b>Área/Nome:</b> complemento livre para identificar área, setor ou nome do documento.</li>
+<li><b>Mês/Ano:</b> competência usada no padrão do arquivo.</li>
+<li><b>Revisão:</b> revisão do documento, como REV00.</li>
+<li><b>Motivo da revisão:</b> observação opcional para controle interno.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📋 <b>Resultado:</b><br>
+
+Após preencher os campos, o sistema gera o texto final para copiar e colar no nome do arquivo.
+A tabela abaixo do formulário permite copiar, editar ou apagar os registros adicionados.
+
+</div>
+
+<div id="ferramentas-paineis" class="guiaSubtitulo">
+
+⚡ Registros de Painel Elétrico
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A ferramenta <b>Registros de Painel Elétrico</b> controla os painéis cadastrados, seus dados técnicos, responsáveis e andamento de montagem.
+Esses registros também podem ser vinculados em uma OS pela aba Complementos.
+
+</p>
+
+<ul>
+
+<li><b>Cliente:</b> selecionado a partir dos clientes cadastrados.</li>
+<li><b>Atuação do painel:</b> descreve onde ou para qual finalidade o painel será usado.</li>
+<li><b>Nº de série:</b> gerado seguindo o padrão do ano e o próximo número disponível, como 26.123.</li>
+<li><b>Tensão:</b> selecionada em combo, com opções como 12V, 24V, 110V, 220V, 380V e combinações.</li>
+<li><b>Frequência:</b> selecionada entre 50Hz e 60Hz.</li>
+<li><b>Tamanho:</b> selecionado pela lista de dimensões, com opção de dimensão personalizada.</li>
+<li><b>Projetista:</b> selecionado entre os responsáveis cadastrados.</li>
+<li><b>Montador:</b> responsável pela montagem do painel.</li>
+<li><b>ART, senha, peso e link externo:</b> campos complementares para rastreabilidade.</li>
+
+</ul>
+
+</div>
+
+<div id="ferramentas-checklist" class="guiaSubtitulo">
+
+✅ Checklist e Progresso
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Cada painel possui um checklist com etapas de acompanhamento. A barra de progresso muda conforme os itens marcados,
+indo de tons de alerta até tons de conclusão.
+
+</p>
+
+<ul>
+
+<li><b>Material separado:</b> indica que os materiais necessários já foram separados.</li>
+<li><b>Montagem realizada:</b> indica que a montagem física foi concluída.</li>
+<li><b>Testado:</b> indica que o painel passou por teste.</li>
+<li><b>Embalado para envio:</b> indica que está pronto para transporte ou entrega.</li>
+
+</ul>
+
+</div>
+
+<div id="ferramentas-imagens" class="guiaSubtitulo">
+
+🖼️ Imagens, Link Externo e QR Code
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Após cadastrar o painel, é possível adicionar imagens do painel montado.</li>
+<li>Mais de uma imagem pode ser vinculada ao mesmo painel.</li>
+<li>As imagens podem ser visualizadas na própria tela, em uma galeria com navegação.</li>
+<li>O link externo pode ser aberto por botão rápido.</li>
+<li>Quando houver link, o sistema pode gerar QR Code para facilitar acesso externo.</li>
+
+</ul>
+
+</div>
+
+<div id="ferramentas-boas-praticas" class="guiaSubtitulo">
+
+🚀 Boas Práticas
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Cadastre painéis com cliente, atuação e responsáveis bem definidos.</li>
+<li>Use a sequência automática para evitar número de série repetido.</li>
+<li>Atualize o checklist conforme o painel avançar na produção.</li>
+<li>Adicione imagens somente depois do painel estar cadastrado.</li>
+<li>Use o resultado da numeração de documentos para manter os arquivos com padrão único.</li>
+<li>Vincule o painel na OS quando a montagem ou instalação fizer parte do serviço.</li>
+
+</ul>
+
+</div>
+
+`;
+
+}
+
+function getGestao() {
+
+    return `
+
+<div id="gestao-topo"
+     class="guiaTitulo">
+
+⚙️ Tela Gestão
+
+</div>
+
+<div id="gestao-visao-geral"
+     class="guiaSubtitulo">
+
+📋 Visão Geral
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tela <b>Gestão</b> é o painel central para administrar cadastros estruturais do sistema.
+Ela concentra tabelas de OS, empresas, supervisores, cidades, setores, cargos, exames, cursos,
+EPIs e fornecedores em uma única interface.
+
+</p>
+
+<p>
+
+O objetivo da tela é permitir manutenção rápida dos cadastros base que alimentam outros módulos,
+como Programação, RH, Colaboradores, Materiais e indicadores operacionais.
+
+</p>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Ideia principal:</b><br>
+
+Use a Gestão para manter os cadastros mestres corretos. Quando empresa, cidade, supervisor,
+cargo, setor, exame, curso ou EPI estão bem cadastrados, as demais telas passam a carregar
+opções mais consistentes e com menos retrabalho.
+
+</div>
+
+<div class="guiaCard">
+
+<h4>O que a tela permite fazer</h4>
+
+<ul>
+
+<li>Consultar listas de cadastros em formato de tabela.</li>
+
+<li>Criar novos registros diretamente na tabela ou abrir formulário específico, como no caso de OS.</li>
+
+<li>Editar registros existentes com edição inline.</li>
+
+<li>Excluir registros com confirmação de segurança.</li>
+
+<li>Filtrar dados digitando qualquer texto no campo de busca.</li>
+
+<li>Ordenar colunas clicando no cabeçalho da tabela.</li>
+
+<li>Atualizar os dados manualmente pelo botão de recarregar.</li>
+
+<li>Gerenciar vínculos de Empresa com Cidades e Supervisores.</li>
+
+<li>Gerenciar vínculos de Setor com Cargos.</li>
+
+<li>Alterar status de OS e acompanhar indicadores operacionais.</li>
+
+<li>Visualizar gráficos de OS por período, responsável e taxa de conclusão.</li>
+
+</ul>
+
+</div>
+
+<div id="gestao-acesso"
+     class="guiaSubtitulo">
+
+🚪 Acesso e Permissões
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+O acesso ao módulo Gestão é feito pelo menu lateral através do item <b>Gestão</b>.
+No menu principal, esse item está configurado para usuários com os níveis permitidos pelo atributo
+<code>data-roles="6,7,99"</code>.
+
+</p>
+
+<ul>
+
+<li><b>Nível 6 e 7:</b> podem acessar a tela conforme a regra atual do menu.</li>
+
+<li><b>Nível 99:</b> possui acesso administrativo e também visualiza abas restritas.</li>
+
+<li><b>Aba Fornecedor:</b> aparece com <code>data-roles="99"</code>, ou seja, fica restrita a usuários autorizados.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+🔐 <b>Atenção:</b><br>
+
+A visibilidade no menu ajuda a controlar acesso visual, mas as rotas de API também usam autenticação.
+Isso evita que uma chamada direta seja aceita sem sessão válida.
+
+</div>
+
+<div id="gestao-abas"
+     class="guiaSubtitulo">
+
+🧭 Abas e Cadastros
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+No topo da tela existem abas. Cada aba troca a entidade em edição e recarrega a tabela com os dados
+correspondentes.
+
+</p>
+
+<table>
+<thead>
+<tr>
+<th>Aba</th>
+<th>Uso principal</th>
+<th>Campos/Detalhes exibidos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><b>OS</b></td>
+<td>Consultar e acompanhar ordens de serviço cadastradas.</td>
+<td>Status, descrição, empresa, supervisor, cidade, responsável, orçamento, criação e conclusão.</td>
+</tr>
+<tr>
+<td><b>Empresa</b></td>
+<td>Manter empresas/clientes usados na programação e cadastros.</td>
+<td>Nome, cidades vinculadas, supervisores vinculados e flags de integração/liberação/segurança.</td>
+</tr>
+<tr>
+<td><b>Supervisor</b></td>
+<td>Manter contatos de supervisores.</td>
+<td>Nome, email e telefone.</td>
+</tr>
+<tr>
+<td><b>Cidade</b></td>
+<td>Manter cidades utilizadas por empresas e OS.</td>
+<td>Nome e estado.</td>
+</tr>
+<tr>
+<td><b>Setor</b></td>
+<td>Organizar áreas internas e relacionar cargos.</td>
+<td>Nome, cargos vinculados e nível de acesso.</td>
+</tr>
+<tr>
+<td><b>Cargo</b></td>
+<td>Definir cargos usados nos colaboradores.</td>
+<td>Nome, nível de acesso e disponibilidade para colaborador.</td>
+</tr>
+<tr>
+<td><b>Exame</b></td>
+<td>Cadastrar tipos de exames ocupacionais.</td>
+<td>Nome, descrição e controle de vencimento.</td>
+</tr>
+<tr>
+<td><b>Curso</b></td>
+<td>Cadastrar tipos de cursos/treinamentos.</td>
+<td>Nome, descrição e controle de vencimento.</td>
+</tr>
+<tr>
+<td><b>EPI</b></td>
+<td>Cadastrar itens de EPI controlados no sistema.</td>
+<td>Nome e obrigatoriedade.</td>
+</tr>
+<tr>
+<td><b>Fornecedor</b></td>
+<td>Manter fornecedores usados em materiais/cotações.</td>
+<td>Nome, email, telefone e ICMS.</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📌 <b>Importante:</b><br>
+
+Alguns cadastros são base para outros. Por exemplo: uma OS depende de empresa, cidade,
+supervisor e responsável. Um colaborador depende de cargo e setor. Um EPI, exame ou curso
+mal cadastrado pode afetar listas, anexos e vencimentos.
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Vencimento em Exames e Cursos</h4>
+
+<p>
+
+Nas abas <b>Exame</b> e <b>Curso</b>, a coluna <b>Vencimento</b> define se aquele cadastro deve gerar controle de validade.
+
+</p>
+
+<ul>
+
+<li><b>Marcado:</b> o sistema calcula vencimento, alerta e status vencido normalmente.</li>
+
+<li><b>Desmarcado:</b> o item fica como <b>não vence</b> no histórico do colaborador.</li>
+
+<li>Itens desmarcados não entram nos alertas do RH, da Programação ou do Form do colaborador.</li>
+
+<li>A alteração é aplicada para novos registros e também para históricos já vinculados ao mesmo exame ou curso.</li>
+
+</ul>
+
+</div>
+
+<div id="gestao-toolbar"
+     class="guiaSubtitulo">
+
+🧰 Barra de Ferramentas
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A barra de ferramentas fica acima da tabela e concentra as ações rápidas da tela.
+
+</p>
+
+<ul>
+
+<li><b>+ Novo:</b> cria um novo registro para a aba atual. Na aba OS, abre o formulário completo de cadastro de OS.</li>
+
+<li><b>Atualizar:</b> recarrega a lista da aba atual a partir da API.</li>
+
+<li><b>📉 Mostrar Gráfico:</b> disponível na aba OS; exibe os gráficos operacionais.</li>
+
+<li><b>📈 Ocultar Gráfico:</b> aparece quando o gráfico está aberto; recolhe a área gráfica.</li>
+
+<li><b>Buscar em qualquer coluna:</b> filtra as linhas da tabela pelo texto digitado.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Ícones e botões usados</h4>
+
+<ul>
+
+<li><b>+</b> indica inclusão de novo registro ou inclusão de vínculo.</li>
+
+<li><b>📉</b> indica abertura da área de gráficos.</li>
+
+<li><b>📈</b> indica recolhimento da área de gráficos.</li>
+
+<li><b>Lápis</b> indica editar registro.</li>
+
+<li><b>Lixeira</b> indica apagar registro.</li>
+
+<li><b>Disquete</b> indica salvar alteração ou novo registro.</li>
+
+<li><b>X</b> indica cancelar edição ou remover vínculo de chip.</li>
+
+<li><b>Checkbox</b> indica campos booleanos, como obrigatório, disponível, integração, liberação, segurança e vencimento.</li>
+
+</ul>
+
+</div>
+
+<div id="gestao-tabela"
+     class="guiaSubtitulo">
+
+📊 Tabela
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tabela é montada dinamicamente conforme a aba selecionada. O cabeçalho é criado a partir dos campos
+retornados para aquela entidade, e a coluna <b>Ações</b> é adicionada ao final.
+
+</p>
+
+<ul>
+
+<li><b>Cabeçalho fixo:</b> permanece visível durante a rolagem da tabela.</li>
+
+<li><b>Ordenação:</b> clique em uma coluna para ordenar crescente ou decrescente.</li>
+
+<li><b>Busca:</b> filtra qualquer texto visível da linha.</li>
+
+<li><b>Total:</b> em abas que não são OS, o contador mostra quantos registros estão visíveis.</li>
+
+<li><b>Linhas em edição:</b> ficam destacadas visualmente para evitar confusão.</li>
+
+<li><b>Novo registro:</b> aparece no topo da tabela com destaque azul/verde.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+🔎 <b>Busca rápida:</b><br>
+
+A pesquisa não filtra apenas uma coluna. Ela procura o termo em toda a linha renderizada.
+Isso permite buscar por nome, cidade, supervisor, status, telefone, descrição ou qualquer informação visível.
+
+</div>
+
+<div id="gestao-crud"
+     class="guiaSubtitulo">
+
+✏️ Criar, Editar e Excluir
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Criar novo registro</h4>
+
+<ul>
+
+<li>Clique em <b>+ Novo</b>.</li>
+
+<li>Nas abas comuns, uma linha nova aparece no topo da tabela.</li>
+
+<li>Preencha os campos necessários.</li>
+
+<li>Clique no ícone de <b>salvar</b> para gravar.</li>
+
+<li>Clique no <b>X</b> para cancelar antes de gravar.</li>
+
+<li>Na aba <b>OS</b>, o botão abre o formulário completo de cadastro de OS, pois a OS possui regras e campos dependentes.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Editar registro</h4>
+
+<ul>
+
+<li>Clique no ícone de <b>lápis</b> na coluna Ações.</li>
+
+<li>Os campos editáveis da linha viram inputs ou selects.</li>
+
+<li>O sistema bloqueia múltiplas edições ao mesmo tempo.</li>
+
+<li>Depois de alterar, clique em <b>salvar</b>.</li>
+
+<li>Para desistir, clique em <b>cancelar</b> e os dados originais voltam para a linha.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Excluir registro</h4>
+
+<ul>
+
+<li>Clique no ícone de <b>lixeira</b>.</li>
+
+<li>O sistema abre confirmação antes de excluir.</li>
+
+<li>Ao confirmar, a rota de exclusão é chamada e a tabela é recarregada.</li>
+
+<li>Quando houver vínculos com outros registros, a exclusão pode falhar por segurança ou regra do banco.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+⚠️ <b>Cuidado:</b><br>
+
+Excluir cadastros base pode afetar telas que dependem deles. Antes de apagar empresa, cidade,
+supervisor, cargo, exame, curso, EPI ou fornecedor, verifique se o registro não está sendo usado.
+
+</div>
+
+<div id="gestao-vinculos"
+     class="guiaSubtitulo">
+
+🔗 Vínculos entre Cadastros
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Algumas abas possuem relações com outros cadastros. Elas são exibidas em formato de <b>chips</b>,
+permitindo adicionar e remover itens sem abrir outro formulário.
+
+</p>
+
+<ul>
+
+<li><b>Empresa → Cidades:</b> define em quais cidades aquela empresa atua.</li>
+
+<li><b>Empresa → Supervisores:</b> define quais supervisores pertencem ou atendem aquela empresa.</li>
+
+<li><b>Setor → Cargos:</b> define quais cargos fazem parte daquele setor.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Como adicionar vínculo</h4>
+
+<ul>
+
+<li>Clique no botão <b>+</b> dentro da célula de chips.</li>
+
+<li>Escolha uma opção no seletor exibido.</li>
+
+<li>Clique no ícone de <b>salvar</b>.</li>
+
+<li>O vínculo é enviado para a API e a tabela é recarregada.</li>
+
+</ul>
+
+<h4>Como remover vínculo</h4>
+
+<ul>
+
+<li>Clique no <b>x</b> dentro do chip.</li>
+
+<li>O sistema remove a associação e recarrega a tabela.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+🧩 <b>Por que vínculos importam?</b><br>
+
+Eles alimentam seletores dependentes. Ao editar uma OS, por exemplo, a escolha da empresa influencia
+as opções de cidade e supervisor disponíveis para aquela OS.
+
+</div>
+
+<div id="gestao-os"
+     class="guiaSubtitulo">
+
+🧾 Gestão de OS
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A aba <b>OS</b> é especial porque trabalha com dados operacionais e possui indicadores próprios.
+Ela permite consultar, editar status e acompanhar a evolução das ordens de serviço.
+
+</p>
+
+<ul>
+
+<li><b>Status:</b> pode ser alterado diretamente por select na tabela.</li>
+
+<li><b>Empresa:</b> ao editar, influencia supervisor e cidade.</li>
+
+<li><b>Supervisor:</b> pode aparecer como select quando a empresa possui mais de um supervisor.</li>
+
+<li><b>Cidade:</b> pode aparecer como select quando a empresa possui mais de uma cidade.</li>
+
+<li><b>Responsável:</b> usa a lista de responsáveis carregada em <code>/api/colaboradores/responsavel/cbx</code>.</li>
+
+<li><b>Orçado:</b> é exibido formatado como moeda brasileira.</li>
+
+<li><b>Criado e concluído:</b> são formatados para facilitar leitura por mês/data.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Status disponíveis na OS</h4>
+
+<ul>
+
+<li>⚪ <b>Sem responsável:</b> OS sem liderança definida.</li>
+
+<li>🟠 <b>Aguardando:</b> OS ainda em espera para iniciar.</li>
+
+<li>🔵 <b>Em execução:</b> OS em andamento.</li>
+
+<li>🔴 <b>Parado:</b> OS interrompida ou bloqueada.</li>
+
+<li>🟢 <b>Concluído:</b> OS finalizada.</li>
+
+<li>🟡 <b>Em espera:</b> OS em pausa planejada ou aguardando condição.</li>
+
+<li>⚫ <b>Cancelado:</b> OS cancelada.</li>
+
+</ul>
+
+</div>
+
+<div id="gestao-graficos"
+     class="guiaSubtitulo">
+
+📈 Gráficos e Indicadores
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Na aba OS, o botão <b>Mostrar Gráfico</b> abre uma área com dois gráficos.
+Eles ajudam a acompanhar volume, conclusão e distribuição por responsável.
+
+</p>
+
+<ul>
+
+<li><b>Gráfico de barras/linhas:</b> mostra OS criadas, OS concluídas, taxa de conclusão mensal e taxa acumulada.</li>
+
+<li><b>Gráfico de pizza:</b> mostra quantidade de OS por responsável.</li>
+
+<li><b>Mês atual:</b> recebe destaque visual para facilitar análise do período em andamento.</li>
+
+<li><b>Legendas:</b> ajudam a diferenciar quantidade e percentuais.</li>
+
+<li><b>Tooltip:</b> ao passar o mouse, mostra valores detalhados.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📊 <b>Como interpretar:</b><br>
+
+Se muitas OS foram criadas e poucas concluídas no mesmo período, a taxa mensal cai.
+A taxa acumulada mostra a eficiência geral ao longo dos meses e evita analisar apenas um mês isolado.
+
+</div>
+
+
+<div id="gestao-boas-praticas"
+     class="guiaSubtitulo">
+
+🚀 Boas Práticas
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Evite criar cadastros duplicados. Pesquise antes de clicar em <b>+ Novo</b>.</li>
+
+<li>Padronize nomes de empresas, cargos, setores, exames, cursos e EPIs.</li>
+
+<li>Use nomes claros em exames e cursos, pois eles aparecem em vencimentos, anexos e histórico do colaborador.</li>
+
+<li>Antes de excluir um cadastro, confirme se ele não está sendo usado por OS, colaboradores, materiais ou relatórios.</li>
+
+<li>Ao cadastrar empresas, vincule cidades e supervisores para facilitar cadastro e edição de OS.</li>
+
+<li>Ao cadastrar setores, vincule os cargos corretos para manter a estrutura profissional organizada.</li>
+
+<li>Em OS, mantenha status atualizado para que gráficos e resumos reflitam a operação real.</li>
+
+<li>Use o botão <b>Atualizar</b> quando outra pessoa alterar dados ao mesmo tempo.</li>
+
+<li>Conclua ou cancele uma edição antes de iniciar outra, evitando alterações incompletas.</li>
+
+<li>Use o gráfico de OS para identificar acúmulo, gargalos e distribuição por responsável.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+✅ <b>Resumo rápido:</b><br>
+
+Gestão é a tela de manutenção dos cadastros centrais. Ela não substitui os módulos operacionais,
+mas garante que eles tenham dados confiáveis para funcionar bem.
+
+</div>
+
+`;
+
+}
+
+function getMateriais() {
+
+    return `
+
+<div id="materiais-topo"
+     class="guiaTitulo">
+
+📦 Materiais
+
+</div>
+
+<div id="mat-visao-geral"
+     class="guiaSubtitulo">
+
+📋 Visão Geral
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tela Materiais é usada para controlar os materiais vinculados a uma OS, acompanhar quantidades,
+separação, compra, fornecedores, cotações e custo estimado ou comprado.
+
+</p>
+
+<p>
+
+Ela reúne o controle operacional da lista de materiais e o controle financeiro básico das cotações.
+
+</p>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Dica:</b><br>
+
+Antes de incluir materiais, selecione a OS correta no topo da tela. A lista carregada sempre pertence à OS selecionada.
+
+</div>
+
+<div id="mat-os"
+     class="guiaSubtitulo">
+
+🧾 Seleção da OS
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Use o campo <b>Selecione uma OS</b> para carregar a lista de materiais daquela ordem de serviço.</li>
+
+<li>O botão <b>Atualizar</b> recarrega os dados da OS selecionada.</li>
+
+<li>O botão <b>Exportar</b> gera uma planilha da tabela atual de materiais.</li>
+
+<li>Os cards do topo mostram custo total, comprado, estimado, economia e percentual comprado.</li>
+
+</ul>
+
+</div>
+
+<div id="mat-lista"
+     class="guiaSubtitulo">
+
+📦 Lista de Materiais da OS
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tabela apresenta os materiais vinculados à OS com suas principais informações:
+
+</p>
+
+<ul>
+
+<li><b>ID:</b> identificação interna do item na lista.</li>
+
+<li><b>Material:</b> nome do material e atributos da variação.</li>
+
+<li><b>Categoria:</b> classificação do material.</li>
+
+<li><b>Qtde:</b> quantidade solicitada para a OS.</li>
+
+<li><b>Código e Fabricante:</b> dados técnicos da variação cadastrada.</li>
+
+<li><b>Separação:</b> barra visual com separado, comprado e faltante.</li>
+
+<li><b>Fornecedor:</b> fornecedor selecionado ou botão para cotação.</li>
+
+<li><b>Preço e Total R$:</b> menor preço encontrado e valor escolhido quando houver cotação selecionada.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Ações da lista</h4>
+
+<ul>
+
+<li><b>Novo Material:</b> adiciona uma linha para inserir material na OS.</li>
+
+<li><b>Editar:</b> altera o material ou a quantidade de um item já lançado.</li>
+
+<li><b>Separar item:</b> registra controle de separação do material.</li>
+
+<li><b>Apagar:</b> remove o material da lista da OS.</li>
+
+</ul>
+
+</div>
+
+<div id="mat-cadastro"
+     class="guiaSubtitulo">
+
+➕ Cadastro de Material
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+O botão <b>Cadastrar Material</b> abre o cadastro completo para criar materiais e variações.
+
+</p>
+
+<ul>
+
+<li>Informe o nome do material e a categoria.</li>
+
+<li>Cadastre código, fabricante e atributos técnicos.</li>
+
+<li>Use os atributos para diferenciar variações do mesmo material, como cor, modelo, bitola, tamanho, tensão, corrente, aplicação e outros.</li>
+
+<li>O sistema mostra variações existentes para evitar duplicidade.</li>
+
+<li>Alguns materiais podem sugerir categoria e atributos automaticamente.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📌 <b>Importante:</b><br>
+
+Material é o cadastro principal. Variação é a combinação de código, fabricante e atributos.
+Ao lançar na OS, normalmente é a variação que identifica exatamente o item usado.
+
+</div>
+
+<div id="mat-fornecedores"
+     class="guiaSubtitulo">
+
+💰 Fornecedores e Cotações
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Na coluna Fornecedor, o botão de cotação abre os fornecedores cadastrados para aquele material da OS.
+
+</p>
+
+<ul>
+
+<li>Adicione um fornecedor quando ainda não houver cotação.</li>
+
+<li>Informe valor, ICMS, quantidade, prazo, orçamento e observação.</li>
+
+<li>Marque <b>OK</b> quando o material do fornecedor estiver validado.</li>
+
+<li>O sistema calcula valor em reais, score e comparação entre fornecedores.</li>
+
+<li>É possível selecionar o fornecedor escolhido para refletir no preço da lista principal.</li>
+
+<li>Fornecedores podem ser removidos quando a cotação não for mais necessária.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Preço menor e preço escolhido</h4>
+
+<p>
+
+Quando existem cotações, a tela pode mostrar o menor valor encontrado e o valor do fornecedor escolhido.
+Isso ajuda a comparar economia, custo estimado e custo comprado.
+
+</p>
+
+</div>
+
+<div id="mat-status"
+     class="guiaSubtitulo">
+
+📊 Status, Resumo e Progresso
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tela possui indicadores para acompanhar a evolução dos materiais da OS.
+
+</p>
+
+<ul>
+
+<li><b>Itens:</b> quantidade de linhas de materiais.</li>
+
+<li><b>Qtd:</b> soma das quantidades solicitadas.</li>
+
+<li><b>Fornecedores:</b> quantidade de fornecedores vinculados aos materiais.</li>
+
+<li><b>Comprado:</b> quantidade já comprada.</li>
+
+<li><b>Separado:</b> quantidade já separada.</li>
+
+<li><b>Faltante:</b> quantidade ainda pendente.</li>
+
+<li><b>Barra inferior:</b> mostra percentuais de separado, comprado e faltante.</li>
+
+</ul>
+
+</div>
+
+<div id="mat-filtros"
+     class="guiaSubtitulo">
+
+🔎 Busca e Filtros
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Use o campo <b>Buscar material</b> para localizar itens por nome, código, atributos ou fabricante.</li>
+
+<li>Use os filtros de status para visualizar <b>Todos</b>, <b>Faltante</b>, <b>Parcial</b>, <b>Separado</b> ou <b>Comprado</b>.</li>
+
+<li>Os filtros atualizam a tabela e os resumos exibidos.</li>
+
+<li>O botão <b>Mostrar imagens</b> exibe ou oculta imagens dos materiais na tabela.</li>
+
+</ul>
+
+</div>
+
+<div id="mat-imagens"
+     class="guiaSubtitulo">
+
+🖼️ Imagens dos Materiais
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+No cadastro de material, é possível carregar uma imagem para facilitar a identificação visual do item.
+
+</p>
+
+<ul>
+
+<li>Use o botão de carregar imagem dentro do cadastro de material.</li>
+
+<li>A imagem pode ser recortada antes de salvar.</li>
+
+<li>O sistema converte a imagem para WebP para manter o carregamento mais leve.</li>
+
+<li>Quando não há imagem cadastrada, o sistema usa a imagem padrão de material.</li>
+
+</ul>
+
+</div>
+
+<div id="mat-boas-praticas"
+     class="guiaSubtitulo">
+
+🚀 Boas Práticas
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Selecione a OS antes de lançar, editar ou exportar materiais.</li>
+
+<li>Cadastre materiais com nomes padronizados para evitar duplicidade.</li>
+
+<li>Use atributos para diferenciar variações parecidas.</li>
+
+<li>Preencha código e fabricante sempre que possível.</li>
+
+<li>Registre cotações com valor, ICMS, quantidade e prazo para melhorar a comparação.</li>
+
+<li>Selecione o fornecedor escolhido quando a compra for definida.</li>
+
+<li>Use os filtros de status para acompanhar pendências de compra e separação.</li>
+
+<li>Exporte a lista quando precisar compartilhar ou arquivar a relação de materiais da OS.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📦 <b>Resumo:</b><br>
+
+A tela Materiais conecta cadastro técnico, lista da OS, cotações de fornecedores e acompanhamento de compra/separação em uma única visão.
+
+</div>
+
+`;
+
+}
+
+function getChatOnline() {
+
+    return `
+
+<div id="chat-online-topo"
+     class="guiaTitulo">
+
+💬 Chat Online
+
+</div>
+
+<div class="guiaCard">
+
+<h4>O que é o Chat Online?</h4>
+
+<p>
+
+O Chat Online é uma ferramenta rápida de comunicação entre usuários conectados ao sistema.
+Ele fica integrado ao painel Online, no canto inferior direito da tela.
+
+</p>
+
+<p>
+
+As mensagens são temporárias e permanecem disponíveis somente durante a sessão aberta da página.
+Ao atualizar ou fechar a página, o histórico local do chat não é mantido.
+
+</p>
+
+</div>
+
+<div id="chat-online-acesso"
+     class="guiaSubtitulo">
+
+👥 Como acessar
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Clique no botão <b>ONLINE</b>, localizado no canto inferior direito.</li>
+
+<li>A aba <b>Online</b> mostra os usuários conectados no momento.</li>
+
+<li>A aba <b>Chat</b> abre a conversa rápida entre os usuários online.</li>
+
+<li>Ao clicar em um usuário da lista Online, o chat abre com o nome dele já preparado para menção.</li>
+
+</ul>
+
+</div>
+
+<div id="chat-online-mensagens"
+     class="guiaSubtitulo">
+
+💬 Envio de mensagens
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaMedalhaIcone">✍️</div>
+
+<div>
+
+<div class="guiaMedalhaTitulo">
+Digitar
+</div>
+
+<div class="guiaMedalhaDescricao">
+Escreva a mensagem no campo inferior do chat. O limite atual é de 300 caracteres.
+</div>
+
+</div>
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaMedalhaIcone">📨</div>
+
+<div>
+
+<div class="guiaMedalhaTitulo">
+Enviar
+</div>
+
+<div class="guiaMedalhaDescricao">
+Clique em Enviar para compartilhar a mensagem com os usuários conectados.
+</div>
+
+</div>
+
+</div>
+
+<div class="guiaMedalha">
+
+<div class="guiaMedalhaIcone">🔔</div>
+
+<div>
+
+<div class="guiaMedalhaTitulo">
+Mensagens não lidas
+</div>
+
+<div class="guiaMedalhaDescricao">
+Quando o chat estiver fechado ou em outra aba, o contador da aba Chat indica mensagens recebidas.
+</div>
+
+</div>
+
+</div>
+
+<div id="chat-online-mencoes"
+     class="guiaSubtitulo">
+
+@ Usuários online e # colaboradores
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Para chamar uma pessoa que está online no momento, digite <b>@</b> e comece a escrever o nome.
+O sistema exibe os usuários online disponíveis para menção.
+
+</p>
+
+<p>
+
+Para citar um colaborador cadastrado e liberar o atalho de informações, digite <b>#</b> e comece a escrever o nome.
+O sistema exibe os colaboradores cadastrados e insere a referência pelo botão <b>#</b>.
+
+</p>
+
+<p>
+
+Quando alguém menciona seu usuário online com <b>@</b>, o sistema exibe uma notificação visual no painel Online.
+
+</p>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Dica:</b><br>
+
+Use <b>@</b> para recados direcionados a quem está conectado, como <b>@Andrei</b>.
+Use <b>#</b> para vincular um colaborador cadastrado à mensagem, como <b>#Guilherme Augusto Schvaickardt</b>.
+
+</div>
+
+<div id="chat-online-emoticons"
+     class="guiaSubtitulo">
+
+🙂 Emoticons
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+O botão de emoticons fica ao lado do campo de mensagem.
+Ao clicar nele, o sistema abre uma lista rápida de ícones para inserir no texto.
+
+</p>
+
+<ul>
+
+<li>Clique em um emoticon para adicioná-lo na posição atual do cursor.</li>
+
+<li>Use emoticons para respostas rápidas, confirmações e avisos leves.</li>
+
+<li>Depois de enviar a mensagem, o painel de emoticons é fechado automaticamente.</li>
+
+</ul>
+
+</div>
+
+<div id="chat-online-info"
+     class="guiaSubtitulo">
+
+📋 Informações do colaborador citado
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Quando uma mensagem contém um colaborador cadastrado citado com <b>#nome completo</b>,
+o chat exibe um atalho de <b>Info</b> abaixo da mensagem.
+
+</p>
+
+<p>
+
+Esse botão abre rapidamente as informações do colaborador citado, sem necessidade de procurar manualmente no cadastro.
+
+</p>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📌 <b>Importante:</b><br>
+
+O Chat Online não envia mensagens para WhatsApp e não salva histórico permanente.
+Ele serve para comunicação interna rápida enquanto a página estiver aberta.
+
+</div>
+
+<div id="chat-online-boas-praticas"
+     class="guiaSubtitulo">
+
+🚀 Boas Práticas
+
+</div>
+
+<div class="guiaCard">
+
+<ul>
+
+<li>Use mensagens curtas e objetivas.</li>
+
+<li>Use <b>@</b> para chamar usuários online.</li>
+
+<li>Use <b>#</b> para citar colaboradores cadastrados e liberar o botão Info.</li>
+
+<li>Evite enviar dados sensíveis no chat, pois ele é voltado para comunicação rápida.</li>
+
+<li>Use o botão Info para confirmar dados do colaborador citado.</li>
+
+<li>Atualize a página somente quando não precisar mais do histórico temporário da conversa.</li>
+
+</ul>
+
+</div>
+
 `;
 
 }

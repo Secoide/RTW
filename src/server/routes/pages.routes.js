@@ -13,6 +13,10 @@ router.get('/resetar-senha', (req, res) => {
   res.sendFile(path.resolve('public/client/pages/resetar-senha.html'));
 });
 
+router.get('/owner-gs', (req, res) => {
+  res.sendFile(path.resolve('public/client/pages/owner.html'));
+});
+
 router.get('/assinar-epi', (req, res) => {
   res.sendFile(path.resolve('public/client/pages/ass_epi.html'));
 });

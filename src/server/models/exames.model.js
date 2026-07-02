@@ -32,6 +32,7 @@ async function getExameByColaborador(idFunc) {
             e.nome,
             e.descricao,
             e.icone,
+            COALESCE(e.vencimento, 1) AS controla_vencimento,
             fce.id as idfce,
             fce.data,
             fce.vencimento,
@@ -52,7 +53,7 @@ async function getExameByColaborador(idFunc) {
           u.nome       AS nome,
           u.descricao  AS descricao,
           u.icone      AS icone,
-          u.horarioAgendando AS horario_marcado,
+          DATE_FORMAT(u.horarioAgendando, '%Y-%m-%d %H:%i:%s') AS horario_marcado,
 		      u.idfce,
               CASE 
         WHEN u.anexoExamePDF IS NOT NULL AND u.anexoExamePDF <> '' THEN 'pdf_anexado'
@@ -61,14 +62,14 @@ async function getExameByColaborador(idFunc) {
           -- Datas já formatadas (pt-BR)
           DATE_FORMAT(u.data, '%d/%m/%Y') AS data_realizacao,
           CASE
-            WHEN LOWER(u.nome) IN ('admissional','demissional') OR COALESCE(u.vencimento,0) = 0
+            WHEN COALESCE(u.controla_vencimento, 1) = 0 OR LOWER(u.nome) IN ('admissional','demissional') OR COALESCE(u.vencimento,0) = 0
               THEN NULL
             ELSE DATE_FORMAT(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), '%d/%m/%Y')
           END AS data_vencimento,
 
           -- Dias restantes (sem negativos; nulo p/ não controlados)
           CASE
-            WHEN LOWER(u.nome) IN ('admissional','demissional') OR COALESCE(u.vencimento,0) = 0
+            WHEN COALESCE(u.controla_vencimento, 1) = 0 OR LOWER(u.nome) IN ('admissional','demissional') OR COALESCE(u.vencimento,0) = 0
               THEN NULL
             ELSE GREATEST(DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()), 0)
           END AS dias_restantes,
@@ -77,6 +78,7 @@ async function getExameByColaborador(idFunc) {
           CASE
             WHEN LOWER(u.nome) = 'admissional' THEN 'admissional'
             WHEN LOWER(u.nome) = 'demissional' THEN 'demissional'
+            WHEN COALESCE(u.controla_vencimento, 1) = 0 OR COALESCE(u.vencimento,0) = 0 THEN 'OK'
             WHEN u.horarioAgendando IS NOT NULL THEN 'AGENDADO'
             WHEN DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()) < 0 THEN 'VENCIDO'
             WHEN DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()) <= 30 THEN 'ALERTA'
@@ -87,7 +89,7 @@ async function getExameByColaborador(idFunc) {
         WHERE u.rn = 1
         ORDER BY
           CASE
-            WHEN LOWER(u.nome) IN ('admissional','demissional') OR COALESCE(u.vencimento,0) = 0 THEN 3
+            WHEN COALESCE(u.controla_vencimento, 1) = 0 OR LOWER(u.nome) IN ('admissional','demissional') OR COALESCE(u.vencimento,0) = 0 THEN 3
             WHEN DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()) < 0 THEN 0
             WHEN DATEDIFF(DATE_ADD(u.data, INTERVAL u.vencimento MONTH), CURDATE()) <= 30 THEN 1
             ELSE 2
@@ -131,6 +133,7 @@ async function buscarAlertasExames() {
         ON e.idexame = fce.idexame
 
     WHERE LOWER(e.nome) <> 'demissional'
+      AND COALESCE(e.vencimento, 1) = 1
 
     AND NOT EXISTS (
         SELECT 1
@@ -178,18 +181,18 @@ ORDER BY dias_restantes ASC;
 async function createExame(data) {
   // 1) Insere supervisor
   const sql = `
-    INSERT INTO exames (nome, descricao, icone)
-    VALUES (?, ?, ?)
+    INSERT INTO exames (nome, descricao, icone, vencimento)
+    VALUES (?, ?, ?, ?)
   `;
   const [supervisorResult] = await connection.query(sql, [
     data.nome,
     data.descricao,
-    ''
+    '',
+    data.vencimento === '0' || data.vencimento === 0 || data.vencimento === false ? 0 : 1
   ]);
 
-  await connection.query(insertSeuEmpSQL, [data.idCliente, idExame]);
-
   return {
+    insertId: supervisorResult.insertId,
     message: "Exame cadastrado com sucesso!",
     nome: data.nome
   };
@@ -215,16 +218,33 @@ async function agendarExame(data) {
 
 // Atualizar
 async function updateExame(id, data) {
-  const sql = `
-    UPDATE exames
-    SET nome = ?, descricao = ?
-    WHERE idexame = ?
-  `;
-  const [result] = await connection.query(sql, [
-    data.nome,
-    data.descricao,
-    id
-  ]);
+  const campos = [];
+  const valores = [];
+
+  if (data.nome !== undefined) {
+    campos.push("nome = ?");
+    valores.push(data.nome);
+  }
+
+  if (data.descricao !== undefined) {
+    campos.push("descricao = ?");
+    valores.push(data.descricao);
+  }
+
+  if (data.vencimento !== undefined) {
+    campos.push("vencimento = ?");
+    valores.push(data.vencimento === '0' || data.vencimento === 0 || data.vencimento === false ? 0 : 1);
+  }
+
+  if (campos.length === 0) return false;
+
+  valores.push(id);
+  const [result] = await connection.query(
+    `UPDATE exames
+      SET ${campos.join(", ")}
+      WHERE idexame = ?`,
+    valores
+  );
   return result.affectedRows > 0;
 }
 
@@ -274,6 +294,73 @@ async function buscarExamePorId(id) {
   return rows[0] || null; // devolve objeto ou null
 }
 
+async function getHistoricoExameColaborador(idFunc, idExame) {
+  const [rows] = await connection.query(
+    `SELECT
+        fce.id,
+        fce.idfuncionario,
+        fce.idexame,
+        e.nome AS exame,
+        COALESCE(e.vencimento, 1) AS controla_vencimento,
+        DATE_FORMAT(fce.data, '%Y-%m-%d') AS data_realizada_input,
+        DATE_FORMAT(fce.data, '%d/%m/%Y') AS data_realizada,
+        fce.vencimento,
+        CASE
+          WHEN COALESCE(e.vencimento, 1) = 0 OR COALESCE(fce.vencimento, 0) = 0 THEN NULL
+          ELSE DATE_FORMAT(DATE_ADD(fce.data, INTERVAL fce.vencimento MONTH), '%d/%m/%Y')
+        END AS data_vencimento,
+        CASE
+          WHEN COALESCE(e.vencimento, 1) = 0 OR COALESCE(fce.vencimento, 0) = 0 THEN NULL
+          ELSE DATE_FORMAT(DATE_ADD(fce.data, INTERVAL fce.vencimento MONTH), '%Y-%m-%d')
+        END AS data_vencimento_input,
+        fce.anexoExamePDF,
+        CASE
+          WHEN fce.anexoExamePDF IS NOT NULL AND fce.anexoExamePDF <> '' THEN 1
+          ELSE 0
+        END AS possui_anexo
+      FROM funcionarios_contem_exames fce
+      JOIN exames e ON e.idexame = fce.idexame
+      WHERE fce.idfuncionario = ?
+        AND fce.idexame = ?
+      ORDER BY fce.data DESC, fce.id DESC`,
+    [idFunc, idExame]
+  );
+
+  return rows;
+}
+
+async function atualizarRegistroExame(id, dados) {
+  const campos = [];
+  const valores = [];
+
+  if (dados.data !== undefined) {
+    campos.push("data = ?");
+    valores.push(dados.data || null);
+  }
+
+  if (dados.vencimento !== undefined) {
+    campos.push("vencimento = ?");
+    valores.push(dados.vencimento);
+  }
+
+  if (dados.anexoExamePDF !== undefined) {
+    campos.push("anexoExamePDF = ?");
+    valores.push(dados.anexoExamePDF);
+  }
+
+  if (campos.length === 0) return false;
+
+  valores.push(id);
+  const [result] = await connection.query(
+    `UPDATE funcionarios_contem_exames
+      SET ${campos.join(", ")}
+      WHERE id = ?`,
+    valores
+  );
+
+  return result.affectedRows > 0;
+}
+
 
 
 module.exports = {
@@ -288,5 +375,7 @@ module.exports = {
   deleteExameByColaborador,
   inserirExame,
   buscarExamePorId,
+  getHistoricoExameColaborador,
+  atualizarRegistroExame,
   buscarAlertasExames
 };

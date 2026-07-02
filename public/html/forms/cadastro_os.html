@@ -29,8 +29,16 @@
                         <i class="fa-solid fa-circle-exclamation"></i>
                         <span class="menu-text">Status</span>
                     </a>
+                    <a class="bt_menu" data-target=".painel_complementos" data-roles="99">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                        <span class="menu-text">Complementos</span>
+                    </a>
+                    <a class="bt_menu" data-target=".painel_materiais_os" data-roles="99">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <span class="menu-text">Materiais</span>
+                    </a>
                     <div class="push"></div>
-                    <a class="bt_menu" data-target=".painel_estatistica">
+                    <a class="bt_menu" data-target=".painel_estatistica" data-roles="99">
                         <i class="fa-solid fa-chart-simple"></i>
                         <span class="menu-text">Estatística</span>
                     </a>
@@ -185,6 +193,290 @@
                         </form>
                     </div>
 
+                    <div class="painel_complementos">
+                        <p>Complementos da OS</p>
+                        <div class="os-complementos-wrap">
+                            <div class="os-complementos-box">
+                                <div class="os-complementos-grid os-complementos-dados">
+                                    <label class="os-complemento-field">
+                                        <span>Categoria</span>
+                                        <select id="osComplementoCategoriaServico" class="cbx_teste glass opcoes">
+                                            <option value="">Selecione...</option>
+                                        </select>
+                                    </label>
+
+                                    <label class="os-complemento-field">
+                                        <span>Serviço</span>
+                                        <select id="osComplementoTipoServico" class="cbx_teste glass opcoes">
+
+                                            <option value="">Selecione...</option>
+
+                                            <optgroup label="Instalações Elétricas">
+                                                <option value="Montagem elétrica">Montagem elétrica</option>
+                                                <option value="Instalação elétrica">Instalação elétrica</option>
+                                                <option value="Ampliação elétrica">Ampliação elétrica</option>
+                                                <option value="Infraestrutura elétrica">Infraestrutura elétrica</option>
+                                                <option value="Passagem de cabos">Passagem de cabos</option>
+                                                <option value="Lançamento de cabos">Lançamento de cabos</option>
+                                                <option value="Montagem de eletrocalha">Montagem de eletrocalha</option>
+                                                <option value="Montagem de perfilado">Montagem de perfilado</option>
+                                                <option value="Montagem de aramado">Montagem de aramado</option>
+                                                <option value="Montagem de eletroduto">Montagem de eletroduto</option>
+                                                <option value="Montagem de painéis">Montagem de painéis</option>
+                                                <option value="Montagem de QGBT">Montagem de QGBT</option>
+                                                <option value="Montagem de CCM">Montagem de CCM</option>
+                                                <option value="Montagem de QDF">Montagem de QDF</option>
+                                                <option value="Montagem de tomadas">Montagem de tomadas</option>
+                                                <option value="Montagem de iluminação">Montagem de iluminação</option>
+                                            </optgroup>
+
+                                            <optgroup label="Manutenção">
+                                                <option value="Manutenção elétrica">Manutenção elétrica</option>
+                                                <option value="Manutenção preventiva">Manutenção preventiva</option>
+                                                <option value="Manutenção corretiva">Manutenção corretiva</option>
+                                                <option value="Manutenção preditiva">Manutenção preditiva</option>
+                                                <option value="Parada de manutenção">Parada de manutenção</option>
+                                                <option value="Atendimento emergencial">Atendimento emergencial</option>
+                                                <option value="Diagnóstico de falha">Diagnóstico de falha</option>
+                                            </optgroup>
+
+                                            <optgroup label="Subestações e Média Tensão">
+                                                <option value="Subestação">Subestação</option>
+                                                <option value="Cabine primária">Cabine primária</option>
+                                                <option value="Média tensão">Média tensão</option>
+                                                <option value="Manutenção de subestação">Manutenção de subestação
+                                                </option>
+                                                <option value="Comissionamento de subestação">Comissionamento de
+                                                    subestação</option>
+                                                <option value="Transformador">Transformador</option>
+                                                <option value="Disjuntor MT">Disjuntor MT</option>
+                                                <option value="Relé de proteção">Relé de proteção</option>
+                                                <option value="Estudo de seletividade">Estudo de seletividade</option>
+                                                <option value="Estudo de curto-circuito">Estudo de curto-circuito
+                                                </option>
+                                            </optgroup>
+
+                                            <optgroup label="SPDA e Aterramento">
+                                                <option value="Instalação SPDA">Instalação SPDA</option>
+                                                <option value="Adequação SPDA">Adequação SPDA</option>
+                                                <option value="Manutenção SPDA">Manutenção SPDA</option>
+                                                <option value="Inspeção SPDA">Inspeção SPDA</option>
+                                                <option value="Projeto SPDA">Projeto SPDA</option>
+                                                <option value="Gerenciamento de risco SPDA">Gerenciamento de risco SPDA
+                                                </option>
+                                                <option value="Aterramento">Aterramento</option>
+                                                <option value="Malha de aterramento">Malha de aterramento</option>
+                                                <option value="Solda exotérmica">Solda exotérmica</option>
+                                                <option value="Medição de aterramento">Medição de aterramento</option>
+                                                <option value="Medição de continuidade">Medição de continuidade</option>
+                                            </optgroup>
+
+                                            <optgroup label="Inspeções e Ensaios">
+                                                <option value="Inspeção técnica">Inspeção técnica</option>
+                                                <option value="Laudo elétrico">Laudo elétrico</option>
+                                                <option value="Laudo NR10">Laudo NR10</option>
+                                                <option value="Laudo SPDA">Laudo SPDA</option>
+                                                <option value="Laudo de aterramento">Laudo de aterramento</option>
+                                                <option value="Termografia">Termografia</option>
+                                                <option value="Medição de isolação">Medição de isolação</option>
+                                                <option value="Análise de energia">Análise de energia</option>
+                                                <option value="Qualidade de energia">Qualidade de energia</option>
+                                                <option value="Comissionamento">Comissionamento</option>
+                                                <option value="Start-up">Start-up</option>
+                                            </optgroup>
+
+                                            <optgroup label="Automação e NR12">
+                                                <option value="Adequação NR10">Adequação NR10</option>
+                                                <option value="Adequação NR12">Adequação NR12</option>
+                                                <option value="Automação industrial">Automação industrial</option>
+                                                <option value="Programação CLP">Programação CLP</option>
+                                                <option value="Programação IHM">Programação IHM</option>
+                                                <option value="Parametrização de inversor">Parametrização de inversor
+                                                </option>
+                                                <option value="Parametrização de Soft Starter">Parametrização de Soft
+                                                    Starter</option>
+                                                <option value="Instalação de sensores">Instalação de sensores</option>
+                                                <option value="Instalação de cortina de luz">Instalação de cortina de
+                                                    luz</option>
+                                                <option value="Instalação de chave de segurança">Instalação de chave de
+                                                    segurança</option>
+                                                <option value="Validação de segurança">Validação de segurança</option>
+                                            </optgroup>
+
+                                            <optgroup label="Motores e Acionamentos">
+                                                <option value="Instalação de motores">Instalação de motores</option>
+                                                <option value="Manutenção de motores">Manutenção de motores</option>
+                                                <option value="Alinhamento de motores">Alinhamento de motores</option>
+                                                <option value="Inversor de frequência">Inversor de frequência</option>
+                                                <option value="Soft Starter">Soft Starter</option>
+                                                <option value="Servo acionamento">Servo acionamento</option>
+                                                <option value="Partida de motores">Partida de motores</option>
+                                            </optgroup>
+
+                                            <optgroup label="Energia Solar">
+                                                <option value="Projeto fotovoltaico">Projeto fotovoltaico</option>
+                                                <option value="Instalação fotovoltaica">Instalação fotovoltaica</option>
+                                                <option value="Comissionamento fotovoltaico">Comissionamento
+                                                    fotovoltaico</option>
+                                                <option value="Manutenção fotovoltaica">Manutenção fotovoltaica</option>
+                                                <option value="Grid Zero">Grid Zero</option>
+                                                <option value="Monitoramento fotovoltaico">Monitoramento fotovoltaico
+                                                </option>
+                                            </optgroup>
+
+                                            <optgroup label="Iluminação">
+                                                <option value="Projeto luminotécnico">Projeto luminotécnico</option>
+                                                <option value="Luminotécnica">Luminotécnica</option>
+                                                <option value="Iluminação industrial">Iluminação industrial</option>
+                                                <option value="Iluminação pública">Iluminação pública</option>
+                                                <option value="Iluminação de emergência">Iluminação de emergência
+                                                </option>
+                                                <option value="Retrofit LED">Retrofit LED</option>
+                                            </optgroup>
+
+                                            <optgroup label="Incêndio e PPCI">
+                                                <option value="PPCI">PPCI</option>
+                                                <option value="Alarme de incêndio">Alarme de incêndio</option>
+                                                <option value="Detecção de incêndio">Detecção de incêndio</option>
+                                                <option value="Sistema de hidrantes">Sistema de hidrantes</option>
+                                                <option value="Bomba de incêndio">Bomba de incêndio</option>
+                                                <option value="Sistema de combate a incêndio">Sistema de combate a
+                                                    incêndio</option>
+                                            </optgroup>
+
+                                            <optgroup label="CFTV e Telecom">
+                                                <option value="CFTV">CFTV</option>
+                                                <option value="Controle de acesso">Controle de acesso</option>
+                                                <option value="Rede estruturada">Rede estruturada</option>
+                                                <option value="Cabeamento estruturado">Cabeamento estruturado</option>
+                                                <option value="Fibra óptica">Fibra óptica</option>
+                                                <option value="Rack de telecom">Rack de telecom</option>
+                                                <option value="Wireless">Wireless</option>
+                                                <option value="Telefonia">Telefonia</option>
+                                            </optgroup>
+
+                                            <optgroup label="Projetos e Engenharia">
+                                                <option value="Projeto elétrico">Projeto elétrico</option>
+                                                <option value="Projeto de automação">Projeto de automação</option>
+                                                <option value="Projeto de rede">Projeto de rede</option>
+                                                <option value="Projeto de CFTV">Projeto de CFTV</option>
+                                                <option value="Projeto de incêndio">Projeto de incêndio</option>
+                                                <option value="Levantamento técnico">Levantamento técnico</option>
+                                                <option value="Levantamento de campo">Levantamento de campo</option>
+                                                <option value="As Built">As Built</option>
+                                                <option value="Compatibilização">Compatibilização</option>
+                                                <option value="Fiscalização de obra">Fiscalização de obra</option>
+                                                <option value="Consultoria técnica">Consultoria técnica</option>
+                                                <option value="ART">ART</option>
+                                                <option value="Memorial descritivo">Memorial descritivo</option>
+                                            </optgroup>
+
+                                            <optgroup label="Treinamentos">
+                                                <option value="Treinamento NR10">Treinamento NR10</option>
+                                                <option value="Treinamento NR35">Treinamento NR35</option>
+                                                <option value="DDS">DDS</option>
+                                                <option value="Capacitação técnica">Capacitação técnica</option>
+                                                <option value="Integração">Integração</option>
+                                            </optgroup>
+
+                                            <optgroup label="Administrativo">
+                                                <option value="Visita técnica">Visita técnica</option>
+                                                <option value="Vistoria">Vistoria</option>
+                                                <option value="Reunião técnica">Reunião técnica</option>
+                                                <option value="Acompanhamento de obra">Acompanhamento de obra</option>
+                                                <option value="Suporte técnico">Suporte técnico</option>
+                                                <option value="Orçamento">Orçamento</option>
+                                            </optgroup>
+
+                                            <optgroup label="Locação">
+                                                <option value="Locação de equipamentos">Locação de equipamentos</option>
+                                                <option value="Locação de plataforma">Locação de plataforma</option>
+                                                <option value="Locação de container">Locação de container</option>
+                                            </optgroup>
+
+                                            <optgroup label="Classificação da OS">
+                                                <option value="Obra nova">Obra nova</option>
+                                                <option value="Ampliação">Ampliação</option>
+                                                <option value="Adequação">Adequação</option>
+                                                <option value="Reforma">Reforma</option>
+                                                <option value="Emergencial">Emergencial</option>
+                                                <option value="Outros">Outros</option>
+                                            </optgroup>
+
+                                        </select>
+                                    </label>
+
+                                    <button type="button" id="btnAdicionarServicoOS" class="bt_teste glass">
+                                        <i class="fa-solid fa-plus"></i>
+                                        Adicionar serviço
+                                    </button>
+                                </div>
+
+                                <div id="osComplementoServicosLista" class="os-servicos-cards">
+                                    <div class="os-complemento-empty">Nenhum serviço adicionado.</div>
+                                </div>
+
+                                <div class="os-complementos-grid os-complementos-restante">
+                                    <label class="os-complemento-field os-complemento-obs">
+                                        <span>Observação complementar</span>
+                                        <input id="osComplementoObs" class="tbx_teste glass" type="text"
+                                            placeholder="Detalhes rápidos para consulta futura">
+                                    </label>
+
+                                    <button type="button" id="btnSalvarComplementosOS" class="bt_teste glass">
+                                        <i class="fa-solid fa-floppy-disk"></i>
+                                        Salvar dados
+                                    </button>
+                                </div>
+
+                                <div class="os-complementos-checks">
+                                    <label class="os-complemento-check">
+                                        <input id="osComplementoPTA" type="checkbox">
+                                        <span>Terá PTA alocada</span>
+                                    </label>
+
+                                    <label class="os-complemento-check os-complemento-check-painel">
+                                        <input id="osComplementoPainelPrevisto" type="checkbox">
+                                        <span>Terá painel para montar/instalar</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="os-complementos-grid os-complementos-paineis" id="osComplementosPaineisBox">
+                                <label class="os-complemento-field">
+                                    <span>Painel elétrico vinculado</span>
+                                    <select id="osComplementoPainel" class="cbx_teste glass opcoes">
+                                        <option value="">Carregando painéis...</option>
+                                    </select>
+                                </label>
+
+                                <button type="button" id="btnVincularPainelOS" class="bt_teste glass">
+                                    <i class="fa-solid fa-link"></i>
+                                    Vincular
+                                </button>
+                            </div>
+
+                            <div class="os-complementos-lista" id="osPaineisVinculados">
+                                <div class="os-complemento-empty">Informe a OS para carregar os complementos.</div>
+                            </div>
+
+                            <div class="os-complemento-empty" id="osPainelNaoPrevisto">
+                                Marque e salve "Terá painel para montar/instalar" para liberar o vínculo de painéis.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="painel_materiais_os">
+                        <p>Materiais da OS</p>
+                        <div id="osMateriaisResumo" class="os-materiais-lista">
+                            <div class="os-complemento-empty">Informe a OS para carregar os materiais.</div>
+                        </div>
+                    </div>
+
+                    <div class="painel_estatistica">
+                        <p>Estatística</p>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -199,19 +491,19 @@
         $("#anexoCadOS").slideToggle(100);
     }
 
-    $(document).on("click", "#bt_sair_os", function () {
+    $(document).off("click.cad-os-sair", "#bt_sair_os").on("click.cad-os-sair", "#bt_sair_os", function () {
         $('#form_cadOS').empty();
     });
 
     // ao abrir formulario Cadastro OS
 
-    $(document).on('click', '#bt_fechar_form_OS', function (e) {
+    $(document).off('click.cad-os-fechar', '#bt_fechar_form_OS').on('click.cad-os-fechar', '#bt_fechar_form_OS', function (e) {
         $('#form_cadOS').empty();
     });
 
 
 
-    $(document).on('click', '#bt_analisarGraficoOS', function (e) {
+    $(document).off('click.cad-os-grafico', '#bt_analisarGraficoOS').on('click.cad-os-grafico', '#bt_analisarGraficoOS', function (e) {
         //GERA GRAFICO DE COLABS POR DIA
         const osID = $('#idOS').val().trim();
 
@@ -314,36 +606,583 @@
         });
     });
 
-    // Oculta todos os painéis
-    $('.painel_status').hide();
-    // Controle dos botões do menu
-    $('.bt_menu').on('click', function () {
-        const target = $(this).data('target');
+    function getFormOSAtual() {
+        return $('#form_cadOS .cadOS').last();
+    }
 
-        $('.bt_menu').removeClass('ativo');
+    function ocultarPaineisOS($form) {
+        $form.find('.painel_info, .painel_status, .painel_complementos, .painel_materiais_os, .painel_estatistica').hide();
+    }
+
+    var $formOSInicial = getFormOSAtual();
+    $formOSInicial.find('.painel_status, .painel_complementos, .painel_materiais_os, .painel_estatistica').hide();
+
+    // Controle dos botões do menu
+    $(document).off('click.cad-os-menu', '#form_cadOS .cadOS .bt_menu').on('click.cad-os-menu', '#form_cadOS .cadOS .bt_menu', function () {
+        const target = $(this).data('target');
+        const $form = $(this).closest('.cadOS');
+        if (!target) return;
+
+        $form.find('.bt_menu').removeClass('ativo');
         $(this).addClass('ativo');
 
-        // Se o painel for exames, chama a função
-        if (target === '.painel_exames') {
-            const idFunc = $('#idColaborador').val();
-            load_exames_colaborador(idFunc, $('#carregarExamesAqui'));
-        }
-
-        // Se o painel for epi, chama a função
-        if (target === '.painel_vestimentas') {
-            const idFunc = $('#idColaborador').val();
-            load_epis_colaborador(idFunc, $('#carregarEPIAqui'));
-        }
-        // Se o painel for cursos, chama a função
-        if (target === '.painel_cursos') {
-            const idFunc = $('#idColaborador').val();
-            load_cursos_colaborador(idFunc, $('#carregarCursosAqui'));
-
-        }
         // Oculta todos os painéis
-        $('.painel_info, .painel_status').hide();
+        ocultarPaineisOS($form);
 
         // Mostra o painel clicado
-        $(target).fadeIn(200);
+        $form.find(target).fadeIn(200);
+
+        if (target === '.painel_complementos') {
+            carregarDadosComplementaresOS();
+            carregarComplementosOS();
+        }
+
+        if (target === '.painel_materiais_os') {
+            carregarMateriaisOSResumo();
+        }
     });
+
+    function escapeOSComplemento(valor) {
+        return String(valor ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    let SERVICOS_OS_POR_CATEGORIA = {
+        'Instalação': [
+            'Infraestrutura Metálica',
+            'Passagem de Cabos',
+            'Montagem de Painel',
+            'Instalação Elétrica'
+        ],
+        'Manutenção': [
+            'Manutenção Elétrica',
+            'Parada de Manutenção',
+            'Atendimento Emergencial',
+            'Diagnóstico de Falha',
+            'Manutenção de Subestação',
+            'Manutenção de Motores'
+        ],
+        'SPDA': [
+            'Instalação SPDA',
+            'Inspeção SPDA',
+            'Projeto SPDA',
+            'Análise de Risco SPDA',
+            'Aterramento Estrutural',
+            'Solda Exotérmica',
+            'Medição de Aterramento',
+            'Medição de Continuidade'
+        ],
+        'Engenharia': [
+            'Projeto Elétrico',
+            'Projeto Luminotécnico',
+            'Projeto de Automação',
+            'Projeto de Rede',
+            'Projeto de CFTV',
+            'Projeto de Incêndio',
+            'Laudo NR10',
+            'Laudo SPDA',
+            'Laudo de Aterramento',
+            'Termografia',
+            'Análise de Energia',
+            'Levantamento Técnico',
+            'As Built',
+            'Compatibilização',
+            'Consultoria Técnica',
+            'ART',
+            'Memorial Descritivo'
+        ],
+        'Solar': [
+            'Projeto Fotovoltaico',
+            'Instalação Fotovoltaica',
+            'Grid Zero'
+        ],
+        'Automação': [
+            'Adequação NR10',
+            'Adequação NR12',
+            'Automação Industrial',
+            'Programação CLP',
+            'Programação IHM',
+            'Parametrização de Inversor',
+            'Parametrização de Soft Starter',
+            'Instalação de Sensores',
+            'Partida de Motores'
+        ],
+        'Incêndio': [
+            'PPCI',
+            'Alarme de Incêndio',
+            'Sistema de Hidrantes'
+        ],
+        'Telecom': [
+            'CFTV',
+            'Controle de acesso',
+            'Fibra óptica',
+            'Rack de telecom',
+            'Wireless',
+            'Telefonia'
+        ],
+        'Outros': [
+            'Homem Hora',
+            'Visita técnica',
+            'Reunião técnica',
+            'Orçamento',
+            'Locação de Equipamentos',
+            'Locação de Plataforma',
+            'Locação de Container',
+            'Emergencial',
+            'Outros'
+        ]
+    };
+
+    let servicosComplementaresOS = [];
+
+    function iniciarCombosServicoOS() {
+        const $categoria = $('#osComplementoCategoriaServico');
+        if (!$categoria.length || $categoria.data('iniciado')) return;
+
+        $categoria.html('<option value="">Selecione...</option>');
+        Object.keys(SERVICOS_OS_POR_CATEGORIA).forEach(categoria => {
+            $categoria.append(`<option value="${escapeOSComplemento(categoria)}">${escapeOSComplemento(categoria)}</option>`);
+        });
+
+        $categoria.data('iniciado', true);
+        preencherServicosOS('');
+    }
+
+    function preencherServicosOS(categoria, servicoSelecionado = '') {
+        const $servico = $('#osComplementoTipoServico');
+        const servicos = SERVICOS_OS_POR_CATEGORIA[categoria] || [];
+
+        $servico.html('<option value="">Selecione...</option>');
+        servicos.forEach(servico => {
+            $servico.append(`<option value="${escapeOSComplemento(servico)}">${escapeOSComplemento(servico)}</option>`);
+        });
+
+        if (servicoSelecionado) {
+            const existeOpcao = $servico.find('option').toArray().some(option => option.value === servicoSelecionado);
+            if (!existeOpcao) {
+                $servico.append(`<option value="${escapeOSComplemento(servicoSelecionado)}">${escapeOSComplemento(servicoSelecionado)}</option>`);
+            }
+            $servico.val(servicoSelecionado);
+        }
+    }
+
+    function selecionarServicoOS(servico) {
+        let categoriaEncontrada = '';
+
+        Object.entries(SERVICOS_OS_POR_CATEGORIA).some(([categoria, servicos]) => {
+            if (servicos.includes(servico)) {
+                categoriaEncontrada = categoria;
+                return true;
+            }
+            return false;
+        });
+
+        $('#osComplementoCategoriaServico').val(categoriaEncontrada);
+        preencherServicosOS(categoriaEncontrada, servico || '');
+    }
+
+    function parseServicosComplementares(valor) {
+        const texto = String(valor || '').trim();
+        if (!texto) return [];
+
+        try {
+            const lista = JSON.parse(texto);
+            if (Array.isArray(lista)) return lista.filter(Boolean);
+        } catch (err) {
+            // Mantém compatibilidade com registros antigos salvos como texto simples.
+        }
+
+        return texto
+            .split(/\s\|\s|;\s*/)
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+    function serializarServicosComplementares() {
+        if (!servicosComplementaresOS.length) return '';
+        return JSON.stringify(servicosComplementaresOS);
+    }
+
+    function renderServicosComplementaresOS() {
+        const $lista = $('#osComplementoServicosLista');
+
+        if (!servicosComplementaresOS.length) {
+            $lista.html('<div class="os-complemento-empty">Nenhum serviço adicionado.</div>');
+            return;
+        }
+
+        $lista.html(servicosComplementaresOS.map((servico, index) => `
+            <div class="os-servico-card">
+                <span>${escapeOSComplemento(servico)}</span>
+                <button type="button" data-index="${index}" title="Remover serviço">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `).join(''));
+    }
+
+    function adicionarServicoComplementarOS() {
+        const servico = $('#osComplementoTipoServico').val();
+
+        if (!servico) {
+            Swal.fire({ icon: 'warning', title: 'Selecione um serviço para adicionar.', theme: 'dark' });
+            return;
+        }
+
+        if (servicosComplementaresOS.includes(servico)) {
+            Swal.fire({ icon: 'info', title: 'Serviço já adicionado nesta OS.', theme: 'dark', timer: 1200, showConfirmButton: false });
+            return;
+        }
+
+        servicosComplementaresOS.push(servico);
+        $('#osComplementoTipoServico').val('');
+        renderServicosComplementaresOS();
+    }
+
+    function getIdOSComplementos() {
+        return $('#idOS').val()?.trim();
+    }
+
+    function atualizarVisibilidadePainelComplemento(temPainel) {
+        $('#osComplementosPaineisBox, #osPaineisVinculados').toggle(!!temPainel);
+        $('#osPainelNaoPrevisto').toggle(!temPainel);
+    }
+
+    async function carregarPaineisComplementos() {
+        const $select = $('#osComplementoPainel');
+        if (!$select.length) return;
+
+        $select.html('<option value="">Carregando painéis...</option>');
+
+        try {
+            const paineis = await $.getJSON('/api/paineis-eletricos');
+            $select.html('<option value="">Selecione o painel...</option>');
+
+            paineis.forEach(painel => {
+                const atuacao = painel.atuacao_painel ? ` - ${painel.atuacao_painel}` : '';
+                $select.append(`<option value="${painel.id_painel}">${escapeOSComplemento(painel.numero_serie)}${escapeOSComplemento(atuacao)}</option>`);
+            });
+        } catch (err) {
+            console.error('Erro ao carregar painéis:', err);
+            $select.html('<option value="">Erro ao carregar painéis</option>');
+        }
+    }
+
+    async function carregarComplementosOS() {
+        const idOS = getIdOSComplementos();
+        const $lista = $('#osPaineisVinculados');
+
+        if (!idOS) {
+            $lista.html('<div class="os-complemento-empty">Informe o número da OS para vincular painéis.</div>');
+            return;
+        }
+
+        try {
+            const paineis = await $.getJSON(`/api/os/${encodeURIComponent(idOS)}/paineis`);
+            renderPaineisOS(paineis);
+        } catch (err) {
+            console.error('Erro ao carregar complementos da OS:', err);
+            $lista.html('<div class="os-complemento-empty">Não foi possível carregar os complementos desta OS.</div>');
+        }
+    }
+
+    function calcularResumoMateriaisOS(materiais) {
+        const resumo = {
+            itens: materiais.length,
+            quantidade: 0,
+            comprada: 0,
+            separada: 0,
+            faltante: 0,
+            percentualCompra: 0,
+            percentualSeparacao: 0,
+            status: 'Sem materiais'
+        };
+
+        materiais.forEach(item => {
+            const quantidade = Number(item.quantidade || 0);
+            const comprada = Number(item.quantidade_comprada || 0);
+            const separada = Number(item.quantidade_separada || 0);
+
+            resumo.quantidade += quantidade;
+            resumo.comprada += comprada;
+            resumo.separada += separada;
+        });
+
+        resumo.faltante = Math.max(resumo.quantidade - Math.max(resumo.comprada, resumo.separada), 0);
+        resumo.percentualCompra = resumo.quantidade ? Math.min((resumo.comprada / resumo.quantidade) * 100, 100) : 0;
+        resumo.percentualSeparacao = resumo.quantidade ? Math.min((resumo.separada / resumo.quantidade) * 100, 100) : 0;
+
+        if (resumo.quantidade && resumo.percentualCompra >= 100) resumo.status = 'Comprado';
+        else if (resumo.quantidade && resumo.percentualSeparacao >= 100) resumo.status = 'Separado';
+        else if (resumo.comprada > 0 || resumo.separada > 0) resumo.status = 'Em andamento';
+        else if (resumo.itens) resumo.status = 'Pendente';
+
+        return resumo;
+    }
+
+    async function carregarMateriaisOSResumo() {
+        const idOS = getIdOSComplementos();
+        const $lista = $('#osMateriaisResumo');
+
+        if (!idOS) {
+            $lista.html('<div class="os-complemento-empty">Informe a OS para carregar os materiais.</div>');
+            return;
+        }
+
+        $lista.html('<div class="os-complemento-empty">Carregando materiais da OS...</div>');
+
+        try {
+            const materiais = await $.getJSON(`/api/materiais/os/${encodeURIComponent(idOS)}`);
+            renderMateriaisOSResumo(idOS, materiais || []);
+        } catch (err) {
+            console.error('Erro ao carregar materiais da OS:', err);
+            $lista.html('<div class="os-complemento-empty">Não foi possível carregar os materiais desta OS.</div>');
+        }
+    }
+
+    function renderMateriaisOSResumo(idOS, materiais) {
+        const $lista = $('#osMateriaisResumo');
+
+        if (!materiais.length) {
+            $lista.html(`
+                <button type="button" class="os-material-card vazio" data-os="${escapeOSComplemento(idOS)}">
+                    <div>
+                        <strong>Lista #1</strong>
+                        <span>Nenhum material lançado nesta OS.</span>
+                    </div>
+                    <small>Abrir Materiais</small>
+                </button>
+            `);
+            return;
+        }
+
+        const resumo = calcularResumoMateriaisOS(materiais);
+        const descricao = `${resumo.itens} item${resumo.itens === 1 ? '' : 's'} | Qtd. ${resumo.quantidade}`;
+        const percentual = Math.max(resumo.percentualCompra, resumo.percentualSeparacao);
+        const progressoLabel = resumo.percentualCompra >= resumo.percentualSeparacao ? 'Comprando' : 'Separando';
+
+        $lista.html(`
+            <button type="button" class="os-material-card" data-os="${escapeOSComplemento(idOS)}">
+                <div class="os-material-topo">
+                    <div>
+                        <strong>Lista #1</strong>
+                        <span>${escapeOSComplemento(descricao)}</span>
+                    </div>
+                    <em>${escapeOSComplemento(resumo.status)}</em>
+                </div>
+
+                <div class="os-material-info">
+                    <span>Comprado: ${resumo.comprada}/${resumo.quantidade}</span>
+                    <span>Separado: ${resumo.separada}/${resumo.quantidade}</span>
+                    <span>Faltante: ${resumo.faltante}</span>
+                </div>
+
+                <div class="os-material-progresso-label">
+                    <span>${escapeOSComplemento(progressoLabel)}</span>
+                    <b>${percentual.toFixed(0)}%</b>
+                </div>
+                <div class="os-material-progresso">
+                    <span style="width:${percentual.toFixed(0)}%"></span>
+                </div>
+            </button>
+        `);
+    }
+
+    async function carregarDadosComplementaresOS() {
+        const idOS = getIdOSComplementos();
+        if (!idOS) {
+            servicosComplementaresOS = [];
+            selecionarServicoOS('');
+            renderServicosComplementaresOS();
+            $('#osComplementoPTA').prop('checked', false);
+            $('#osComplementoPainelPrevisto').prop('checked', false);
+            $('#osComplementoObs').val('');
+            atualizarVisibilidadePainelComplemento(false);
+            return;
+        }
+
+        try {
+            const dados = await $.getJSON(`/api/os/${encodeURIComponent(idOS)}/complementos`);
+            servicosComplementaresOS = parseServicosComplementares(dados.tipo_servico);
+            selecionarServicoOS('');
+            renderServicosComplementaresOS();
+            $('#osComplementoPTA').prop('checked', String(dados.pta_alocada) === '1');
+            $('#osComplementoPainelPrevisto').prop('checked', String(dados.painel_eletrico_previsto) === '1');
+            $('#osComplementoObs').val(dados.observacao || '');
+            atualizarVisibilidadePainelComplemento(String(dados.painel_eletrico_previsto) === '1');
+        } catch (err) {
+            console.error('Erro ao carregar dados complementares da OS:', err);
+        }
+    }
+
+    function renderPaineisOS(paineis) {
+        const $lista = $('#osPaineisVinculados');
+
+        if (!paineis.length) {
+            $lista.html('<div class="os-complemento-empty">Nenhum painel vinculado nesta OS.</div>');
+            return;
+        }
+
+        $lista.html(paineis.map(painel => `
+            <div class="os-painel-card" data-id-painel="${painel.id_painel}">
+                <button type="button" class="os-painel-open" data-action="abrir-painel-ferramentas" title="Abrir em Ferramentas">
+                    <i class="fa-solid fa-table-list"></i>
+                </button>
+                <div class="os-painel-info">
+                    <strong>${escapeOSComplemento(painel.numero_serie)}</strong>
+                    <span>${escapeOSComplemento(painel.atuacao_painel || 'Sem atuação informada')}</span>
+                    <small>${escapeOSComplemento(painel.tensao || '-')} • ${escapeOSComplemento(painel.dimensoes || '-')}</small>
+                </div>
+                <button type="button" class="os-painel-remove" data-action="remover-painel-os" title="Remover vínculo">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `).join(''));
+    }
+
+    async function vincularPainelOS() {
+        const idOS = getIdOSComplementos();
+        const idPainel = $('#osComplementoPainel').val();
+
+        if (!idOS) {
+            Swal.fire({ icon: 'warning', title: 'Informe a OS antes de vincular painel.', theme: 'dark' });
+            return;
+        }
+
+        if (!idPainel) {
+            Swal.fire({ icon: 'warning', title: 'Selecione um painel para vincular.', theme: 'dark' });
+            return;
+        }
+
+        try {
+            const res = await $.ajax({
+                url: `/api/os/${encodeURIComponent(idOS)}/paineis`,
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    id_painel: idPainel
+                }
+            });
+
+            renderPaineisOS(res.paineis || []);
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Painel não vinculado',
+                text: err.responseJSON?.mensagem || 'Erro ao vincular painel à OS.',
+                theme: 'dark'
+            });
+        }
+    }
+
+    async function salvarDadosComplementaresOS() {
+        const idOS = getIdOSComplementos();
+
+        if (!idOS) {
+            Swal.fire({ icon: 'warning', title: 'Informe a OS antes de salvar complementos.', theme: 'dark' });
+            return;
+        }
+
+        try {
+            await $.ajax({
+                url: `/api/os/${encodeURIComponent(idOS)}/complementos`,
+                method: 'PUT',
+                dataType: 'json',
+                data: {
+                    tipo_servico: serializarServicosComplementares(),
+                    pta_alocada: $('#osComplementoPTA').is(':checked') ? '1' : '0',
+                    painel_eletrico_previsto: $('#osComplementoPainelPrevisto').is(':checked') ? '1' : '0',
+                    observacao: $('#osComplementoObs').val()
+                }
+            });
+
+            atualizarVisibilidadePainelComplemento($('#osComplementoPainelPrevisto').is(':checked'));
+            if ($('#osComplementoPainelPrevisto').is(':checked')) carregarComplementosOS();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Complementos salvos',
+                timer: 1300,
+                showConfirmButton: false,
+                theme: 'dark'
+            });
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Complementos não salvos',
+                text: err.responseJSON?.mensagem || 'Erro ao salvar dados complementares da OS.',
+                theme: 'dark'
+            });
+        }
+    }
+
+    async function removerPainelOS(idPainel) {
+        const idOS = getIdOSComplementos();
+        if (!idOS || !idPainel) return;
+
+        try {
+            const res = await $.ajax({
+                url: `/api/os/${encodeURIComponent(idOS)}/paineis/${encodeURIComponent(idPainel)}`,
+                method: 'DELETE',
+                dataType: 'json'
+            });
+
+            renderPaineisOS(res.paineis || []);
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Vínculo não removido',
+                text: err.responseJSON?.mensagem || 'Erro ao remover painel da OS.',
+                theme: 'dark'
+            });
+        }
+    }
+
+    function abrirPainelNasFerramentas(idPainel) {
+        sessionStorage.setItem('ferramentas_focus_painel', String(idPainel));
+        const botaoFerramentas = document.querySelector('.bt_menuP[data-pagina="/client/pages/ferramentas.html"]');
+        if (botaoFerramentas) {
+            $('#form_cadOS').empty();
+            botaoFerramentas.click();
+        }
+    }
+
+    function abrirListaMateriaisOS(idOS) {
+        sessionStorage.setItem('material_focus_os', String(idOS));
+        const botaoMateriais = document.querySelector('.bt_menuP[data-pagina="/client/pages/lista_material.html"]');
+        if (botaoMateriais) {
+            $('#form_cadOS').empty();
+            botaoMateriais.click();
+        }
+    }
+
+    $(document).off('click', '#btnVincularPainelOS').on('click', '#btnVincularPainelOS', vincularPainelOS);
+    $(document).off('click', '#btnSalvarComplementosOS').on('click', '#btnSalvarComplementosOS', salvarDadosComplementaresOS);
+    $(document).off('click', '#btnAdicionarServicoOS').on('click', '#btnAdicionarServicoOS', adicionarServicoComplementarOS);
+    $(document).off('change', '#osComplementoCategoriaServico').on('change', '#osComplementoCategoriaServico', function () {
+        preencherServicosOS($(this).val(), '');
+    });
+    $(document).off('click', '#osComplementoServicosLista button').on('click', '#osComplementoServicosLista button', function () {
+        const index = Number($(this).data('index'));
+        if (Number.isNaN(index)) return;
+
+        servicosComplementaresOS.splice(index, 1);
+        renderServicosComplementaresOS();
+    });
+    $(document).off('click', '#osPaineisVinculados [data-action]').on('click', '#osPaineisVinculados [data-action]', function () {
+        const idPainel = $(this).closest('.os-painel-card').data('id-painel');
+        if ($(this).data('action') === 'remover-painel-os') removerPainelOS(idPainel);
+        if ($(this).data('action') === 'abrir-painel-ferramentas') abrirPainelNasFerramentas(idPainel);
+    });
+    $(document).off('click', '.os-material-card').on('click', '.os-material-card', function () {
+        abrirListaMateriaisOS($(this).data('os'));
+    });
+
+    iniciarCombosServicoOS();
+    renderServicosComplementaresOS();
+    carregarPaineisComplementos();
 </script>

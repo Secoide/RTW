@@ -1,6 +1,34 @@
 import { formatarData } from "../formatters/date-format.js";
 import { atualizarProgramacao } from "../../events/change/handle-date-change.js";
 
+const TEMPO_ILUMINAR_STATUS_MS = 3000;
+
+export function destacarStatusDia($painel) {
+  if (!$painel || !$painel.length) return;
+
+  clearTimeout($painel.data("timerIluminarVerde"));
+  $painel.removeClass("iluminar_verde");
+
+  requestAnimationFrame(() => {
+    $painel.addClass("iluminar_verde");
+    const timer = setTimeout(() => {
+      $painel.removeClass("iluminar_verde");
+      $painel.removeData("timerIluminarVerde");
+    }, TEMPO_ILUMINAR_STATUS_MS);
+
+    $painel.data("timerIluminarVerde", timer);
+  });
+}
+
+export function limparDestaqueStatusDia(escopo = document) {
+  $(escopo).find(".painelDia.iluminar_verde").each(function () {
+    const $painel = $(this);
+    clearTimeout($painel.data("timerIluminarVerde"));
+    $painel.removeClass("iluminar_verde");
+    $painel.removeData("timerIluminarVerde");
+  });
+}
+
 /**
  * Atualiza o ícone e os avisos de programação do dia
  * @param {{ statuss: number, dia: string, origem?: string }} param0
@@ -46,9 +74,9 @@ export function mudarStatusProgramacaoDia({ statuss, dia, origem }) {
   // ✅ Atualiza visualmente o ícone e o painel sem disparar o click
   if (statuss === 1) {
     $icone.removeClass("fa-file-signature").addClass("fa-file-circle-check");
-    $painel.addClass("iluminar_verde");
+    destacarStatusDia($painel);
   } else {
     $icone.removeClass("fa-file-circle-check").addClass("fa-file-signature");
-    $painel.removeClass("iluminar_verde");
+    limparDestaqueStatusDia($painel);
   }
 }

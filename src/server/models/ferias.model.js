@@ -25,6 +25,78 @@ async function listarFerias() {
   return rows;
 }
 
+async function listarColaboradoresBase() {
+  const [rows] = await connection.query(`
+    SELECT
+      id,
+      nome,
+      fotoperfil,
+      versao_foto
+    FROM funcionarios
+    WHERE id <> 999
+    ORDER BY nome ASC
+  `);
+
+  return rows;
+}
+
+async function buscarFeriasPorId(idFerias) {
+  const [rows] = await connection.query(`
+    SELECT
+      id_funcInterrups AS id,
+      datainicio,
+      datafinal,
+      motivo,
+      descricao,
+      id_func,
+      status
+    FROM tb_func_interrupto
+    WHERE id_funcInterrups = ?
+      AND LOWER(motivo) = 'ferias'
+    LIMIT 1
+  `, [idFerias]);
+
+  return rows[0] || null;
+}
+
+async function existeColaborador(idFunc) {
+  const [rows] = await connection.query(`
+    SELECT id
+    FROM funcionarios
+    WHERE id = ?
+      AND id <> 999
+    LIMIT 1
+  `, [idFunc]);
+
+  return rows.length > 0;
+}
+
+async function listarFeriasColaborador(idFunc, ignorarId = null) {
+  const params = [idFunc];
+  let filtroIgnorar = "";
+
+  if (ignorarId) {
+    filtroIgnorar = "AND id_funcInterrups <> ?";
+    params.push(ignorarId);
+  }
+
+  const [rows] = await connection.query(`
+    SELECT
+      id_funcInterrups AS id,
+      datainicio,
+      datafinal,
+      status
+    FROM tb_func_interrupto
+    WHERE id_func = ?
+      AND LOWER(motivo) = 'ferias'
+      AND (status IS NULL OR status <> 'reprovado')
+      ${filtroIgnorar}
+    ORDER BY datainicio ASC
+  `, params);
+
+  return rows;
+}
+
 /* =====================================================
    CRIAR NOVO PERÍODO DE FÉRIAS
 ===================================================== */
@@ -54,6 +126,7 @@ async function atualizarFerias(idFerias, data) {
            datafinal = ?,
            descricao = ?
      WHERE id_funcInterrups = ?
+       AND LOWER(motivo) = 'ferias'
   `, [
     data.datainicio,
     data.datafinal,
@@ -72,6 +145,7 @@ async function atualizarStatus(idFerias, status) {
     UPDATE tb_func_interrupto
        SET status = ?
      WHERE id_funcInterrups = ?
+       AND LOWER(motivo) = 'ferias'
   `, [status, idFerias]);
 
   return result.affectedRows > 0;
@@ -84,6 +158,7 @@ async function excluirFerias(idFerias) {
   const [result] = await connection.query(`
     DELETE FROM tb_func_interrupto
      WHERE id_funcInterrups = ?
+       AND LOWER(motivo) = 'ferias'
   `, [idFerias]);
 
   return result.affectedRows > 0;
@@ -91,6 +166,10 @@ async function excluirFerias(idFerias) {
 
 module.exports = {
   listarFerias,
+  listarColaboradoresBase,
+  buscarFeriasPorId,
+  existeColaborador,
+  listarFeriasColaborador,
   criarFerias,
   atualizarFerias,
   atualizarStatus,

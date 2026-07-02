@@ -526,7 +526,7 @@ async function open_form_AnexarExame(idColab, idExame) {
 }
 
 // ABRIR Form anexar Curso ao Colaborador
-async function open_form_AnexarCurso(idColab, idExame) {
+async function open_form_AnexarCurso(idColab, idCurso) {
     const $wrap = $('#form_anexarCurso');
 
     try {
@@ -543,7 +543,7 @@ async function open_form_AnexarCurso(idColab, idExame) {
         if (idColab != null) {
             $('#selectColaborador').val(String(idColab)).trigger('change');
         }
-        if (idExame != null) {
+        if (idCurso != null) {
             $('#selectCurso').val(String(idCurso)).trigger('change');
         }
     } catch (err) {

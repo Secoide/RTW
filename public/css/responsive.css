@@ -12,6 +12,30 @@
 
 
 /* Estilo para celulares (telas Médias) */
+
+@media (max-width: 1180px) {
+    .programacao-toolbar {
+        align-items: stretch;
+    }
+
+    .programacao-toolbar-busca {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .programacao-toolbar-hints {
+        order: 4;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .programacao-advanced-panel {
+        left: 10px;
+        right: 10px;
+        width: auto;
+    }
+}
+
 @media (max-width: 850px) {
     body {
         background-color: rgb(31, 31, 31);
@@ -47,6 +71,47 @@
     #conteudo .textoHome,
     .release-notes {
         display: none;
+    }
+
+    #conteudoInicio {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: auto;
+        min-height: 100vh;
+        padding: 10px;
+        overflow-y: auto;
+        border-radius: 0;
+    }
+
+    #bemvindo .textoHome {
+        display: block;
+    }
+
+    #bemvindo {
+        min-height: 180px;
+    }
+
+    .inicio-brand {
+        padding: 16px;
+    }
+
+    .inicio-logo {
+        width: 116px;
+        max-height: 96px;
+    }
+
+    #bemvindo h2.textoHome {
+        font-size: 18px;
+    }
+
+    #bemvindo p.textoHome {
+        font-size: 11px;
+    }
+
+    .inicio-version-card {
+        width: calc(100% - 32px);
+        margin: 0 16px 16px;
     }
 
     .painel_inicio {
@@ -235,7 +300,50 @@
         margin-left: 0;
     }
 
-    #bt_abrir_NovaOS {
+    .painel_menuSuperior.programacao-toolbar {
+        position: static;
+        top: auto;
+        width: auto;
+        justify-content: flex-start;
+        margin: 6px;
+        padding: 8px;
+    }
+
+    .programacao-toolbar-acoes,
+    .programacao-toolbar-filtros,
+    .programacao-toolbar-data {
+        width: 100%;
+    }
+
+    .programacao-toolbar-acoes,
+    .programacao-toolbar-filtros {
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+
+    .programacao-top-btn,
+    .programacao-filter-btn {
+        flex: 0 0 auto;
+    }
+
+    .programacao-toolbar-busca {
+        min-width: 100%;
+        order: 2;
+    }
+
+    .programacao-toolbar-hints {
+        order: 5;
+        overflow-x: auto;
+    }
+
+    .programacao-advanced-panel {
+        grid-template-columns: 1fr;
+        left: 8px;
+        right: 8px;
+        width: auto;
+    }
+
+    #bt_abrir_NovaOS.bt_submenu {
         display: none;
     }
 

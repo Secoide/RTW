@@ -140,6 +140,75 @@ async function getAnotacoesOS(req, res) {
   }
 }
 
+async function getPaineisOS(req, res) {
+  try {
+    const paineis = await OSService.listarPaineisOS(req.params.id);
+    res.json(paineis);
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function vincularPainelOS(req, res) {
+  try {
+    const paineis = await OSService.vincularPainelOS(req.params.id, req.body);
+    res.json({
+      sucesso: true,
+      paineis
+    });
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function removerPainelOS(req, res) {
+  try {
+    const paineis = await OSService.removerPainelOS(req.params.id, req.params.idPainel);
+    res.json({
+      sucesso: true,
+      paineis
+    });
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function getComplementosOS(req, res) {
+  try {
+    const complementos = await OSService.buscarComplementosOS(req.params.id);
+    res.json(complementos);
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function salvarComplementosOS(req, res) {
+  try {
+    const complementos = await OSService.salvarComplementosOS(req.params.id, req.body);
+    res.json({
+      sucesso: true,
+      complementos
+    });
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
 
 
 async function deleteOS(req, res) {
@@ -162,5 +231,10 @@ module.exports = {
   updateStatusOS,
   salvarAnotacoesOS,
   getStatusOS,
-  getAnotacoesOS
+  getAnotacoesOS,
+  getPaineisOS,
+  vincularPainelOS,
+  removerPainelOS,
+  getComplementosOS,
+  salvarComplementosOS
 };

@@ -1,10 +1,18 @@
 export function initaddConquistas() {
-    $(document).on(
-        'click',
+    $(document).off(
+        'click.conquistas',
+        '#btAdicionarConquista'
+    ).on(
+        'click.conquistas',
         '#btAdicionarConquista',
         async function () {
+            const $botao = $(this);
+
+            if ($botao.data('salvando'))
+                return;
 
             try {
+                $botao.data('salvando', true);
 
                 const id_colaborador =
                     $('#idColaborador')
@@ -48,11 +56,76 @@ export function initaddConquistas() {
 
                 console.error(err);
 
+            } finally {
+
+                $botao.data('salvando', false);
+
             }
 
         }
     );
 
+    $(document).off(
+        'contextmenu.conquistas',
+        '.cardConquista'
+    ).on(
+        'contextmenu.conquistas',
+        '.cardConquista',
+        function (event) {
+            event.preventDefault();
+
+            const tipo = $(this).data('tipo');
+            const idColaborador = $('#idColaborador').val();
+
+            if (!tipo || !idColaborador)
+                return;
+
+            abrirMenuConquista(event, idColaborador, tipo);
+        }
+    );
+
+}
+
+function abrirMenuConquista(event, idColaborador, tipo) {
+    $('.menuConquistaManual').remove();
+
+    const $menu = $(`
+        <div class="menuConquistaManual">
+            <button type="button" class="removerConquistaManual">
+                Remover medalha
+            </button>
+        </div>
+    `);
+
+    $menu.css({
+        left: event.pageX,
+        top: event.pageY
+    });
+
+    $('body').append($menu);
+
+    $menu.find('.removerConquistaManual').on('click', async function () {
+        const confirmar = confirm('Remover esta medalha manual?');
+        if (!confirmar)
+            return;
+
+        try {
+            await $.ajax({
+                url: `/api/colaboradores/conquista/${idColaborador}/${encodeURIComponent(tipo)}`,
+                method: 'DELETE'
+            });
+
+            $('.menuConquistaManual').remove();
+            await carregarConquistasColaborador(idColaborador);
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao remover medalha.');
+        }
+    });
+
+    setTimeout(() => {
+        $(document).one('click.conquistas-menu', () => $('.menuConquistaManual').remove());
+    }, 0);
 }
 
 
@@ -205,7 +278,7 @@ export async function carregarConquistasColaborador(
             ).toLocaleDateString(
                 'pt-BR'
             );
-        let classdestaque;
+        let classdestaque = '';
         if (item.nome == "Destaque do Ano"){
             classdestaque = "cardConquistaGold"
         }
@@ -213,6 +286,7 @@ export async function carregarConquistasColaborador(
             
       <div
             class="cardConquista ${classdestaque}"
+            data-tipo="${c.tipo}"
             title="${item.nome}">
 
             <div class="icone">

@@ -8,38 +8,46 @@
 
 <div class="menu glass" id="menuMobile">
   <div class="menuSuperior">
-    <a class="bt_menuP ativo" data-roles="*" data-pagina="/client/pages/inicio.html">
+    <a class="bt_menuP ativo" data-roles="*" data-feature="menu.inicio" data-pagina="/client/pages/inicio.html">
       <i class="fa-solid fa-house"></i><span class="menu-text">Início</span>
     </a>
-    <a class="bt_menuP" data-roles="4,6,7,99" data-pagina="/client/pages/rh.html">
+    <a class="bt_menuP" data-roles="4,6,7,99" data-feature="menu.rh" data-pagina="/client/pages/rh.html">
       <i class="fa-solid fa-stethoscope"></i><span class="menu-text">RH</span>
     </a>
-    <a class="bt_menuP" data-roles="6,7,99" data-pagina="/client/pages/programacaoOS.html">
+    <a class="bt_menuP" data-roles="6,7,99" data-feature="menu.programacao" data-pagina="/client/pages/programacaoOS.html">
       <i class="fa-solid fa-clock"></i><span class="menu-text">Programação OS</span>
     </a>
-    <a class="bt_menuP" data-roles="" data-pagina="/client/pages/projetos.html">
+    <a class="bt_menuP" data-roles="" data-feature="menu.projetos" data-pagina="/client/pages/projetos.html">
       <i class="fa-solid fa-briefcase"></i><span class="menu-text">Projetos</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-pagina="/client/pages/lista_material.html">
-      <i class="fa-solid fa-hammer"></i><span class="menu-text">Material</span>
+    <a class="bt_menuP" data-roles="99" data-feature="menu.materiais" data-pagina="/client/pages/lista_material.html">
+      <i class="fa-solid fa-boxes-stacked"></i><span class="menu-text">Material</span>
     </a>
-    <a class="bt_menuP" data-roles="6,7,99" data-pagina="/client/pages/gestao.html">
+    <a class="bt_menuP" data-roles="99" data-feature="menu.ferramentas" data-pagina="/client/pages/ferramentas.html">
+      <i class="fa-solid fa-screwdriver-wrench"></i><span class="menu-text">Ferramentas</span>
+    </a>
+    <a class="bt_menuP" data-roles="6,7,99" data-feature="menu.gestao" data-pagina="/client/pages/gestao.html">
       <i class="fa-solid fa-book"></i><span class="menu-text">Gestão</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-pagina="/client/pages/ferias.html">
+    <a class="bt_menuP" data-roles="99" data-feature="menu.ferias" data-pagina="/client/pages/ferias.html">
       <i class="fa-solid fa-calendar"></i><span class="menu-text">Férias</span>
     </a>
-    <a class="bt_menuP" data-roles="" data-pagina="/client/pages/admin.html">
+    <a class="bt_menuP" data-roles="" data-feature="menu.admin" data-pagina="/client/pages/admin.html">
       <i class="fa-solid fa-user-gear"></i><span class="menu-text">Admin</span>
     </a>
-    <a class="bt_menuP" data-roles="" data-pagina="/client/pages/ass_epi.html">
+    <a class="bt_menuP" data-roles="" data-feature="menu.assinar" data-pagina="/client/pages/ass_epi.html">
       <i class="fa-solid fa-pen"></i><span class="menu-text">Assinar</span>
     </a>
-    <a class="bt_menuP" data-roles="*" data-pagina="/client/pages/guia.html">
+    <a class="bt_menuP" data-roles="*" data-feature="menu.guia" data-pagina="/client/pages/guia.html">
       <i class="fa-solid fa-book-open"></i><span class="menu-text">Guia Geral</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-pagina="/client/pages/ia2.html">
+    <a class="bt_menuP" data-roles="" data-feature="menu.ia" data-pagina="/client/pages/ia2.html">
       <i class="fa-solid fa-brain"></i><span class="menu-text">IA 2.0</span>
+    </a>
+  </div>
+  <div class="menuInferiorEsq">
+    <a id="menuVersaoBtn" class="menu-version-link" title="Consultar versão do sistema">
+      <i class="fa-solid fa-circle-info"></i><span class="menu-text">Versão</span>
     </a>
   </div>
 </div>

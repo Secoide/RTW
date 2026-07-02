@@ -1,16 +1,52 @@
 <div class="painel_pagina">
-    <div class="painel_menuSuperior">
-        <div id="bt_abrir_NovaOS" class="bt_submenu">
-            <input type="button" data-roles="6,7,99" name="" value="➕ Ordem de Serviço" title="Cadastrar OS"
-                class="bt_padrao bt_cad">
+    <div class="painel_menuSuperior programacao-toolbar">
+        <div class="programacao-toolbar-grupo programacao-toolbar-acoes">
+            <button id="bt_abrir_NovaOS" type="button" data-roles="6,7,99"
+                class="programacao-top-btn programacao-top-btn-primary" title="Cadastrar OS">
+                <i class="fa-solid fa-plus"></i>
+                <span>Nova OS</span>
+            </button>
+            <button id="bt_atualizarProgramacao" type="button" class="programacao-top-btn bt_atualizar" title="Atualizar programacao">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Atualizar</span>
+            </button>
         </div>
-        <div class="bt_submenu" style="width: 20px; text-align: center;">|</div>
-        <div id="bt_atualizarProgramacao" class="bt_submenu">
-            <input type="button" name="" value="🔄 Atualizar programação" title="Atualizar programação"
-                class="bt_padrao bt_atualizar">
+
+        <div class="programacao-toolbar-grupo programacao-toolbar-busca">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="programacaoBuscaGlobal" type="text" autocomplete="off"
+                placeholder="Busca global. Buscar OS, cliente, cidade ou colaborador...">
+            <button id="programacaoLimparBusca" type="button" title="Limpar busca">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
+
+        <div class="programacao-toolbar-grupo programacao-toolbar-filtros" aria-label="Filtros da programacao">
+            <button type="button" class="programacao-filter-btn" data-filtro="prioridade" title="Mostrar prioridade alta">
+                <i class="fa-solid fa-flag"></i>
+            </button>
+            <button type="button" class="programacao-filter-btn" data-filtro="com-equipe" title="Mostrar OS com equipe">
+                <i class="fa-solid fa-people-group"></i>
+            </button>
+            <button type="button" class="programacao-filter-btn" data-filtro="sem-equipe" title="Mostrar OS sem equipe">
+                <i class="fa-regular fa-circle"></i>
+            </button>
+            <button type="button" class="programacao-filter-btn" data-filtro="sem-responsavel" title="Mostrar OS sem responsavel">
+                <i class="fa-solid fa-user-slash"></i>
+            </button>
+            <button id="programacaoBuscaAvancadaToggle" type="button" class="programacao-filter-btn programacao-filter-wide"
+                title="Busca avancada">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
+        </div>
+
+        <div class="programacao-toolbar-hints" title="Atalhos para adicionar colaboradores na OS">
+            <span><b>#</b> responsaveis</span>
+            <span><b>$</b> terceiros</span>
+        </div>
+
         <div class="direitaflex"></div>
-        <div class="painel_EsqBtAcoes" style="padding-right: 10px; ">
+        <div class="painel_EsqBtAcoes programacao-toolbar-data">
             <div class="date-wrapper">
                 <label for="seletor_data" id="btnAbrirData" class="date-icon-btn">
                     <i class="fa-solid fa-calendar-days"></i>
@@ -18,8 +54,42 @@
 
                 <input id="seletor_data" class="tbx_data tbx_teste glass" type="date" value="">
             </div>
-            <!--<button class="bt_abrirmenu"><i class="fa-solid fa-ellipsis"></i></button>-->
-            <!--<p id="toggle-mode" class=""></p>-->
+        </div>
+
+        <div id="programacaoBuscaAvancada" class="programacao-advanced-panel" hidden>
+            <label>
+                <span>OS</span>
+                <input class="programacao-avancado-campo" data-campo="os" type="text" placeholder="Numero">
+            </label>
+            <label>
+                <span>Cliente</span>
+                <input class="programacao-avancado-campo" data-campo="cliente" type="text" placeholder="Empresa">
+            </label>
+            <label>
+                <span>Cidade</span>
+                <input class="programacao-avancado-campo" data-campo="cidade" type="text" placeholder="Local">
+            </label>
+            <label>
+                <span>Colaborador</span>
+                <input class="programacao-avancado-campo" data-campo="colaborador" type="text" placeholder="Nome">
+            </label>
+            <label>
+                <span>Status</span>
+                <select class="programacao-avancado-campo" data-campo="status">
+                    <option value="">Todos</option>
+                    <option value="sem responsavel">Sem responsavel</option>
+                    <option value="aguardando">Aguardando</option>
+                    <option value="em execucao">Em execucao</option>
+                    <option value="parado">Parado</option>
+                    <option value="concluido">Concluido</option>
+                    <option value="em espera">Em espera</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </label>
+            <button id="programacaoLimparFiltros" type="button">
+                <i class="fa-solid fa-eraser"></i>
+                Limpar filtros
+            </button>
         </div>
     </div>
 </div>

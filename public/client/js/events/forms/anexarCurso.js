@@ -6,7 +6,7 @@ import {
 } from "./populate-combobox.js";
 
 // /public/client/js/events/forms/anexarCurso.js
-async function open_form_AnexarCurso(idColab, idExame) {
+async function open_form_AnexarCurso(idColab, idCurso) {
     const $wrap = $('#form_anexarCurso');
 
     try {
@@ -16,16 +16,43 @@ async function open_form_AnexarCurso(idColab, idExame) {
 
         await preencherCbxColaborador();
         await preencherCbxCurso();
+        initControleVencimentoCurso();
         initSubmit()
         if (idColab != null) {
             $('#selectColaborador').val(String(idColab)).trigger('change');
         }
-        if (idExame != null) {
-            $('#selectCurso').val(String(idExame)).trigger('change'); // corrigido
+        if (idCurso != null) {
+            $('#selectCurso').val(String(idCurso)).trigger('change'); // corrigido
         }
     } catch (err) {
         alert(`Erro ao carregar janela: ${err.status || ''} ${err.statusText || err.message}`);
     }
+}
+
+function initControleVencimentoCurso() {
+    const aplicarRegra = () => {
+        const $option = $("#selectCurso option:selected");
+        const controlaVencimento = Number($option.data("vencimento") ?? 1) === 1;
+        const $vencimento = $("#vencimentoCurso");
+        const $status = $("#statusVencimentoCurso");
+
+        if (!controlaVencimento) {
+            $vencimento.data("valorAnterior", $vencimento.val() || "12");
+            $vencimento.val("0").prop("readonly", true).addClass("campo-bloqueado");
+            $status.addClass("ativo").html('<i class="fa-solid fa-circle-check"></i><span>Sem vencimento</span>');
+            return;
+        }
+
+        $vencimento
+            .val($vencimento.data("valorAnterior") || ($vencimento.val() === "0" ? "12" : $vencimento.val() || "12"))
+            .prop("readonly", false)
+            .removeClass("campo-bloqueado");
+        $status.removeClass("ativo").empty();
+    };
+
+    $(document).off("change.controleVencimentoCurso", "#selectCurso");
+    $(document).on("change.controleVencimentoCurso", "#selectCurso", aplicarRegra);
+    aplicarRegra();
 }
 
 function initSubmit() {

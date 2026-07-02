@@ -44,42 +44,42 @@ export function initOSForm() {
                 // contentType padrão (x-www-form-urlencoded) já serve para serialize()
             });
 
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+
             if (res.sucesso) {
-                await Promise.all(
-                    [...document.querySelectorAll(".painelDia")].map(async painel => {
-                        await carregarOSComColaboradores(painel);
-                    })
-                );
                 const msg = `OS ${botaoClicado === 'cadOS' ? 'cadastrada' : 'atualizada'} com sucesso!`;
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
-                    }
-                });
                 Toast.fire({
                     icon: "success",
                     theme: 'dark',
                     title: msg
                 });
 
+                try {
+                    await Promise.all(
+                        [...document.querySelectorAll(".painelDia")].map(async painel => {
+                            await carregarOSComColaboradores(painel);
+                        })
+                    );
+                } catch (refreshErr) {
+                    console.error("OS salva, mas ocorreu erro ao atualizar a tela:", refreshErr);
+                    Toast.fire({
+                        icon: "warning",
+                        theme: 'dark',
+                        title: "OS salva, mas a tela não atualizou. Recarregue a página."
+                    });
+                }
+
             } else {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
-                    }
-                });
                 Toast.fire({
                     icon: "warning",
                     theme: 'dark',
@@ -89,7 +89,13 @@ export function initOSForm() {
 
         } catch (err) {
             console.error(err);
-            alert('Erro ao processar a solicitação de OS.');
+            const mensagem = err.responseJSON?.mensagem || err.responseJSON?.erro || 'A OS não foi salva. Tente novamente.';
+            Swal.fire({
+                icon: 'error',
+                title: 'OS não salva',
+                theme: 'dark',
+                text: mensagem
+            });
         }
     });
 

@@ -96,10 +96,20 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
       nomeEmpresa: cliente = "",
       nomeCidade: cidade = "",
       total_colaboradores: totalColab = 0,
+      pta_alocada = 0,
+      painel_eletrico_previsto = 0,
       status_OS = "Indefinido"
     } = primeira;
 
     const statusClass = status_OS.replace(/\s+/g, '').toLowerCase();
+    const temPta = Number(pta_alocada) === 1;
+    const temPainel = Number(painel_eletrico_previsto) === 1;
+    const iconesComplementos = `
+      <span class="p_complementosOS">
+        ${temPta ? '<i class="fa-solid fa-arrow-down-up-across-line complementoOSIcone complementoOSIcone-pta" title="OS com PTA alocada"></i>' : ''}
+        ${temPainel ? '<i class="fa-solid fa-bolt complementoOSIcone complementoOSIcone-painel" title="OS com painel elétrico para montar/instalar"></i>' : ''}
+      </span>
+    `;
 
     // Cabeçalho da OS
     let html = `
@@ -162,6 +172,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
         <div class="p_totalColabs" title="Total de Colaboradores">
           <i class="fa-solid fa-people-group"></i>
           <p class="lbl_total">${totalColab}</p>
+          ${iconesComplementos}
           <i class="bt_exportDados fa-solid fa-file-export" title="Exportar dados dos colaboradores"></i>
         </div>
 
@@ -257,12 +268,12 @@ export async function atualizarStatusDia(painelDia) {
     hoje.setHours(0, 0, 0, 0); // zera a hora para garantir comparação só por dia
 
     const addDiv = $painelDia.find('.painelInfoDia .painel_iconeDia');
+    addDiv.find('.iconeStatusDia').remove();
 
     let htmlStatus = '';
     const [ano, mes, dia] = diaPainel.split('-');
     const diaBanco = new Date(ano, mes - 1, dia); // agora respeita o horário local
     diaBanco.setHours(0, 0, 0, 0); // garante mesma base de comparação
-    //addDiv.empty();
     if (diaBanco < hoje) {
       htmlStatus = `
             <div class="iconeStatusDia" title="Programação bloqueada.">
@@ -279,21 +290,22 @@ export async function atualizarStatusDia(painelDia) {
       addDiv.append(htmlStatus);
       return false;
     }
-    icon.forEach(status => {
-      const statuss = status.statuss;
-      if (statuss == 1) {
-        htmlStatus =
-          `<div class="iconeStatusDia" title="Programação Liberada!">
+    const status = icon.find(item => Number(item.statuss) === 1) || icon[0];
+    const statuss = Number(status.statuss);
+
+    if (statuss === 1) {
+      htmlStatus =
+        `<div class="iconeStatusDia" title="Programação Liberada!">
                     <i class="fa-solid fa-file-circle-check"></i>
                 </div>`;
-      } else if (statuss == 0) {
-        htmlStatus =
-          `<div class="iconeStatusDia" title="Programação não finalizada.">
+    } else {
+      htmlStatus =
+        `<div class="iconeStatusDia" title="Programação não finalizada.">
                     <i class="fa-solid fa-file-signature"></i>
                 </div>`;
-      };
-      addDiv.append(htmlStatus);
-    });
+    }
+
+    addDiv.append(htmlStatus);
   }).fail(function () {
     console.error('Erro ao buscar status do dia:', diaPainel);
   });
@@ -339,4 +351,3 @@ export function atualizarIconeAnotacoes(painelDia) {
     console.error('Erro ao buscar anotações do dia:', diaPainel);
   });
 }
-

@@ -8,6 +8,11 @@ router.post("/cad_OS", verificarAutenticacao, OSController.salvarOS);
 router.post("/anotacoes/salvar",verificarAutenticacao, OSController.salvarAnotacoesOS);
 router.get("/status/:dataDia", verificarAutenticacao, OSController.getStatusOS);
 router.get("/anotacoes/:dataDia", verificarAutenticacao, OSController.getAnotacoesOS);
+router.get("/:id/paineis", verificarAutenticacao, OSController.getPaineisOS);
+router.post("/:id/paineis", verificarAutenticacao, OSController.vincularPainelOS);
+router.delete("/:id/paineis/:idPainel", verificarAutenticacao, OSController.removerPainelOS);
+router.get("/:id/complementos", verificarAutenticacao, OSController.getComplementosOS);
+router.put("/:id/complementos", verificarAutenticacao, OSController.salvarComplementosOS);
 
 router.put('/editar/:id', verificarAutenticacao, OSController.updateOS);
 

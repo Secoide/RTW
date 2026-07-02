@@ -7,6 +7,7 @@ function verificarAutenticacao(req, res, next) {
       id: usuarioId,
       nome: usuarioNome || null,
       role: req.session.nivel_acesso,
+      saas: req.session.saas || null,
     };
 
     return next();

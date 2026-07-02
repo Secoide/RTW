@@ -159,7 +159,7 @@ function ChatArea() {
                     </h2>
 
                     <small>
-                        Assistente Operacional RTW
+                        Assistente Operacional ConnectPear
                     </small>
 
                 </div>

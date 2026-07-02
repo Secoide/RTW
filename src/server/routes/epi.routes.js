@@ -5,7 +5,7 @@ const uploadEpiPDF = require('../middlewares/uploadExame.middleware');
 const epiController = require('../controllers/epi.controller');
 
 // -------------------------------------------------------------
-// 🔒 ROTAS INTERNAS (SOMENTE USUÁRIOS LOGADOS DA RTW)
+// 🔒 ROTAS INTERNAS (SOMENTE USUÁRIOS LOGADOS DA ConnectPear)
 // -------------------------------------------------------------
 router.post('/cadastrar', verificarAutenticacao, epiController.createEPI);
 router.get('/por-colaborador/:idFunc', verificarAutenticacao, epiController.getEPIsByColaborador);

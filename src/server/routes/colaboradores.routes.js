@@ -19,6 +19,7 @@ router.get("/cbx", verificarAutenticacao, colaboradoresController.getColaborador
 router.get("/aniversariantes", verificarAutenticacao, colaboradoresController.getColaboradoresAniversariantes);
 router.get("/hall-experiencia", verificarAutenticacao, colaboradoresController.getHallExperiencia);
 router.post('/conquista',verificarAutenticacao, colaboradoresController.addConquista);
+router.delete('/conquista/:idColaborador/:tipo', verificarAutenticacao, colaboradoresController.removerConquista);
 router.get('/conquistas/:id', verificarAutenticacao, colaboradoresController.getConquistasColaborador);
 
 // Upload de foto

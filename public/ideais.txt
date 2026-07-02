@@ -1,0 +1,56 @@
+
+Easter Eggs
+
+9. Sexta-feira do Salshipão
+Nas sextas-feiras, depois das 11h:
+aparece discretamente um 🌭;
+ao clicar, abre:
+🚨 Rumores indicam movimentações suspeitas envolvendo Salshipão.
+A diretoria ainda não confirmou o cardápio.
+Poderia ter 5% de chance de aparecer para não ficar repetitivo.
+
+
+10. Gato fiscalizador
+Você já possui o emoji 🐈 entre os ícones dos avisos.
+Ao selecionar o gato cinco vezes ou clicar nele em um aviso:
+um gato atravessa a parte inferior da tela;
+para no painel;
+“derruba” visualmente um card;
+aparece:
+🐈 Auditoria felina concluída.
+Nenhuma irregularidade encontrada, somente alguns cabos soltos.
+
+
+12. Mensagens especiais conforme o horário
+No login ou na Home:
+Antes das 7h:
+Você chegou antes até do servidor.
+Entre 11h45 e 12h:
+O sistema detectou queda de produtividade causada pela proximidade do almoço.
+Depois das 18h:
+Trabalhando até agora? O sistema recomenda desligamento programado.
+De madrugada:
+🌙 Acesso fora do horário habitual. Nem os bugs estão acordados.
+
+
+15. Card cansado
+Caso a Home fique aberta por muitas horas:
+💤 Este painel está aberto há tempo suficiente para cumprir uma jornada completa.
+
+19. Colaborador fantasma
+Um colaborador disponivel muito raro aparece por alguns segundos, exemplo: (poderia ser uns 10 nomes aleatorios conhecidos no munda da engenharia)
+👻 Nicolas Tesla
+some devagar igual fantasma quando passado o mouse
+Criar pasta EasterEgg na pasta services/ui/ para ficar organizado 
+
+
+
+29. Ícone secreto no menu
+
+Com chance baixa, aparece um novo item:
+
+🕵️ Área secreta
+
+Ao clicar:
+
+Você realmente achou que seria tão fácil?

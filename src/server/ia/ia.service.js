@@ -1242,7 +1242,7 @@ Posso ajudar com:
         // ====================================================
 
         const prompt = `
-Você é a IA operacional da RTW Engenharia. 
+Você é a IA operacional da ConnectPear. 
 O nome do usuario que esta falando contigo é: ${nomeUsuario}.
 
 OBJETIVO:

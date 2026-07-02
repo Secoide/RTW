@@ -4,108 +4,456 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RTW Engenharia Elétrica - Carregando</title>
+  <link rel="icon" type="image/png" href="/logo_GS.png">
+  <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
+  <title>ConnectPear - Carregando</title>
 
   <link rel="stylesheet" type="text/css" href="css/padrao/thema.css">
 
-  <!-- Font Awesome -->
   <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    /* Tela de carregamento */
-    body, html {
+    body,
+    html {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background: rgb(36, 36, 36);
-      color: white;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      background:
+        linear-gradient(145deg, #1f1f1f 0%, #242424 48%, #000000 100%);
+      color: #f4f7f8;
+      font-family: "Segoe UI", Arial, sans-serif;
     }
 
     #loadingOverlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      box-sizing: border-box;
+      padding: 24px;
       text-align: center;
     }
 
     .logoLoading {
-      width: 180px;
-      margin-bottom: 30px;
-      animation: fadeIn 1.7s ease-in-out;
+      width: min(190px, 52vw);
+      margin-bottom: 28px;
+      filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.28));
+      animation: logoEntrada 900ms ease-out, respirar 2200ms ease-in-out infinite;
     }
 
     .loadingText {
-      font-size: 15px;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-size: clamp(18px, 4vw, 24px);
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .loadingMessage {
+      min-height: 22px;
+      max-width: 520px;
+      margin-bottom: 20px;
+      color: rgba(244, 247, 248, 0.72);
+      font-size: 13px;
+      line-height: 1.45;
+      transition: opacity 180ms ease;
+    }
+
+    .progressWrap {
+      width: min(460px, 86vw);
+    }
+
+    .progressInfo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      color: rgba(244, 247, 248, 0.74);
+      font-size: 12px;
+    }
+
+    .progressTrack {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .progressBar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ee7722, #efda38);
+      box-shadow: 0 0 18px rgba(238, 119, 34, 0.34);
+      transition: width 260ms ease;
+    }
+
+    .progressBar::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+      animation: brilho 1200ms linear infinite;
     }
 
     .loadingProgress {
+      margin-top: 10px;
+      color: rgba(239, 218, 56, 0.9);
       font-size: 12px;
-      color: #00ff597a;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.7); }
-      to { opacity: 1; transform: scale(1); }
+    @keyframes logoEntrada {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.86);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes respirar {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    @keyframes brilho {
+      from {
+        transform: translateX(-100%);
+      }
+
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+
+    .fade-out-loading {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 300ms ease;
+    }
+
+
+
+    .logo-expand {
+      animation:
+        expandLogoSmooth 1100ms cubic-bezier(0.22,
+          1,
+          0.36,
+          1) forwards;
+    }
+
+    @keyframes expandLogoSmooth {
+
+      0% {
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(0px);
+      }
+
+      60% {
+        transform: scale(3.5);
+        opacity: 1;
+        filter: blur(0px);
+      }
+
+      100% {
+        transform: scale(9);
+        opacity: 0;
+        filter: blur(25px);
+      }
+
+    }
+
+    #rtwReveal {
+      position: fixed;
+      inset: 0;
+
+      background:
+        radial-gradient(circle,
+          rgba(116, 116, 116, 0.18),
+          transparent 60%);
+
+      opacity: 0;
+
+      z-index: 999998;
+      pointer-events: none;
+    }
+
+    #rtwReveal.show {
+      animation: revealConnectPear 800ms ease forwards;
+    }
+
+    @keyframes revealConnectPear {
+
+      0% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+
+    }
+
+    #particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particula {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow:
+        0 0 8px #e9e9e9,
+        0 0 16px #6b6b6b;
+      opacity: 0;
+    }
+
+    .particula.animar {
+      animation: subirParticula linear forwards;
+    }
+
+    @keyframes subirParticula {
+      0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-120px) scale(1.2);
+        opacity: 0;
+      }
     }
   </style>
 </head>
 
 <body>
-  <!-- Overlay de loading -->
+  <div id="rtwReveal"></div>
+  <div id="particles"></div>
   <div id="loadingOverlay">
-    <img src="logo_GS.png" alt="Logo RTW Engenharia Elétrica" class="logoLoading">
-    <div class="loadingText">Bem-vindo!</div>
-    <div class="loadingProgress">Carregando: <span id="loadingPercent">0%</span></div>
+    <img src="logo_teste.png" alt="Logo ConnectPear" class="logoLoading">
+    <div class="loadingText">Preparando seu ambiente</div>
+    <div class="loadingMessage" id="loadingMessage">Conferindo a sessao e alinhando os paineis...</div>
+
+    <div class="progressWrap" aria-label="Progresso de carregamento">
+      <div class="progressInfo">
+        <span id="loadingStep">Iniciando</span>
+        <span><span id="loadingPercent">0</span>%</span>
+      </div>
+      <div class="progressTrack">
+        <div class="progressBar" id="progressBar"></div>
+      </div>
+      <div class="loadingProgress" id="loadingProgress">Aguarde um instante</div>
+    </div>
   </div>
 
-
-
-
-  <!-- Inatividade separado -->
   <script type="text/javascript" src="scripts/websocket/inatividade.js"></script>
-  <!-- Agora só carrega o main.js -->
   <script type="module" src="/client/js/main.js"></script>
 
   <script type="module">
-    
+    const mensagensRaras = [
+      "☕ O café ainda não terminou de inicializar, mas o sistema sim.",
+      "⚡ Procurando o neutro que juraram ter passado na obra.",
+      "☕ Contando quantos cafés foram necessários para carregar esta tela.",
+      "⚡ Verificando se a fase está na fase certa.",
+      "☕ Consultando o banco de dados e a garrafa térmica.",
+      "🔌 Confirmando que ninguém ligou 220V onde era 127V.",
+      "☕ A produtividade aumenta proporcionalmente à proximidade da cafeteira.",
+      "⚡ Medindo continuidade entre a engenharia e a realidade.",
+      "☕ Sincronizando os servidores com o horário do café.",
+      "🔧 Procurando aquele parafuso que desapareceu durante a montagem.",
+      "⚡ Validando se o eletricista realmente trouxe o multímetro.",
+      "☕ Carregamento temporariamente alimentado por café extra forte.",
+      "⚡ Conferindo se o estagiário não usou o DPS como borne.",
+      "☕ Calculando a resistência elétrica da segunda-feira de manhã.",
+      "⚡ Buscando o disjuntor que alguém desligou 'só um pouquinho'."
+    ];
 
-    // Simula o progresso do carregamento
+    const usarMensagemRara = Math.random() < 0.02; // 2%
+    const mensagemFinalRara = mensagensRaras[
+      Math.floor(Math.random() * mensagensRaras.length)
+    ];
+
+    const etapas = [
+      {
+        ate: 12,
+        titulo: "Autenticando usuário",
+        mensagem: "Validando permissões e preparando seu ambiente."
+      },
+      {
+        ate: 28,
+        titulo: "Carregando módulos",
+        mensagem: "Montando menus e recursos disponíveis para seu perfil."
+      },
+      {
+        ate: 45,
+        titulo: "Sincronizando informações",
+        mensagem: "Buscando comunicados, avisos e atualizações do sistema."
+      },
+      {
+        ate: 62,
+        titulo: "Preparando dashboard",
+        mensagem: "Organizando indicadores, aniversários e informações rápidas."
+      },
+      {
+        ate: 80,
+        titulo: "Conectando serviços",
+        mensagem: "Inicializando recursos inteligentes e integrações do sistema."
+      },
+      {
+        ate: 95,
+        titulo: "Finalizando ambiente",
+        mensagem: "Aplicando preferências e ajustando os últimos detalhes."
+      },
+      {
+        ate: 100,
+        titulo: "Bem Vindo",
+        mensagem: usarMensagemRara
+          ? mensagemFinalRara
+          : "Tudo pronto. Sua área de trabalho está disponível."
+      }
+    ];
+
+    const percentEl = document.getElementById("loadingPercent");
+    const barEl = document.getElementById("progressBar");
+    const stepEl = document.getElementById("loadingStep");
+    const messageEl = document.getElementById("loadingMessage");
+    const progressEl = document.getElementById("loadingProgress");
+
     let percent = 0;
+    let etapaAtual = "";
+
+    function atualizarEtapa(valor) {
+      const etapa = etapas.find(item => valor <= item.ate) || etapas[etapas.length - 1];
+      if (etapa.titulo === etapaAtual) return;
+
+      etapaAtual = etapa.titulo;
+      stepEl.textContent = etapa.titulo;
+      messageEl.style.opacity = "0";
+
+      setTimeout(() => {
+        messageEl.textContent = etapa.mensagem;
+        messageEl.style.opacity = "1";
+      }, 160);
+    }
+    function criarParticula() {
+
+      const container =
+        document.getElementById("particles");
+
+      const p =
+        document.createElement("div");
+
+      p.className =
+        "particula animar";
+
+      const logo =
+        document.querySelector(".logoLoading");
+
+      const rect =
+        logo.getBoundingClientRect();
+
+      p.style.left =
+        rect.left +
+        rect.width / 2 +
+        (Math.random() * 320 - 150)
+        + "px";
+
+      p.style.top =
+        rect.top +
+        rect.height / 2 +
+        (Math.random() * 50 + 120)
+        + "px";
+
+      p.style.animationDuration =
+        (1 + Math.random() * 1.5) + "s";
+
+      container.appendChild(p);
+
+      setTimeout(() => {
+        p.remove();
+      }, 2500);
+    }
     const intervalo = setInterval(() => {
-      percent += Math.floor(Math.random() * 14) + 1;
-      if (percent > 100) percent = 100;
 
-      document.getElementById("loadingPercent").innerText = percent + "%";
+      const incremento = percent < 65
+        ? Math.floor(Math.random() * 7) + 4
+        : Math.floor(Math.random() * 4) + 2;
 
-      if (percent === 100) {
-        document.querySelector(".loadingProgress").innerText = "Sistema carregado!";
+      percent = Math.min(percent + incremento, 100);
+      percentEl.textContent = percent;
+      barEl.style.width = `${percent}%`;
+      atualizarEtapa(percent);
+      if (percent >= 50) {
+        criarParticula();
+      }
+      if (percent >= 100) {
         clearInterval(intervalo);
 
-        // Exemplo: inicializa o contexto de colaboradores (opcional)
-        try {
-        } catch (err) {
-          console.warn("Contexto de colaboradores não encontrado (opcional).");
-        }
+        progressEl.textContent = "Sistema carregado";
 
-        // Aguarda 1 segundo e redireciona para home.html
+        const logo = document.querySelector(".logoLoading");
+        const reveal = document.getElementById("rtwReveal");
+
+        const textos = document.querySelectorAll(
+          ".loadingText, #loadingMessage, .loadingMessage, .progressWrap"
+        );
+
         setTimeout(() => {
+
+          // Esconde textos e barra
+          document.querySelectorAll(
+            ".loadingText, #loadingMessage, .progressWrap"
+          ).forEach(el => el.remove());
+
+
+        }, 250);
+
+        setTimeout(() => {
+
+          reveal.classList.add("show");
+          logo.classList.add("logo-expand");
+
+        }, 700);
+
+        setTimeout(() => {
+
           window.location.href = "/home";
-        }, 1000);
-        
+
+        }, 1400);
+
       }
-    }, 120);
+    }, 180);
   </script>
 </body>
+
 </html>

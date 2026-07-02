@@ -1,6 +1,7 @@
 const connection = require('../config/db');
 
 async function buscarUsuarioPorUsername(username) {
+  const identificador = String(username || "").trim();
   const sql = `
     SELECT 
     f.id,
@@ -14,10 +15,10 @@ async function buscarUsuarioPorUsername(username) {
 FROM funcionarios f
 LEFT JOIN tb_cargos c ON f.cargo = c.id
 LEFT JOIN tb_setores s ON c.idsetor = s.id_catnvl
-WHERE f.id = ? OR f.mail = ?
+WHERE CAST(f.id AS CHAR) = ? OR LOWER(TRIM(f.mail)) = LOWER(TRIM(?))
 LIMIT 1;
   `;
-  const [rows] = await connection.query(sql, [username, username]);
+  const [rows] = await connection.query(sql, [identificador, identificador]);
   return rows[0] || null;
 }
 

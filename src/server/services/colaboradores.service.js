@@ -1,4 +1,5 @@
 const ColabModel = require('../models/colaboradores.model');
+const SaasService = require('./saas.service');
 const bcrypt = require('bcrypt');
 const fsPromises = require('fs').promises;
 const path = require('path');
@@ -32,13 +33,14 @@ async function gerarHash(senha) {
   return await bcrypt.hash(senha, saltRounds);
 }
 
-async function criarColaborador(data) {
+async function criarColaborador(data, options = {}) {
   if (!data.nome || !data.cpf || !data.email) {
     throw new Error('Nome, e-mail e CPF são obrigatórios');
   }
 
   // Normaliza CPF (remove pontuação)
   const cpfLimpo = data.cpf.replace(/\D/g, '').trim();
+  const rgLimpo = data.rg ? String(data.rg).trim() : null;
 
   // Verifica se já existe CPF
   const existente = await ColabModel.findByCPF(cpfLimpo);
@@ -47,7 +49,7 @@ async function criarColaborador(data) {
   }
 
   // Verifica se já existe RG
-  const existenterg = await ColabModel.findByRG(data.rg);
+  const existenterg = rgLimpo ? await ColabModel.findByRG(rgLimpo) : null;
   if (existenterg) {
     throw new Error('RG já cadastrado.');
   }
@@ -65,14 +67,29 @@ async function criarColaborador(data) {
     mail: data.email,
     sobre: data.sobre,
     cpf: cpfLimpo,
-    rg: data.rg,
+    rg: rgLimpo,
     senha: senhaHash,
     fotoperfil: data.fotoperfil || '/imagens/user-default.webp'
   };
 
-
   const novo = await ColabModel.createColaborador(colaborador);
-  return { ...novo, senhaPadrao: data.senha ? undefined : '123' };
+  const retorno = { ...novo, senhaPadrao: data.senha ? undefined : '123' };
+  const idEmpresaSaas = options.empresaSaas?.id_empresa_saas;
+
+  if (!idEmpresaSaas) {
+    return retorno;
+  }
+  console.log(idEmpresaSaas, '|', novo.id);
+  try {
+    await SaasService.vincularUsuarioEmpresa(idEmpresaSaas, novo.id);
+    retorno.empresaSaasVinculada = true;
+  } catch (err) {
+    console.error('Erro ao vincular novo usuario a empresa SaaS:', err);
+    retorno.empresaSaasVinculada = false;
+    retorno.avisoSaas = 'Usuário criado, mas não foi possível vincular automaticamente à empresa logada.';
+  }
+
+  return retorno;
 }
 
 
@@ -393,8 +410,8 @@ async function salvarFotoPerfil(userId, file) {
   return publicURL;
 }
 
-async function getHallExperienciaRTW() {
-  return await ColabModel.getHallExperienciaRTW();
+async function getHallExperienciaConnectPear() {
+  return await ColabModel.getHallExperienciaConnectPear();
 }
 
 async function addConquista(
@@ -416,6 +433,16 @@ async function getConquistasColaborador(
   return await ColabModel
     .getConquistasColaborador(
       idColaborador
+    );
+
+}
+
+async function removerConquista(idColaborador, tipo) {
+
+  return await ColabModel
+    .removerConquista(
+      idColaborador,
+      tipo
     );
 
 }
@@ -447,7 +474,8 @@ module.exports = {
   cadastrarAtestado,
   buscarHistoricoColabPorEmpresa,
   salvarFotoPerfil,
-  getHallExperienciaRTW,
+  getHallExperienciaConnectPear,
   addConquista,
-  getConquistasColaborador
+  getConquistasColaborador,
+  removerConquista
 };

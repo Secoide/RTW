@@ -133,7 +133,7 @@ export async function preencherCbxExame() {
 
     $cbx.append('<option value="" disabled selected hidden>Selecione o Exame...</option>');
     data.forEach(e => {
-      $cbx.append(`<option value="${e.idexame}">${e.nome}</option>`);
+      $cbx.append(`<option value="${e.idexame}" data-vencimento="${Number(e.vencimento ?? 1)}">${e.nome}</option>`);
     });
   } catch (err) {
     console.error("Erro carregar exames:", err);
@@ -156,7 +156,7 @@ export async function preencherCbxCurso() {
 
     $cbx.append('<option value="" disabled selected hidden>Selecione o Curso...</option>');
     data.forEach(c => {
-      $cbx.append(`<option value="${c.id}">${c.nome}</option>`);
+      $cbx.append(`<option value="${c.id}" data-vencimento="${Number(c.vencimento ?? 1)}">${c.nome}</option>`);
     });
   } catch (err) {
     console.error("Erro carregar cursos:", err);

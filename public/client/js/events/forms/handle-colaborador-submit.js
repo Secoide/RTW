@@ -41,6 +41,10 @@ export function initColabForm() {
                 let msg = `Colaborador cadastrado com sucesso!`;
                 msg += `\n\nLogin: ${res.id}`;
                 msg += `\nSenha: ${res.senhaPadrao}`;
+                if (res.empresaSaasVinculada) {
+                } else if (res.avisoSaas) {
+                    msg += `\n\nAviso: ${res.avisoSaas}`;
+                }
 
                 $('#idColaborador').val(res.id);
                 $('#idColaboradorPro').val(res.id);

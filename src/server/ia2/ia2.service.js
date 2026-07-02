@@ -28,7 +28,7 @@ async function gerarComentarioIA(
 
         const prompt = `
 
-Você é um analista operacional da RTW Engenharia.
+Você é um analista operacional da ConnectPear.
 
 Analise os dados abaixo e gere um comentário executivo.
 

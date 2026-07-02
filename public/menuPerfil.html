@@ -1,20 +1,32 @@
-<div class="menu_Perfil glass">
-    <img id="fotoavatarPerfil" class="tb_fotoColab glass" src="/imagens/fotoperfil/user-default.jpg?v=null" onerror="this.src='/imagens/user-default.webp'">
-    <div class="menuSuperiorDir">
-        <div id="notification-container" title="Notificações" style="cursor: pointer;">
-            <i class="fa fa-bell notif"></i>
-            <span id="notification-count">0</span>
-        </div>
-
-        <div id="notification-list" class="notification-lista glass">
-            Nenhuma notificação!
-            <!-- Notificações serão inseridas aqui -->
-        </div>
-
-        <a id="bt_perfilhome" class="nomePerfil" title="Perfil" style="cursor: pointer;">-</a>
-        <a id="toggle-theme" title="Alterar tema" style="margin-right: 10px;"><i class="fas fa-sun"></i></a>
+<div class="menu_Perfil" aria-label="Menu do usuario">
+    <div class="perfil-avatar-area">
+        <img id="fotoavatarPerfil" class="tb_fotoColab" src="/imagens/fotoperfil/user-default.jpg?v=null" onerror="this.src='/imagens/user-default.webp'">
+        <span id="perfil-notification-badge" class="perfil-notification-badge">0</span>
     </div>
-    <div class="menuInferior">
-        <a class="bt_menuSair" id="btnLogout" href="#"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+
+    <div class="menuSuperiorDir">
+        <div class="perfil-meta">
+            <span class="perfil-kicker">Perfil</span>
+            <a id="bt_perfilhome" class="nomePerfil" title="Abrir perfil">-</a>
+        </div>
+
+        <div class="perfil-actions">
+            <button id="notification-container" type="button" title="Notificacoes">
+                <i class="fa fa-bell notif"></i>
+                <span id="notification-count">0</span>
+            </button>
+
+            <a id="btnPreferenciasUsuario" class="perfil-action" title="Preferencias do usuario">
+                <i class="fa-solid fa-gear"></i>
+            </a>
+
+            <a class="bt_menuSair perfil-action" id="btnLogout" href="#" title="Sair">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </a>
+        </div>
+    </div>
+
+    <div id="notification-list" class="notification-lista">
+        <div class="notification-empty">Nenhuma notificacao.</div>
     </div>
 </div>

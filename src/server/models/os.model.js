@@ -244,6 +244,92 @@ async function salvarAnotacoesOS(datadia, anotacoes, icone) {
   return true;
 }
 
+async function listarPaineisOS(idOS) {
+  const [rows] = await connection.query(`
+    SELECT
+      op.id_os_painel,
+      op.id_os,
+      op.id_painel,
+      pe.numero_serie,
+      pe.atuacao_painel,
+      pe.cliente,
+      pe.tensao,
+      pe.frequencia,
+      pe.dimensoes,
+      pe.projetista,
+      pe.montador
+    FROM os_paineis_eletricos op
+    INNER JOIN paineis_eletricos pe ON pe.id_painel = op.id_painel
+    WHERE op.id_os = ?
+    ORDER BY pe.numero_serie ASC
+  `, [idOS]);
+
+  return rows;
+}
+
+async function vincularPainelOS(data) {
+  const [result] = await connection.query(`
+    INSERT INTO os_paineis_eletricos
+      (id_os, id_painel)
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE
+      id_painel = VALUES(id_painel)
+  `, [
+    data.id_os,
+    data.id_painel
+  ]);
+
+  return result;
+}
+
+async function removerPainelOS(idOS, idPainel) {
+  const [result] = await connection.query(`
+    DELETE FROM os_paineis_eletricos
+    WHERE id_os = ? AND id_painel = ?
+  `, [idOS, idPainel]);
+
+  return result.affectedRows > 0;
+}
+
+async function buscarComplementosOS(idOS) {
+  const [rows] = await connection.query(`
+    SELECT id_os, tipo_servico, pta_alocada, painel_eletrico_previsto, observacao
+    FROM os_complementos
+    WHERE id_os = ?
+    LIMIT 1
+  `, [idOS]);
+
+  return rows[0] || {
+    id_os: idOS,
+    tipo_servico: null,
+    pta_alocada: 0,
+    painel_eletrico_previsto: 0,
+    observacao: null
+  };
+}
+
+async function salvarComplementosOS(data) {
+  await connection.query(`
+    INSERT INTO os_complementos
+      (id_os, tipo_servico, pta_alocada, painel_eletrico_previsto, observacao)
+    VALUES (?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      tipo_servico = VALUES(tipo_servico),
+      pta_alocada = VALUES(pta_alocada),
+      painel_eletrico_previsto = VALUES(painel_eletrico_previsto),
+      observacao = VALUES(observacao),
+      atualizado_em = CURRENT_TIMESTAMP
+  `, [
+    data.id_os,
+    data.tipo_servico || null,
+    data.pta_alocada ? 1 : 0,
+    data.painel_eletrico_previsto ? 1 : 0,
+    data.observacao || null
+  ]);
+
+  return buscarComplementosOS(data.id_os);
+}
+
 
 async function getAnotacoesOS(dataDia) {
 
@@ -307,5 +393,10 @@ module.exports = {
   updateStatusOS,
   getStatusOS,
   getAnotacoesOS,
-  salvarAnotacoesOS
+  salvarAnotacoesOS,
+  listarPaineisOS,
+  vincularPainelOS,
+  removerPainelOS,
+  buscarComplementosOS,
+  salvarComplementosOS
 };

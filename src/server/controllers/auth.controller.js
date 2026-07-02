@@ -1,5 +1,14 @@
 const authService = require('../services/auth.service');
 
+function getCookieOptions() {
+  return {
+    path: '/',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  };
+}
+
 async function loginController(req, res, next) {
   const { username, password } = req.body;
 
@@ -10,13 +19,18 @@ async function loginController(req, res, next) {
       return res.status(401).json(result);
     }
 
-    // cria sessão
-    req.session.usuarioId = result.usuario.id;
-    req.session.usuarioNome = result.usuario.nome;
-    req.session.nivel_acesso = result.usuario.nivel; // <-- ESTA LINHA FALTAVA
+    req.session.regenerate((regenerateErr) => {
+      if (regenerateErr) return next(regenerateErr);
 
-    req.session.save(() => {
-      res.json(result);
+      req.session.usuarioId = result.usuario.id;
+      req.session.usuarioNome = result.usuario.nome;
+      req.session.nivel_acesso = result.usuario.nivel;
+      req.session.saas = result.usuario.saas || null;
+
+      req.session.save((saveErr) => {
+        if (saveErr) return next(saveErr);
+        res.json(result);
+      });
     });
 
   } catch (err) {
@@ -81,6 +95,13 @@ async function resetarSenhaController(req, res, next) {
 
 
 async function logoutController(req, res) {
+  const cookieOptions = getCookieOptions();
+
+  if (!req.session) {
+    res.clearCookie("rtw.sid", cookieOptions);
+    return res.json({ sucesso: true });
+  }
+
   req.session.destroy(err => {
     if (err) {
       return res.status(500).json({
@@ -89,8 +110,85 @@ async function logoutController(req, res) {
       });
     }
 
-    res.clearCookie("connect.sid"); // nome padrão do cookie
+    res.clearCookie("rtw.sid", cookieOptions);
     return res.json({ sucesso: true });
+  });
+}
+
+async function logoutAllController(req, res) {
+  const usuarioId = req.session?.usuarioId;
+  const store = req.sessionStore;
+  const cookieOptions = getCookieOptions();
+
+  if (!usuarioId || !store) {
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Nao foi possivel localizar as sessoes do usuario."
+    });
+  }
+
+  const chamarStore = (metodo, ...args) => new Promise((resolve, reject) => {
+    if (typeof store[metodo] !== "function") {
+      reject(new Error(`Store sem suporte a ${metodo}.`));
+      return;
+    }
+
+    store[metodo](...args, (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+
+  try {
+    let sessoesUsuario = [];
+
+    if (typeof store.ids === "function" && typeof store.get === "function") {
+      const ids = await chamarStore("ids");
+      const sessoes = await Promise.all(
+        ids.map(async sid => {
+          const sessao = await chamarStore("get", sid);
+          return [sid, sessao];
+        })
+      );
+
+      sessoesUsuario = sessoes.filter(([, sessao]) => {
+        return Number(sessao?.usuarioId) === Number(usuarioId);
+      });
+    } else if (typeof store.all === "function") {
+      const sessions = await chamarStore("all");
+      const entries = Object.entries(sessions || {});
+      sessoesUsuario = entries.filter(([, sessao]) => {
+        return Number(sessao?.usuarioId) === Number(usuarioId);
+      });
+    } else {
+      throw new Error("Store sem listagem de sessoes.");
+    }
+
+    await Promise.all(sessoesUsuario.map(([sid]) => chamarStore("destroy", sid)));
+
+    res.clearCookie("rtw.sid", cookieOptions);
+    return res.json({
+      sucesso: true,
+      encerradas: sessoesUsuario.length
+    });
+  } catch (err) {
+    console.error("Erro ao encerrar todas as sessoes:", err);
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao encerrar sessoes ativas."
+    });
+  }
+}
+
+function statusController(req, res) {
+  res.json({
+    sucesso: true,
+    usuario: {
+      id: req.user.id,
+      nome: req.user.nome,
+      nivel: req.user.role
+    },
+    saas: req.user.saas || null
   });
 }
 
@@ -100,6 +198,7 @@ module.exports = {
   alterarSenhaController,
   recuperarSenhaController,
   resetarSenhaController,
-  logoutController
+  logoutController,
+  logoutAllController,
+  statusController
 };
-
