@@ -101,7 +101,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Corrigido
 
 
-
+----- VERSAO ATUAL
 ## [2.1.0] - 2026-08-12
 ## Nome: 📜 PDFs e Notificações
 ### Adicionado
@@ -122,6 +122,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Atualizados colunas do banco de dados para usarem a data de entrada no lugar do exame admissional;
 - Repaginado janela de cadastro e informções das Ordens de Serviço;
 - Agora recarregar página volta para a mesma tela que estava trabalhando (ainda reseta dados que esteve preenchendo);
+- A exportação da programação pergunta sobre anotações somente quando houver anotações no dia;
 
 ### Corrigido
 - Corrigido problema em que colaboradores adicionados por # ou $ podiam aparecer na OS sem terem sido gravados no banco após reconexão do servidor;
@@ -133,7 +134,6 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
------ VERSAO ATUAL
 ## [2.0.0] - 2026-07-01
 ## Nome: 🎨 Nova Identidade Visual 
 

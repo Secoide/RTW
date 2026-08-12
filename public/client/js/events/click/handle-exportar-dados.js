@@ -219,7 +219,7 @@ async function exportarWHATS($btn) {
     let dadosOS =
       `—— *OS ${idOS}* ——\n` +
       `> ${cliente.toUpperCase()} - ${descricaoFormatada}\n` + 
-       "» ```" + `${responsavel}` + "``` \n";
+       "» ```Gestor: " + `${responsavel}` + "``` \n";
 
     if (!preferenciasExportacao.mostrarResponsavel) {
       dadosOS = dadosOS.replace(/(?:Â»|»)\s*```[\s\S]*?```\s*\n?$/, "");
@@ -263,41 +263,33 @@ async function exportarWHATS($btn) {
   }
 
 
-  let adicionarObservacoes = preferenciasExportacao.adicionarObservacoesAutomaticamente;
+  try {
+    const dados = await $.get(`/api/os/anotacoes/${normalizarDataAnotacoesProgramacao(diaOriginal)}`);
+    const anotacoes = normalizarAnotacoesProgramacao(dados);
 
-  if (!adicionarObservacoes) {
-    const result = await Swal.fire({
-    text: "Deseja adicionar as anotações na programação?",
-    icon: "warning",
-    theme: "dark",
-    showCancelButton: true,
-    confirmButtonColor: "#51d630",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Sim"
-    });
-    adicionarObservacoes = result.isConfirmed;
-  }
-  // 🔹 Pergunta observações
-  if (adicionarObservacoes) {
-    try {
+    if (anotacoes.length > 0) {
+      let adicionarObservacoes = preferenciasExportacao.adicionarObservacoesAutomaticamente;
 
-      const dados = await $.get(`/api/os/anotacoes/${diaOriginal}`);
-
-      if (dados?.anotacoes?.length > 0) {
-
-        let linhas = "";
-
-        dados.anotacoes.forEach((texto, index) => {
-          const icone = dados.icones?.[index] || "📝";
-          linhas += `> ${texto}\n`;
+      if (!adicionarObservacoes) {
+        const result = await Swal.fire({
+          text: "Deseja adicionar as anotações na programação?",
+          icon: "warning",
+          theme: "dark",
+          showCancelButton: true,
+          confirmButtonColor: "#51d630",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sim"
         });
-
-        enviar += `\n⚠️ *OBSERVAÇÕES:*\n${linhas}`;
+        adicionarObservacoes = result.isConfirmed;
       }
 
-    } catch (err) {
-      console.error("Erro ao carregar anotações:", err);
+      if (adicionarObservacoes) {
+        const linhas = anotacoes.map(texto => `> ${texto}`).join("\n");
+        enviar += `\n⚠️ *OBSERVAÇÕES:*\n${linhas}\n`;
+      }
     }
+  } catch (err) {
+    console.error("Erro ao carregar anotações:", err);
   }
 
   copiarTexto(
@@ -317,9 +309,37 @@ function formatarNomeResponsavelWhats(nomeCompleto) {
 
   const primeiroNome = partes[0];
   const ultimoNome = partes.length > 1 ? partes[partes.length - 1] : "";
-  const inicialSobrenome = ultimoNome ? `${ultimoNome.charAt(0).toUpperCase()}.` : "";
 
-  return [primeiroNome, inicialSobrenome].filter(Boolean).join(" ");
+  return [primeiroNome, ultimoNome].filter(Boolean).join(" ");
+}
+
+function normalizarDataAnotacoesProgramacao(data) {
+  if (data instanceof Date && !Number.isNaN(data.getTime())) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const dia = String(data.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  return String(data || "").slice(0, 10);
+}
+
+function normalizarAnotacoesProgramacao(dados) {
+  const origem = Array.isArray(dados?.anotacoes)
+    ? dados.anotacoes
+    : String(dados?.anotacoes || "")
+      .replace(/[{}]/g, "")
+      .split(";");
+
+  return origem
+    .map(item => {
+      if (item && typeof item === "object") {
+        return item.anotacoes || item.texto || item.descricao || "";
+      }
+      return item;
+    })
+    .map(texto => String(texto || "").replace(/"/g, "").trim())
+    .filter(Boolean);
 }
 
 async function exportarPDF($btn) {
@@ -411,10 +431,8 @@ function coletarProgramacaoDiaPDF($painelDia) {
 
 async function carregarAnotacoesProgramacaoPDF(diaOriginal) {
   try {
-    const dados = await $.get(`/api/os/anotacoes/${diaOriginal}`);
-    return Array.isArray(dados?.anotacoes)
-      ? dados.anotacoes.filter(texto => String(texto || "").trim())
-      : [];
+    const dados = await $.get(`/api/os/anotacoes/${normalizarDataAnotacoesProgramacao(diaOriginal)}`);
+    return normalizarAnotacoesProgramacao(dados);
   } catch (err) {
     console.warn("Nao foi possivel carregar anotacoes para o PDF.", err);
     return [];

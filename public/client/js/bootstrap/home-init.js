@@ -1946,9 +1946,10 @@ function formatarDataConquistaHome(valor, tipo) {
   if (!data) return "";
 
   if (tipo === "DESTAQUE_MES") {
-    return data.toLocaleDateString("pt-BR", {
+    const mes = data.toLocaleDateString("pt-BR", {
       month: "long"
     }).toUpperCase("pt-BR");
+    return `${mes}/${data.getFullYear()}`;
   }
 
   if (tipo === "DESTAQUE_ANO") {
