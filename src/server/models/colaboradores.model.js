@@ -1215,7 +1215,7 @@ async function getHallExperienciaConnectPear() {
       f.fotoperfil,
       f.versao_foto,
 
-      COALESCE(f.data_experiencia, a.data_admissao) AS data_admissao,
+      MAX(COALESCE(f.data_experiencia, a.data_admissao)) AS data_admissao,
 
       GROUP_CONCAT(
         CONCAT(
@@ -1313,7 +1313,7 @@ IFNULL(
       f.id
 
     ORDER BY
-      COALESCE(f.data_experiencia, a.data_admissao) ASC
+      data_admissao ASC
 
     LIMIT 50
 
