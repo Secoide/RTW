@@ -362,10 +362,6 @@ function abrirMenuConquista(event, idColaborador, tipo) {
 export async function carregarConquistasColaborador(
     idColaborador
 ) {
-    console.log(
-        'Carregando conquistas:',
-        idColaborador
-    );
     const dados =
         await $.get(
             `/api/colaboradores/conquistas/${idColaborador}`

@@ -262,10 +262,10 @@ function preencherFormulario(preferencias) {
   ].join("");
 
   document.getElementById("preferenciasAvisos").innerHTML = [
-    criarSwitch("prefNotificacoesOnline", "Avisos de usuários online", "Mostra entradas e menções do chat online.", preferencias.notificacoesOnline),
-    criarSwitch("prefAbrirChatOnline", "Abrir chat online automaticamente", "Mantém a aba de chat pronta ao entrar na home.", preferencias.abrirChatOnline),
-    criarSwitch("prefSilenciarChatGlobal", "Silenciar chat global", "Oculta avisos e contador de novas mensagens do Grupo geral.", preferencias.silenciarChatGlobal),
-    `
+    criarSwitch("prefNotificacoesOnline", "Avisos de usuários online", "Mostra entradas de usuario online.", preferencias.notificacoesOnline),
+    //criarSwitch("prefAbrirChatOnline", "Abrir chat online automaticamente", "Mantém a aba de chat pronta ao entrar na home.", preferencias.abrirChatOnline),
+    //criarSwitch("prefSilenciarChatGlobal", "Silenciar chat global", "Oculta avisos e contador de novas mensagens do Grupo geral.", preferencias.silenciarChatGlobal),
+    /*`
       <label class="preferencia-field" for="prefHistoricoChatDias">
         <span>Histórico do chat</span>
         <select id="prefHistoricoChatDias">
@@ -280,14 +280,14 @@ function preencherFormulario(preferencias) {
         <i class="fa-solid fa-broom"></i>
         <span>Limpar histórico do chat agora</span>
       </button>
-    `
+    `*/
   ].join("");
 
-  document.getElementById("prefHistoricoChatDias").value = String(preferencias.historicoChatDias ?? 10);
+  //document.getElementById("prefHistoricoChatDias").value = String(preferencias.historicoChatDias ?? 10);
 
   document.getElementById("preferenciasNotificacoes").innerHTML = [
     criarSwitch("prefNotifProgramacao", "Programação", "Recebe avisos quando a programação do dia for lançada ou alterada.", preferencias.notificacoesProgramacao),
-    criarSwitch("prefNotifChat", "Chat online", "Recebe avisos de mensagens, menções e chamadas do chat.", preferencias.notificacoesChat),
+    //criarSwitch("prefNotifChat", "Chat online", "Recebe avisos de mensagens, menções e chamadas do chat.", preferencias.notificacoesChat),
     criarSwitch("prefNotifAlertas", "Alertas importantes", "Recebe avisos de atenção, falhas e alertas do sistema.", preferencias.notificacoesAlertas),
     criarSwitch("prefNotifGerais", "Notificações gerais", "Recebe comunicados e avisos que não se encaixam nas categorias acima.", preferencias.notificacoesGerais)
   ].join("");

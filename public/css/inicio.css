@@ -2903,14 +2903,13 @@ LOCK
 }
 
 #hall-experiencia.hall-em-desenvolvimento::before {
-    content: "";
+    content: "Tempo de empresa e Reconhecimentos";
+    padding: 20px;
+    font-size: 11px;
     position: absolute;
     inset: 0;
     z-index: 4;
-    background:
-        radial-gradient(circle at 20% 20%, rgba(32, 32, 32, 0.13), transparent 28%),
-        linear-gradient(135deg, rgba(16, 16, 16, 0.62), rgba(30, 30, 30, 0.84));
-    backdrop-filter: blur(5px);
+    background: #1b1b1b;
 }
 
 #hall-experiencia.hall-em-desenvolvimento::after {

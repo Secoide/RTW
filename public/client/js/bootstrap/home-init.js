@@ -1396,15 +1396,10 @@ function carregarFotoPerfil() {
         console.warn("Colaborador nao encontrado.");
         return;
       }
-      const fotoURL = dados.fotoperfil + "?v=" + dados.versao_foto;
+      const fotoURL = montarUrlFotoPerfil(dados.fotoperfil, dados.versao_foto);
+      atualizarAvatarPerfil(fotoURL);
 
-      if (fotoURL && fotoURL.startsWith("http")) {
-        $('#fotoavatarPerfil').attr('src', fotoURL);
-      } else {
-        $('#fotoavatarPerfil').attr('src', '/imagens/user-default.webp');
-      }
-
-      $('#fotoavatarPerfil').on('error', function () {
+      $('#fotoavatarPerfil, #avatarMobile').off('error.fotoPerfil').on('error.fotoPerfil', function () {
         console.warn("Foto do perfil não encontrada. Carregando padrão.");
         $(this).attr('src', '/imagens/user-default.webp');
       });
@@ -1421,6 +1416,28 @@ function carregarFotoPerfil() {
       console.warn('Erro ao carregar foto do perfil.', err);
     }
   });
+}
+
+function montarUrlFotoPerfil(foto, versao) {
+  const caminho = String(foto || "").trim();
+  if (!caminho || caminho === "null" || caminho === "undefined") {
+    return "/imagens/user-default.webp";
+  }
+
+  const separador = caminho.includes("?") ? "&" : "?";
+  const cache = versao ? `${separador}v=${encodeURIComponent(versao)}` : "";
+
+  if (/^https?:\/\//i.test(caminho) || caminho.startsWith("/")) {
+    return `${caminho}${cache}`;
+  }
+
+  return `/${caminho.replace(/^\/+/, "")}${cache}`;
+}
+
+function atualizarAvatarPerfil(src) {
+  const foto = src || "/imagens/user-default.webp";
+  $('#fotoavatarPerfil').attr('src', foto);
+  $('#avatarMobile').attr('src', foto);
 }
 
 
@@ -1739,7 +1756,7 @@ function renderizarColaboradorIA(
 }
 
 async function carregarHallExperiencia() {
-  return; //DESATIVADO por enquanto.
+  //return; //DESATIVADO por enquanto.
   const resp =
     await fetch(
       "/api/colaboradores/hall-experiencia",
