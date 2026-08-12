@@ -1,4 +1,4 @@
-// /public/client/js/events/contextmenu/handle-colaboradores-contextmenu.js
+﻿// /public/client/js/events/contextmenu/handle-colaboradores-contextmenu.js
 import { carregarColaboradoresDisp, carregarOSComColaboradores } from "../../services/api/programacao-service.js";
 import { get_carregarPerfilUsuario } from "../click/handle-abrir-info-colab.js";
 import { open_form_AnexarCurso } from "../forms/anexarCurso.js";
@@ -10,7 +10,7 @@ import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
 import { formatarTelefoneParaWhatsApp } from "../../utils/formatters/number-format.js";
 
 // ========================================================
-// 🔧 Funções utilitárias globais
+// ðŸ”§ FunÃ§Ãµes utilitÃ¡rias globais
 // ========================================================
 
 function criarMenuContextual(e, opcoesMenu) {
@@ -24,7 +24,7 @@ function criarMenuContextual(e, opcoesMenu) {
 
   const addSeparator = () => {
     menu.append(
-      '<div class="menu-separador" style="color:#c0c0c0ff;font-size:8px;text-align:center;user-select:none;pointer-events:none;">────────────────────</div>'
+      '<div class="menu-separador" style="height:1px;margin:6px 8px;background:rgba(255,255,255,.12);user-select:none;pointer-events:none;"></div>'
     );
   };
 
@@ -108,7 +108,7 @@ async function registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fno
       timerProgressBar: true
     });
   } catch {
-    alert("Erro de comunicação com o servidor.");
+    alert("Erro de comunicaÃ§Ã£o com o servidor.");
   }
 }
 
@@ -138,7 +138,7 @@ function removerSupervisor(osID, dataDia, $colab) {
     method: "DELETE",
     success: () => $colab.removeClass("supervisor"),
     error: err => {
-      console.error("❌ Erro ao remover supervisor:", err);
+      console.error("âŒ Erro ao remover supervisor:", err);
       alert("Erro ao remover supervisor.");
     }
   });
@@ -146,7 +146,7 @@ function removerSupervisor(osID, dataDia, $colab) {
 
 function cancelarAgendamentoExame(idfce) {
   if (!idfce) {
-    console.error("❌ ID do exame não informado.");
+    console.error("âŒ ID do exame nÃ£o informado.");
     return;
   }
 
@@ -170,7 +170,7 @@ function cancelarAgendamentoExame(idfce) {
       Toast.fire({
         icon: "error",
         theme: "dark",
-        title: "Não foi possível cancelar o agendamento de exame."
+        title: "NÃ£o foi possÃ­vel cancelar o agendamento de exame."
       });
     }
   });
@@ -194,7 +194,7 @@ function calcularDataVencimento(dataISO, meses) {
 }
 
 function formatarPreviewVencimento(registro) {
-  if (Number(registro?.controla_vencimento ?? 1) === 0) return "Não vence";
+  if (Number(registro?.controla_vencimento ?? 1) === 0) return "NÃ£o vence";
   return `Vence: ${registro.data_vencimento || calcularDataVencimento(registro.data_realizada_input, registro.vencimento)}`;
 }
 
@@ -215,7 +215,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
         <div class="editor-exames-header">
           <div>
             <h3>Editar exames anexados</h3>
-            <p>Carregando histórico do exame...</p>
+            <p>Carregando histÃ³rico do exame...</p>
           </div>
         </div>
         <div id="editorExamesConteudo" class="editor-exames-conteudo">
@@ -237,7 +237,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
       });
 
       if (!res.ok) {
-        throw new Error("Não foi possível carregar o histórico do exame.");
+        throw new Error("NÃ£o foi possÃ­vel carregar o histÃ³rico do exame.");
       }
 
       const registros = await res.json();
@@ -271,7 +271,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
           : '<span class="sem_pdf">Sem PDF</span>'}
           </td>
           <td class="editor-exames-acoes">
-            <button type="button" class="bt_teste glass bt_salvar_registro_exame" title="Salvar alterações" aria-label="Salvar alterações">Salvar</button>
+            <button type="button" class="bt_teste glass bt_salvar_registro_exame" title="Salvar alteraÃ§Ãµes" aria-label="Salvar alteraÃ§Ãµes">Salvar</button>
             <button type="button" class="bt_teste glass bt_excluir_registro_exame" title="Excluir registro do exame" aria-label="Excluir registro do exame">Excluir</button>
           </td>
         </tr>
@@ -287,7 +287,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
                 <th>Vencimento</th>
                 <th>Novo anexo</th>
                 <th>PDF anexado</th>
-                <th>Ações</th>
+                <th>AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody>${linhas}</tbody>
@@ -327,7 +327,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
 
     const result = await Swal.fire({
       title: "Remover anexo?",
-      text: "O PDF será removido deste registro de exame.",
+      text: "O PDF serÃ¡ removido deste registro de exame.",
       icon: "warning",
       theme: "dark",
       showCancelButton: true,
@@ -344,7 +344,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
       });
       const json = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(getMensagemErroApi(json, "Não foi possível remover o anexo."));
+      if (!res.ok) throw new Error(getMensagemErroApi(json, "NÃ£o foi possÃ­vel remover o anexo."));
 
       Toast.fire({ icon: "success", theme: "dark", title: json.message || "Anexo removido." });
       await render();
@@ -361,7 +361,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
 
     const result = await Swal.fire({
       title: "Excluir registro?",
-      text: "O registro do exame e o PDF anexado serão removidos do colaborador.",
+      text: "O registro do exame e o PDF anexado serÃ£o removidos do colaborador.",
       icon: "warning",
       theme: "dark",
       showCancelButton: true,
@@ -378,9 +378,9 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
       });
       const json = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(getMensagemErroApi(json, "Não foi possível excluir o registro."));
+      if (!res.ok) throw new Error(getMensagemErroApi(json, "NÃ£o foi possÃ­vel excluir o registro."));
 
-      Toast.fire({ icon: "success", theme: "dark", title: "Registro de exame excluído." });
+      Toast.fire({ icon: "success", theme: "dark", title: "Registro de exame excluÃ­do." });
       await render();
       preencherTabelaColaboradoresRH();
       document.querySelector('.bt_menu[data-target=".painel_exames"]')?.click();
@@ -413,7 +413,7 @@ async function abrirEditorHistoricoExames(idColab, idExame) {
       });
       const json = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(getMensagemErroApi(json, "Não foi possível salvar o exame."));
+      if (!res.ok) throw new Error(getMensagemErroApi(json, "NÃ£o foi possÃ­vel salvar o exame."));
 
       Toast.fire({ icon: "success", theme: "dark", title: json.message || "Exame atualizado." });
       await render();
@@ -438,7 +438,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
         <div class="editor-exames-header">
           <div>
             <h3>Editar cursos anexados</h3>
-            <p>Carregando histórico do curso...</p>
+            <p>Carregando histÃ³rico do curso...</p>
           </div>
         </div>
         <div id="editorCursosConteudo" class="editor-exames-conteudo">
@@ -460,7 +460,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
       });
 
       if (!res.ok) {
-        throw new Error("Não foi possível carregar o histórico do curso.");
+        throw new Error("NÃ£o foi possÃ­vel carregar o histÃ³rico do curso.");
       }
 
       const registros = await res.json();
@@ -494,7 +494,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
           : '<span class="sem_pdf">Sem PDF</span>'}
           </td>
           <td class="editor-exames-acoes">
-            <button type="button" class="bt_teste glass bt_salvar_registro_curso bt_salvar_registro_exame" title="Salvar alterações" aria-label="Salvar alterações">Salvar</button>
+            <button type="button" class="bt_teste glass bt_salvar_registro_curso bt_salvar_registro_exame" title="Salvar alteraÃ§Ãµes" aria-label="Salvar alteraÃ§Ãµes">Salvar</button>
             <button type="button" class="bt_teste glass bt_excluir_registro_curso bt_excluir_registro_exame" title="Excluir registro do curso" aria-label="Excluir registro do curso">Excluir</button>
           </td>
         </tr>
@@ -510,7 +510,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
                 <th>Vencimento</th>
                 <th>Novo anexo</th>
                 <th>PDF anexado</th>
-                <th>Ações</th>
+                <th>AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody>${linhas}</tbody>
@@ -550,7 +550,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
 
     const result = await Swal.fire({
       title: "Remover anexo?",
-      text: "O PDF será removido deste registro de curso.",
+      text: "O PDF serÃ¡ removido deste registro de curso.",
       icon: "warning",
       theme: "dark",
       showCancelButton: true,
@@ -567,7 +567,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
       });
       const json = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(getMensagemErroApi(json, "Não foi possível remover o anexo."));
+      if (!res.ok) throw new Error(getMensagemErroApi(json, "NÃ£o foi possÃ­vel remover o anexo."));
 
       Toast.fire({ icon: "success", theme: "dark", title: json.message || "Anexo removido." });
       await render();
@@ -584,7 +584,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
 
     const result = await Swal.fire({
       title: "Excluir registro?",
-      text: "O registro do curso e o PDF anexado serão removidos do colaborador.",
+      text: "O registro do curso e o PDF anexado serÃ£o removidos do colaborador.",
       icon: "warning",
       theme: "dark",
       showCancelButton: true,
@@ -601,9 +601,9 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
       });
       const json = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(getMensagemErroApi(json, "Não foi possível excluir o registro."));
+      if (!res.ok) throw new Error(getMensagemErroApi(json, "NÃ£o foi possÃ­vel excluir o registro."));
 
-      Toast.fire({ icon: "success", theme: "dark", title: "Registro de curso excluído." });
+      Toast.fire({ icon: "success", theme: "dark", title: "Registro de curso excluÃ­do." });
       await render();
       preencherTabelaColaboradoresRH();
       document.querySelector('.bt_menu[data-target=".painel_cursos"]')?.click();
@@ -636,7 +636,7 @@ async function abrirEditorHistoricoCursos(idColab, idCurso) {
       });
       const json = await res.json().catch(() => ({}));
 
-      if (!res.ok) throw new Error(getMensagemErroApi(json, "Não foi possível salvar o curso."));
+      if (!res.ok) throw new Error(getMensagemErroApi(json, "NÃ£o foi possÃ­vel salvar o curso."));
 
       Toast.fire({ icon: "success", theme: "dark", title: json.message || "Curso atualizado." });
       await render();
@@ -659,14 +659,14 @@ function definirSupervisor(fnoID, osID, dataDia, $painelOS, $colab) {
       $colab.addClass("supervisor");
     },
     error: err => {
-      console.error("❌ Erro ao definir supervisor:", err);
+      console.error("âŒ Erro ao definir supervisor:", err);
       alert("Erro ao definir supervisor.");
     }
   });
 }
 
 // ========================================================
-// 🧩 Inicializador principal de menus
+// ðŸ§© Inicializador principal de menus
 // ========================================================
 
 export function initColaboradoresContextMenu(socket) {
@@ -685,36 +685,36 @@ export function initColaboradoresContextMenu(socket) {
     const jaESupervisor = $colab.hasClass("supervisor");
     const precisaAttIntegracao =
       $colab.hasClass("status-integracao-vencido") ||
-      $colab.hasClass("status-integracao-atenção");
+      $colab.hasClass("status-integracao-atenÃ§Ã£o");
 
     const opcoesMenu = [
       {
-        label: "👤 Perfil",
+        label: '<i class="fa-solid fa-user"></i> Perfil',
         roles: "*", action: () => get_carregarPerfilUsuario(funcID)
       },
       "SEPARADOR",
       jaESupervisor
         ? {
-          label: "⭐ Remover Supervisor",
+          label: '<i class="fa-solid fa-star"></i> Remover Supervisor',
           roles: [6, 7, 99], action: () => removerSupervisor(osID, dataDia, $colab)
         }
         : {
-          label: "⭐ Tornar Supervisor",
+          label: '<i class="fa-solid fa-star"></i> Tornar Supervisor',
           roles: [6, 7, 99], action: () => definirSupervisor(fnoID, osID, dataDia, $painelOS, $colab)
         },
       {
-        label: "🚫 Marcar Falta Indevida",
+        label: '<i class="fa-solid fa-ban"></i> Marcar Falta Indevida',
         roles: [4, 6, 7, 99], action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fnoID)
       },
       ...(precisaAttIntegracao
         ? [{
-          label: "📜 Verificar Integração",
+          label: '<i class="fa-solid fa-file-lines"></i> Verificar Integra&ccedil;&atilde;o',
           roles: "*", action: () => abrirIntegracao(funcID)
         }]
         : []),
       "SEPARADOR",
       {
-        label: "❌ Remover da OS",
+        label: '<i class="fa-solid fa-xmark"></i> Remover da OS',
         roles: [6, 7, 99], action: () => removerDaOS($colab, socket, osID, funcID, fnoID, dataDia)
       }
     ];
@@ -723,7 +723,7 @@ export function initColaboradoresContextMenu(socket) {
   });
 
   // --------------------------------------------------------
-  // MENU: Colaboradores disponíveis
+  // MENU: Colaboradores disponÃ­veis
   // --------------------------------------------------------
   $(document).on("contextmenu", ".p_colabsDisp .colaborador", function (e) {
     e.preventDefault();
@@ -735,12 +735,12 @@ export function initColaboradoresContextMenu(socket) {
 
     const opcoesMenu = [
       {
-        label: "👤 Perfil",
+        label: '<i class="fa-solid fa-user"></i> Perfil',
         roles: "*", action: () => get_carregarPerfilUsuario(funcID)
       },
       "SEPARADOR",
       {
-        label: "🚫 Marcar Falta Indevida",
+        label: '<i class="fa-solid fa-ban"></i> Marcar Falta Indevida',
         roles: [4, 6, 7, 99],
         action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket)
       }
@@ -760,25 +760,25 @@ export function initColaboradoresContextMenu(socket) {
 
     const opcoesMenu = [
       {
-        label: "👤 Perfil",
+        label: '<i class="fa-solid fa-user"></i> Perfil',
         roles: "*", action: () => get_carregarPerfilUsuario(funcID)
       },
       "SEPARADOR",
       {
-        label: "🥾 Registrar EPI",
+        label: '<i class="fa-solid fa-helmet-safety"></i> Registrar EPI',
         roles: [5, 6, 7, 99], action: () => open_form_AnexarEPI(funcID)
       },
       {
-        label: "🩺 Anexar Exame",
+        label: '<i class="fa-solid fa-stethoscope"></i> Anexar Exame',
         roles: [4, 99], action: () => open_form_AnexarExame(funcID)
       },
       {
-        label: "📚 Anexar Curso",
+        label: '<i class="fa-solid fa-book"></i> Anexar Curso',
         roles: [4, 99], action: () => open_form_AnexarCurso(funcID)
       },
       "SEPARADOR",
       {
-        label: "🚫 Marcar Falta Indevida",
+        label: '<i class="fa-solid fa-ban"></i> Marcar Falta Indevida',
         roles: [4, 5, 6, 7, 99],
         action: () => {
           const $date = $('<input type="date" style="position:absolute;left:-9999px;">').appendTo("body");
@@ -796,7 +796,7 @@ export function initColaboradoresContextMenu(socket) {
               .done(res => res.sucesso
                 ? alert("Falta indevida registrada!")
                 : alert("Erro: " + res.mensagem))
-              .fail(() => alert("Erro de comunicação."))
+              .fail(() => alert("Erro de comunicaÃ§Ã£o."))
               .always(() => $date.remove());
           });
           $date.trigger("focus").trigger("click");
@@ -804,7 +804,7 @@ export function initColaboradoresContextMenu(socket) {
       },
       "SEPARADOR",
       {
-        label: "🏴 Desligar colaborador",
+        label: '<i class="fa-solid fa-user-slash"></i> Desligar colaborador',
         roles: [4, 6, 7, 99], action: () => open_form_AnexarExame(funcID, 3)
       }
     ];
@@ -833,7 +833,7 @@ export function initColaboradoresContextMenu(socket) {
       const result = await Swal.fire({
         title: "Apagar?",
         text: isAdmissional
-          ? "⚠️ Este é um exame ADMISSIONAL. Ao excluir, adicione o quanto antes um novo exame admissional para não gerar falhas nos processos do sistema."
+          ? "Este é um exame ADMISSIONAL. Ao excluir, adicione um novo caso precise manter o histórico/documento do RH."
           : "Deseja realmente apagar este exame?",
         icon: "warning",
         theme: "dark",
@@ -856,7 +856,7 @@ export function initColaboradoresContextMenu(socket) {
           return Toast.fire({
             icon: "error",
             theme: "dark",
-            title: "Não foi possível excluir o exame."
+            title: "NÃ£o foi possÃ­vel excluir o exame."
           });
         }
 
@@ -869,8 +869,8 @@ export function initColaboradoresContextMenu(socket) {
           icon: "success",
           theme: "dark",
           title: isAdmissional
-            ? "Exame admissional excluído. Não esqueça de cadastrar um novo!"
-            : "Exame excluído!"
+            ? "Exame admissional excluído."
+            : "Exame excluÃ­do!"
         });
 
       } catch (err) {
@@ -895,7 +895,7 @@ export function initColaboradoresContextMenu(socket) {
         if (!res.ok) {
           const mensagens = {
             400: "Nenhum PDF anexado para este exame.",
-            404: "Exame ou arquivo não encontrado."
+            404: "Exame ou arquivo nÃ£o encontrado."
           };
 
           return Toast.fire({
@@ -919,14 +919,14 @@ export function initColaboradoresContextMenu(socket) {
     // ---------- Montagem do menu ----------
     if (idExame !== 1) {
       opcoesMenu.push({
-        label: "🔄 Atualizar Exame",
+        label: '<i class="fa-solid fa-rotate"></i> Atualizar Exame',
         roles: [4, 7, 99],
         action: () => open_form_AnexarExame(idColab, idExame)
       });
     }
 
     opcoesMenu.push({
-      label: "✏️ Editar Exame",
+      label: '<i class="fa-solid fa-pen"></i> Editar Exame',
       roles: [4, 7, 99],
       action: () => abrirEditorHistoricoExames(idColab, idExame)
     });
@@ -934,21 +934,21 @@ export function initColaboradoresContextMenu(socket) {
     opcoesMenu.push(
       jaEAgendado
         ? {
-          label: "✖️ Cancelar Exame",
+          label: '<i class="fa-solid fa-calendar-xmark"></i> Cancelar Exame',
           roles: [4, 7, 99], action: () => cancelarAgendamentoExame(idFuncionarioExame)
         }
         : {
-          label: "🗓️ Agendar Exame",
+          label: '<i class="fa-solid fa-calendar-days"></i> Agendar Exame',
           roles: [4, 7, 99], action: () => open_form_AgendarExame(idColab, idFuncionarioExame)
         },
       {
-        label: "🧾 Visualizar Exame",
+        label: '<i class="fa-solid fa-receipt"></i> Visualizar Exame',
         roles: "*", // todos podem
         action: () => visualizarExame(idFuncionarioExame)
       },
       "SEPARADOR",
       {
-        label: "❌ Apagar Exame",
+        label: '<i class="fa-solid fa-trash"></i> Apagar Exame',
         roles: [4, 7, 99],
         action: () => confirmarExclusaoExame(idFuncionarioExame, idExame)
       }
@@ -969,15 +969,15 @@ export function initColaboradoresContextMenu(socket) {
 
     const opcoesMenu = [
       {
-        label: "🔄 Atualizar Curso",
+        label: '<i class="fa-solid fa-rotate"></i> Atualizar Curso',
         roles: [4, 7, 99], action: () => open_form_AnexarCurso(idColab, idCurso)
       },
       {
-        label: "✏️ Editar Curso",
+        label: '<i class="fa-solid fa-pen"></i> Editar Curso',
         roles: [4, 7, 99], action: () => abrirEditorHistoricoCursos(idColab, idCurso)
       },
       {
-        label: "🧾 Visualizar Curso",
+        label: '<i class="fa-solid fa-receipt"></i> Visualizar Curso',
         roles: "*",
         action: async () => {
           if (!idFuncionarioCurso) return;
@@ -986,7 +986,7 @@ export function initColaboradoresContextMenu(socket) {
             if (!res.ok) {
               let msg = "Erro ao visualizar curso.";
               if (res.status === 400) msg = "Nenhum PDF anexado para este curso.";
-              if (res.status === 404) msg = "Curso ou arquivo não encontrado.";
+              if (res.status === 404) msg = "Curso ou arquivo nÃ£o encontrado.";
               return Toast.fire({
                 icon: "warning",
                 theme: 'dark',
@@ -1005,7 +1005,7 @@ export function initColaboradoresContextMenu(socket) {
       },
       "SEPARADOR",
       {
-        label: "❌ Apagar Curso",
+        label: '<i class="fa-solid fa-trash"></i> Apagar Curso',
         roles: [4, 99],
         action: async () => {
           if (!idFuncionarioCurso) return;
@@ -1035,13 +1035,13 @@ export function initColaboradoresContextMenu(socket) {
                 Toast.fire({
                   icon: "success",
                   theme: 'dark',
-                  title: "Curso excluído!"
+                  title: "Curso excluÃ­do!"
                 });
               } else {
                 Toast.fire({
                   icon: "error",
                   theme: 'dark',
-                  title: "Não foi possível excluir o curso."
+                  title: "NÃ£o foi possÃ­vel excluir o curso."
                 });
               }
             } catch (err) {
@@ -1060,7 +1060,7 @@ export function initColaboradoresContextMenu(socket) {
   });
 
   // --------------------------------------------------------
-  // MENU: Painel de vencimento de integrações
+  // MENU: Painel de vencimento de integraÃ§Ãµes
   // --------------------------------------------------------
   $(document).on("contextmenu", ".painel_vencimento_integracoes .bloco_integracao", function (e) {
     e.preventDefault();
@@ -1071,20 +1071,20 @@ export function initColaboradoresContextMenu(socket) {
 
     const opcoesMenu = [
       {
-        label: "🔄 Atualizar Integração",
+        label: '<i class="fa-solid fa-rotate"></i> Atualizar Integra&ccedil;&atilde;o',
         roles: [4, 6, 7, 99], action: () => open_form_AnexarIntegracao(idColab, idEmpresa)
       },
       {
-        label: "🧾 Visualizar Integração",
+        label: '<i class="fa-solid fa-receipt"></i> Visualizar Integra&ccedil;&atilde;o',
         roles: "*",
         action: async () => {
           if (!idFuncionarioIntegracao) return;
           try {
             const res = await fetch(`/api/integracao/download/${idFuncionarioIntegracao}`, { method: "HEAD", credentials: "include" });
             if (!res.ok) {
-              let msg = "Erro ao visualizar integração.";
-              if (res.status === 400) msg = "Nenhum PDF anexado para esta integração.";
-              if (res.status === 404) msg = "Integração ou arquivo não encontrado.";
+              let msg = "Erro ao visualizar integraÃ§Ã£o.";
+              if (res.status === 400) msg = "Nenhum PDF anexado para esta integraÃ§Ã£o.";
+              if (res.status === 404) msg = "IntegraÃ§Ã£o ou arquivo nÃ£o encontrado.";
               return Toast.fire({
                 icon: "warning",
                 theme: 'dark',
@@ -1102,14 +1102,14 @@ export function initColaboradoresContextMenu(socket) {
         }
       },
       "SEPARADOR", {
-        label: "❌ Apagar Integração",
+        label: '<i class="fa-solid fa-trash"></i> Apagar Integra&ccedil;&atilde;o',
         roles: [4, 99],
         action: async () => {
           if (!idFuncionarioIntegracao) return;
 
           const result = await Swal.fire({
             title: "Apagar?",
-            text: "Deseja realmente apagar esta integração?",
+            text: "Deseja realmente apagar esta integraÃ§Ã£o?",
             icon: "warning",
             theme: "dark",
             showCancelButton: true,
@@ -1132,13 +1132,13 @@ export function initColaboradoresContextMenu(socket) {
                 Toast.fire({
                   icon: "success",
                   theme: 'dark',
-                  title: "Integração excluída!"
+                  title: "IntegraÃ§Ã£o excluÃ­da!"
                 });
               } else {
                 Toast.fire({
                   icon: "error",
                   theme: 'dark',
-                  title: "Não foi possível excluir a integração."
+                  title: "NÃ£o foi possÃ­vel excluir a integraÃ§Ã£o."
                 });
               }
             } catch (err) {
@@ -1168,28 +1168,29 @@ export function initColaboradoresContextMenu(socket) {
     const idFuncionarioEPI = $(this).data("idfcepi");
     const idEPI = $(this).data("idepi");
 
-    // 🔹 Obtém o nome e formata (somente a primeira letra maiúscula)
+    // ðŸ”¹ ObtÃ©m o nome e formata (somente a primeira letra maiÃºscula)
     let epi = $(this).find(".nomeEPI").text().trim().toLowerCase();
     epi = epi.charAt(0).toUpperCase() + epi.slice(1);
 
-    // 🔹 Define ícone conforme o tipo de EPI
-    let icone = "🧤"; // padrão
-    if ($(this).hasClass("status_fone")) icone = "🎧";
-    else if ($(this).hasClass("status_capacete")) icone = "🪖";
-    else if ($(this).hasClass("status_oculos")) icone = "👓";
-    else if ($(this).hasClass("status_luva")) icone = "🧤";
-    else if ($(this).hasClass("status_sapato")) icone = "🥾";
-    else if ($(this).hasClass("status_mascara")) icone = "😷";
-    else if ($(this).hasClass("status_colete")) icone = "🦺";
-    else if ($(this).hasClass("status_calca")) icone = "👖";
-    else if ($(this).hasClass("status_jaleco")) icone = "👕";
+    // ðŸ”¹ Define Ã­cone conforme o tipo de EPI
+    let icone = '<i class="fa-solid fa-shield-halved"></i>';
+    if ($(this).hasClass("status_fone")) icone = '<i class="fa-solid fa-headphones"></i>';
+    else if ($(this).hasClass("status_capacete")) icone = '<i class="fa-solid fa-helmet-safety"></i>';
+    else if ($(this).hasClass("status_oculos")) icone = '<i class="fa-solid fa-glasses"></i>';
+    else if ($(this).hasClass("status_luva")) icone = '<i class="fa-solid fa-mitten"></i>';
+    else if ($(this).hasClass("status_sapato")) icone = '<i class="fa-solid fa-shoe-prints"></i>';
+    else if ($(this).hasClass("status_mascara")) icone = '<i class="fa-solid fa-head-side-mask"></i>';
+    else if ($(this).hasClass("status_colete")) icone = '<i class="fa-solid fa-vest"></i>';
+    else if ($(this).hasClass("status_calca")) icone = '<i class="fa-solid fa-user-shield"></i>';
+    else if ($(this).hasClass("status_jaleco")) icone = '<i class="fa-solid fa-shirt"></i>';
 
-    // 🔹 Verifica o status do EPI (texto dentro do span .statusEPI)
+    // ðŸ”¹ Verifica o status do EPI (texto dentro do span .statusEPI)
     const statusTexto = $(this).find(".statusEPI").text().trim().toLowerCase();
-    // 🔹 Define opções do menu conforme o status
+    const statusTextoNormalizado = statusTexto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // ðŸ”¹ Define opÃ§Ãµes do menu conforme o status
     const opcoesMenu = [];
 
-    if (statusTexto.includes("não entregue!")) {
+    if (statusTextoNormalizado.includes("nao entregue!")) {
       // Somente Registrar
       opcoesMenu.push({
         label: `${icone} Registrar ${epi}`,
@@ -1198,7 +1199,7 @@ export function initColaboradoresContextMenu(socket) {
           open_form_AnexarEPI(idColab, idEPI);
         }
       });
-    } else if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!") || statusTexto.includes("avaliar!")) {
+    } else if (statusTextoNormalizado.includes("realizar troca!") || statusTextoNormalizado.includes("apto para uso!") || statusTextoNormalizado.includes("avaliar!")) {
       // Somente Atualizar
       opcoesMenu.push({
         label: `${icone} Atualizar ${epi}`,
@@ -1208,7 +1209,7 @@ export function initColaboradoresContextMenu(socket) {
         }
       });
     } else {
-      // Padrão — se surgir outro status, mostra ambos
+      // PadrÃ£o â€” se surgir outro status, mostra ambos
       opcoesMenu.push(
         {
           label: `${icone} Registrar ${epi}`,
@@ -1217,7 +1218,7 @@ export function initColaboradoresContextMenu(socket) {
           }
         },
         {
-          label: `🔄 Atualizar ${epi}`,
+          label: `<i class="fa-solid fa-rotate"></i> Atualizar ${epi}`,
           roles: [4, 5, 6, 7, 99], action: () => {
             open_form_AnexarEPI(idColab, idEPI);
           }
@@ -1225,14 +1226,14 @@ export function initColaboradoresContextMenu(socket) {
       );
     }
 
-    // 🔹 Sempre mostra Visualizar e Apagar (se aplicável)
-    if (statusTexto.includes("realizar troca!") || statusTexto.includes("apto para uso!") || statusTexto.includes("avaliar!")) {
+    // ðŸ”¹ Sempre mostra Visualizar e Apagar (se aplicÃ¡vel)
+    if (statusTextoNormalizado.includes("realizar troca!") || statusTextoNormalizado.includes("apto para uso!") || statusTextoNormalizado.includes("avaliar!")) {
       opcoesMenu.push(
 
 
         "SEPARADOR",
         {
-          label: `✍🏻 Solicitar Assinatura`,
+          label: '<i class="fa-solid fa-signature"></i> Solicitar Assinatura',
           roles: [4,6, 7, 99],
           action: async () => {
 
@@ -1240,12 +1241,12 @@ export function initColaboradoresContextMenu(socket) {
               Toast.fire({
                 icon: "warning",
                 theme: 'dark',
-                title: "ID do registro EPI não encontrado."
+                title: "ID do registro EPI nÃ£o encontrado."
               });
               return;
             }
 
-            // Gera a URL automática
+            // Gera a URL automÃ¡tica
             const r = await fetch(`/api/epi/gerar-token/${idFuncionarioEPI}`, { method: "POST" });
             const { token } = await r.json();
 
@@ -1253,7 +1254,7 @@ export function initColaboradoresContextMenu(socket) {
 
 
 
-            // Copiar para a área de transferência
+            // Copiar para a Ã¡rea de transferÃªncia
             try {
               await navigator.clipboard.writeText(assinaturaURL);
             } catch (err) {
@@ -1262,11 +1263,11 @@ export function initColaboradoresContextMenu(socket) {
 
             // TELEFONE DO COLABORADOR
             const telefoneColaborador = formatarTelefoneParaWhatsApp(telefone);
-            // formato: DDI + DDD + número (sem espaços)
+            // formato: DDI + DDD + nÃºmero (sem espaÃ§os)
 
             // Mensagem pronta para enviar pelo WhatsApp
             const mensagem = encodeURIComponent(
-              `Olá! Por favor assine sua ficha de EPI no link abaixo:\n\n${assinaturaURL}`
+              `OlÃ¡! Por favor assine sua ficha de EPI no link abaixo:\n\n${assinaturaURL}`
             );
 
             const whatsappURL = `https://wa.me/${telefoneColaborador}?text=${mensagem}`;
@@ -1288,7 +1289,7 @@ export function initColaboradoresContextMenu(socket) {
         }
         ,
         {
-          label: `🧾 Visualizar Registros`,
+          label: '<i class="fa-solid fa-receipt"></i> Visualizar Registros',
           roles: [4,6, 7, 99],
           action: async () => {
             if (!idFuncionarioEPI) return;
@@ -1300,7 +1301,7 @@ export function initColaboradoresContextMenu(socket) {
               if (!res.ok) {
                 let msg = "Erro ao visualizar EPI.";
                 if (res.status === 400) msg = "Nenhum PDF anexado para esta EPI.";
-                if (res.status === 404) msg = "EPI ou arquivo não encontrado.";
+                if (res.status === 404) msg = "EPI ou arquivo nÃ£o encontrado.";
                 return Toast.fire({
                   icon: "warning",
                   theme: 'dark',
@@ -1319,7 +1320,7 @@ export function initColaboradoresContextMenu(socket) {
         },
         "SEPARADOR",
         {
-          label: `❌ Apagar ${epi}`,
+          label: `<i class="fa-solid fa-trash"></i> Apagar ${epi}`,
           roles: [4, 6, 7, 99],
           action: async () => {
             if (!idFuncionarioEPI) return;
@@ -1348,13 +1349,13 @@ export function initColaboradoresContextMenu(socket) {
                   Toast.fire({
                     icon: "success",
                     theme: 'dark',
-                    title: "EPI excluído!"
+                    title: "EPI excluÃ­do!"
                   });
                 } else {
                   Toast.fire({
                     icon: "error",
                     theme: 'dark',
-                    title: "Não foi possível excluir EPI."
+                    title: "NÃ£o foi possÃ­vel excluir EPI."
                   });
                 }
               } catch (err) {
@@ -1376,3 +1377,4 @@ export function initColaboradoresContextMenu(socket) {
 
 
 }
+

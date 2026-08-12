@@ -111,3 +111,566 @@
     border-radius: 10px;
 }
 
+/* ===== Janela OS - identidade visual atual ===== */
+.cadOS .painel_principal {
+    width: min(860px, 94vw);
+    max-height: min(760px, 88vh);
+    min-height: 0;
+    padding: 0;
+    overflow: visible;
+    align-items: stretch;
+    background: linear-gradient(145deg, rgb(86 86 86 / 5%), rgb(0 0 0 / 24%)), var(--pretoMedio, var(--bg-padrao));
+    border: 1px solid rgba(238, 119, 34, .32);
+    border-radius: 12px;
+    box-shadow: 0 22px 54px rgba(0, 0, 0, .58);
+}
+
+.cadOS .p_titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 54px;
+    padding: 0 20px;
+    color: var(--texto-principal);
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
+}
+
+.cadOS .p_titulo::before {
+    content: "\f15c";
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #efda38;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(239, 218, 56, .22);
+    border-radius: 8px;
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.cadOS .p_titulo::after {
+    content: "Cadastro e edição";
+    color: var(--cinzaMedioEscuro, #a6a6a6);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.cadOS .p_titulo .tituloform {
+    margin: 0;
+    color: var(--texto-principal);
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: 0;
+}
+
+.cadOS .painel_dadosOS {
+    width: 100%;
+    min-height: 0;
+    max-height: calc(min(760px, 88vh) - 54px);
+    overflow: visible;
+    background: transparent;
+    border-radius: 0 0 12px 12px;
+}
+
+.cadOS .painel_todosOS {
+    width: 100%;
+    min-width: 0;
+    padding: 20px 22px 22px;
+}
+
+.cadOS .painel_Paineis {
+    height: calc(min(760px, 88vh) - 88px);
+    overflow: auto;
+    padding-right: 2px;
+    scrollbar-width: none;
+}
+
+.cadOS .painel_Paineis::-webkit-scrollbar {
+    display: none;
+}
+
+.cadOS .painel_info > p,
+.cadOS .painel_status > p,
+.cadOS .painel_complementos > p,
+.cadOS .painel_materiais_os > p,
+.cadOS .painel_anexos_os > p,
+.cadOS .painel_estatistica > p {
+    margin: 0 0 14px;
+    padding: 0;
+    color: var(--texto-principal);
+    font-size: 15px;
+    font-weight: 650;
+}
+
+.cadOS .os-estatistica-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .028);
+}
+
+.cadOS .os-estatistica-head strong,
+.cadOS .os-estatistica-head span {
+    display: block;
+}
+
+.cadOS .os-estatistica-head strong {
+    color: var(--texto-principal);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.cadOS .os-estatistica-head span {
+    margin-top: 4px;
+    color: rgba(244, 247, 248, .62);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.cadOS #bt_analisarGraficoOS {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 104px;
+    height: 34px;
+    border: 1px solid rgba(239, 218, 56, .30);
+    background: linear-gradient(90deg, #ee7722, #efda38);
+    color: #161616;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.cadOS .os-estatistica-resumo {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border: 1px dashed rgba(239, 218, 56, .28);
+    border-radius: 10px;
+    color: rgba(244, 247, 248, .62);
+    font-size: 12px;
+}
+
+.cadOS .os-estatistica-resumo strong,
+.cadOS .os-estatistica-resumo span {
+    display: block;
+}
+
+.cadOS .os-estatistica-resumo strong {
+    color: var(--texto-principal);
+}
+
+.cadOS .os-estatistica-erro {
+    color: #ff8a80;
+    font-weight: 700;
+}
+
+.cadOS .os-grafico-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 320px;
+    height: min(420px, 48vh);
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .12);
+}
+
+.cadOS .os-grafico-area:empty {
+    display: none;
+}
+
+.cadOS .os-grafico-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 28px;
+    color: rgba(244, 247, 248, .62);
+    font-size: 11px;
+}
+
+.cadOS .os-grafico-toolbar span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
+.cadOS .os-grafico-dica {
+    flex: 1;
+}
+
+.cadOS .os-grafico-periodo {
+    min-height: 24px;
+    padding: 0 10px;
+    border: 1px solid rgba(239, 218, 56, .20);
+    border-radius: 999px;
+    background: rgba(239, 218, 56, .07);
+    color: rgba(244, 247, 248, .76);
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cadOS .os-grafico-mes {
+    height: 26px;
+    min-width: 116px;
+    padding: 0 28px 0 10px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .055);
+    color: var(--texto-principal);
+    font-size: 11px;
+    font-weight: 700;
+    outline: none;
+}
+
+.cadOS .os-grafico-mes:focus {
+    border-color: rgba(239, 218, 56, .55);
+    box-shadow: 0 0 0 2px rgba(239, 218, 56, .10);
+}
+
+.cadOS .os-grafico-toolbar i {
+    color: #efda38;
+}
+
+.cadOS .os-grafico-reset {
+    width: 30px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    border: 1px solid rgba(239, 218, 56, .28);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .055);
+    color: var(--texto-principal);
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.cadOS .os-grafico-reset:hover {
+    border-color: rgba(239, 218, 56, .55);
+    background: rgba(239, 218, 56, .12);
+    transform: translateY(-1px);
+}
+
+.cadOS .os-grafico-viewport {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.cadOS .os-grafico-viewport.selecionando {
+    cursor: ew-resize;
+}
+
+.cadOS .os-grafico-canvas-wrap {
+    width: 100%;
+    height: 100%;
+}
+
+.cadOS .os-grafico-selecao {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    display: none;
+    border-left: 1px solid rgba(239, 218, 56, .9);
+    border-right: 1px solid rgba(239, 218, 56, .9);
+    background: linear-gradient(90deg, rgba(238, 119, 34, .18), rgba(239, 218, 56, .22));
+    pointer-events: none;
+}
+
+.cadOS .os-grafico-selecao.ativo {
+    display: block;
+}
+
+.cadOS .os-grafico-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.cadOS #frm_cadastrarOS {
+    padding: 0;
+}
+
+.cadOS .form__os > div {
+    display: grid;
+    gap: 16px;
+}
+
+.cadOS .form__os > div > div:first-child {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(255, 255, 255, .028);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 10px;
+}
+
+.cadOS .linha_padrao {
+    padding: 0;
+}
+
+.cadOS .linha_infoOS,
+.cadOS .linha_infoCliente,
+.cadOS .linha_valorData,
+.cadOS .linha_responsavel,
+.cadOS .linha_observacao {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+}
+
+.cadOS .linha_infoOS {
+    grid-template-columns: minmax(82px, 110px) minmax(0, 1fr);
+}
+
+.cadOS .linha_infoCliente {
+    grid-template-columns: minmax(0, 1fr) minmax(0, .9fr) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 12px;
+    row-gap: 5px;
+}
+
+.cadOS .linha_infoCliente > .linha_valorData:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.cadOS .linha_infoCliente > .linha_valorData:nth-child(2) {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+.cadOS .linha_infoCliente > div:nth-child(3) {
+    grid-column: 3;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 0;
+    padding: 0 2px !important;
+    color: var(--cinzaMedioEscuro, #a6a6a6) !important;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+.cadOS .linha_infoCliente > div:nth-child(3) p {
+    margin: 0;
+    padding: 0;
+}
+
+.cadOS .linha_infoCliente > .linha_valorData,
+.cadOS .linha_valorData.linha_padrao {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.cadOS .linha_infoCliente > .linha_valorData {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 1fr !important;
+    justify-content: stretch;
+}
+
+.cadOS #selectCliente,
+.cadOS #selectCidade,
+.cadOS #selectSupervisor {
+    width: 100% !important;
+    min-width: 0;
+    max-width: none;
+    margin-right: 0 !important;
+}
+
+.cadOS .linha_infoCliente > .linha_valorData:nth-child(4) {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: none;
+}
+
+.cadOS .linha_responsavel {
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, .8fr);
+    align-items: center;
+}
+
+.cadOS .dica {
+    margin: 0;
+    padding: 8px 10px;
+    color: var(--cinzaMedioEscuro, #a6a6a6);
+    background: rgba(255, 255, 255, .04);
+    border: 1px dashed rgba(239, 218, 56, .24);
+    border-radius: 8px;
+}
+
+.cadOS input.tbx_teste,
+.cadOS select.cbx_teste,
+.cadOS textarea {
+    width: 100% !important;
+    min-height: 38px;
+    box-sizing: border-box;
+    margin: 0 !important;
+    color: var(--texto-principal);
+    background: rgba(255, 255, 255, .055) !important;
+    border: 1px solid rgba(255, 255, 255, .13) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+.cadOS textarea {
+    min-height: 84px;
+}
+
+.cadOS input.tbx_teste:focus,
+.cadOS select.cbx_teste:focus,
+.cadOS textarea:focus {
+    outline: none;
+    border-color: rgba(239, 218, 56, .52) !important;
+    box-shadow: 0 0 0 3px rgba(239, 218, 56, .09) !important;
+}
+
+.cadOS .p_padrao {
+    color: var(--texto-principal);
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .10);
+    box-shadow: none;
+    border-radius: 10px;
+}
+
+.cadOS .p_anexosRolante {
+    justify-content: flex-start;
+}
+
+.cadOS .p_anexoPadrao {
+    width: 110px;
+    height: 78px;
+    display: grid;
+    place-items: center;
+    color: var(--texto-principal);
+    background: rgba(255, 255, 255, .045);
+    border: 1px dashed rgba(238, 119, 34, .42);
+    border-radius: 8px;
+    transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.cadOS .p_anexoPadrao:hover {
+    transform: translateY(-1px);
+    color: var(--texto-principal);
+    background: rgba(255, 255, 255, .065);
+    border-color: rgba(239, 218, 56, .62);
+    box-shadow: none;
+}
+
+.cadOS .iconeAnexo {
+    padding: 0;
+    color: #efda38;
+    font-size: 22px;
+}
+
+.cadOS .linha_tituloAnexo p {
+    margin: 0;
+    padding: 0;
+    color: var(--cinzaMedioEscuro, #a6a6a6);
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.cadOS .p_acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0 -22px -22px;
+    padding: 16px 22px 20px;
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 0;
+}
+
+.cadOS .p_acoes input {
+    width: auto !important;
+    min-width: 112px;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 8px !important;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.cadOS #bt_cadOS,
+.cadOS #bt_editOS,
+.cadOS #bt_editStatusOS,
+.cadOS #btnSalvarComplementosOS,
+.cadOS #btnVincularPainelOS,
+.cadOS #btnAdicionarServicoOS {
+    color: #101010 !important;
+    background: linear-gradient(90deg, #ee7722, #efda38) !important;
+    border: 1px solid rgba(255, 255, 255, .22) !important;
+    box-shadow: none !important;
+}
+
+.cadOS #bt_cadOS:hover,
+.cadOS #bt_editOS:hover,
+.cadOS #bt_editStatusOS:hover,
+.cadOS #btnSalvarComplementosOS:hover,
+.cadOS #btnVincularPainelOS:hover,
+.cadOS #btnAdicionarServicoOS:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(238, 119, 34, .22) !important;
+}
+
+.cadOS #bt_fechar_form_OS {
+    color: #ffd4d4 !important;
+    background: rgba(157, 45, 45, .22) !important;
+    border: 1px solid rgba(255, 107, 107, .32) !important;
+}
+
+.cadOS #bt_fechar_form_OS:hover {
+    color: #fff !important;
+    background: rgba(157, 45, 45, .34) !important;
+    box-shadow: 0 0 18px rgba(255, 107, 107, .18) !important;
+}
+
+@media (max-width: 860px) {
+    .cadOS .painel_principal {
+        width: calc(100vw - 24px);
+        top: 6%;
+    }
+
+    .cadOS .linha_infoOS,
+    .cadOS .linha_infoCliente,
+    .cadOS .linha_infoCliente > .linha_valorData,
+    .cadOS .linha_valorData.linha_padrao,
+    .cadOS .linha_responsavel {
+        grid-template-columns: 1fr;
+    }
+
+    .cadOS .linha_infoCliente > div:nth-child(3),
+    .cadOS .linha_infoCliente > .linha_valorData:nth-child(4) {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .cadOS .p_titulo::after {
+        display: none;
+    }
+}
+

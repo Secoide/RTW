@@ -1,4 +1,4 @@
-import { atualizarUsuariosOnline, atualizarListaOnline, receberMensagemChat } from "./socket-users.js";
+import { atualizarUsuariosOnline, atualizarListaOnline, receberMensagemChat, receberErroChat } from "./socket-users.js";
 import { atualizarUI } from "./socket-notifications.js";
 import {
     handleAlocarColaborador,
@@ -13,12 +13,14 @@ import { registrarResultadoStatusProgDia } from "./status-dia-socket.js";
 function tratarErroSocket(data) {
     document.dispatchEvent(new CustomEvent("ws:action-failed", {
         detail: {
-            mensagem: data.mensagem || "Nao foi possivel salvar a alteracao."
+            mensagem: data.mensagem || "Nao foi possivel salvar a alteracao.",
+            codigo: data.codigo || "ACTION_FAILED",
+            precisaSincronizar: data.precisaSincronizar === true
         }
     }));
 
     const seletor = document.getElementById("seletor_data");
-    if (seletor) {
+    if (seletor && data.precisaSincronizar === true) {
         seletor.dispatchEvent(new Event("change", { bubbles: true }));
     }
 }
@@ -57,6 +59,9 @@ export function handleSocketMessage(data, socket) {
             break;
         case "mensagem_chat":
             receberMensagemChat(data);
+            break;
+        case "erro_chat":
+            receberErroChat(data);
             break;
         case "erro":
             registrarResultadoStatusProgDia({ ...data, sucesso: false });

@@ -5,6 +5,8 @@ const NotificacoesController = require("../controllers/notificacoes.controller")
 
 router.get("/", verificarAutenticacao, NotificacoesController.listar);
 router.post("/limpar", verificarAutenticacao, NotificacoesController.marcarTodasLidas);
+router.post("/aprovacoes/:id/aprovar", verificarAutenticacao, NotificacoesController.aprovar);
+router.post("/aprovacoes/:id/reprovar", verificarAutenticacao, NotificacoesController.reprovar);
 router.post("/:id/lida", verificarAutenticacao, NotificacoesController.marcarLida);
 
 module.exports = router;

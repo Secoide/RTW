@@ -25,6 +25,39 @@ export function initGuia() {
                         'guia'
                     );
 
+            const jaAberto =
+                $(this)
+                    .hasClass(
+                        'ativo'
+                    )
+                &&
+                $(
+                    `.submenuGuia[data-menu="${guia}"]`
+                )
+                    .hasClass(
+                        'aberto'
+                    );
+
+            if (
+                jaAberto
+            ) {
+
+                $(this)
+                    .removeClass(
+                        'ativo'
+                    );
+
+                $(
+                    `.submenuGuia[data-menu="${guia}"]`
+                )
+                    .removeClass(
+                        'aberto'
+                    );
+
+                return;
+
+            }
+
             $('.itemGuia')
                 .removeClass(
                     'ativo'
@@ -130,6 +163,8 @@ function carregarGuia(
 
         programacao: getProgramacao(),
 
+        'ordem-servico': getOrdemServicoOS(),
+
         ferias: getFerias(),
 
         colaboradores: getColaboradores(),
@@ -232,6 +267,7 @@ function getIntroducao() {
 
 </div>
 
+
 <div class="guiaCard guiaInfo">
 
     📖 Este guia é atualizado constantemente conforme novas funcionalidades
@@ -242,6 +278,288 @@ function getIntroducao() {
 `;
 
 }
+
+function getMateriais() {
+
+    return `
+
+<div id="materiais-topo" class="guiaTitulo">
+📦 Controle de Fluxo e Materiais
+</div>
+
+<div id="mat-visao-geral" class="guiaSubtitulo">
+📋 Vis&atilde;o Geral
+</div>
+
+<div class="guiaCard">
+<p>
+A &aacute;rea de materiais foi dividida em tr&ecirc;s rotinas principais:
+<b>Controle de Fluxo</b>, <b>Estoque</b> e <b>Materiais</b>.
+</p>
+
+<ul>
+<li><b>Controle de Fluxo:</b> acompanha listas de materiais por OS, est&aacute;gios, separa&ccedil;&atilde;o, compras, fornecedores, cota&ccedil;&otilde;es e custos.</li>
+<li><b>Estoque:</b> recebe listas liberadas para separa&ccedil;&atilde;o e tamb&eacute;m listas finalizadas que precisam de confer&ecirc;ncia.</li>
+<li><b>Materiais:</b> concentra o cadastro geral dos materiais, fotos, categorias, varia&ccedil;&otilde;es, valores de or&ccedil;amento e m&eacute;dia de fornecedores.</li>
+</ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+💡 <b>Dica:</b><br>
+Selecione a OS correta antes de criar listas, adicionar materiais, cotar fornecedores ou exportar relat&oacute;rios.
+Tudo que aparece na lista pertence &agrave; OS selecionada e &agrave; lista atual.
+</div>
+
+<div id="mat-os" class="guiaSubtitulo">
+🧾 Sele&ccedil;&atilde;o da OS e Exporta&ccedil;&otilde;es
+</div>
+
+<div class="guiaCard">
+<ul>
+<li>Use o campo <b>Selecione uma OS</b> para carregar o fluxo e as listas de materiais daquela ordem de servi&ccedil;o.</li>
+<li>O bot&atilde;o <b>Atualizar</b> recarrega os dados da OS selecionada.</li>
+<li>O bot&atilde;o <b>Exportar</b> gera uma planilha da tabela atual.</li>
+<li>O bot&atilde;o <b>PDF</b> abre um submenu com duas op&ccedil;&otilde;es: <b>Dados completo</b> e <b>Somente lista cliente</b>.</li>
+<li><b>Dados completo:</b> exporta OS, lista, resumo financeiro, foto, material, categoria, quantidade, observa&ccedil;&atilde;o, fornecedor, pre&ccedil;o, total e OC.</li>
+<li><b>Somente lista cliente:</b> exporta uma vers&atilde;o limpa com foto, descri&ccedil;&atilde;o, c&oacute;digo, fabricante, observa&ccedil;&atilde;o, quantidade e unidade.</li>
+</ul>
+</div>
+
+<div id="mat-fluxo-listas" class="guiaSubtitulo">
+🧭 Fluxo das Listas
+</div>
+
+<div class="guiaCard">
+<p>
+O Controle de Fluxo organiza cada lista em est&aacute;gios, permitindo que cada setor avance a lista somente quando sua parte estiver conclu&iacute;da.
+</p>
+
+<ul>
+<li><b>Or&ccedil;amento:</b> in&iacute;cio da lista quando a necessidade nasce pelo or&ccedil;amento.</li>
+<li><b>Engenharia:</b> revis&atilde;o t&eacute;cnica, confer&ecirc;ncia e ajuste dos itens.</li>
+<li><b>Estoque:</b> separa&ccedil;&atilde;o dos materiais dispon&iacute;veis internamente.</li>
+<li><b>Compras:</b> cota&ccedil;&atilde;o, escolha de fornecedor, OC e registro de compra.</li>
+<li><b>Finalizado:</b> lista conclu&iacute;da, pronta para hist&oacute;rico, confer&ecirc;ncia e acompanhamento.</li>
+<li>Os cards mostram OS, descri&ccedil;&atilde;o, prioridade e barra de progresso.</li>
+<li>&Eacute; poss&iacute;vel avan&ccedil;ar, voltar est&aacute;gio com motivo, duplicar, editar, excluir e consultar hist&oacute;rico.</li>
+</ul>
+</div>
+
+<div class="guiaCard">
+<h4>Criar ou editar lista</h4>
+<ul>
+<li>Informe nome da lista, est&aacute;gio inicial, prioridade, respons&aacute;vel e prazo.</li>
+<li>Se n&atilde;o houver prazo definido, marque <b>Sem prazo definido</b>.</li>
+<li>Use descri&ccedil;&atilde;o e observa&ccedil;&atilde;o r&aacute;pida para orientar o pr&oacute;ximo setor.</li>
+<li>Listas com prazo mudam de apar&ecirc;ncia conforme urg&ecirc;ncia; listas sem prazo usam indica&ccedil;&atilde;o neutra.</li>
+</ul>
+</div>
+
+<div id="mat-lista" class="guiaSubtitulo">
+📦 Lista de Materiais da OS
+</div>
+
+<div class="guiaCard">
+<p>A tabela mostra os materiais vinculados &agrave; lista atual.</p>
+
+<ul>
+<li><b>ID:</b> identifica&ccedil;&atilde;o interna do item na lista.</li>
+<li><b>Categoria:</b> classifica&ccedil;&atilde;o do material.</li>
+<li><b>Material:</b> nome, foto e atributos da varia&ccedil;&atilde;o.</li>
+<li><b>C&oacute;digo e Fabricante:</b> dados t&eacute;cnicos cadastrados na varia&ccedil;&atilde;o.</li>
+<li><b>Qtde e Und:</b> quantidade solicitada e unidade correspondente.</li>
+<li><b>Observa&ccedil;&atilde;o:</b> informa&ccedil;&atilde;o complementar do material na OS.</li>
+<li><b>Or&ccedil;ado:</b> valor unit&aacute;rio e total baseados no cadastro geral do material.</li>
+<li><b>Separa&ccedil;&atilde;o:</b> barra visual de separado, comprado e faltante.</li>
+<li><b>Fornecedor:</b> fornecedor selecionado ou bot&atilde;o para abrir cota&ccedil;&otilde;es.</li>
+<li><b>Pre&ccedil;o, Total R$ e OC:</b> aparecem nas etapas de compra/finaliza&ccedil;&atilde;o, conforme o est&aacute;gio da lista.</li>
+</ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+📌 <b>Colunas por est&aacute;gio:</b><br>
+Em <b>Or&ccedil;amento</b> e <b>Engenharia</b>, a tabela foca dados t&eacute;cnicos.
+No <b>Estoque</b>, aparece a separa&ccedil;&atilde;o.
+Em <b>Compras</b> e <b>Finalizado</b>, aparecem fornecedor, pre&ccedil;os, total e OC.
+</div>
+
+<div class="guiaCard">
+<h4>A&ccedil;&otilde;es da lista</h4>
+<ul>
+<li><b>Novo Material:</b> adiciona uma linha para inserir material na OS.</li>
+<li><b>Editar:</b> altera quantidade e observa&ccedil;&atilde;o do item j&aacute; lan&ccedil;ado.</li>
+<li><b>Separar item:</b> abre controles de diminuir, aumentar, total, salvar e cancelar.</li>
+<li><b>Apagar:</b> remove o material da lista.</li>
+<li>Durante a separa&ccedil;&atilde;o, os bot&otilde;es de editar e apagar ficam ocultos para evitar conflito.</li>
+</ul>
+</div>
+
+<div id="mat-fornecedores" class="guiaSubtitulo">
+💰 Fornecedores e Cota&ccedil;&otilde;es
+</div>
+
+<div class="guiaCard">
+<p>
+Na coluna <b>Fornecedor</b>, o bot&atilde;o de cota&ccedil;&atilde;o abre os fornecedores cadastrados para aquele material da OS.
+</p>
+
+<ul>
+<li>Ao adicionar fornecedor, informe valor, prazo, or&ccedil;amento e observa&ccedil;&atilde;o.</li>
+<li>O <b>ICMS</b> fica travado, pois vem do cadastro do fornecedor na Gest&atilde;o.</li>
+<li>A <b>quantidade</b> j&aacute; vem preenchida com a quantidade total do material.</li>
+<li>O checkbox <b>OK</b> j&aacute; vem marcado, podendo ser desmarcado se a cota&ccedil;&atilde;o n&atilde;o atender.</li>
+<li>A coluna <b>Valor R$</b> mostra o valor unit&aacute;rio ajustado pelo ICMS.</li>
+<li>A coluna <b>Total R$</b> mostra o total da cota&ccedil;&atilde;o daquele fornecedor.</li>
+<li>&Eacute; poss&iacute;vel selecionar, deselecionar, editar ou excluir fornecedores da cota&ccedil;&atilde;o.</li>
+<li>O menor e maior valor s&atilde;o destacados dentro da tabela de fornecedores.</li>
+</ul>
+</div>
+
+<div class="guiaCard">
+<h4>Bot&atilde;o Infos Fornecedor</h4>
+<p>
+O bot&atilde;o <b>Fornecedores</b>, acima da tabela de materiais, abre um painel de resumo da lista atual.
+</p>
+<ul>
+<li>Mostra o <b>Total R$ geral</b> cotado por fornecedor e o <b>Valor R$ selecionado</b> nos cards.</li>
+<li>Exibe quantidade total, n&uacute;mero de cota&ccedil;&otilde;es e fornecedores selecionados.</li>
+<li>Mostra gr&aacute;fico de participa&ccedil;&atilde;o por fornecedor.</li>
+<li>Indica maior volume cotado, ticket m&eacute;dio por cota&ccedil;&atilde;o, materiais marcados como OK e trata empate quando dois fornecedores possuem o mesmo total.</li>
+<li>Ajuda Compras a enxergar concentra&ccedil;&atilde;o de valores, total selecionado e validar se falta selecionar fornecedor.</li>
+</ul>
+</div>
+
+<div id="mat-status" class="guiaSubtitulo">
+📊 Status, Resumo e Progresso
+</div>
+
+<div class="guiaCard">
+<ul>
+<li><b>Itens:</b> quantidade de linhas de materiais.</li>
+<li><b>Qtd:</b> soma das quantidades solicitadas.</li>
+<li><b>Fornecedores:</b> quantidade de fornecedores selecionados nos materiais.</li>
+<li><b>Comprado:</b> quantidade j&aacute; comprada.</li>
+<li><b>Separado:</b> quantidade j&aacute; separada.</li>
+<li><b>Faltante:</b> quantidade ainda pendente.</li>
+<li><b>Barra inferior:</b> mostra percentuais de separado, comprado e faltante.</li>
+<li>O progresso dos cards considera materiais/itens adicionados, n&atilde;o somente soma de quantidades.</li>
+</ul>
+</div>
+
+<div id="mat-filtros" class="guiaSubtitulo">
+🔎 Busca e Filtros
+</div>
+
+<div class="guiaCard">
+<ul>
+<li>Use <b>Buscar material</b> para localizar por nome, c&oacute;digo, atributos, observa&ccedil;&atilde;o ou fabricante.</li>
+<li>Use o filtro de <b>Categoria</b> para visualizar apenas uma classe de material.</li>
+<li>Use filtros de status para ver <b>Todos</b>, <b>Faltante</b>, <b>Parcial</b>, <b>Separado</b> ou <b>Comprado</b>.</li>
+<li>O bot&atilde;o <b>Mostrar imagens</b> exibe ou oculta fotos dos materiais na tabela.</li>
+<li>No autocomplete, digitar medidas como <b>100x50</b> ajuda a encontrar materiais por largura e altura.</li>
+</ul>
+</div>
+
+<div id="mat-estoque" class="guiaSubtitulo">
+📦 Tela Estoque
+</div>
+
+<div class="guiaCard">
+<p>
+A tela Estoque mostra listas liberadas para separa&ccedil;&atilde;o e listas finalizadas que podem precisar de confer&ecirc;ncia.
+</p>
+<ul>
+<li><b>Listas pendentes:</b> cards compactos com OS, descri&ccedil;&atilde;o, prioridade e barra de progresso.</li>
+<li><b>Busca:</b> localiza por OS, cliente, descri&ccedil;&atilde;o, material, refer&ecirc;ncia ou fabricante.</li>
+<li><b>Lista completa:</b> ao selecionar um card, os materiais aparecem na tabela.</li>
+<li><b>Separar:</b> registra a quantidade separada usando menos, mais, total, salvar e cancelar.</li>
+<li><b>Enviar para compras:</b> confirma a etapa do estoque e avan&ccedil;a para Compras.</li>
+<li><b>PDF do Estoque:</b> exporta categoria, foto, descri&ccedil;&atilde;o, refer&ecirc;ncia, fabricante, observa&ccedil;&atilde;o, quantidade, unidade e campos para preenchimento manual.</li>
+<li>Materiais comprados s&atilde;o abatidos da necessidade do Estoque; materiais apenas separados continuam vis&iacute;veis quando necess&aacute;rio.</li>
+</ul>
+</div>
+
+<div class="guiaCard">
+<h4>Modo confer&ecirc;ncia</h4>
+<ul>
+<li>Listas finalizadas podem aparecer para confer&ecirc;ncia no Estoque.</li>
+<li>O bot&atilde;o de confer&ecirc;ncia abre uma janela item por item, com foto maior, descri&ccedil;&atilde;o, quantidade e unidade.</li>
+<li>Use <b>OK</b>, <b>Faltando</b> ou <b>N&atilde;o encontrado</b> para registrar a confer&ecirc;ncia.</li>
+<li>A barra fixa mostra o avan&ccedil;o da confer&ecirc;ncia at&eacute; concluir todos os itens.</li>
+</ul>
+</div>
+
+<div id="mat-catalogo" class="guiaSubtitulo">
+🧰 Tela Materiais
+</div>
+
+<div class="guiaCard">
+<p>
+A tela <b>Materiais</b> &eacute; o cadastro geral usado por Or&ccedil;amento e Compras como base de consulta e atualiza&ccedil;&atilde;o de pre&ccedil;os.
+</p>
+<ul>
+<li>A tabela carrega at&eacute; 50 materiais por p&aacute;gina e possui pagina&ccedil;&atilde;o.</li>
+<li>A busca carrega materiais conforme o usu&aacute;rio digita.</li>
+<li>As colunas mostram ID, categoria, foto, descri&ccedil;&atilde;o, c&oacute;digo, fabricante, unidade, valor de or&ccedil;amento atual e m&eacute;dia dos &uacute;ltimos fornecedores.</li>
+<li>O bot&atilde;o <b>Cadastrar Material</b> abre o cadastro para criar novo material.</li>
+<li>O bot&atilde;o de abrir no cadastro permite editar ou aproveitar dados de um material existente.</li>
+<li>&Eacute; poss&iacute;vel apagar material quando permitido pelo sistema.</li>
+</ul>
+</div>
+
+<div id="mat-cadastro" class="guiaSubtitulo">
+➕ Cadastro de Material
+</div>
+
+<div class="guiaCard">
+<ul>
+<li>Informe nome, categoria, unidade, c&oacute;digo, fabricante e atributos t&eacute;cnicos.</li>
+<li>O modo <b>Editar</b> aparece direto quando o cadastro &eacute; aberto pela tabela de materiais.</li>
+<li>A imagem s&oacute; &eacute; carregada depois que o material existe, pois depende do ID.</li>
+<li>&Eacute; poss&iacute;vel selecionar uma imagem j&aacute; cadastrada em outro material, usando busca e pagina&ccedil;&atilde;o de imagens.</li>
+<li>Varia&ccedil;&otilde;es existentes ficam vis&iacute;veis para consulta e ajudam a evitar duplicidade.</li>
+<li>O valor de or&ccedil;amento atual serve como base para custos previstos nas listas.</li>
+</ul>
+</div>
+
+<div id="mat-imagens" class="guiaSubtitulo">
+🖼️ Imagens dos Materiais
+</div>
+
+<div class="guiaCard">
+<ul>
+<li>Use imagens para facilitar a identifica&ccedil;&atilde;o visual do item.</li>
+<li>Ao editar imagem de um material, a tabela deve atualizar a foto mais recente.</li>
+<li>Quando n&atilde;o houver imagem cadastrada, o sistema usa imagem padr&atilde;o.</li>
+<li>Reaproveitar imagens evita uploads repetidos para itens parecidos, como cabos de cores ou bitolas diferentes.</li>
+</ul>
+</div>
+
+<div id="mat-boas-praticas" class="guiaSubtitulo">
+🚀 Boas Pr&aacute;ticas
+</div>
+
+<div class="guiaCard">
+<ul>
+<li>Crie uma lista por conjunto de materiais ou etapa relevante da OS.</li>
+<li>Use categorias e observa&ccedil;&otilde;es para facilitar busca, estoque e compra.</li>
+<li>Preencha c&oacute;digo, fabricante e unidade sempre que poss&iacute;vel.</li>
+<li>Atualize o valor de or&ccedil;amento no cadastro geral para manter o custo previsto confi&aacute;vel.</li>
+<li>Registre cota&ccedil;&otilde;es com valor, prazo, observa&ccedil;&atilde;o e fornecedor correto.</li>
+<li>Selecione o fornecedor escolhido antes de lan&ccedil;ar OC ou finalizar compra.</li>
+<li>Use o painel de fornecedores para conferir concentra&ccedil;&atilde;o de compras e totais por fornecedor.</li>
+<li>Exporte PDF completo para confer&ecirc;ncia interna e PDF cliente para compartilhamento simplificado.</li>
+</ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+📦 <b>Resumo:</b><br>
+O Controle de Fluxo acompanha a jornada dos materiais da OS; Estoque separa e confere; Materiais mant&eacute;m o cadastro t&eacute;cnico e financeiro que alimenta todo o processo.
+</div>
+
+`;
+
+};
 
 function getColaboradores() {
 
@@ -410,9 +728,23 @@ O sistema possui ferramentas automáticas de:
 
 <li>Categoria CNH</li>
 
+<li>Data de admiss&atilde;o usada nos c&aacute;lculos de f&eacute;rias, programa&ccedil;&atilde;o e experi&ecirc;ncia</li>
+
+<li>Op&ccedil;&atilde;o <b>Gestor de Obras</b>, usada para liberar o colaborador como respons&aacute;vel de OS ap&oacute;s aprova&ccedil;&atilde;o da Engenharia</li>
+
 <li>Histórico profissional</li>
 
 </ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+&#128274; <b>Aprova&ccedil;&atilde;o de Gestor de Obras:</b><br>
+Ao marcar ou desmarcar <b>Gestor de Obras</b>, o sistema n&atilde;o altera o respons&aacute;vel da OS imediatamente.
+Uma solicita&ccedil;&atilde;o &eacute; enviada para o <b>Gerente de Engenharia</b> pelo sininho de notifica&ccedil;&otilde;es.
+Somente ap&oacute;s aprova&ccedil;&atilde;o o colaborador passa a aparecer, ou deixa de aparecer, no campo de respons&aacute;vel ao cadastrar uma OS.
+Na notifica&ccedil;&atilde;o tamb&eacute;m aparece o nome do usu&aacute;rio que solicitou a altera&ccedil;&atilde;o.
 
 </div>
 
@@ -820,190 +1152,7 @@ Cada registro pode conter:
 
 
 
-<!--
-<div data-roles="99">
-<div id="colab-conquistas" class="guiaSubtitulo" >
-🏅 Conquistas e Medalhas
-</div>
-<div class="guiaCard">
-<p>
-Sistema de reconhecimento interno utilizado para valorizar experiências, desempenho e contribuições dos colaboradores.
-</p>
-</div>
-<div class="guiaCard">
-<ul>
-<li>Conquistas manuais</li>
-<li>Conquistas automáticas</li>
-<li>Reconhecimentos de segurança</li>
-<li>Reconhecimentos de liderança</li>
-<li>Reconhecimentos operacionais</li>
-<li>Histórico de medalhas</li>
-</ul>
-</div>
-<div class="guiaCard guiaInfo">
-🏆 Todas as medalhas e conquistas são exibidas no Hall da Experiência RTW.
-</div>
-</div>
--->
 
-<div id="colab-estatisticas" class="guiaSubtitulo">
-📊 Estatísticas Profissionais
-</div>
-
-<div class="guiaCard">
-
-<p>
-
-Painel dedicado ao histórico operacional e experiência acumulada do colaborador.
-
-</p>
-
-</div>
-
-<div class="guiaCard">
-
-<ul>
-
-<li>Clientes atendidos</li>
-
-<li>Participações em projetos</li>
-
-<li>Experiência operacional</li>
-
-<li>Histórico por empresa</li>
-
-<li>Indicadores profissionais</li>
-
-</ul>
-
-</div>
-<!--
-<div data-roles="99">
-<div id="colab-ferramentas" class="guiaSubtitulo">
-🧰 Ferramentas
-</div>
-
-<div class="guiaCard">
-
-<p>
-
-Controle patrimonial das ferramentas vinculadas ao colaborador.
-
-</p>
-
-</div>
-
-<div class="guiaCard">
-
-<ul>
-
-<li>Maleta virtual</li>
-
-<li>Histórico de entregas</li>
-
-<li>Controle de devoluções</li>
-
-<li>Vistorias</li>
-
-<li>Status dos equipamentos</li>
-
-</ul>
-
-</div>
-
-<div class="guiaCard">
-
-<p>
-
-Exemplos de ferramentas controladas:
-
-</p>
-
-<ul>
-
-<li>Multímetro</li>
-
-<li>Alicates</li>
-
-<li>Chaves</li>
-
-<li>Serrinhas</li>
-
-<li>Ferramentas especiais</li>
-
-</ul>
-
-</div>
-</div> -->
-<div id="colab-seguranca" class="guiaSubtitulo">
-🔐 Segurança e Acesso
-</div>
-
-<div class="guiaCard">
-
-<p>
-
-Cada colaborador possui acesso individual ao sistema.
-
-</p>
-
-</div>
-
-<div class="guiaCard">
-
-<ul>
-
-<li>Alteração de senha</li>
-
-<li>Controle de permissões</li>
-
-<li>Validação de acesso</li>
-
-<li>Configurações pessoais</li>
-
-</ul>
-
-</div>
-
-<div class="guiaCard guiaInfo">
-
-🔒 Determinadas funções administrativas são restritas a perfis autorizados pelo sistema.
-
-</div>
-
-<div id="colab-boas-praticas" class="guiaSubtitulo">
-🚀 Boas Práticas
-</div>
-
-<div class="guiaCard">
-
-<ul>
-
-<li>Mantenha os dados cadastrais atualizados.</li>
-
-<li>Atualize fotos sempre que necessário.</li>
-
-<li>Anexe documentos oficiais sempre que possível.</li>
-
-<li>Controle exames antes dos vencimentos.</li>
-
-<li>Mantenha cursos e integrações atualizados.</li>
-
-<li>Registre afastamentos imediatamente.</li>
-
-<li>Utilize o sistema de conquistas para reconhecer colaboradores.</li>
-
-<li>Revise periodicamente EPIs e ferramentas vinculadas.</li>
-
-</ul>
-
-</div>
-
-<div class="guiaCard guiaInfo">
-
-👤 O Cadastro de Colaboradores é a base de informações utilizada por praticamente todos os módulos da plataforma RTW, incluindo RH, Programação, Hall da Experiência e Central IA.
-
-</div>
 
 `;
 
@@ -1834,73 +1983,6 @@ facilitando o dimensionamento das equipes e a análise rápida da distribuição
 
 </div>
 <!--
-<div data-roles="99">
-    <div id="prog-complementos" class="guiaSubtitulo">
-    🧩 Complementos da OS
-    </div>
-    <div class="guiaCard">
-    <p>
-    A aba <b>Complementos</b> do formulário da OS registra informações adicionais que ajudam a organizar melhor o serviço antes da execução.
-    Ela não substitui a programação principal; ela complementa a OS com detalhes úteis para análise, preparação e integração com outras telas.
-    </p>
-    <ul>
-    <li><b>Categoria:</b> separa o tipo geral do serviço, como Instalação, Manutenção, SPDA, Engenharia, Solar, Automação, Incêndio ou Telecom.</li>
-    <li><b>Serviço:</b> mostra opções filtradas conforme a categoria selecionada.</li>
-    <li><b>Mais de um serviço:</b> a OS pode receber vários serviços, exibidos em cards com largura padronizada.</li>
-    <li><b>Remover serviço:</b> cada card possui um botão para retirar o serviço quando necessário.</li>
-    <li><b>PTA alocada:</b> indica que a execução exige PTA, mantendo essa informação separada dos painéis elétricos.</li>
-    <li><b>Painel para montar/instalar:</b> sinaliza que a OS terá painel elétrico relacionado.</li>
-    <li><b>Observação complementar:</b> registra detalhes rápidos que ajudam no entendimento operacional da OS.</li>
-    </ul>
-    </div>
-    <div class="guiaCard guiaInfo">
-    📌 <b>Importante:</b><br>
-    Quando a OS já possui número salvo, a aba permite vincular painéis elétricos cadastrados na tela Ferramentas.
-    O painel vinculado aparece com número de série e atuação, permitindo abrir os detalhes rapidamente.
-    </div>
-    <div class="guiaCard">
-    <h4>Ícones no card da OS</h4>
-    <p>
-    Quando a OS possui informações importantes em Complementos, a Programação mostra ícones pequenos no rodapé do card,
-    ao lado do total de colaboradores. Esses ícones ajudam a identificar rapidamente necessidades especiais sem abrir o formulário da OS.
-    </p>
-    <ul>
-    <li><b>🚚 PTA:</b> indica que a OS possui PTA alocada ou prevista para execução.</li>
-    <li><b>⚡ Painel:</b> indica que a OS possui painel elétrico previsto para montar ou instalar.</li>
-    <li>Os ícones aparecem somente quando as opções correspondentes estiverem marcadas na aba Complementos da OS.</li>
-    <li>Use essa indicação para conferir rapidamente recursos críticos antes de liberar ou acompanhar a programação do dia.</li>
-    </ul>
-    </div>
-</div>
-
-
-<div  data-roles="99">
-    <div id="prog-materiais-os" class="guiaSubtitulo">
-    📦 Materiais da OS
-    </div>
-    <div class="guiaCard">
-    <p>
-    A aba <b>Materiais</b> da OS resume as listas de materiais vinculadas à ordem de serviço, usando os dados da tela Lista de Materiais.
-    Ela foi criada para o usuário acompanhar o andamento sem precisar sair do perfil da OS.
-    </p>
-    <ul>
-    <li>Exibe as listas vinculadas à OS selecionada.</li>
-    <li>Mostra número da lista, descrição, quantidade de itens e quantidade total.</li>
-    <li>Apresenta o progresso no mesmo padrão visual usado nos painéis elétricos.</li>
-    <li>Indica quantidades compradas, separadas e faltantes.</li>
-    <li>Mostra o status atual da lista, como pendente, comprando, separado ou concluído.</li>
-    <li>Ao clicar na lista, o sistema direciona para a tela Materiais com a lista completa carregada.</li>
-    </ul>
-    </div>
-    <div class="guiaCard guiaInfo">
-    💡 <b>Dica:</b><br>
-    Use essa aba para conferir rapidamente se os materiais da OS estão avançando junto com a programação.
-    Quando houver divergência entre execução e material, abra a lista completa para ajustar compras, separação ou pendências.
-    </div>
-</div>
--->
-
-
 <div id="prog-boas-praticas" class="guiaSubtitulo">
 🚀 Boas Práticas
 </div>
@@ -1942,6 +2024,185 @@ Todas as alocações, movimentações e indicadores operacionais são refletidos
 
 }
 
+
+function getOrdemServicoOS() {
+
+    return `
+
+<div id="os-topo" class="guiaTitulo">
+&#128196; Ordem de Servi&ccedil;o - OS
+</div>
+
+<div id="os-visao-geral" class="guiaSubtitulo">
+&#128203; Vis&atilde;o Geral
+</div>
+
+<div class="guiaCard">
+<p>
+O formul&aacute;rio de <b>Ordem de Servi&ccedil;o</b> centraliza o cadastro, edi&ccedil;&atilde;o e consulta dos dados principais da OS.
+Ele &eacute; usado para registrar informa&ccedil;&otilde;es do cliente, local, respons&aacute;veis, status, complementos, materiais e documentos anexados.
+</p>
+<ul>
+<li>Ao cadastrar uma OS nova, o sistema valida se o n&uacute;mero j&aacute; existe antes de salvar.</li>
+<li>Ao editar uma OS existente, os dados s&atilde;o carregados no mesmo formul&aacute;rio.</li>
+<li>As abas laterais separam informa&ccedil;&otilde;es, status, complementos, materiais, anexos e estat&iacute;sticas.</li>
+<li>As altera&ccedil;&otilde;es importantes devem ser salvas antes de fechar o formul&aacute;rio.</li>
+</ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+&#128204; <b>Dica:</b><br>
+Sempre confira cliente, cidade e respons&aacute;vel antes de usar a OS na Programa&ccedil;&atilde;o. Esses dados ajudam nos filtros, exporta&ccedil;&otilde;es e relat&oacute;rios.
+</div>
+
+<div id="os-informacoes" class="guiaSubtitulo">
+&#128221; Informa&ccedil;&otilde;es da OS
+</div>
+
+<div class="guiaCard">
+<h4>Campos principais</h4>
+<ul>
+<li><b>N&ordm; OS:</b> n&uacute;mero identificador da Ordem de Servi&ccedil;o.</li>
+<li><b>Descri&ccedil;&atilde;o do servi&ccedil;o:</b> resumo objetivo do trabalho que ser&aacute; executado.</li>
+<li><b>Cliente:</b> empresa contratante vinculada &agrave; OS.</li>
+<li><b>Cidade:</b> local de execu&ccedil;&atilde;o do servi&ccedil;o.</li>
+<li><b>Supervisor do cliente:</b> contato relacionado ao cliente ou &agrave; unidade.</li>
+<li><b>Telefone e e-mail do supervisor:</b> informa&ccedil;&otilde;es exibidas apenas para consulta.</li>
+<li><b>Valor or&ccedil;ado:</b> valor previsto ou aprovado para a OS.</li>
+<li><b>Previs&atilde;o:</b> data prevista de conclus&atilde;o ou refer&ecirc;ncia do servi&ccedil;o.</li>
+<li><b>Respons&aacute;vel:</b> colaborador respons&aacute;vel pela OS. Pode ser deixado em branco quando ainda n&atilde;o estiver definido.</li>
+<li>A lista de respons&aacute;veis exibe apenas colaboradores liberados como <b>Gestor de Obras</b>. Essa libera&ccedil;&atilde;o depende de aprova&ccedil;&atilde;o da Engenharia pelo sininho.</li>
+<li><b>Observa&ccedil;&otilde;es:</b> campo livre para informa&ccedil;&otilde;es gerais da OS.</li>
+</ul>
+</div>
+
+<div class="guiaCard">
+<h4>Cadastro e edi&ccedil;&atilde;o</h4>
+<ul>
+<li><b>Cadastrar:</b> cria uma nova OS ap&oacute;s validar campos obrigat&oacute;rios e duplicidade.</li>
+<li><b>Editar:</b> atualiza os dados de uma OS j&aacute; existente.</li>
+<li><b>Cancelar/Fechar:</b> fecha o formul&aacute;rio sem continuar a edi&ccedil;&atilde;o.</li>
+<li>Se a OS j&aacute; estiver cadastrada, o sistema deve informar a duplicidade e impedir grava&ccedil;&atilde;o duplicada.</li>
+</ul>
+</div>
+
+<div id="os-status" class="guiaSubtitulo">
+&#128681; Status da OS
+</div>
+
+<div class="guiaCard">
+<p>
+A aba de status permite atualizar a situa&ccedil;&atilde;o operacional da OS sem alterar os demais dados cadastrais.
+</p>
+<ul>
+<li><b>Sem respons&aacute;vel:</b> OS ainda sem lideran&ccedil;a definida.</li>
+<li><b>Aguardando:</b> OS aberta, aguardando programa&ccedil;&atilde;o ou execu&ccedil;&atilde;o.</li>
+<li><b>Em execu&ccedil;&atilde;o:</b> servi&ccedil;o em andamento.</li>
+<li><b>Parado:</b> execu&ccedil;&atilde;o interrompida temporariamente.</li>
+<li><b>Conclu&iacute;do:</b> OS finalizada.</li>
+<li><b>Em espera:</b> aguardando libera&ccedil;&atilde;o, cliente, material ou outra condi&ccedil;&atilde;o.</li>
+<li><b>Cancelado:</b> OS cancelada.</li>
+</ul>
+</div>
+
+<div id="os-complementos" class="guiaSubtitulo">
+&#129513; Complementos da OS
+</div>
+
+<div class="guiaCard">
+<p>
+A aba <b>Complementos</b> adiciona informa&ccedil;&otilde;es operacionais que ajudam no planejamento antes da execu&ccedil;&atilde;o.
+Ela n&atilde;o substitui a Programa&ccedil;&atilde;o; ela melhora os dados da OS para consultas, filtros e integra&ccedil;&otilde;es.
+</p>
+<ul>
+<li><b>Categoria do servi&ccedil;o:</b> separa o tipo geral, como Instala&ccedil;&atilde;o, Manuten&ccedil;&atilde;o, SPDA, Engenharia, Solar, Automa&ccedil;&atilde;o, Inc&ecirc;ndio ou Telecom.</li>
+<li><b>Servi&ccedil;o:</b> lista op&ccedil;&otilde;es filtradas conforme a categoria escolhida.</li>
+<li><b>Adicionar servi&ccedil;o:</b> permite registrar mais de um servi&ccedil;o na mesma OS.</li>
+<li><b>Cards de servi&ccedil;o:</b> exibem os servi&ccedil;os adicionados e possuem bot&atilde;o para remover quando necess&aacute;rio.</li>
+<li><b>Ter&aacute; PTA alocada:</b> marca que a OS precisa de PTA.</li>
+<li><b>Ter&aacute; painel para montar/instalar:</b> indica que a OS possui necessidade de painel el&eacute;trico.</li>
+<li><b>Observa&ccedil;&atilde;o complementar:</b> registra detalhes r&aacute;pidos para consulta operacional.</li>
+</ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+&#9889; <b>Painel el&eacute;trico vinculado:</b><br>
+Depois que a OS possui n&uacute;mero salvo, &eacute; poss&iacute;vel vincular pain&eacute;is cadastrados em Ferramentas. O card mostra n&uacute;mero de s&eacute;rie e atua&ccedil;&atilde;o, permitindo abrir a tela de detalhes do painel.
+</div>
+
+<div id="os-materiais" class="guiaSubtitulo">
+&#128230; Materiais da OS
+</div>
+
+<div class="guiaCard">
+<p>
+A aba <b>Materiais</b> da OS resume as listas vinculadas &agrave; ordem de servi&ccedil;o usando dados do Controle de Fluxo.
+</p>
+<ul>
+<li>Exibe as listas de materiais vinculadas &agrave; OS selecionada.</li>
+<li>Mostra t&iacute;tulo, descri&ccedil;&atilde;o, status, quantidade de itens e progresso.</li>
+<li>Indica quantidades compradas, separadas e faltantes.</li>
+<li>Ao clicar em uma lista, o sistema abre a tela de Controle de Fluxo/Materiais j&aacute; direcionada para a OS e lista correspondente.</li>
+<li>Quando n&atilde;o houver materiais, a aba informa que nenhuma lista foi lan&ccedil;ada para aquela OS.</li>
+</ul>
+</div>
+
+<div id="os-anexos" class="guiaSubtitulo">
+&#128206; Anexos da OS
+</div>
+
+<div class="guiaCard">
+<p>
+A aba <b>Anexos</b> permite guardar documentos PDF diretamente vinculados &agrave; OS.
+</p>
+<ul>
+<li><b>Anexar documento:</b> informe o nome do PDF e selecione o arquivo correspondente.</li>
+<li><b>Visualizar:</b> abre o PDF salvo para confer&ecirc;ncia.</li>
+<li><b>Excluir:</b> remove o documento anexado quando necess&aacute;rio.</li>
+<li><b>Limite:</b> arquivos PDF podem ter at&eacute; 15 MB.</li>
+<li>O sistema valida a OS antes de anexar, evitando envio para OS inexistente ou n&atilde;o carregada.</li>
+</ul>
+</div>
+
+<div id="os-analise" class="guiaSubtitulo">
+&#128202; An&aacute;lise e Hist&oacute;rico
+</div>
+
+<div class="guiaCard">
+<p>
+O formul&aacute;rio da OS tamb&eacute;m pode abrir visualiza&ccedil;&otilde;es de hist&oacute;rico e gr&aacute;fico relacionados aos colaboradores que participaram da OS.
+</p>
+<ul>
+<li>Use a an&aacute;lise para conferir participa&ccedil;&atilde;o de colaboradores na OS.</li>
+<li>Quando n&atilde;o houver dados, o sistema informa que a OS n&atilde;o possui hist&oacute;rico dispon&iacute;vel.</li>
+<li>Esse recurso ajuda a entender volume de m&atilde;o de obra e distribui&ccedil;&atilde;o por colaborador.</li>
+</ul>
+</div>
+
+<div id="os-boas-praticas" class="guiaSubtitulo">
+&#128640; Boas Pr&aacute;ticas
+</div>
+
+<div class="guiaCard">
+<ul>
+<li>Cadastre a OS com descri&ccedil;&atilde;o clara e objetiva.</li>
+<li>Evite deixar cliente, cidade e supervisor incorretos, pois esses dados afetam relat&oacute;rios e filtros.</li>
+<li>Defina respons&aacute;vel sempre que poss&iacute;vel para facilitar gest&atilde;o e exporta&ccedil;&atilde;o da Programa&ccedil;&atilde;o.</li>
+<li>Use Complementos para registrar PTA, painel e servi&ccedil;os adicionais.</li>
+<li>Anexe documentos importantes diretamente na OS para manter rastreabilidade.</li>
+<li>Confira Materiais da OS antes de liberar execu&ccedil;&atilde;o de servi&ccedil;os dependentes de compra ou estoque.</li>
+<li>Atualize o status da OS conforme a realidade operacional.</li>
+</ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+&#128196; <b>Resumo:</b><br>
+A OS &eacute; a base do fluxo operacional: alimenta Programa&ccedil;&atilde;o, Materiais, Estoque, Ferramentas, relat&oacute;rios e hist&oacute;rico. Quanto mais completo o cadastro, melhor a gest&atilde;o.
+</div>
+
+`;
+
+}
 function getFerias() {
 
     return `
@@ -2062,7 +2323,7 @@ O sistema valida datas obrigatórias, ordem das datas, períodos sobrepostos e l
 
 <p>
 
-O sistema calcula os ciclos a partir da data de admissão do colaborador.
+O sistema calcula os ciclos a partir da data de entrada na empresa informada em Dados Profissionais do colaborador.
 Cada ciclo possui um período aquisitivo, um período concessivo e um saldo de até 30 dias.
 
 </p>
@@ -5073,7 +5334,7 @@ mas garante que eles tenham dados confiáveis para funcionar bem.
 
 }
 
-function getMateriais() {
+function getMateriaisLegacy() {
 
     return `
 
@@ -5132,8 +5393,53 @@ Antes de incluir materiais, selecione a OS correta no topo da tela. A lista carr
 <li>O botão <b>Atualizar</b> recarrega os dados da OS selecionada.</li>
 
 <li>O botão <b>Exportar</b> gera uma planilha da tabela atual de materiais.</li>
+<li>A opção <b>PDF</b> gera uma lista completa para conferência, com dados da OS, cabeçalho, materiais e imagens quando o link da imagem permitir carregamento.</li>
 
 <li>Os cards do topo mostram custo total, comprado, estimado, economia e percentual comprado.</li>
+
+</ul>
+
+</div>
+
+<div id="mat-fluxo-listas"
+     class="guiaSubtitulo">
+
+🧭 Fluxo das Listas
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tela Materiais também possui uma visão por listas, organizada em estágios para acompanhar o andamento até a finalização.
+
+</p>
+
+<ul>
+
+<li><b>Orçamento:</b> início da lista quando a necessidade nasce pelo orçamento.</li>
+<li><b>Engenharia:</b> revisão técnica, conferência e ajuste dos itens.</li>
+<li><b>Estoque:</b> separação dos materiais disponíveis internamente.</li>
+<li><b>Compras:</b> cotação, escolha de fornecedor e registro de compra.</li>
+<li><b>Finalizado:</b> lista concluída e pronta para histórico/acompanhamento.</li>
+<li>Os cards exibem OS, descrição, prioridade, prazo e barra de progresso por material.</li>
+<li>É possível avançar, voltar estágio com motivo, duplicar, editar, excluir e consultar histórico da lista.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Criar ou editar lista</h4>
+
+<ul>
+
+<li>Selecione a OS antes de criar uma nova lista.</li>
+<li>Informe nome da lista, estágio inicial, prioridade, responsável, prazo ou marque <b>Sem prazo definido</b>.</li>
+<li>Use descrição e observação rápida para orientar quem vai receber a lista nos próximos setores.</li>
+<li>Listas com prazo acompanham indicadores visuais de vencimento; listas sem prazo usam indicação neutra.</li>
 
 </ul>
 
@@ -5186,7 +5492,8 @@ A tabela apresenta os materiais vinculados à OS com suas principais informaçõ
 
 <li><b>Editar:</b> altera o material ou a quantidade de um item já lançado.</li>
 
-<li><b>Separar item:</b> registra controle de separação do material.</li>
+<li><b>Separar item:</b> abre controles de quantidade com botões de diminuir, aumentar, total, salvar e cancelar.</li>
+<li>Enquanto o item está em separação, as ações de editar e apagar ficam ocultas para evitar alteração conflitante.</li>
 
 <li><b>Apagar:</b> remove o material da lista da OS.</li>
 
@@ -5257,9 +5564,11 @@ Na coluna Fornecedor, o botão de cotação abre os fornecedores cadastrados par
 
 <li>Marque <b>OK</b> quando o material do fornecedor estiver validado.</li>
 
-<li>O sistema calcula valor em reais, score e comparação entre fornecedores.</li>
+<li>O sistema calcula valor em reais considerando ICMS, score e comparação entre fornecedores.</li>
 
 <li>É possível selecionar o fornecedor escolhido para refletir no preço da lista principal.</li>
+<li>Quando um fornecedor já está selecionado, a própria linha permite desmarcar/deselecionar.</li>
+<li>Acima da lista, cards de resumo mostram somente fornecedores selecionados, somando quantidade de materiais e valor total por fornecedor.</li>
 
 <li>Fornecedores podem ser removidos quando a cotação não for mais necessária.</li>
 
@@ -5275,6 +5584,7 @@ Na coluna Fornecedor, o botão de cotação abre os fornecedores cadastrados par
 
 Quando existem cotações, a tela pode mostrar o menor valor encontrado e o valor do fornecedor escolhido.
 Isso ajuda a comparar economia, custo estimado e custo comprado.
+O menor valor considera o valor final calculado com ICMS, evitando escolher uma cotação aparentemente menor que fique mais cara no total.
 
 </p>
 
@@ -5310,6 +5620,8 @@ A tela possui indicadores para acompanhar a evolução dos materiais da OS.
 <li><b>Faltante:</b> quantidade ainda pendente.</li>
 
 <li><b>Barra inferior:</b> mostra percentuais de separado, comprado e faltante.</li>
+<li>Nas listas e cards de fluxo, o progresso principal considera materiais/itens adicionados, não apenas a soma de quantidades.</li>
+<li>Materiais já comprados deixam de aparecer como pendência para separação no Estoque; materiais apenas separados continuam visíveis quando necessário.</li>
 
 </ul>
 
@@ -5335,6 +5647,44 @@ A tela possui indicadores para acompanhar a evolução dos materiais da OS.
 <li>O botão <b>Mostrar imagens</b> exibe ou oculta imagens dos materiais na tabela.</li>
 
 </ul>
+
+</div>
+
+<div id="mat-estoque"
+     class="guiaSubtitulo">
+
+📦 Tela Estoque
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+A tela Estoque mostra somente listas que chegaram ao estágio de separação. Ela foi criada para facilitar a rotina de quem separa materiais antes da etapa de Compras.
+
+</p>
+
+<ul>
+
+<li><b>Listas pendentes:</b> exibe cards compactos com OS, descrição, prioridade e barra de progresso.</li>
+<li><b>Busca:</b> permite localizar por OS, cliente, descrição, material, referência ou fabricante.</li>
+<li><b>Filtros:</b> ajudam a visualizar prioridade, ordem das listas e situação dos itens.</li>
+<li><b>Lista completa:</b> ao selecionar um card, os materiais aparecem na tabela ao lado/detalhe.</li>
+<li><b>Separação:</b> use os botões de quantidade, total, salvar e cancelar para registrar a separação.</li>
+<li><b>Enviar para compras:</b> confirma que a etapa do Estoque foi concluída e avança a lista para Compras.</li>
+<li>Materiais comprados são abatidos da necessidade do Estoque; se tudo foi comprado, deixam de aparecer como pendência.</li>
+<li>Em telas menores e tablets, o layout reduz cards e mantém a tabela com rolagem para facilitar toque nos botões de separação.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+💡 <b>Dica:</b><br>
+
+Use a tela Estoque para separar o que existe internamente antes de enviar a lista para Compras. Assim, Compras recebe apenas o que ainda precisa ser comprado ou tratado.
 
 </div>
 
@@ -5428,14 +5778,14 @@ function getChatOnline() {
 <p>
 
 O Chat Online é uma ferramenta rápida de comunicação entre usuários conectados ao sistema.
-Ele fica integrado ao painel Online, no canto inferior direito da tela.
+Ele fica integrado ao painel Online, no canto inferior direito da tela, com conversa em Grupo geral e conversa Privada.
 
 </p>
 
 <p>
 
-As mensagens são temporárias e permanecem disponíveis somente durante a sessão aberta da página.
-Ao atualizar ou fechar a página, o histórico local do chat não é mantido.
+As mensagens podem ficar salvas somente no navegador do usuário, conforme a preferência configurada.
+O histórico local pode ser desativado ou mantido por 5, 10, 15 ou 30 dias.
 
 </p>
 
@@ -5454,11 +5804,13 @@ Ao atualizar ou fechar a página, o histórico local do chat não é mantido.
 
 <li>Clique no botão <b>ONLINE</b>, localizado no canto inferior direito.</li>
 
-<li>A aba <b>Online</b> mostra os usuários conectados no momento.</li>
+<li>O painel mostra o <b>Chat</b> à esquerda e os usuários <b>Onlines</b> à direita.</li>
 
-<li>A aba <b>Chat</b> abre a conversa rápida entre os usuários online.</li>
+<li>Use <b>Grupo geral</b> para conversar com todos os usuários conectados.</li>
 
-<li>Ao clicar em um usuário da lista Online, o chat abre com o nome dele já preparado para menção.</li>
+<li>Ao clicar em um usuário da lista Online, o chat muda para <b>Privado</b> com aquele usuário.</li>
+
+<li>Quando o painel estiver minimizado, o botão ONLINE mostra contador de usuários e contador de mensagens não vistas.</li>
 
 </ul>
 
@@ -5500,7 +5852,8 @@ Enviar
 </div>
 
 <div class="guiaMedalhaDescricao">
-Clique em Enviar para compartilhar a mensagem com os usuários conectados.
+No Grupo geral, a mensagem é enviada para todos os usuários conectados.
+No Privado, a mensagem é enviada somente para o usuário selecionado.
 </div>
 
 </div>
@@ -5518,7 +5871,8 @@ Mensagens não lidas
 </div>
 
 <div class="guiaMedalhaDescricao">
-Quando o chat estiver fechado ou em outra aba, o contador da aba Chat indica mensagens recebidas.
+Quando o chat estiver minimizado, o sistema mostra aviso visual e contador de mensagens não vistas no botão ONLINE.
+No privado, o nome de quem chamou também recebe badge e destaque piscando.
 </div>
 
 </div>
@@ -5621,8 +5975,46 @@ Esse botão abre rapidamente as informações do colaborador citado, sem necessi
 
 📌 <b>Importante:</b><br>
 
-O Chat Online não envia mensagens para WhatsApp e não salva histórico permanente.
-Ele serve para comunicação interna rápida enquanto a página estiver aberta.
+O Chat Online não envia mensagens para WhatsApp e não salva histórico no banco de dados.
+O histórico é local, fica somente no navegador do usuário e respeita o prazo configurado nas preferências.
+
+</div>
+
+<div id="chat-online-preferencias"
+     class="guiaSubtitulo">
+
+⚙️ Histórico e Preferências
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+As preferências do Chat Online ficam no menu de configurações do usuário e são salvas localmente no navegador.
+
+</p>
+
+<ul>
+
+<li><b>Histórico do chat:</b> permite escolher entre desativado, 5 dias, 10 dias, 15 dias ou 30 dias.</li>
+<li><b>Limpar histórico do chat agora:</b> apaga as mensagens salvas neste navegador.</li>
+<li><b>Silenciar chat global:</b> oculta avisos e contador de novas mensagens do Grupo geral.</li>
+<li>O silenciamento do Grupo geral não bloqueia avisos de conversa privada.</li>
+<li><b>Aba Notificações:</b> permite habilitar ou desabilitar avisos por categoria, como Programação, Chat online, Alertas importantes e Notificações gerais.</li>
+<li>As escolhas de notificações ficam salvas localmente para aquele usuário e dispositivo.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+&#128276; <b>Aprova&ccedil;&otilde;es no sininho:</b><br>
+Al&eacute;m de chat e programa&ccedil;&atilde;o, o sininho tamb&eacute;m pode receber solicita&ccedil;&otilde;es de aprova&ccedil;&atilde;o.
+No caso de <b>Gestor de Obras</b>, o Gerente de Engenharia recebe uma notifica&ccedil;&atilde;o com o nome do colaborador,
+o tipo de altera&ccedil;&atilde;o solicitada e o nome do usu&aacute;rio que fez a solicita&ccedil;&atilde;o.
+Essa aprova&ccedil;&atilde;o fica salva para o destinat&aacute;rio e pode ser vista mesmo se ele n&atilde;o estava online na hora.
 
 </div>
 
@@ -5642,6 +6034,8 @@ Ele serve para comunicação interna rápida enquanto a página estiver aberta.
 <li>Use <b>@</b> para chamar usuários online.</li>
 
 <li>Use <b>#</b> para citar colaboradores cadastrados e liberar o botão Info.</li>
+
+<li>Use o <b>Privado</b> para conversas direcionadas e o <b>Grupo geral</b> para recados coletivos.</li>
 
 <li>Evite enviar dados sensíveis no chat, pois ele é voltado para comunicação rápida.</li>
 
@@ -5748,6 +6142,32 @@ Sim. Os documentos podem ser armazenados junto aos respectivos registros para co
 
 Sim. A Programação foi desenvolvida justamente para o planejamento operacional futuro das equipes.
 
+</p>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>👤 Por que o colaborador n&atilde;o est&aacute; aparecendo na Programa&ccedil;&atilde;o?</h4>
+
+<p>
+Quando um colaborador n&atilde;o aparece na lista de dispon&iacute;veis da Programa&ccedil;&atilde;o, verifique estes pontos:
+</p>
+
+<ul>
+<li><b>Colaborador desligado:</b> colaboradores com status desligado n&atilde;o aparecem para nova programa&ccedil;&atilde;o.</li>
+<li><b>J&aacute; est&aacute; em uma OS no mesmo dia:</b> se ele j&aacute; foi alocado em outra OS daquela data, pode deixar de aparecer como dispon&iacute;vel.</li>
+<li><b>F&eacute;rias ou afastamento:</b> colaboradores em f&eacute;rias, afastados ou com aus&ecirc;ncia registrada podem ser bloqueados.</li>
+<li><b>Exames, cursos ou integra&ccedil;&otilde;es vencidos:</b> pend&ecirc;ncias obrigat&oacute;rias podem impedir ou alertar a aloca&ccedil;&atilde;o.</li>
+<li><b>Filtro ativo:</b> filtros por nome, cargo, setor, status, cidade, OS ou busca global podem esconder colaboradores.</li>
+<li><b>Data selecionada incorreta:</b> a disponibilidade sempre considera o dia aberto na Programa&ccedil;&atilde;o.</li>
+<li><b>Cadastro incompleto:</b> setor, cargo, situa&ccedil;&atilde;o, dados profissionais ou permiss&otilde;es podem afetar a listagem.</li>
+<li><b>Conex&atilde;o ou sess&atilde;o:</b> se a sess&atilde;o expirou ou a conex&atilde;o caiu, atualize a tela e entre novamente se solicitado.</li>
+</ul>
+
+<p>
+Se ap&oacute;s conferir esses pontos o colaborador ainda n&atilde;o aparecer, abra o perfil dele no RH e confira status,
+f&eacute;rias, exames, cursos, integra&ccedil;&otilde;es e hist&oacute;rico de programa&ccedil;&otilde;es.
 </p>
 
 </div>
@@ -5938,7 +6358,22 @@ Sim. O cadastro de colaboradores permite vincular ferramentas e acompanhar sua u
 
 <p>
 
-Ainda não. O acompanhamento é realizado através dos indicadores visuais dos módulos.
+Sim. O sistema possui notificações no sininho do perfil para avisos como programação lançada, mensagens do chat, menções e alertas importantes.
+Nas configurações do usuário, a aba <b>Notificações</b> permite ativar ou desativar categorias específicas.
+
+</p>
+
+</div>
+
+<div class="guiaCard">
+
+<h4>&#128188; Por que o colaborador n&atilde;o apareceu como respons&aacute;vel da OS?</h4>
+
+<p>
+
+Para aparecer no campo <b>Respons&aacute;vel</b> da OS, o colaborador precisa estar liberado como <b>Gestor de Obras</b>.
+Quando o RH marca essa op&ccedil;&atilde;o nos Dados Profissionais, a altera&ccedil;&atilde;o fica aguardando aprova&ccedil;&atilde;o do Gerente de Engenharia.
+Depois de aprovada pelo sininho, o status &eacute; aplicado no cadastro e o colaborador passa a aparecer na lista de respons&aacute;veis.
 
 </p>
 
@@ -5967,3 +6402,6 @@ Caso uma funcionalidade não esteja disponível atualmente, registre sua sugest�
 `;
 
 }
+
+
+

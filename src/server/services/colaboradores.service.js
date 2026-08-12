@@ -1,4 +1,5 @@
 const ColabModel = require('../models/colaboradores.model');
+const AprovacoesModel = require('../models/aprovacoes.model');
 const SaasService = require('./saas.service');
 const bcrypt = require('bcrypt');
 const fsPromises = require('fs').promises;
@@ -13,7 +14,16 @@ async function listarColaboradores() {
 
 // Buscar um
 async function buscarColaborador(id) {
-  return await ColabModel.getColaboradorById(id);
+  const colaborador = await ColabModel.getColaboradorById(id);
+  if (!colaborador) return null;
+
+  const pendente = await AprovacoesModel.buscarPendenteResponsavelOS(id);
+  colaborador.gestor_obras_pendente = pendente
+    ? Number(pendente.valor_solicitado || 0)
+    : null;
+  colaborador.gestor_obras_aprovacao_id = pendente?.id_aprovacao || null;
+
+  return colaborador;
 }
 
 /**
@@ -31,6 +41,18 @@ async function buscarStatusIntegracao(idfuncionario, idOS, dataDia) {
 async function gerarHash(senha) {
   const saltRounds = 10;
   return await bcrypt.hash(senha, saltRounds);
+}
+
+function textoLimpo(valor) {
+  return String(valor || "").trim();
+}
+
+function validarTamanhoCampo(nomeCampo, valor, limite) {
+  const texto = textoLimpo(valor);
+  if (texto.length > limite) {
+    throw new Error(`${nomeCampo} deve ter no maximo ${limite} caracteres.`);
+  }
+  return texto || null;
 }
 
 async function criarColaborador(data, options = {}) {
@@ -59,13 +81,13 @@ async function criarColaborador(data, options = {}) {
   const senhaHash = await gerarHash(senhaPlain);
 
   const colaborador = {
-    nome: data.nome,
+    nome: textoLimpo(data.nome),
     sexo: data.genero,
     nascimento: data.dataNascimento,
-    endereco: data.endereco,
-    telefone: data.telefone,
-    mail: data.email,
-    sobre: data.sobre,
+    endereco: validarTamanhoCampo('Endereco', data.endereco, 255),
+    telefone: textoLimpo(data.telefone),
+    mail: textoLimpo(data.email),
+    sobre: textoLimpo(data.sobre),
     cpf: cpfLimpo,
     rg: rgLimpo,
     senha: senhaHash,
@@ -113,13 +135,13 @@ async function atualizarColaborador(id, data) {
 
     // 🔧 Sanitização
     const payload = {
-      nome: data.nome,
+      nome: textoLimpo(data.nome),
       sexo: data.genero,
       nascimento: data.dataNascimento,
-      endereco: data.endereco,
-      telefone: data.telefone,
-      mail: data.email,
-      sobre: data.sobre,
+      endereco: validarTamanhoCampo('Endereco', data.endereco, 255),
+      telefone: textoLimpo(data.telefone),
+      mail: textoLimpo(data.email),
+      sobre: textoLimpo(data.sobre),
       cpf: data.cpf ? data.cpf.replace(/\D/g, "").trim() : null,
       rg: data.rg ? data.rg.trim() : null
     };
@@ -146,7 +168,10 @@ async function atualizarColaborador(id, data) {
 
     return {
       sucesso: false,
-      mensagem: "Erro interno ao atualizar colaborador.",
+      mensagem: error.message?.includes("maximo") || (error.message?.includes("Data too long") && error.message?.includes("'endereco'"))
+        ? error.message
+            .replace("Data too long for column 'endereco' at row 1", "Endereco muito longo. Reduza o endereco e tente novamente.")
+        : "Erro interno ao atualizar colaborador.",
       detalhe: error.message
     };
   }
@@ -166,21 +191,40 @@ async function listarColaboradoresPorData(dataDia) {
 }
 
 // Atualizar dados profissional
-async function atualizarProfissionalColab(id, data) {
+async function atualizarProfissionalColab(id, data, usuario = {}) {
   if (!id) throw new Error('ID do colaborador é obrigatório');
   if (!data.setor || !data.cargo) throw new Error('Setor e Cargo são obrigatórios');
   const atualizado = await ColabModel.updateProfissionalColab(id, {
     setor: data.setor,
     cargo: data.cargo,
     vehicles_selected: data.vehicles_selected,
-    empresacontrato: data.empresacontrato
+    empresacontrato: data.empresacontrato,
+    data_experiencia: data.data_experiencia || null
   });
 
   if (!atualizado) {
     throw new Error('Colaborador não encontrado para atualização');
   }
 
-  return { id, ...data };
+  let aprovacaoGestorObras = null;
+  const gestorObrasFoiEnviado = Object.prototype.hasOwnProperty.call(data, "gestor_obras_estado_enviado")
+    || Object.prototype.hasOwnProperty.call(data, "gestor_obras");
+
+  if (gestorObrasFoiEnviado) {
+    const valorSolicitado = data.gestor_obras === "1"
+      || data.gestor_obras === 1
+      || data.gestor_obras === true
+      ? 1
+      : 0;
+
+    aprovacaoGestorObras = await AprovacoesModel.solicitarResponsavelOS({
+      idFuncionario: id,
+      valorSolicitado,
+      solicitadoPor: usuario?.id || 999
+    });
+  }
+
+  return { id, ...data, aprovacaoGestorObras };
 }
 
 // Deletar

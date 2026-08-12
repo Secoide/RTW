@@ -1,6 +1,7 @@
 import {
   abrirModalMaterial,
   fecharModalMaterial,
+  resetModalMaterial,
   adicionarAtributo
 } from "../../components/forms/material.modal.js";
 
@@ -22,13 +23,22 @@ import { carregarMateriais } from "../../services/api/material.api.js";
 export function initMaterialModal() {
 
   // 🔥 abrir modal
-  $("#btnCadastrarMaterial").on("click", abrirModalMaterial);
+  $("#btnCadastrarMaterial")
+    .off("click.materialModalCadastrar")
+    .on("click.materialModalCadastrar", function () {
+      resetModalMaterial();
+      abrirModalMaterial();
+    });
 
   // 🔥 fechar
-  $("#btnFecharModal").on("click", fecharModalMaterial);
+  $("#btnFecharModal")
+    .off("click.materialModalFechar")
+    .on("click.materialModalFechar", fecharModalMaterial);
 
   // 🔥 adicionar atributo
-  $("#btnAddAtributosss").on("click", function () {
+  $("#btnAddAtributosss")
+    .off("click.materialModalAtributo")
+    .on("click.materialModalAtributo", function () {
 
     const atributo = $("#selectAtributo").val();
 

@@ -1,11 +1,11 @@
-import { calcularValorRS, calcularScore } from "../material.utils.js";
+import { calcularValorRS, calcularScore, escapeHtml } from "../material.utils.js";
 
 export function renderTabelaFornecedores(res, idMaterial) {
 
   if (!res || !res.length) {
     return `
     <tr class="linha-fornecedores">
-      <td colspan="11">
+      <td colspan="15">
 
         <div class="fornecedores-box vazio">
 
@@ -60,10 +60,16 @@ export function renderTabelaFornecedores(res, idMaterial) {
 
     const isMelhor = f.score === maiorScore;
     const isPior = f.score === menorScore;
+    const isMenorValor = Math.abs(Number(f.valorRS || 0) - Number(minValor || 0)) < 0.01;
+    const isMaiorValor = Math.abs(Number(f.valorRS || 0) - Number(maxValor || 0)) < 0.01;
 
     const valorFormatado = isNaN(f.valorRS)
       ? "-"
       : Number(f.valorRS).toFixed(2);
+    const totalFornecedor = Number(f.valorRS || 0) * Number(f.quantidade || 0);
+    const totalFormatado = totalFornecedor
+      ? `R$ ${totalFornecedor.toFixed(2)}`
+      : "-";
 
     html += `
       <tr 
@@ -74,7 +80,7 @@ export function renderTabelaFornecedores(res, idMaterial) {
           ${isPior ? 'pior-preco' : ''}
         ">
 
-        <td>${f.nome_fornecedor}</td>
+        <td>${escapeHtml(f.nome_fornecedor)}</td>
 
         <td>R$ ${Number(f.valor).toFixed(2)}</td>
 
@@ -90,20 +96,24 @@ export function renderTabelaFornecedores(res, idMaterial) {
 
         <td>${f.prazo || 1}</td>
 
-        <td>${f.orcamento || '-'}</td>
+        <td>${escapeHtml(f.orcamento || '-')}</td>
 
-        <td title="${f.observacao || ''}">
-          ${(f.observacao || '-').length > 20
+        <td title="${escapeHtml(f.observacao || '')}">
+          ${escapeHtml((f.observacao || '-').length > 20
         ? f.observacao.substring(0, 20) + '...'
-        : f.observacao || '-'}
+        : f.observacao || '-')}
         </td>
 
         <!-- 🔥 VALOR COM COR -->
-        <td class="valor-rs ${f.valorRS === minValor ? 'melhor' : f.valorRS === maxValor ? 'pior' : ''}">
+        <td class="valor-rs ${isMenorValor ? 'melhor' : isMaiorValor ? 'pior' : ''}">
           ${valorFormatado === "-" ? "-" : "R$ " + valorFormatado}
         </td>
 
         <!-- 🔥 SCORE VISUAL -->
+        <td class="valor-total-rs">
+          ${totalFormatado}
+        </td>
+
         <td class="score">
           <div class="score-box">
 
@@ -119,13 +129,36 @@ export function renderTabelaFornecedores(res, idMaterial) {
         </td>
 
         <td>
-          ${!f.selecionado ? `
+          ${f.selecionado ? `
+            <button class="deselecionar-forn"
+              data-id="${f.id}"
+              data-material="${idMaterial}"
+              title="Deselecionar fornecedor">
+              <i class="fa-solid fa-ban"></i>
+            </button>
+          ` : `
             <button class="selecionar-forn"
-              data-id="${f.id}" 
-              data-material="${idMaterial}">
+              data-id="${f.id}"
+              data-material="${idMaterial}"
+              title="Selecionar fornecedor">
               <i class="fa-solid fa-check"></i>
             </button>
-          ` : ''}
+          `}
+
+          <button class="editar-forn"
+            data-id="${f.id}"
+            data-material="${idMaterial}"
+            data-fornecedor="${f.id_fornecedor}"
+            data-valor="${Number(f.valor || 0)}"
+            data-icms="${Number(f.icms || 0)}"
+            data-quantidade="${Number(f.quantidade || 0)}"
+            data-material-ok="${f.material_ok ? 1 : 0}"
+            data-prazo="${Number(f.prazo || 1)}"
+            data-orcamento="${escapeHtml(f.orcamento || '')}"
+            data-observacao="${escapeHtml(f.observacao || '')}"
+            title="Editar fornecedor">
+            <i class="fa-solid fa-pen"></i>
+          </button>
 
           <button class="deletar-forn" data-id="${f.id}">
             <i class="fa-solid fa-trash"></i>
@@ -138,7 +171,7 @@ export function renderTabelaFornecedores(res, idMaterial) {
 
   return `
     <tr class="linha-fornecedores">
-      <td colspan="11">
+      <td colspan="15">
 
         <div class="fornecedores-box">
           <table class="tb-fornecedores">
@@ -153,6 +186,7 @@ export function renderTabelaFornecedores(res, idMaterial) {
                 <th>Orçamento</th>
                 <th>Obs</th>
                 <th>Valor RS</th>
+                <th>Total R$</th>
                 <th>Score</th>
                 <th>Ações</th>
               </tr>

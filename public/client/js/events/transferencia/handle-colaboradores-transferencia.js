@@ -105,7 +105,7 @@ export function initColaboradoresTransferencia(socket) {
         }
     });
 
-    $(document).on('click', '#confirmarTransferencia', function () {
+    $(document).on('click', '#confirmarTransferencia', async function () {
         const datas = fp ? fp.selectedDates.map(d => fp.formatDate(d, 'Y-m-d')) : [];
         if (!datas.length || !window.transferenciaColabs?.length) {
             alert('Selecione ao menos uma data e colaboradores.');
@@ -119,7 +119,8 @@ export function initColaboradoresTransferencia(socket) {
         });
 
         // envia apenas uma vez via WS
-        transferirColaboradores(colaboradores, datas);
+        const enviado = await transferirColaboradores(colaboradores, datas);
+        if (!enviado) return;
 
         // Limpeza de UI
         $('.overlay-transferencia').remove();

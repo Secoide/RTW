@@ -6,22 +6,24 @@ import { calcularValorRS, calcularScore } from "../material.utils.js";
 // ==============================
 export function atualizarScoreLinha($tr) {
 
-  const valor = Number($tr.find(".valor").val() || 0);
-  const icms = Number($tr.find(".input-icms").val() || 0);
-  const prazo = Number($tr.find(".prazo").val() || 1);
+  const valor = parseNumeroBR($tr.find(".valor").val() || 0);
+  const icms = parseNumeroBR($tr.find(".input-icms").val() || 0);
+  const prazo = parseNumeroBR($tr.find(".prazo").val() || 1);
   const materialOK = $tr.find(".material-ok").is(":checked");
+  const quantidade = parseNumeroBR($tr.find(".qtd-forn").val() || 0);
 
   if (!valor) return;
 
   const valorRS = calcularValorRS(valor, icms);
+  const valorTotal = valorRS * quantidade;
 
   // 🔥 pega todos valores da tabela
   const valores = [];
 
   $tr.closest("tbody").find("tr").each(function () {
 
-    const v = Number($(this).find(".valor").val());
-    const i = Number($(this).find(".input-icms").val());
+    const v = parseNumeroBR($(this).find(".valor").val());
+    const i = parseNumeroBR($(this).find(".input-icms").val());
 
     if (v) {
       valores.push(calcularValorRS(v, i));
@@ -36,6 +38,7 @@ export function atualizarScoreLinha($tr) {
 
   // 🔥 UI
   $tr.find(".valor-rs").text("R$ " + valorRS.toFixed(2));
+  $tr.find(".valor-total-rs").text(valorTotal ? "R$ " + valorTotal.toFixed(2) : "-");
   $tr.find(".score-text").text(score.toFixed(2));
 
   atualizarBarraScore($tr, score, minValor, maxValor);
@@ -54,8 +57,8 @@ export function atualizarScoreTabela($container) {
   // 🔥 coleta valores
   $trs.each(function () {
 
-    const v = Number($(this).find(".valor").val());
-    const i = Number($(this).find(".input-icms").val());
+    const v = parseNumeroBR($(this).find(".valor").val());
+    const i = parseNumeroBR($(this).find(".input-icms").val());
 
     if (v) {
       valores.push(calcularValorRS(v, i));
@@ -73,17 +76,20 @@ export function atualizarScoreTabela($container) {
 
     const $tr = $(this);
 
-    const valor = Number($tr.find(".valor").val() || 0);
-    const icms = Number($tr.find(".input-icms").val() || 0);
-    const prazo = Number($tr.find(".prazo").val() || 1);
+    const valor = parseNumeroBR($tr.find(".valor").val() || 0);
+    const icms = parseNumeroBR($tr.find(".input-icms").val() || 0);
+    const prazo = parseNumeroBR($tr.find(".prazo").val() || 1);
     const materialOK = $tr.find(".material-ok").is(":checked");
+    const quantidade = parseNumeroBR($tr.find(".qtd-forn").val() || 0);
 
     if (!valor) return;
 
     const valorRS = calcularValorRS(valor, icms);
+    const valorTotal = valorRS * quantidade;
     const score = calcularScore(valorRS, prazo, materialOK, minValor, maxValor);
 
     $tr.find(".valor-rs").text("R$ " + valorRS.toFixed(2));
+    $tr.find(".valor-total-rs").text(valorTotal ? "R$ " + valorTotal.toFixed(2) : "-");
     $tr.find(".score-text").text(score.toFixed(2));
 
     atualizarBarraScore($tr, score, minValor, maxValor);
@@ -125,4 +131,22 @@ export function atualizarBarraScore($tr, score) {
     background: cor,
     transition: "width 0.4s ease, background 0.3s ease"
   });
+}
+
+function parseNumeroBR(valor) {
+  if (typeof valor === "number") return valor;
+
+  const texto = String(valor ?? "")
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/R\$/gi, "");
+
+  if (!texto) return 0;
+
+  const normalizado = texto.includes(",")
+    ? texto.replace(/\./g, "").replace(",", ".")
+    : texto;
+
+  const numero = Number(normalizado);
+  return Number.isFinite(numero) ? numero : 0;
 }

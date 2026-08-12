@@ -18,8 +18,8 @@
 
     grid-template-areas:
 
-        "bemvindo mural aniversarios"
-        "bemvindo mural aniversarios"
+        "bemvindo mural funcionario"
+        "bemvindo mural funcionario"
         "experiencia experiencia experiencia";
     box-sizing: border-box;
     background:
@@ -282,11 +282,16 @@
 
 .painel_inicio {
     grid-area: mural;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 14px;
     min-width: 0;
     min-height: 0;
 }
 
 #conteudo-central {
+    display: flex;
+    flex-direction: column;
     height: 100%;
     min-height: 0;
     padding: 18px;
@@ -326,10 +331,17 @@
 
 #hall-experiencia {
     grid-area: experiencia;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 #painel-aniversarios {
-    grid-area: aniversarios;
+    grid-area: auto;
+}
+
+#painel-funcionario-mes {
+    grid-area: funcionario;
 }
 
 
@@ -357,7 +369,55 @@
     -moz-user-select: none;
 }
 
+#painel-aniversarios.painel-aniversarios-mural {
+    min-height: 0;
+    max-height: none;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.045);
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+#painel-aniversarios.painel-aniversarios-mural h3 {
+    text-align: left;
+    font-size: 12px;
+    color: var(--texto-principal);
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.painel-aniversarios-mural .aniversarios-proximos-titulo {
+    margin-top: 14px;
+}
+
+.painel-aniversarios-mural .card-aniver {
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.painel-aniversarios-mural .card-aniver img {
+    width: 38px;
+    height: 38px;
+}
+
+#painel-funcionario-mes > h4,
+#painel-funcionario-mes > .area-cards {
+    display: none !important;
+}
+
 #painel-aniversarios h4 {
+    text-align: left;
+    font-size: 13px;
+    color: var(--texto-principal);
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#painel-aniversarios h3 {
     text-align: left;
     font-size: 13px;
     color: var(--texto-principal);
@@ -511,12 +571,11 @@
 /* PainÃ©is de comunicados (4 categorias) */
 #painel-avisos {
     display: grid;
-    grid-template-columns: repeat(4, minmax(160px, 1fr));
-    /* 4 colunas */
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
     gap: 12px;
     padding: 0;
     margin-top: 0;
-    height: calc(100% - 54px);
+    height: 100%;
     min-height: 0;
 }
 
@@ -816,6 +875,32 @@
     text-align: center;
 }
 
+#online-message-count {
+    display: none;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    background: #d83b32;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 0 14px rgba(216, 59, 50, 0.45);
+    animation: onlineMessagePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes onlineMessagePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.12);
+    }
+}
+
 /* Popup */
 #online-popup {
     position: absolute;
@@ -845,13 +930,23 @@
     font-weight: 700;
 }
 
+#online-popup.message {
+    border-left: 4px solid #efda38;
+    box-shadow: 0 0 16px rgba(239, 218, 56, 0.22), 0 0 10px rgba(0, 0, 0, 0.5);
+    font-weight: 700;
+}
+
+#online-popup.exit {
+    border-left: 4px solid rgba(255, 255, 255, 0.42);
+}
+
 #online-panel {
     display: none;
 }
 
 #online-panel.active {
-    width: 280px;
-    height: 360px;
+    width: min(720px, calc(100vw - 40px));
+    height: min(520px, calc(100vh - 120px));
     background: var(--bg-card);
     color: var(--texto-principal);
     border-radius: 8px;
@@ -859,6 +954,93 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
     display: flex;
     flex-direction: column;
+}
+
+.online-panel-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 190px;
+    gap: 10px;
+    height: 100%;
+    min-height: 0;
+    padding: 10px;
+}
+
+.online-chat-area,
+.online-users-area {
+    min-height: 0;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.online-chat-area {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.online-users-area {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.online-chat-head,
+.online-users-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.online-chat-head strong,
+.online-users-head strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.online-chat-head > div span,
+.online-users-head small {
+    display: block;
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.online-users-head {
+    padding: 10px 10px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.online-chat-modes {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+.online-chat-mode {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--texto-principal);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 7px 10px;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.online-chat-mode:hover {
+    border-color: rgba(239, 218, 56, 0.45);
+    background: rgba(239, 218, 56, 0.10);
+}
+
+.online-chat-mode.active {
+    border-color: rgba(239, 218, 56, 0.68);
+    background: linear-gradient(90deg, #ee7722, #efda38);
+    color: #101010;
+    font-weight: 700;
 }
 
 .online-panel-header {
@@ -919,7 +1101,12 @@
 }
 
 .online-user {
-    padding: 6px 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 4px;
     border-bottom: 1px solid #333;
     cursor: pointer;
 }
@@ -928,11 +1115,57 @@
     color: #efda38;
 }
 
+.online-user-status {
+    color: #efda38;
+    font-size: 9px;
+    line-height: 1;
+}
+
+.online-user-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.online-user-private-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, #ee7722, #efda38);
+    color: #101010;
+    font-size: 10px;
+    font-weight: 800;
+    box-shadow: 0 0 12px rgba(239, 218, 56, 0.45);
+}
+
+.online-user.has-private-unread .online-user-name {
+    color: #efda38;
+    font-weight: 700;
+    animation: onlineUserBlink 1.1s ease-in-out infinite;
+}
+
+@keyframes onlineUserBlink {
+    0%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 0 rgba(239, 218, 56, 0);
+    }
+
+    50% {
+        opacity: 0.55;
+        text-shadow: 0 0 10px rgba(239, 218, 56, 0.78);
+    }
+}
+
 #online-chat {
     flex: 1;
     min-height: 0;
     flex-direction: column;
-    padding: 8px;
+    padding: 0;
 }
 
 #online-chat-messages {
@@ -967,6 +1200,36 @@
 .online-chat-msg.mine {
     margin-left: auto;
     background: rgba(238, 119, 34, 0.28);
+}
+
+.online-chat-msg.private {
+    border: 1px solid rgba(239, 218, 56, 0.28);
+}
+
+.online-chat-reactions {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+    opacity: 0.78;
+}
+
+.online-chat-reaction {
+    width: 24px;
+    height: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.online-chat-reaction:hover,
+.online-chat-reaction.active {
+    border-color: rgba(239, 218, 56, 0.55);
+    background: rgba(239, 218, 56, 0.16);
+    transform: translateY(-1px);
 }
 
 .online-chat-meta {
@@ -1132,6 +1395,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    #online-panel.active {
+        width: calc(100vw - 24px);
+        height: min(620px, calc(100vh - 110px));
+    }
+
+    .online-panel-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) 150px;
+    }
 }
 
 
@@ -2210,6 +2485,8 @@ LOCK
 
     display: flex;
     gap: 12px;
+    flex: 1;
+    min-height: 0;
 
     overflow-x: auto;
     overflow-y: hidden;
@@ -2234,6 +2511,133 @@ LOCK
 
 #hall-ranking::-webkit-scrollbar {
     display: none;
+}
+
+.hall-conquistas-slide + #hall-ranking .card-experiencia {
+    flex-basis: 156px;
+    height: 160px;
+}
+
+.hall-conquistas-slide + #hall-ranking .foto-progress {
+    width: 68px;
+    height: 68px;
+}
+
+.hall-conquistas-slide + #hall-ranking .foto-progress img {
+    width: 60px;
+    height: 60px;
+}
+
+.hall-conquistas-slide {
+    flex: 0 0 74px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 54px 58px;
+    align-items: center;
+    gap: 12px;
+    min-height: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(238, 119, 34, 0.24);
+    border-radius: 12px;
+    background:
+        radial-gradient(circle at 15% 10%, rgba(239, 218, 56, 0.16), transparent 35%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    box-sizing: border-box;
+    animation: hallSlideEntrada 0.45s ease;
+}
+
+.hall-conquistas-slide.vazio {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 2px;
+    opacity: 0.75;
+}
+
+.hall-slide-info {
+    min-width: 0;
+}
+
+.hall-conquistas-slide span,
+.hall-slide-info span {
+    display: block;
+    color: #efda38;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.hall-conquistas-slide strong,
+.hall-slide-info strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--texto-principal);
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hall-conquistas-slide p,
+.hall-slide-info p {
+    margin: 3px 0 0;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 12px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hall-slide-info small {
+    display: block;
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.hall-slide-medalha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(238, 119, 34, 0.24), rgba(239, 218, 56, 0.20));
+    font-size: 28px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.hall-slide-foto {
+    width: 54px;
+    height: 54px;
+    padding: 2px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #ee7722, #efda38);
+    box-sizing: border-box;
+}
+
+.hall-slide-foto img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #2b2b2b;
+}
+
+@keyframes hallSlideEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 #hall-ranking.dragging {
@@ -2476,7 +2880,8 @@ LOCK
     min-height: 220px;
     min-width: 0;
     overflow: hidden;
-    padding: 14px 16px 10px;
+    position: relative;
+    padding: 10px 14px 1px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     background:
@@ -2486,10 +2891,52 @@ LOCK
     box-sizing: border-box;
 }
 
+#hall-experiencia.hall-em-desenvolvimento {
+    pointer-events: none;
+}
+
+#hall-experiencia.hall-em-desenvolvimento > h5,
+#hall-experiencia.hall-em-desenvolvimento > #hall-ranking {
+    filter: blur(3px);
+    opacity: 0.42;
+    transform: scale(0.995);
+}
+
+#hall-experiencia.hall-em-desenvolvimento::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(32, 32, 32, 0.13), transparent 28%),
+        linear-gradient(135deg, rgba(16, 16, 16, 0.62), rgba(30, 30, 30, 0.84));
+    backdrop-filter: blur(5px);
+}
+
+#hall-experiencia.hall-em-desenvolvimento::after {
+    content: "Em desenvolvimento... 70%";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 5;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: min(280px, calc(100% - 36px));
+    padding: 13px 18px;
+    border: 1px solid rgb(255 255 255 / 30%);
+    border-radius: 999px;
+    color: #ffffff;
+    font-size: 12px;
+    letter-spacing: 0;
+    text-align: center;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+}
+
 #hall-experiencia h4,
 #hall-experiencia h5 {
 
-    margin: 0 0 8px 0;
 
     font-size: 13px;
 
@@ -2627,6 +3074,16 @@ LOCK
     background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(246, 250, 250, 0.80));
     box-shadow: 0 16px 38px rgba(15, 23, 42, 0.10);
+}
+
+:root[data-theme='light'] #hall-experiencia.hall-em-desenvolvimento::before {
+    background:
+        radial-gradient(circle at 20% 20%, rgba(238, 119, 34, 0.15), transparent 30%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(226, 232, 240, 0.80));
+}
+
+:root[data-theme='light'] #hall-experiencia.hall-em-desenvolvimento::after {
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
 }
 
 :root[data-theme='light'] .inicio-version-card,
@@ -2899,4 +3356,284 @@ LOCK
 :root[data-theme='light'] .chat-suggestion .mention {
     background: linear-gradient(90deg, #ee7722, #efda38);
     color: #101010;
+}
+
+/* Funcionario do mes */
+#painel-funcionario-mes {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    min-width: 0;
+    min-height: 0;
+    padding: 16px;
+    border-radius: 14px;
+    background: repeating-linear-gradient(
+    -45deg,
+    #00a6500e 0 50px,
+    #0a0a0a10 50px 100px
+  );
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.funcionario-mes-head {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.funcionario-mes-head span {
+    color: #efda38;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.funcionario-mes-head h4 {
+    margin: 0;
+    color: var(--texto-principal);
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.funcionario-mes-head small {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.funcionario-mes-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background:
+        radial-gradient(circle at top, rgba(94, 94, 93, 0.13), transparent 34%),
+        rgba(255, 255, 255, 0.04);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.funcionario-mes-card.vazio {
+    opacity: 0.78;
+}
+
+.funcionario-mes-foto {
+    width: 126px;
+    height: 126px;
+    padding: 4px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #3b3b3b, #fbfbfbdb);
+    box-sizing: border-box;
+}
+
+.funcionario-mes-foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #2b2b2b;
+}
+
+.funcionario-mes-card strong {
+    max-width: 100%;
+    color: var(--texto-principal);
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1.18;
+}
+
+.funcionario-mes-card p {
+    margin: 0;
+    color: rgba(251, 255, 0, 0.932);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.funcionario-medalha-slide {
+    position: relative;
+    justify-content: center;
+    gap: 9px;
+    padding-bottom: 44px;
+    animation: funcionarioMedalhaEntrada 0.45s ease;
+}
+
+.funcionario-medalha-icone {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid gray;
+    font-size: 22px;
+}
+
+.funcionario-slide-tempo {
+    position: absolute;
+    left: 28px;
+    right: 28px;
+    bottom: 10px;
+}
+
+.funcionario-slide-progresso {
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+    overflow: hidden;
+}
+
+.funcionario-slide-progresso span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: rgba(239, 218, 56, 0.62);
+    transform-origin: left center;
+    animation: funcionarioSlideTempo 30s linear forwards;
+}
+
+.funcionario-medalha-descricao {
+    max-width: 90%;
+    min-height: 34px;
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.22;
+    text-align: center;
+}
+
+@keyframes funcionarioSlideTempo {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+
+.funcionario-medalha-data {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 10px;
+    font-size: 11px;
+}
+
+.funcionario-medalha-frase {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 10px 2px 2px;
+    color: rgba(255, 255, 255, 0.78);
+    text-transform: uppercase;
+}
+
+.funcionario-medalha-frase i {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #58c45a;
+    border: 1px solid rgba(88, 196, 90, 0.55);
+    box-shadow: 0 0 14px rgba(88, 196, 90, 0.18);
+}
+
+.funcionario-medalha-frase span {
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0;
+}
+
+.funcionario-medalha-frase strong {
+    color: #58c45a;
+    font-weight: 900;
+}
+
+@keyframes funcionarioMedalhaEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.funcionario-mes-tempo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(238, 119, 34, 0.14);
+    color: #efda38;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+:root[data-theme='light'] #painel-funcionario-mes {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.78));
+    border-color: rgba(238, 119, 34, 0.26);
+}
+
+:root[data-theme='light'] .funcionario-mes-head small,
+:root[data-theme='light'] .funcionario-mes-card p {
+    color: rgba(15, 23, 42, 0.68);
+}
+
+:root[data-theme='light'] .funcionario-medalha-frase {
+    color: rgba(15, 23, 42, 0.68);
+}
+
+:root[data-theme='light'] .funcionario-slide-progresso {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme='light'] .funcionario-medalha-descricao {
+    color: rgba(15, 23, 42, 0.56);
+}
+
+:root[data-theme='light'] .hall-conquistas-slide {
+    background:
+        radial-gradient(circle at 15% 10%, rgba(239, 218, 56, 0.22), transparent 36%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(245, 245, 245, 0.72));
+    border-color: rgba(238, 119, 34, 0.24);
+}
+
+:root[data-theme='light'] .hall-conquistas-slide p,
+:root[data-theme='light'] .hall-slide-info p {
+    color: rgba(15, 23, 42, 0.68);
+}
+
+:root[data-theme='light'] .hall-slide-info small {
+    color: rgba(15, 23, 42, 0.48);
 }

@@ -1,12 +1,14 @@
 import { initMenuClick } from "./events/navigation/handle-menu-click.js";
 import { initHome } from "./bootstrap/home-init.js";
+import { carregarUltimaPaginaMenu } from "./services/ui/page-loader.js";
 
 
-$(document).ready(function () {
+$(document).ready(async function () {
   if ($("#menu").length) {
 
     initMenuClick();
-    initHome();
+    await initHome();
+    carregarUltimaPaginaMenu();
 
     $("#conteudo").addClass("visivel");
   }

@@ -80,21 +80,41 @@ export function initOSForm() {
                 }
 
             } else {
-                Toast.fire({
-                    icon: "warning",
-                    theme: 'dark',
-                    title: res.mensagem
-                });
+                const osDigitada = $("#idOS").val()?.trim();
+                const duplicada = res.codigo === "OS_DUPLICADA";
+                if (duplicada) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "OS já cadastrada",
+                        theme: "dark",
+                        text: osDigitada
+                            ? `A OS ${osDigitada} já existe no sistema. Verifique o número antes de cadastrar novamente.`
+                            : "Essa OS já existe no sistema. Verifique o número antes de cadastrar novamente.",
+                        confirmButtonText: "OK"
+                    });
+                } else {
+                    Toast.fire({
+                        icon: "warning",
+                        theme: 'dark',
+                        title: res.mensagem || "A OS não foi salva."
+                    });
+                }
             }
 
         } catch (err) {
             console.error(err);
-            const mensagem = err.responseJSON?.mensagem || err.responseJSON?.erro || 'A OS não foi salva. Tente novamente.';
+            const resposta = err.responseJSON || {};
+            const osDigitada = $("#idOS").val()?.trim();
+            const duplicada = err.status === 409 || resposta.codigo === "OS_DUPLICADA";
+            const mensagem = resposta.mensagem || resposta.erro || 'A OS não foi salva. Tente novamente.';
             Swal.fire({
-                icon: 'error',
-                title: 'OS não salva',
+                icon: duplicada ? 'warning' : 'error',
+                title: duplicada ? 'OS já cadastrada' : 'OS não salva',
                 theme: 'dark',
-                text: mensagem
+                text: duplicada && osDigitada
+                    ? `A OS ${osDigitada} já existe no sistema. Verifique o número antes de cadastrar novamente.`
+                    : mensagem,
+                confirmButtonText: 'OK'
             });
         }
     });

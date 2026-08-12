@@ -7,6 +7,8 @@ import {
 
 export function abrirModalMaterial() {
   $("#modalMaterial").removeClass("hidden").css("display", "flex");
+  atualizarModoModalMaterial("novo");
+  atualizarEstadoImagemMaterial();
 }
 
 export function fecharModalMaterial() {
@@ -22,6 +24,17 @@ export function resetModalMaterial() {
     $("#categoriaMaterial").val("");
     $("#codigo").val("");
     $("#fabricante").val("");
+    $("#imagemMaterialOrigemId").val("");
+    $("#imagemMaterialOrigemTexto").text("");
+    $("#imagemmaterial").attr("src", "/imagens/imagemmaterial.webp");
+    $("#materialImagemExistentePainel").prop("hidden", true);
+    $("#buscaImagemMaterialExistente").val("");
+    $("#modoEdicaoMaterial").val("0");
+    $("#materialEdicaoPainel").prop("hidden", true).removeClass("editando").hide();
+    $("#materialEdicaoTexto").text("Material existente selecionado.");
+    $("#btnSalvarMaterial").text("Salvar");
+    atualizarModoModalMaterial("novo");
+    atualizarEstadoImagemMaterial();
 
     // 🔹 atributos
     state.atributosSelecionados = [];
@@ -30,11 +43,36 @@ export function resetModalMaterial() {
 
     // 🔹 autocomplete / sugestões
     $("#autocompleteMaterial").empty().hide();
-    $("#variacoesExistentes").empty();
+    $("#variacoesExistentes").empty().removeClass("somente-visualizacao");
 
     // 🔹 alertas
     $("#alertDuplicado").hide();
     carregarVariacoes();
+}
+
+export function atualizarModoModalMaterial(modo = "novo", texto = "") {
+  const $badge = $("#materialModoBadge");
+  if (!$badge.length) return;
+
+  const config = {
+    novo: { classe: "novo", texto: texto || "Novo cadastro" },
+    selecionado: { classe: "selecionado", texto: texto || "Material selecionado" },
+    edicao: { classe: "edicao", texto: texto || "Editando material" },
+    base: { classe: "base", texto: texto || "Usando como base" }
+  };
+
+  const item = config[modo] || config.novo;
+  $badge
+    .removeClass("novo selecionado edicao base")
+    .addClass(item.classe)
+    .text(item.texto);
+}
+
+export function atualizarEstadoImagemMaterial() {
+  const possuiId = Boolean($("#idMaterial").val());
+  $(".variacao-imagem").toggleClass("imagem-bloqueada", !possuiId);
+  $("#btn_uploadImagem, #btn_usarImagemExistente").prop("disabled", !possuiId);
+  $("#imagemMaterialBloqueadaTexto").prop("hidden", possuiId);
 }
 
 export function adicionarAtributo(atributo) {

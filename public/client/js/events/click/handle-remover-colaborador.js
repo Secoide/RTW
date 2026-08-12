@@ -1,7 +1,7 @@
 import { excluirColaboradorDaOS } from "../../services/sockets/colaboradores-socket-service.js";
 
 export function initRemoverColaboradorClick() {
-  $(document).on("click", ".bt_tirarColab", function () {
+  $(document).on("click", ".bt_tirarColab", async function () {
     const colaboradorOS = $(this).closest(".colaborador");
     const painelOS = $(this).closest(".painel_OS");
     const painelDia = $(this).closest(".painelDia");
@@ -11,36 +11,22 @@ export function initRemoverColaboradorClick() {
     const osID = painelOS.find(".p_infoOS").data("os");
     const idNaOS = colaboradorOS.data("idnaos");
 
-    // 🔄 via socket service
-    excluirColaboradorDaOS(osID, idColaborador, idNaOS, dataDestino);
-
-    // 🔽 UI: remover colaborador da OS
-    colaboradorOS.remove();
-
-    // atualizar contador
-    const total = painelOS.find(".p_colabs .colaborador").length;
-    painelOS.find(".lbl_total").text(total);
-
-    // esconder se vazio
-    if (total === 0) {
-      painelOS.find(".p_colabs").slideUp(150);
-      painelOS.find(".icone-olho").removeClass("fa-eye").addClass("fa-eye-slash");
-      painelOS.addClass("os_semColab");
+    if (!idNaOS) {
+      document.dispatchEvent(new CustomEvent("ws:action-failed", {
+        detail: {
+          mensagem: "Nao foi possivel identificar o registro do colaborador na OS. Atualize a programacao e tente novamente.",
+          codigo: "SYNC_REQUIRED",
+          precisaSincronizar: true
+        }
+      }));
+      return;
     }
 
-    // atualizar colaborador no painelDia
-    const $colabBase = painelDia.find(".p_colabsDisp .colaborador").filter(function () {
-      return $(this).data("id") === idColaborador;
-    }).first();
+    colaboradorOS.addClass("salvando").attr("data-loading", "true");
 
-    if ($colabBase.length) {
-      $colabBase.find(".ocupadoEmOS div").filter(function () {
-        return $(this).text().trim() == osID;
-      }).remove();
-
-      if ($colabBase.find(".ocupadoEmOS div").length === 0) {
-        $colabBase.removeClass("colaboradorEmOS");
-      }
+    const enviado = await excluirColaboradorDaOS(osID, idColaborador, idNaOS, dataDestino);
+    if (!enviado) {
+      colaboradorOS.removeClass("salvando").removeAttr("data-loading");
     }
   });
 }

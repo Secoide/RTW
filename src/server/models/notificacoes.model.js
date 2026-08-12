@@ -26,6 +26,22 @@ async function garantirTabelas() {
     )
   `);
 
+  try {
+    const [colunas] = await connection.query(`
+      SHOW COLUMNS FROM sistema_notificacoes LIKE 'id_destinatario'
+    `);
+
+    if (!colunas.length) {
+      await connection.query(`
+        ALTER TABLE sistema_notificacoes
+          ADD COLUMN id_destinatario INT NULL AFTER id_notificacao,
+          ADD INDEX idx_notificacoes_destinatario (id_destinatario, ativo, criado_em)
+      `);
+    }
+  } catch (err) {
+    console.warn("Nao foi possivel garantir id_destinatario em notificacoes:", err.message);
+  }
+
   tabelaGarantida = true;
 }
 
@@ -49,6 +65,28 @@ async function criarGlobal({ tipo, referencia, mensagem }) {
   };
 }
 
+async function criarParaUsuario({ idUsuario, tipo, referencia, mensagem }) {
+  await garantirTabelas();
+
+  const [result] = await connection.query(`
+    INSERT INTO sistema_notificacoes (id_destinatario, tipo, referencia, mensagem)
+    VALUES (?, ?, ?, ?)
+  `, [
+    idUsuario,
+    tipo,
+    referencia || null,
+    mensagem
+  ]);
+
+  return {
+    id_notificacao: result.insertId,
+    id_destinatario: idUsuario,
+    tipo,
+    referencia,
+    mensagem
+  };
+}
+
 async function listarNaoLidas(idUsuario) {
   await garantirTabelas();
 
@@ -64,10 +102,11 @@ async function listarNaoLidas(idUsuario) {
       ON l.id_notificacao = n.id_notificacao
      AND l.id_usuario = ?
     WHERE n.ativo = 1
+      AND (n.id_destinatario IS NULL OR n.id_destinatario = ?)
       AND l.id_notificacao IS NULL
     ORDER BY n.criado_em DESC
     LIMIT 50
-  `, [idUsuario]);
+  `, [idUsuario, idUsuario]);
 
   return rows;
 }
@@ -91,12 +130,27 @@ async function marcarTodasLidas(idUsuario) {
     SELECT id_notificacao, ?
     FROM sistema_notificacoes
     WHERE ativo = 1
-  `, [idUsuario]);
+      AND (id_destinatario IS NULL OR id_destinatario = ?)
+  `, [idUsuario, idUsuario]);
+}
+
+async function desativarPorReferencia(referencia) {
+  await garantirTabelas();
+
+  if (!referencia) return;
+
+  await connection.query(`
+    UPDATE sistema_notificacoes
+    SET ativo = 0
+    WHERE referencia = ?
+  `, [referencia]);
 }
 
 module.exports = {
   criarGlobal,
+  criarParaUsuario,
   listarNaoLidas,
   marcarLida,
-  marcarTodasLidas
+  marcarTodasLidas,
+  desativarPorReferencia
 };

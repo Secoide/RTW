@@ -9,6 +9,14 @@ export function initMenuClick() {
 
     e.preventDefault();
 
+    if (el.classList.contains("menu-parent")) {
+      const nomeSubmenu = el.dataset.submenu;
+      const submenu = document.querySelector(`.menu-submenu[data-submenu-content="${nomeSubmenu}"]`);
+      const aberto = submenu?.classList.toggle("aberto");
+      el.classList.toggle("aberto", Boolean(aberto));
+      return;
+    }
+
     if (!podeUsarRecurso(el.dataset.feature)) {
       Swal?.fire?.({
         icon: "info",
@@ -21,6 +29,8 @@ export function initMenuClick() {
 
     document.querySelectorAll(".bt_menuP").forEach(a => a.classList.remove("ativo"));
     el.classList.add("ativo");
+    el.closest(".menu-submenu")?.classList.add("aberto");
+    document.querySelector(`.menu-parent[data-submenu="${el.closest(".menu-submenu")?.dataset.submenuContent}"]`)?.classList.add("aberto");
 
     const pagina = el.getAttribute("data-pagina");
     if (pagina) carregarPagina(pagina);
@@ -54,6 +64,19 @@ function aplicarPermissoesSaasMenu() {
 
     if (!podeUsarRecurso(chave)) {
       item.style.display = "none";
+    }
+  });
+
+  document.querySelectorAll(".menu-parent[data-submenu]").forEach(parent => {
+    const submenu = document.querySelector(`.menu-submenu[data-submenu-content="${parent.dataset.submenu}"]`);
+    if (!submenu) return;
+
+    const possuiRecursoLiberado = [...submenu.querySelectorAll(".bt_menuP[data-feature]")]
+      .some(item => podeUsarRecurso(item.dataset.feature));
+
+    if (!possuiRecursoLiberado) {
+      parent.style.display = "none";
+      submenu.style.display = "none";
     }
   });
 }

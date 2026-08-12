@@ -4,9 +4,11 @@ import { highlightTextoSeguro } from "../../utils/material.utils.js";
 export function initMaterialAutocomplete() {
 
   // 🔍 DIGITAÇÃO
-  $(document).on("input", ".autocomplete-material", function () {
+  $(document).off("input.materialAutocompleteTabela", ".autocomplete-material")
+    .on("input.materialAutocompleteTabela", ".autocomplete-material", function () {
 
     const termo = $(this).val().toLowerCase();
+    const medidaBusca = extrairMedida(termo);
     const $input = $(this);
     const $linha = $input.closest("tr");
 
@@ -18,7 +20,11 @@ export function initMaterialAutocomplete() {
 
     if (!termo) return;
 
-    const termos = termo
+    const termoSemMedida = medidaBusca
+      ? termo.replace(medidaBusca.matchOriginal, " ")
+      : termo;
+
+    const termos = termoSemMedida
       .split(" ")
       .filter(t => t.trim() !== "");
 
@@ -33,7 +39,7 @@ export function initMaterialAutocomplete() {
         ${m.versao_foto || ""}
       `.toLowerCase();
 
-      return termos.every(t => texto.includes(t));
+      return termos.every(t => texto.includes(t)) && materialCombinaMedida(m, medidaBusca);
 
     }).sort((a, b) => {
 
@@ -42,8 +48,10 @@ export function initMaterialAutocomplete() {
 
       const scoreA = termos.reduce((acc, t) => acc + (textoA.includes(t) ? 1 : 0), 0);
       const scoreB = termos.reduce((acc, t) => acc + (textoB.includes(t) ? 1 : 0), 0);
+      const medidaA = materialCombinaMedida(a, medidaBusca) ? 2 : 0;
+      const medidaB = materialCombinaMedida(b, medidaBusca) ? 2 : 0;
 
-      return scoreB - scoreA;
+      return (scoreB + medidaB) - (scoreA + medidaA);
 
     }).slice(0, 20);
 
@@ -72,6 +80,7 @@ export function initMaterialAutocomplete() {
       `);
     });
 
+    box.find(".item").first().addClass("active");
     $input.parent().append(box);
 
     // 🔥 seleção (ESSENCIAL)
@@ -87,16 +96,23 @@ export function initMaterialAutocomplete() {
       $linha.find("[data-field='id_variacao']").val(material.id);
 
       // atualiza colunas
-      $linha.find("td").eq(4).text(material.codigo || "-");
-      $linha.find("td").eq(5).text(material.fabricante || "-");
+      $linha.find("td").eq(1).text(material.categoria || "-");
+      $linha.find("td").eq(3).text(material.codigo || "-");
+      $linha.find("td").eq(4).text(material.fabricante || "-");
+      $linha.find("td").eq(6).text(material.unidade || "-");
+      $linha.find("td").eq(8).html(renderValorOrcado(material, $linha));
 
       box.remove();
+      setTimeout(() => {
+        $linha.find("[data-field='quantidade']").trigger("focus").trigger("select");
+      }, 0);
     });
 
   });
 
   // 🖱 CLICK NA OPÇÃO
-  $(document).on("click", ".autocomplete-box .item, .autocomplete-box-tabela .item", function () {
+  $(document).off("click.materialAutocompleteTabelaItem", ".autocomplete-box .item, .autocomplete-box-tabela .item")
+    .on("click.materialAutocompleteTabelaItem", ".autocomplete-box .item, .autocomplete-box-tabela .item", function () {
 
     const id = $(this).data("id");
 
@@ -113,7 +129,8 @@ export function initMaterialAutocomplete() {
   });
 
   // ⌨️ NAVEGAÇÃO
-  $(document).on("keydown", ".autocomplete-material", function (e) {
+  $(document).off("keydown.materialAutocompleteTabela", ".autocomplete-material")
+    .on("keydown.materialAutocompleteTabela", ".autocomplete-material", function (e) {
 
     const box = $(this).siblings(".autocomplete-box, .autocomplete-box-tabela");
     const itens = box.find(".item");
@@ -140,16 +157,17 @@ export function initMaterialAutocomplete() {
       }
     }
 
-    if (e.key === "Enter") {
+    if (e.key === "Enter" || (e.key === "Tab" && itens.length)) {
       e.preventDefault();
 
-      ativo.click();
+      (ativo.length ? ativo : itens.first()).click();
     }
 
   });
 
   // 🔥 FECHAR AO CLICAR FORA
-  $(document).on("click", function (e) {
+  $(document).off("click.materialAutocompleteTabelaFechar")
+    .on("click.materialAutocompleteTabelaFechar", function (e) {
 
     if (!$(e.target).closest(".autocomplete-container").length) {
       $(".autocomplete-box, .autocomplete-box-tabela").hide();
@@ -157,4 +175,112 @@ export function initMaterialAutocomplete() {
 
   });
 
+}
+
+function renderValorOrcado(material, $linha) {
+  const valor = Number(material.valor_orcamento_atual || 0);
+  const quantidade = Number($linha?.find("[data-field='quantidade']").val() || 0);
+  const total = quantidade > 0 ? valor * quantidade : 0;
+
+  if (!valor || valor <= 0) return "-";
+
+  return `
+    <span>${formatarMoeda(valor)}</span>
+    <small>${total > 0 ? formatarMoeda(total) : "Total: -"}</small>
+  `;
+}
+
+function formatarMoeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+}
+
+function extrairMedida(termo) {
+  const match = String(termo || "").match(/(\d+(?:[,.]\d+)?)\s*(?:mm)?\s*[xX]\s*(\d*(?:[,.]\d*)?)(?:\s*mm)?/);
+
+  if (!match) return null;
+
+  return {
+    largura: normalizarNumeroMedida(match[1]),
+    altura: normalizarNumeroMedida(match[2]),
+    matchOriginal: match[0]
+  };
+}
+
+function materialCombinaMedida(material, medidaBusca) {
+  if (!medidaBusca) return true;
+
+  const texto = normalizarTextoMedida(`
+    ${material?.nome || ""}
+    ${material?.atributos || ""}
+    ${material?.codigo || ""}
+    ${material?.fabricante || ""}
+  `);
+
+  const largura = medidaBusca.largura;
+  const altura = medidaBusca.altura;
+
+  if (!largura) return true;
+
+  if (combinaMedidaComposta(texto, largura, altura)) {
+    return true;
+  }
+
+  const larguraTexto = valorAtributoComecaCom(texto, "largura", largura);
+  const larguraAbrev = valorAtributoComecaCom(texto, "l", largura);
+
+  if (!altura) {
+    return larguraTexto || larguraAbrev;
+  }
+
+  const alturaTexto = valorAtributoComecaCom(texto, "altura", altura);
+  const alturaAbrev = valorAtributoComecaCom(texto, "a", altura);
+
+  return (larguraTexto || larguraAbrev) && (alturaTexto || alturaAbrev);
+}
+
+function combinaMedidaComposta(texto, larguraBusca, alturaBusca) {
+  const medidas = [...texto.matchAll(/\b(\d+(?:\.\d+)?)\s*(?:mm)?\s*x\s*(\d+(?:\.\d+)?)\s*(?:mm)?\b/g)];
+
+  return medidas.some(match => {
+    const larguraItem = normalizarNumeroMedida(match[1]);
+    const alturaItem = normalizarNumeroMedida(match[2]);
+
+    return medidaComecaCom(larguraItem, larguraBusca) &&
+      (!alturaBusca || medidaComecaCom(alturaItem, alturaBusca));
+  });
+}
+
+function valorAtributoComecaCom(texto, atributo, busca) {
+  const regex = new RegExp(`\\b${escapeRegex(atributo)}\\s*[:=-]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:mm)?\\b`);
+  const match = texto.match(regex);
+
+  return match ? medidaComecaCom(normalizarNumeroMedida(match[1]), busca) : false;
+}
+
+function medidaComecaCom(valorItem, valorBusca) {
+  return String(valorItem || "").startsWith(String(valorBusca || ""));
+}
+
+function normalizarNumeroMedida(valor) {
+  if (valor === null || valor === undefined || String(valor).trim() === "") return "";
+
+  const numero = Number(String(valor || "").replace(",", "."));
+  if (!Number.isFinite(numero)) return "";
+  return String(numero).replace(/\.0+$/, "");
+}
+
+function normalizarTextoMedida(valor) {
+  return String(valor || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/,/g, ".")
+    .replace(/\s+/g, " ");
+}
+
+function escapeRegex(valor) {
+  return String(valor).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

@@ -1,5 +1,25 @@
 const connection = require('../config/db');
 
+let osAnexosTableReady = false;
+
+async function garantirTabelaAnexosOS() {
+  if (osAnexosTableReady) return;
+
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS os_anexos (
+      id_anexo_os INT AUTO_INCREMENT PRIMARY KEY,
+      id_os INT NOT NULL,
+      nome VARCHAR(160) NOT NULL,
+      arquivo_pdf VARCHAR(255) NOT NULL,
+      criado_por INT NULL,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_os_anexos_id_os (id_os)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+
+  osAnexosTableReady = true;
+}
+
 
 // Listar todos
 async function getOrdemServico() {
@@ -44,6 +64,23 @@ async function getOrdemServicoById(id) {
     [id]
   );
   return rows[0] || null;
+}
+
+async function getHistoricoColaboradoresOS(idOS) {
+  const [rows] = await connection.query(`
+    SELECT
+      DATE(fno.data) AS data,
+      COUNT(DISTINCT fno.idfuncionario) AS total_colaboradores,
+      ANY_VALUE(o.descricao) AS descricao
+    FROM funcionario_na_os fno
+    JOIN tb_obras o
+      ON o.id_OSs = fno.id_OS
+    WHERE fno.id_OS = ?
+    GROUP BY DATE(fno.data)
+    ORDER BY DATE(fno.data) ASC
+  `, [idOS]);
+
+  return rows;
 }
 
 // ============================================================
@@ -330,6 +367,65 @@ async function salvarComplementosOS(data) {
   return buscarComplementosOS(data.id_os);
 }
 
+async function listarAnexosOS(idOS) {
+  await garantirTabelaAnexosOS();
+
+  const [rows] = await connection.query(`
+    SELECT
+      id_anexo_os,
+      id_os,
+      nome,
+      arquivo_pdf,
+      criado_por,
+      DATE_FORMAT(criado_em, '%d/%m/%Y %H:%i') AS criado_em
+    FROM os_anexos
+    WHERE id_os = ?
+    ORDER BY criado_em DESC, id_anexo_os DESC
+  `, [idOS]);
+
+  return rows;
+}
+
+async function inserirAnexoOS({ id_os, nome, arquivo_pdf, criado_por }) {
+  await garantirTabelaAnexosOS();
+
+  const [result] = await connection.query(`
+    INSERT INTO os_anexos (id_os, nome, arquivo_pdf, criado_por)
+    VALUES (?, ?, ?, ?)
+  `, [
+    id_os,
+    nome,
+    arquivo_pdf,
+    criado_por || null
+  ]);
+
+  return result.insertId;
+}
+
+async function buscarAnexoOS(idAnexo) {
+  await garantirTabelaAnexosOS();
+
+  const [rows] = await connection.query(`
+    SELECT id_anexo_os, id_os, nome, arquivo_pdf, criado_por, criado_em
+    FROM os_anexos
+    WHERE id_anexo_os = ?
+    LIMIT 1
+  `, [idAnexo]);
+
+  return rows[0] || null;
+}
+
+async function removerAnexoOS(idAnexo) {
+  await garantirTabelaAnexosOS();
+
+  const [result] = await connection.query(
+    'DELETE FROM os_anexos WHERE id_anexo_os = ?',
+    [idAnexo]
+  );
+
+  return result.affectedRows > 0;
+}
+
 
 async function getAnotacoesOS(dataDia) {
 
@@ -384,6 +480,7 @@ async function getAnotacoesOS(dataDia) {
 module.exports = {
   getOrdemServico,
   getOrdemServicoById,
+  getHistoricoColaboradoresOS,
   getOSByDate,
   atualizarOS,
   updateOS,
@@ -398,5 +495,9 @@ module.exports = {
   vincularPainelOS,
   removerPainelOS,
   buscarComplementosOS,
-  salvarComplementosOS
+  salvarComplementosOS,
+  listarAnexosOS,
+  inserirAnexoOS,
+  buscarAnexoOS,
+  removerAnexoOS
 };

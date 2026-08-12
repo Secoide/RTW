@@ -1,6 +1,7 @@
 import { renderColaboradoresDisponiveis, renderOSComColaboradores, renderColoboradorEmOS, atualizarStatusDia, atualizarIconeAnotacoes } from "../../utils/dom/programacao-render.js";
 
 import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
+import { tentarMostrarColaboradorFantasma } from "../ui/EasterEgg/colaborador-fantasma.js";
 
 export async function carregarColaboradoresDisp(painel, renderizarColabEmOS) {
   try {
@@ -16,6 +17,7 @@ export async function carregarColaboradoresDisp(painel, renderizarColabEmOS) {
     // 👇 pega o container dentro do painel atual
     const container = painel.querySelector(".p_colabsDisp");
     renderColaboradoresDisponiveis(colaboradores, container);
+    tentarMostrarColaboradorFantasma(container);
     if (renderizarColabEmOS) { renderColoboradorEmOS(); };
     return colaboradores;
   } catch (err) {

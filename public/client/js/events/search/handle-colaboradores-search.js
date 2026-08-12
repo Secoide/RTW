@@ -1,5 +1,6 @@
 // /public/client/js/events/search/handle-colaboradores-search.js
 import { removerAcentos } from "../../utils/formatters/text-formatter.js";
+import { alocarColaboradores } from "../../services/sockets/colaboradores-socket-service.js";
 
 // Estado interno
 let OS_FOCUS = null;
@@ -125,7 +126,7 @@ export function initColaboradoresSearch(socket) {
     });
 
     // Clique em sugestão
-    $(document).on("click", ".itemSugestao", function () {
+    $(document).on("click", ".itemSugestao", async function () {
         const id = $(this).data("id");
         const nome = $(this).data("nome");
 
@@ -173,61 +174,24 @@ export function initColaboradoresSearch(socket) {
             .filter(function () { return $(this).attr("data-status") !== ""; });
         if (colaboradorComStatus.length > 0) return false;
 
-        // Remove de outras OS no mesmo dia
-        $painelDia.find(".painel_OS").each(function () {
-            const $os = $(this);
-            const idOS = $os.find(".lbl_OS").text().trim();
-            if (idOS !== osID) {
-                const $colabRemovido = $os.find(`.p_colabs .colaborador[data-id="${id}"]`);
-                const destinoOS = $os.find(".p_infoOS").data("os") || idOS;
-
-                if ($colabRemovido.length > 0) {
-                    $colabRemovido.remove();
-
-                    if (socket && socket.readyState === WebSocket.OPEN) {
-                        socket.send(JSON.stringify({
-                            acao: "remover_colaborador",
-                            osID: destinoOS,
-                            id,
-                            dataDia: dia
-                        }));
-                    }
-
-                    const total = $os.find(".p_colabs .colaborador").length;
-                    $os.find(".lbl_total").text(total);
-                    if (total === 0) {
-                        $os.find(".p_colabs").slideUp(150);
-                        $os.find(".icone-olho").removeClass("fa-eye").addClass("fa-eye-slash");
-                    }
-                }
-            }
-        });
-
-        // Atualiza card base
-        const $colabBase = $painelDia.find(`.painel_colaboradores .colaborador[data-id="${id}"]`).first();
-        if ($colabBase.length) {
-            $colabBase.find(".ocupadoEmOS div").remove();
-            $colabBase.find(".ocupadoEmOS").append(`<div>${osID}</div>`);
-            $colabBase.addClass("colaboradorEmOS");
-        }
-
-        // Adiciona na OS
-        const jaExiste = $osNova.find(`.p_colabs .colaborador[data-id="${id}"]`).length > 0;
-        if (!jaExiste) adicionarColaboradorNaOS(id, nome, $osNova);
+        // Marca como pendente; a OS só muda visualmente depois da confirmação do servidor.
+        $painelDia
+            .find(`.colaborador[data-id="${id}"]`)
+            .addClass("salvando")
+            .attr("data-loading", "true");
 
         // Limpa sugestões
         $osNova.find(".buscarColab input").val("");
         $osNova.find(".sugestoes").remove();
 
         // WebSocket alocação
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            dia = dia || $osNova.closest(".painelDia").attr("data-dia");
-            socket.send(JSON.stringify({
-                acao: "alocar_colaborador",
-                osID,
-                dataDia: dia,
-                nomes: [{ nome, id }]
-            }));
+        const enviado = await alocarColaboradores(osID, dia, [{ nome, id }]);
+        if (!enviado) {
+            $painelDia
+                .find(`.colaborador[data-id="${id}"][data-loading="true"]`)
+                .removeClass("salvando")
+                .removeAttr("data-loading");
+            return false;
         }
 
         const $input = $(".buscarColab input:focus").length

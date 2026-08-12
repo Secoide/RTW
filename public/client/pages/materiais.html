@@ -1,0 +1,55 @@
+<main id="materiaisCatalogo">
+  <section class="materiais-catalogo-head">
+    <div>
+      <strong>Materiais</strong>
+      <span>Base de materiais cadastrados para compras manter valores de orçamento atualizados.</span>
+    </div>
+    <div class="materiais-catalogo-actions">
+      <button id="btnCadastrarMaterial" class="bt_padrao bt_cad">
+        <i class="fa-solid fa-plus"></i> Cadastrar material
+      </button>
+      <button id="btnAtualizarMateriaisCatalogo" class="bt_padrao bt_atualizar">
+        <i class="fa-solid fa-rotate"></i> Atualizar
+      </button>
+    </div>
+  </section>
+
+  <section class="materiais-catalogo-toolbar">
+    <label class="materiais-catalogo-busca">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="materiaisCatalogoBusca" type="search" autocomplete="off" placeholder="Buscar por ID, descrição, código, fabricante ou unidade...">
+    </label>
+    <select id="materiaisCatalogoCategoria" title="Filtrar por categoria">
+      <option value="">Todas categorias</option>
+    </select>
+    <span id="materiaisCatalogoResumo">Carregando materiais...</span>
+  </section>
+
+  <section class="materiais-catalogo-card">
+    <div class="table-container table-padrao materiais-catalogo-table-wrap">
+      <table id="materiaisCatalogoTabela">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Categoria</th>
+            <th>Foto</th>
+            <th>Descrição</th>
+            <th>Código</th>
+            <th>Fabricante</th>
+            <th>Unidade</th>
+            <th>Valor atual</th>
+            <th>Média</th>
+            <th class="col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="10" class="materiais-catalogo-empty">Carregando...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="materiaisCatalogoPaginacao" class="materiais-catalogo-paginacao"></div>
+  </section>
+</main>

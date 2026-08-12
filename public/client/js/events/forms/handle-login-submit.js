@@ -2,6 +2,7 @@ import { login } from "../../services/api/auth-service.js";
 import { salvarSessao } from "../../state/session.js";
 
 const LOGIN_LEMBRADO_KEY = "connectpear_login_lembrado";
+const ULTIMA_PAGINA_MENU_KEY = "connectpear_ultima_pagina_menu";
 const MENSAGEM_SEM_EMPRESA = "Seu usuário ainda não está associado a uma empresa.";
 
 export function initLoginForm() {
@@ -45,6 +46,7 @@ export function initLoginForm() {
       if (res.sucesso) {
         salvarLoginLembrado(username);
         salvarSessao(res.usuario);
+        limparUltimaPaginaAposLogin();
         window.location.href = "/carregamento";
         return;
       }
@@ -89,6 +91,14 @@ export function initLoginForm() {
 
 function isErroSemEmpresa(mensagem = "") {
   return String(mensagem).includes(MENSAGEM_SEM_EMPRESA);
+}
+
+function limparUltimaPaginaAposLogin() {
+  try {
+    localStorage.removeItem(ULTIMA_PAGINA_MENU_KEY);
+  } catch {
+    // Se o navegador bloquear o localStorage, o login continua normalmente.
+  }
 }
 
 function initAssociationNotice() {

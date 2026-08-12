@@ -8,7 +8,12 @@ export const materialState = {
   listaVariacoes: [],
   listaFiltrada: [],
   listaFornecedores: [],
+  listaResponsaveis: [],
+  listasOS: [],
+  listaSelecionada: null,
   filtroStatusAtual: "",
+  filtroCategoriaAtual: "",
+  modoVisualizacao: "kanban",
   listaMateriais: [],
   ordenacao: {
     coluna: null,
@@ -17,15 +22,19 @@ export const materialState = {
 
   COLUNAS: {
     0: "id",
-    1: "nome",
-    2: "categoria",
-    3: "quantidade",
-    4: "codigo",
-    5: "fabricante",
-    6: "quantidade_separada",
-    7: "id_fornecedor",
-    8: "menor_valor",
-    9: "valorTotal"
+    1: "categoria",
+    2: "nome",
+    3: "codigo",
+    4: "fabricante",
+    5: "quantidade",
+    6: "unidade",
+    7: "observacao",
+    8: "valor_orcamento_atual",
+    9: "quantidade_separada",
+    10: "fornecedor_nome",
+    11: "menor_valor",
+    12: "valorTotal",
+    13: "oc"
   },
 
   STATUS: {

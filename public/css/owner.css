@@ -273,6 +273,24 @@ select option {
   accent-color: #efda38;
 }
 
+.owner-resource-novo {
+  border-color: rgba(239, 218, 56, 0.42);
+  background: linear-gradient(90deg, rgba(238, 119, 34, 0.12), rgba(239, 218, 56, 0.08));
+}
+
+.owner-resource em {
+  display: inline-flex;
+  margin-left: 5px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: rgba(239, 218, 56, 0.16);
+  color: #efda38;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .owner-users {
   display: grid;
   gap: 5px;

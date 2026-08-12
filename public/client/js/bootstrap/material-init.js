@@ -16,11 +16,13 @@ import { initMaterialSave } from "../components/material/material.save.events.js
 import {
   carregarVariacoes,
   carregarFornecedores,
+  carregarResponsaveisLista,
   carregarOS
 } from "../services/api/material.api.js";
 
 export async function initMaterial() {
 
+  initMostrarImagemMaterial();
   initMaterialClicks();
   initMaterialChange();
   initFornecedorClicks();
@@ -37,7 +39,19 @@ export async function initMaterial() {
 
   await carregarVariacoes();
   await carregarFornecedores();
+  await carregarResponsaveisLista();
   await carregarOS();
 
   await carregarMateriaisCompleto(); 
+}
+
+function initMostrarImagemMaterial() {
+  $(document)
+    .off("click.materialImagem", "#chkMostrarImagemMaterial")
+    .on("click.materialImagem", "#chkMostrarImagemMaterial", function () {
+      const isChecked = $(this).is(":checked");
+
+      $(".tb_imgMaterial").toggleClass("mostrar-imagens", isChecked);
+      localStorage.setItem("mostrarImagemMaterial", isChecked);
+    });
 }

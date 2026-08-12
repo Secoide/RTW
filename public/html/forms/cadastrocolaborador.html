@@ -115,7 +115,7 @@
                                             title="" style="width: 140px;">
                                     </div>
                                 </div>
-                                <input id="endereco" class="tbx_teste glass" type="text" placeholder="Endereço"
+                                <input id="endereco" class="tbx_teste glass" type="text" placeholder="Endereço" maxlength="255"
                                     name="endereco" title="" style="width: 97%; text-align: left; padding-left: 10px;">
                             </div>
                             <div class="linha_contatoColab linha_padrao">
@@ -150,7 +150,29 @@
                         </form>
                     </div>
                     <div class="painel_profissional">
-                        <p>Dados Profissional</p>
+                        <div class="perfil-profissional-header">
+                            <p>Dados Profissional</p>
+                            <button type="button" id="btnExportarPerfilColaboradorPDF" data-roles="99" class="bt_perfil_pdf" title="Exportar PDF completo do colaborador">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                Exportar PDF
+                            </button>
+                            <div id="menuExportarPerfilPDF" class="perfil-pdf-menu" hidden>
+                                <strong>Exportar informações</strong>
+                                <label><input type="checkbox" data-pdf-secao="dadosPessoais" checked> Dados pessoais</label>
+                                <label><input type="checkbox" data-pdf-secao="dadosProfissionais" checked> Dados profissionais</label>
+                                <label><input type="checkbox" data-pdf-secao="exames" checked> Exames</label>
+                                <label><input type="checkbox" data-pdf-secao="cursos" checked> Cursos</label>
+                                <label><input type="checkbox" data-pdf-secao="integracoes" checked> Integrações</label>
+                                <label><input type="checkbox" data-pdf-secao="epis" checked> EPI e vestimentas</label>
+                                <label><input type="checkbox" data-pdf-secao="atestados" checked> Atestados, licenças e férias</label>
+                                <label><input type="checkbox" data-pdf-secao="conquistas" checked> Conquistas</label>
+                                <label><input type="checkbox" data-pdf-secao="estatistica" checked> Estatística</label>
+                                <div class="perfil-pdf-menu-actions">
+                                    <button type="button" class="bt_teste perfil-pdf-gerar">Gerar</button>
+                                    <button type="button" class="bt_teste perfil-pdf-cancelar">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
                         <form id="formColaboradorProfissional" method="POST">
                             <div class="linha_infoColab linha_padrao">
                                 <div class="painel_checkBokCNH">
@@ -175,6 +197,12 @@
                                     <option value="RTW">RTW</option>
                                     <option value="V8i">V8i</option>
                                 </select>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label for="dataExperiencia" style="font-size: 11px;">Data de admissão:</label>
+                                    <input id="dataExperiencia" class="tbx_teste glass" type="date" name="data_experiencia"
+                                        title="Data de entrada utilizada para programação, férias e Hall da Experiência"
+                                        style="width: 145px;">
+                                </div>
                             </div>
 
                             <div class="linha_Setor linha_padrao">
@@ -185,6 +213,14 @@
                                     name="cargo" required="required">
                                     <option value="" disabled selected hidden>Selecione o cargo...</option>
                                 </select>
+                            </div>
+                            <div class="linha_Setor linha_padrao">
+                                <label class="perfil-gestor-obras-check" for="gestorObras">
+                                    <input type="hidden" name="gestor_obras_estado_enviado" value="1">
+                                    <input type="checkbox" id="gestorObras" name="gestor_obras" value="1">
+                                    <span>Gestor de Obras</span>
+                                    <small id="gestorObrasStatus">Alteração exige aprovação da Engenharia.</small>
+                                </label>
                             </div>
                             <input type="hidden" name="idColaboradorPro" id="idColaboradorPro">
                             <div class="div_botoesAcao">
@@ -402,6 +438,11 @@
                                 </optgroup>
 
                             </select>
+
+                            <label class="campoDataConquista" for="dataConquista">
+                                <span>Data</span>
+                                <input id="dataConquista" class="tbx_teste glass" type="date">
+                            </label>
 
                             <button id="btAdicionarConquista" class="bt_padrao bt_cad">
                                 Adicionar
@@ -1408,6 +1449,50 @@
         // Mostra o painel clicado
         $(target).fadeIn(200);
     });
+
+    $(document)
+        .off('click.exportarPerfilColaboradorPDF', '#btnExportarPerfilColaboradorPDF')
+        .on('click.exportarPerfilColaboradorPDF', '#btnExportarPerfilColaboradorPDF', function (event) {
+            event.stopPropagation();
+            $('#menuExportarPerfilPDF').prop('hidden', function (_, hidden) {
+                return !hidden;
+            });
+        });
+
+    $(document)
+        .off('click.gerarPerfilColaboradorPDF', '#menuExportarPerfilPDF .perfil-pdf-gerar')
+        .on('click.gerarPerfilColaboradorPDF', '#menuExportarPerfilPDF .perfil-pdf-gerar', async function () {
+            const secoes = {};
+
+            $('#menuExportarPerfilPDF [data-pdf-secao]').each(function () {
+                secoes[this.dataset.pdfSecao] = this.checked;
+            });
+
+            if (!Object.values(secoes).some(Boolean)) {
+                alert('Selecione pelo menos uma informação para exportar.');
+                return;
+            }
+
+            if (typeof window.exportarPerfilColaboradorPDF !== 'function') {
+                await import('/client/js/services/pdf/rh-pdf.js');
+            }
+
+            $('#menuExportarPerfilPDF').prop('hidden', true);
+            await window.exportarPerfilColaboradorPDF(secoes);
+        });
+
+    $(document)
+        .off('click.cancelarPerfilColaboradorPDF', '#menuExportarPerfilPDF .perfil-pdf-cancelar')
+        .on('click.cancelarPerfilColaboradorPDF', '#menuExportarPerfilPDF .perfil-pdf-cancelar', function () {
+            $('#menuExportarPerfilPDF').prop('hidden', true);
+        });
+
+    $(document)
+        .off('click.fecharMenuPerfilColaboradorPDF')
+        .on('click.fecharMenuPerfilColaboradorPDF', function (event) {
+            if ($(event.target).closest('#btnExportarPerfilColaboradorPDF, #menuExportarPerfilPDF').length) return;
+            $('#menuExportarPerfilPDF').prop('hidden', true);
+        });
 
 
 

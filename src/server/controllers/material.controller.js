@@ -32,6 +32,16 @@ async function getVariacoes(req, res) {
   }
 }
 
+async function getCatalogoMateriais(req, res) {
+  try {
+    const dados = await MaterialService.listarCatalogoMateriais(req.query);
+    res.json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao listar catalogo de materiais' });
+  }
+}
+
 async function getVariacaoById(req, res) {
   try {
     const dados = await MaterialService.listarVariacaoById(req.params.id);
@@ -56,10 +66,51 @@ async function getValoresAtributo(req, res) {
 // ===== OS =====
 async function getMateriaisOS(req, res) {
   try {
-    const dados = await MaterialService.listarMateriaisOS(req.params.idOS);
+    const dados = await MaterialService.listarMateriaisOS(req.params.idOS, req.query.id_lista || null);
     res.json(dados);
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ erro: 'Erro ao listar materiais da OS' });
+  }
+}
+
+async function getListasOS(req, res) {
+  try {
+    const dados = await MaterialService.listarListasOS(req.params.idOS);
+    res.json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao listar listas de materiais' });
+  }
+}
+
+async function getListasEstoque(req, res) {
+  try {
+    const dados = await MaterialService.listarListasEstoque();
+    res.json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao listar listas pendentes do estoque' });
+  }
+}
+
+async function getListasConferencia(req, res) {
+  try {
+    const dados = await MaterialService.listarListasConferencia();
+    res.json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao listar listas para conferencia' });
+  }
+}
+
+async function getHistoricoListaOS(req, res) {
+  try {
+    const dados = await MaterialService.listarHistoricoListaOS(req.params.id);
+    res.json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao listar historico da lista' });
   }
 }
 
@@ -105,6 +156,16 @@ async function createMaterialOS(req, res) {
   }
 }
 
+async function createListaOS(req, res) {
+  try {
+    const nova = await MaterialService.criarListaOS(req.body, req.user);
+    res.status(201).json(nova);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ erro: 'Erro ao criar lista de materiais' });
+  }
+}
+
 async function criarOuBuscarMaterial(req, res) {
   try {
     const mat = await MaterialService.criarOuBuscarMaterial(req.body);
@@ -143,8 +204,93 @@ async function updateMaterialOS(req, res) {
     if (!ok) return res.status(404).json({ erro: 'Não encontrado' });
 
     res.json({ sucesso: true });
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ erro: 'Erro ao atualizar' });
+  }
+}
+
+async function updateConferenciaMaterialOS(req, res) {
+  try {
+    const ok = await MaterialService.atualizarConferenciaMaterialOS(req.params.id, req.body);
+    if (!ok) return res.status(404).json({ erro: 'Material nao encontrado para conferencia' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao salvar conferencia' });
+  }
+}
+
+async function updateVariacao(req, res) {
+  try {
+    const ok = await MaterialService.atualizarVariacao(req.params.id, req.body);
+    if (!ok) return res.status(404).json({ erro: 'Variação não encontrada' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao atualizar variação' });
+  }
+}
+
+async function updateCatalogoVariacao(req, res) {
+  try {
+    const ok = await MaterialService.atualizarCatalogoVariacao(req.params.id, req.body);
+    if (!ok) return res.status(404).json({ erro: 'Material nao encontrado' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao atualizar dados do catalogo' });
+  }
+}
+
+async function updateListaOS(req, res) {
+  try {
+    const ok = await MaterialService.atualizarListaOS(req.params.id, req.body);
+    if (!ok) return res.status(404).json({ erro: 'Lista nao encontrada' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao atualizar lista' });
+  }
+}
+
+async function avancarListaOS(req, res) {
+  try {
+    const ok = await MaterialService.avancarListaOS(req.params.id, req.user, req.body);
+    if (!ok) return res.status(404).json({ erro: 'Lista nao encontrada' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(err.status || 500).json({ erro: err.message || 'Erro ao avancar lista' });
+  }
+}
+
+async function voltarListaOS(req, res) {
+  try {
+    const ok = await MaterialService.voltarListaOS(req.params.id, req.body, req.user);
+    if (!ok) return res.status(404).json({ erro: 'Lista nao encontrada' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao voltar lista' });
+  }
+}
+
+async function duplicarListaOS(req, res) {
+  try {
+    const nova = await MaterialService.duplicarListaOS(req.params.id, req.user);
+    if (!nova) return res.status(404).json({ erro: 'Lista nao encontrada' });
+
+    res.status(201).json(nova);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao duplicar lista' });
   }
 }
 
@@ -169,7 +315,7 @@ async function updateFornecedorMaterialOS(req, res) {
 
 async function selecionarFornecedor(req, res) {
   try {
-    await MaterialFornecedorService.selecionarFornecedor(req.params.id);
+    await MaterialFornecedorService.selecionarFornecedor(req.params.id, req.body);
     res.json({ sucesso: true });
   } catch (err) {
     console.error(err);
@@ -190,6 +336,30 @@ async function deleteMaterialOS(req, res) {
 
   } catch {
     res.status(500).json({ erro: 'Erro ao deletar' });
+  }
+}
+
+async function deleteListaOS(req, res) {
+  try {
+    const ok = await MaterialService.deletarListaOS(req.params.id);
+    if (!ok) return res.status(400).json({ erro: 'Lista nao encontrada ou possui materiais vinculados' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao excluir lista' });
+  }
+}
+
+async function deleteVariacaoMaterial(req, res) {
+  try {
+    const ok = await MaterialService.deletarVariacaoMaterial(req.params.id);
+    if (!ok) return res.status(404).json({ erro: 'Material nao encontrado' });
+
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.status(err.status || 500).json({ erro: err.message || 'Erro ao apagar material' });
   }
 }
 
@@ -221,32 +391,58 @@ async function uploadImagemMaterial(req, res) {
   }
 }
 
+async function vincularImagemExistente(req, res) {
+  try {
+    const dados = await MaterialService.vincularImagemExistente(req.params.id, req.body.id_origem);
+    res.json({ sucesso: true, novaFotoURL: dados.imagem, versao_foto: dados.versao_foto });
+  } catch (err) {
+    console.error('Erro ao vincular imagem existente:', err);
+    res.status(err.status || 500).json({ error: err.mensagem || 'Erro ao vincular imagem existente.' });
+  }
+}
+
 
 // ================= EXPORT =================
 
 module.exports = {
   getMateriais,
   getVariacoes,
+  getCatalogoMateriais,
   getVariacaoById,
   getValoresAtributo,
 
   getMateriaisOS,
+  getListasOS,
+  getListasEstoque,
+  getListasConferencia,
+  getHistoricoListaOS,
   getCustoOS,
 
   getFornecedores,
   getFornecedoresMaterialOS,
 
   createMaterialOS,
+  createListaOS,
   criarOuBuscarMaterial,
   createVariacao,
   addAtributoVariacao,
   addFornecedorMaterialOS,
 
   updateMaterialOS,
+  updateConferenciaMaterialOS,
+  updateVariacao,
+  updateCatalogoVariacao,
+  updateListaOS,
+  avancarListaOS,
+  voltarListaOS,
+  duplicarListaOS,
   updateFornecedorMaterialOS,
   selecionarFornecedor,
   uploadImagemMaterial,
+  vincularImagemExistente,
 
   deleteMaterialOS,
+  deleteListaOS,
+  deleteVariacaoMaterial,
   deleteFornecedorMaterialOS
 };

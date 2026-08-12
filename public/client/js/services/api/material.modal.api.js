@@ -7,5 +7,5 @@ export async function criarVariacao(data) {
 }
 
 export async function adicionarAtributo(data) {
-  return $.post("/api/materiais/atributos", data);
+  return $.post("/api/materiais/variacoes/atributos", data);
 }

@@ -20,9 +20,28 @@
     <a class="bt_menuP" data-roles="" data-feature="menu.projetos" data-pagina="/client/pages/projetos.html">
       <i class="fa-solid fa-briefcase"></i><span class="menu-text">Projetos</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-feature="menu.materiais" data-pagina="/client/pages/lista_material.html">
-      <i class="fa-solid fa-boxes-stacked"></i><span class="menu-text">Material</span>
+    <a class="bt_menuP" data-roles="99" data-feature="menu.spda" data-pagina="/client/pages/spda.html">
+      <i class="fa-solid fa-cloud-bolt"></i><span class="menu-text">SPDA</span>
     </a>
+    <button type="button" class="bt_menuP menu-parent" data-roles="3,99" data-submenu="materiais">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      <span class="menu-text">Materiais</span>
+      <i class="fa-solid fa-chevron-down menu-submenu-arrow"></i>
+    </button>
+    <div class="menu-submenu" data-submenu-content="materiais">
+      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.materiais" data-pagina="/client/pages/lista_material.html">
+        <i class="fa-solid fa-diagram-project"></i><span class="menu-text">Controle de fluxo</span>
+      </a>
+      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.estoque" data-pagina="/client/pages/estoque.html">
+        <i class="fa-solid fa-warehouse"></i><span class="menu-text">Estoque</span>
+      </a>
+      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.catalogo_materiais" data-pagina="/client/pages/materiais.html">
+        <i class="fa-solid fa-layer-group"></i><span class="menu-text">Acervo de Materiais</span>
+      </a>
+      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.prototipo_atributos" data-pagina="/client/pages/prototipo-atributos-material.html">
+        <i class="fa-solid fa-share-nodes"></i><span class="menu-text">Prot&oacute;tipo Atributos</span>
+      </a>
+    </div>
     <a class="bt_menuP" data-roles="99" data-feature="menu.ferramentas" data-pagina="/client/pages/ferramentas.html">
       <i class="fa-solid fa-screwdriver-wrench"></i><span class="menu-text">Ferramentas</span>
     </a>

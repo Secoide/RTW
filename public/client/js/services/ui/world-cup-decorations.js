@@ -7,7 +7,7 @@ export function initWorldCupDecorations() {
     const hoje = new Date();
 
     const inicio = new Date("2026-06-01");
-    const fim = new Date("2026-07-31");
+    const fim = new Date("2026-07-21");
 
     if (hoje < inicio || hoje > fim) {
         return;

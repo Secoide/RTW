@@ -1,32 +1,29 @@
-<main id="listaMaterial">
+<main id="listaMaterial" class="material-kanban-mode">
 
-    <!-- 🔹 Seleção da OS -->
-
-    <!-- 🔹 Seleção da OS -->
     <div class="toolbar-topo">
-
-        <!-- 🔹 ESQUERDA -->
         <div class="left">
             <select id="cbxOS" class="cbx_teste glass" style="width: auto;">
                 <option value="">Selecione uma OS</option>
             </select>
 
-            <button id="btnNovoMaterial" class="bt_padrao bt_cad">+ Novo Material</button>
-            <button id="btnCadastrarMaterial" class="bt_padrao bt_cad">
-                + Cadastrar Material
+            <button id="btnNovoMaterial" class="bt_padrao bt_cad material-detalhe-action">+ Novo Material</button>
+            <button id="btnReloadMaterial" class="bt_padrao bt_atualizar material-detalhe-action">Atualizar</button>
+            <button id="btnExportarLista" class="bt_padrao bt_atualizar material-detalhe-action">Exportar</button>
+            <button id="btnExportarListaPDF" class="bt_padrao bt_atualizar material-detalhe-action">
+                <i class="fa-solid fa-file-pdf"></i> PDF
             </button>
-            <button id="btnReloadMaterial" class="bt_padrao bt_atualizar">Atualizar</button>
-            <button id="btnExportarLista" class="bt_padrao bt_atualizar">Exportar</button>
         </div>
 
-        <!-- 🔹 DIREITA -->
         <div class="right-painel">
-
-            <!-- 💰 FINANCEIRO -->
             <div class="painel-financeiro">
                 <div class="card total">
-                    <span>Custo Total</span>
+                    <span>Or&ccedil;ado</span>
                     <strong id="totalCusto">R$ 0,00</strong>
+                </div>
+
+                <div class="card estimado">
+                    <span>Do estoque</span>
+                    <strong id="totalEstimado">R$ 0,00</strong>
                 </div>
 
                 <div class="card comprado">
@@ -34,83 +31,203 @@
                     <strong id="totalComprado">R$ 0,00</strong>
                 </div>
 
-                <div class="card estimado">
-                    <span>Estimado</span>
-                    <strong id="totalEstimado">R$ 0,00</strong>
-                </div>
-
                 <div class="card economia">
                     <span>Economia</span>
                     <strong id="economia">R$ 0,00</strong>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="card progresso">
-                    <strong id="percentComprado">0%</strong>
-                </div>
+    <section id="materialKanbanView" class="material-kanban-view">
+        <div class="material-kanban-empty">
+            Selecione uma OS para visualizar o fluxo das listas de materiais.
+        </div>
+    </section>
+
+    <section id="materialDetalheView" class="material-detalhe-view" hidden>
+        <div class="material-detalhe-head">
+            <button id="btnVoltarKanbanMaterial" class="bt_padrao bt_atualizar">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao fluxo
+            </button>
+            <div>
+                <strong id="materialDetalheTitulo">Lista #1</strong>
+                <span id="materialDetalheResumo">Detalhes da lista de materiais</span>
+            </div>
+        </div>
+
+        <div class="toolbar-busca">
+            <input type="search" id="searchMaterial" placeholder="Buscar material...">
+            <select id="filtroCategoriaMaterial" title="Filtrar por categoria">
+                <option value="">Todas categorias</option>
+            </select>
+            <div class="painel-quantitativo">
+                <span>Itens: <b id="totalItens">0</b></span>
+                <span>Qtd: <b id="qtdTotal">0</b></span>
+                <span>Fornecedores: <b id="totalFornecedores">0</b></span>
+                <span class="ok">Comprado: <b id="qtdComprada">0</b></span>
+                <span class="info">Separado: <b id="qtdSeparada">0</b></span>
+                <span class="danger">Faltante: <b id="qtdFaltante">0</b></span>
+            </div>
+            <div class="bt_submenu">
+                <label style="font-size: 11px; width: 150px;">
+                    <input type="checkbox" id="chkMostrarImagemMaterial">
+                    Mostrar imagens
+                </label>
+                <button id="btnInfoFornecedoresLista" class="bt_padrao bt_atualizar" type="button" title="Resumo dos fornecedores cotados">
+                    <i class="fa-solid fa-circle-info"></i> Fornecedores
+                </button>
+            </div>
+        </div>
+
+        <div id="resumoFornecedoresSelecionados" class="materiais-fornecedores-resumo" hidden></div>
+
+        <div class="table-container table-padrao">
+            <table id="tableMaterial">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Categoria</th>
+                        <th>Material</th>
+                        <th>Codigo</th>
+                        <th>Fabricante</th>
+                        <th>Qtde</th>
+                        <th>Und</th>
+                        <th>Observa&ccedil;&atilde;o</th>
+                        <th>Or&ccedil;ado</th>
+                        <th>Separacao</th>
+                        <th>Fornecedor</th>
+                        <th>Preco</th>
+                        <th>Total R$</th>
+                        <th>OC</th>
+                        <th class="col-acoes">Acoes</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="emptyMaterial" style="display:none;">
+                Nenhum material encontrado.
+            </div>
+        </div>
+
+        <div class="barra-progresso-material">
+            <div class="progresso separado"><span>0%</span></div>
+            <div class="progresso comprado"><span>0%</span></div>
+            <div class="progresso faltante"><span>0%</span></div>
+        </div>
+
+        <div class="filtros-status">
+            <button data-status="">Todos</button>
+            <button data-status="faltante">Faltante</button>
+            <button data-status="parcial">Parcial</button>
+            <button data-status="separado">Separado</button>
+            <button data-status="comprado">Comprado</button>
+        </div>
+    </section>
+
+    <div id="modalListaMaterial" class="modal-lista-material" hidden>
+        <div class="modal-lista-material-box modal-lista-material-box-wide">
+            <div class="modal-lista-material-head">
+                <strong id="modalListaMaterialTitulo">Nova lista</strong>
+                <button type="button" id="btnFecharModalListaMaterial" title="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
-        </div>
+            <input type="hidden" id="listaMaterialId">
 
+            <div class="modal-lista-material-grid">
+                <label class="modal-lista-material-span-2">
+                    Nome da lista
+                    <input id="listaMaterialTituloInput" type="text" placeholder="Ex: Lista de cabos e painel QGBT">
+                </label>
+
+                <label>
+                    Est&aacute;gio inicial
+                    <select id="listaMaterialOrigemInput">
+                        <option value="orcamento">Come&ccedil;ar em Or&ccedil;amento</option>
+                        <option value="engenharia">Come&ccedil;ar em Engenharia</option>
+                    </select>
+                </label>
+
+                <label>
+                    Prioridade
+                    <select id="listaMaterialPrioridadeInput">
+                        <option value="normal">Normal</option>
+                        <option value="baixa">Baixa</option>
+                        <option value="alta">Alta</option>
+                        <option value="urgente">Urgente</option>
+                    </select>
+                </label>
+
+                <label>
+                    Respons&aacute;vel
+                    <select id="listaMaterialResponsavelInput">
+                        <option value="">Sem respons&aacute;vel</option>
+                    </select>
+                </label>
+
+                <label>
+                    Prazo
+                    <input id="listaMaterialPrazoInput" type="date">
+                </label>
+
+                <label class="modal-lista-material-check">
+                    <input id="listaMaterialSemPrazoInput" type="checkbox">
+                    <span>Sem prazo definido</span>
+                </label>
+
+                <label class="modal-lista-material-span-2">
+                    Descri&ccedil;&atilde;o
+                    <textarea id="listaMaterialDescricaoInput" rows="3" placeholder="Resumo rapido da lista"></textarea>
+                </label>
+
+                <label class="modal-lista-material-span-2">
+                    Observa&ccedil;&atilde;o r&aacute;pida
+                    <input id="listaMaterialObservacaoRapidaInput" type="text" maxlength="120" placeholder="Ex: aguardando retorno do fornecedor">
+                </label>
+            </div>
+
+            <div class="modal-lista-material-actions">
+                <button type="button" id="btnCancelarListaMaterial">Cancelar</button>
+                <button type="button" id="btnSalvarListaMaterial">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- 🔎 BUSCA (fica abaixo do topo) -->
-    <div class="toolbar-busca">
-        <input type="search" id="searchMaterial" placeholder="Buscar material...">
-        <!-- 📦 QUANTITATIVO -->
-        <div class="painel-quantitativo">
-            <span>Itens: <b id="totalItens">0</b></span>
-            <span>Qtd: <b id="qtdTotal">0</b></span>
-            <span>Fornecedores: <b id="totalFornecedores">0</b></span>
-            <span class="ok">Comprado: <b id="qtdComprada">0</b></span>
-            <span class="info">Separado: <b id="qtdSeparada">0</b></span>
-            <span class="danger">Faltante: <b id="qtdFaltante">0</b></span>
-        </div>
-        <div class="bt_submenu">
-            <label style="font-size: 11px; width: 150px;">
-                <input type="checkbox" id="chkMostrarImagemMaterial">
-                Mostrar imagens
+    <div id="modalConfirmacaoMaterial" class="modal-confirmacao-material" hidden>
+        <div class="modal-confirmacao-material-box">
+            <div class="modal-confirmacao-material-icon">
+                <i id="modalConfirmacaoMaterialIcon" class="fa-solid fa-circle-question"></i>
+            </div>
+            <div class="modal-confirmacao-material-text">
+                <strong id="modalConfirmacaoMaterialTitulo">Confirmar ação</strong>
+                <span id="modalConfirmacaoMaterialMensagem">Deseja continuar?</span>
+            </div>
+            <label id="modalConfirmacaoMaterialMotivoWrap" class="modal-confirmacao-material-motivo" hidden>
+                Motivo
+                <textarea id="modalConfirmacaoMaterialMotivo" rows="3" placeholder="Informe o motivo"></textarea>
             </label>
+            <div class="modal-confirmacao-material-actions">
+                <button type="button" id="btnCancelarConfirmacaoMaterial">Cancelar</button>
+                <button type="button" id="btnConfirmarConfirmacaoMaterial">Confirmar</button>
+            </div>
         </div>
     </div>
 
-    <!-- 🔹 Tabela -->
-    <div class="table-container table-padrao">
-
-        <table id="tableMaterial">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Material</th>
-                    <th>Categoria</th>
-                    <th>Qtde</th>
-                    <th>Código</th>
-                    <th>Fabricante</th>
-                    <th>Separação</th>
-                    <th>Fornecedor</th>
-                    <th>Preço</th>
-                    <th>Total R$</th>
-                    <th class="col-acoes">Ações</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <div id="emptyMaterial" style="display:none;">
-            Nenhum material encontrado.
+    <div id="modalHistoricoListaMaterial" class="modal-lista-material" hidden>
+        <div class="modal-lista-material-box">
+            <div class="modal-lista-material-head">
+                <strong>Histórico da lista</strong>
+                <button type="button" id="btnFecharHistoricoListaMaterial" title="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="historicoListaMaterialConteudo" class="historico-lista-material-conteudo"></div>
         </div>
-    </div>
-
-    <div class="barra-progresso-material">
-        <div class="progresso separado"><span>0%</span></div>
-        <div class="progresso comprado"><span>0%</span></div>
-        <div class="progresso faltante"><span>0%</span></div>
-    </div>
-    <div class="filtros-status">
-        <button data-status="">Todos</button>
-        <button data-status="faltante">Faltante</button>
-        <button data-status="parcial">Parcial</button>
-        <button data-status="separado">Separado</button>
-        <button data-status="comprado">Comprado</button>
     </div>
 
 </main>

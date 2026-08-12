@@ -93,6 +93,10 @@ async function logoutOwner() {
 
 async function carregarRecursos() {
   state.recursos = await api("/api/owner/recursos");
+  const recursosObrigatorios = ["menu.prototipo_atributos", "menu.spda"];
+  if (recursosObrigatorios.some(chave => !state.recursos.some(recurso => recurso.chave === chave))) {
+    state.recursos = await api("/api/owner/recursos/sincronizar", { method: "POST" });
+  }
   renderRecursos();
 }
 
@@ -213,10 +217,15 @@ async function excluirEmpresa() {
 
 function renderRecursos() {
   const selecionados = new Set(state.recursosEmpresa);
+  const recursosNovos = ["menu.catalogo_materiais", "menu.materiais", "menu.estoque", "menu.prototipo_atributos", "menu.spda"];
   byId("ownerRecursosLista").innerHTML = state.recursos.map(recurso => `
-    <label class="owner-resource">
+    <label class="owner-resource ${recursosNovos.includes(recurso.chave) ? "owner-resource-novo" : ""}">
       <input type="checkbox" value="${escapeHtml(recurso.chave)}" ${selecionados.has(recurso.chave) ? "checked" : ""}>
-      <span>${escapeHtml(recurso.nome)} <small>(${escapeHtml(recurso.tipo)})</small></span>
+      <span>
+        ${escapeHtml(recurso.nome)}
+        <small>(${escapeHtml(recurso.tipo)})</small>
+        ${recursosNovos.includes(recurso.chave) ? `<em>Novo menu</em>` : ""}
+      </span>
     </label>
   `).join("");
 }

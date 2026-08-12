@@ -1,21 +1,19 @@
 import { getTbody } from "../../utils/dom/material-render.js";
 
 export function criarLinhaNova() {
-
-  // 🔥 evita duplicar linha aberta
   if ($("#tableMaterial tbody tr.novo-registro").length) return;
 
   const tr = `
     <tr class="novo-registro">
+      <td class="col-id">Novo</td>
+      <td>-</td>
 
-      <td></td>
-
-      <td>
+      <td class="col-material">
         <div class="autocomplete-container">
-          <input 
-            type="text" 
+          <input
+            type="text"
             class="autocomplete-material"
-            placeholder="Digite uma informação do material..."
+            placeholder="Digite uma informacao do material..."
             style="
               width: 100%;
               padding: 4px 6px;
@@ -27,26 +25,26 @@ export function criarLinhaNova() {
             "
           >
         </div>
-
         <input type="hidden" data-field="id_variacao">
       </td>
-      
-      <td>—</td>
 
+      <td>-</td>
+      <td>-</td>
       <td>
-        <input data-field="quantidade" type="number">
+        <input data-field="quantidade" type="number" min="1" placeholder="Qtd.">
       </td>
-
-      <td>—</td>
-      <td>—</td>
-      <td>—</td>
-      <td>—</td>
-      
-      <td>—</td>
-      <td>—</td>
-
+      <td class="col-unidade">-</td>
       <td>
+        <input data-field="observacao" type="text" maxlength="255" placeholder="Obs.">
+      </td>
+      <td class="col-orcado">-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td class="col-oc"><span class="material-oc-vazio">-</span></td>
 
+      <td class="col-acoes">
         <button class="save" title="Salvar">
           <i class="fa-solid fa-floppy-disk"></i>
         </button>
@@ -54,19 +52,15 @@ export function criarLinhaNova() {
         <button class="cancel" title="Cancelar">
           <i class="fa-solid fa-xmark"></i>
         </button>
-
       </td>
-
     </tr>
   `;
 
   getTbody().prepend(tr);
 
-  // 🔥 foco no autocomplete
   setTimeout(() => {
     const $input = $(".novo-registro .autocomplete-material").first();
     $input.focus();
     $input.select();
   }, 50);
-
 }

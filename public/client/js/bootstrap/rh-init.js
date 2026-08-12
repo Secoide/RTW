@@ -2,6 +2,7 @@ import { get_carregarPerfilUsuario } from "../events/click/handle-abrir-info-col
 import { open_form_AnexarCurso } from "../events/forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../events/forms/anexarExame.js";
 import { open_form_AnexarEPI } from "../events/forms/anexarEPI.js";
+import { exportarResumoRHPDF } from "../services/pdf/rh-pdf.js";
 
 
 export async function inciarRH() {
@@ -17,6 +18,10 @@ export async function inciarRH() {
 
 $(document).on("click", "#bt_atualizarRH", async function () {
     preencherTabelaColaboradoresRH();
+});
+
+$(document).on("click", "#btnExportarRHPDF", function () {
+    exportarResumoRHPDF();
 });
 
 $(document).on("click", ".bt_form_anexar_epi", function (e) {

@@ -1,0 +1,164 @@
+<main id="estoqueMaterial">
+  <section class="estoque-head">
+    <div>
+      <strong>Estoque</strong>
+      <span>Listas liberadas para separação de materiais.</span>
+    </div>
+    <button id="btnAtualizarEstoque" class="bt_padrao bt_atualizar">
+      <i class="fa-solid fa-rotate"></i> Atualizar
+    </button>
+  </section>
+
+  <section class="estoque-filtros">
+    <label class="estoque-filtro-busca">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="estoqueBuscaListas" type="search" placeholder="Buscar OS, cliente ou descrição...">
+    </label>
+
+    <select id="estoqueFiltroPrioridade" title="Filtrar por prioridade">
+      <option value="">Todas prioridades</option>
+      <option value="baixa">Baixa</option>
+      <option value="normal">Normal</option>
+      <option value="alta">Alta</option>
+      <option value="urgente">Urgente</option>
+    </select>
+
+    <select id="estoqueOrdenacao" title="Ordenar listas">
+      <option value="antigas">Mais antigas no estoque</option>
+      <option value="progresso-asc">Menor progresso</option>
+      <option value="progresso-desc">Maior progresso</option>
+      <option value="os-desc">OS maior</option>
+      <option value="os-asc">OS menor</option>
+    </select>
+
+    <label class="estoque-filtro-busca estoque-filtro-material">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      <input id="estoqueBuscaMateriais" type="search" placeholder="Buscar material, referência, fabricante...">
+    </label>
+
+    <select id="estoqueFiltroSeparacao" title="Filtrar itens da lista">
+      <option value="">Todos itens</option>
+      <option value="pendente">Pendentes</option>
+      <option value="parcial">Parciais</option>
+      <option value="separado">Separados</option>
+    </select>
+
+    <button id="btnLimparFiltrosEstoque" type="button" title="Limpar filtros">
+      <i class="fa-solid fa-filter-circle-xmark"></i>
+    </button>
+  </section>
+
+  <section class="estoque-layout">
+    <aside class="estoque-pendencias">
+      <div class="estoque-col-head">
+        <div>
+          <strong>Listas pendentes</strong>
+          <span id="estoqueTotalPendencias">0 lista(s)</span>
+        </div>
+      </div>
+
+      <div id="estoqueListasPendentes" class="estoque-listas-pendentes">
+        <div class="estoque-empty">Carregando pendências...</div>
+      </div>
+
+      <div class="estoque-col-head estoque-conferencia-head">
+        <div>
+          <strong>Listas para conferência</strong>
+          <span id="estoqueTotalConferencia">0 lista(s)</span>
+        </div>
+      </div>
+
+      <div id="estoqueListasConferencia" class="estoque-listas-conferencia">
+        <div class="estoque-empty">Carregando conferências...</div>
+      </div>
+    </aside>
+
+    <section class="estoque-detalhe">
+      <div class="estoque-detalhe-head">
+        <div>
+          <strong id="estoqueListaTitulo">Selecione uma lista</strong>
+          <span id="estoqueListaResumo">Clique em um bloco à esquerda para iniciar a separação.</span>
+        </div>
+        <div class="estoque-detalhe-actions">
+          <button id="btnEstoqueExportarPDF" class="bt_padrao bt_atualizar" hidden>
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </button>
+          <button id="btnEstoqueEnviarCompras" class="bt_padrao bt_cad" hidden>
+            <i class="fa-solid fa-forward-step"></i> Enviar para compras
+          </button>
+        </div>
+      </div>
+
+      <div id="estoqueDetalheResumo" class="estoque-resumo-grid" hidden></div>
+
+      <div class="table-container table-padrao estoque-table-wrap">
+        <table id="estoqueMaterialTable">
+          <thead>
+            <tr>
+              <th data-sort="categoria">Categoria</th>
+              <th>Foto</th>
+              <th data-sort="nome">Material</th>
+              <th data-sort="codigo">Referencia</th>
+              <th data-sort="fabricante">Fabricante</th>
+              <th data-sort="observacao">Observacao</th>
+              <th data-sort="quantidade">Qtd.</th>
+              <th data-sort="unidade">Und</th>
+              <th data-sort="separacao">Separacao</th>
+              <th class="col-acoes">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="10" class="estoque-placeholder">Nenhuma lista selecionada.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <div id="modalConfirmacaoEstoque" class="modal-confirmacao-material" hidden>
+    <div class="modal-confirmacao-material-box">
+      <div class="modal-confirmacao-material-icon">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <div class="modal-confirmacao-material-text">
+        <strong>Deseja realmente enviar para compras?</strong>
+        <span>Depois de confirmar, esta lista sai da fila do Estoque e segue para Compras.</span>
+      </div>
+      <div class="modal-confirmacao-material-actions">
+        <button type="button" id="btnCancelarConfirmacaoEstoque">Cancelar</button>
+        <button type="button" id="btnConfirmarConfirmacaoEstoque">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalConferenciaEstoque" class="estoque-conferencia-modal" hidden>
+    <div class="estoque-conferencia-box">
+      <div class="estoque-conferencia-topo">
+        <div>
+          <strong id="conferenciaTitulo">Conferência</strong>
+          <span id="conferenciaResumo">Confira os materiais antes da obra iniciar.</span>
+        </div>
+        <button type="button" id="btnFecharConferenciaEstoque" title="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="conferenciaMaterialAtual" class="estoque-conferencia-material"></div>
+
+      <div class="estoque-conferencia-rodape">
+        <button type="button" id="btnConferenciaAnterior" title="Material anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="estoque-conferencia-progresso">
+          <span id="conferenciaContador">Item 0 de 0</span>
+          <div><i id="conferenciaBarra" style="width:0%"></i></div>
+        </div>
+        <button type="button" id="btnConferenciaProximo" title="Próximo material">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</main>

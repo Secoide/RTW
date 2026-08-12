@@ -54,6 +54,10 @@
 
                 <input id="seletor_data" class="tbx_data tbx_teste glass" type="date" value="">
             </div>
+            <button id="btnProgramacaoAjustes" type="button" class="programacao-ajustes-btn"
+                title="Ajustes da programação">
+                <i class="fa-solid fa-gear"></i>
+            </button>
         </div>
 
         <div id="programacaoBuscaAvancada" class="programacao-advanced-panel" hidden>
@@ -90,6 +94,41 @@
                 <i class="fa-solid fa-eraser"></i>
                 Limpar filtros
             </button>
+        </div>
+
+        <div id="programacaoAjustesPanel" class="programacao-ajustes-panel" hidden>
+            <header>
+                <i class="fa-solid fa-gear"></i>
+                <div>
+                    <strong>Ajustes da programação</strong>
+                    <span>Preferências salvas neste navegador.</span>
+                </div>
+            </header>
+
+            <section>
+                <h4>Exportar programação</h4>
+                <label class="programacao-ajustes-check" for="chkExportarResponsavelProgramacao">
+                    <input id="chkExportarResponsavelProgramacao" type="checkbox" checked>
+                    <span>
+                        <strong>Mostrar responsável da OS</strong>
+                        <small>Inclui o responsável no texto exportado para WhatsApp.</small>
+                    </span>
+                </label>
+                <label class="programacao-ajustes-check" for="chkExportarAniversariantesProgramacao">
+                    <input id="chkExportarAniversariantesProgramacao" type="checkbox" checked>
+                    <span>
+                        <strong>Mostrar aniversariantes</strong>
+                        <small>Mantém o destaque de aniversário na exportação.</small>
+                    </span>
+                </label>
+                <label class="programacao-ajustes-check" for="chkExportarObsAutomaticasProgramacao">
+                    <input id="chkExportarObsAutomaticasProgramacao" type="checkbox">
+                    <span>
+                        <strong>Adicionar observações automaticamente</strong>
+                        <small>Inclui as observações do dia sem perguntar antes.</small>
+                    </span>
+                </label>
+            </section>
         </div>
     </div>
 </div>
@@ -335,7 +374,7 @@
 
 <div id="popupMenuExportar" class="popup-menu-exportar">
     <div class="popup-option" data-type="whats">WhatsApp</div>
-    <!--<div class="popup-option" data-type="pdf">PDF</div>-->
+    <div class="popup-option" data-type="pdf">PDF</div>
     <!--<div class="popup-option" data-type="excel">Excel</div>-->
     <!-- 
         ADICIONAR APENAS QUANDO IMPLEMENTAR EXCEL 

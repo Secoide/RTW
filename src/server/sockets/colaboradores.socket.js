@@ -93,7 +93,7 @@ async function handleAlocarColaborador(wss, ws, { osID, dataDia, nomes }) {
     // broadcast básico
     broadcast(wss, ws, { acao: "alocar_colaborador", osID, dataDia, nomes });
 
-    for (const { idNaOS, idfuncionario, id } of confirmacoes) {
+    for (const { idNaOS, idfuncionario, id, nome } of confirmacoes) {
       const idColab = idfuncionario || id;
       if (!idNaOS || !idColab) continue;
 
@@ -108,6 +108,7 @@ async function handleAlocarColaborador(wss, ws, { osID, dataDia, nomes }) {
         acao: "confirmar_alocacao",
         osID,
         idfuncionario: idColab,
+        nome,
         idNaOS,
         status_integracao: status_integracao || "",
         dataDia // 🔥 ESSENCIAL
@@ -250,10 +251,15 @@ function broadcast(wss, ws, data) {
 
 function sendError(ws, mensagem, err, requestId = null) {
   console.error(mensagem, err);
+  const detalhe = err?.message || "Erro desconhecido";
+  const precisaSincronizar = /Nenhum colaborador|não encontrado|nao encontrado|not found/i.test(detalhe);
+
   ws.send(JSON.stringify({
     acao: "erro",
-    mensagem: `${mensagem}: ${err.message}`,
-    requestId
+    mensagem: `${mensagem}: ${detalhe}`,
+    requestId,
+    codigo: precisaSincronizar ? "SYNC_REQUIRED" : "ACTION_FAILED",
+    precisaSincronizar
   }));
 }
 

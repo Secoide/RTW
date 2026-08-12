@@ -1,1 +1,1 @@
-export const VERSAO_SISTEMA = "2.0.0";
+export const VERSAO_SISTEMA = "2.1.0";

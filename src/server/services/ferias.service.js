@@ -14,11 +14,19 @@ const INTERVALO_MIN_MESES = 5;
 async function listarAdmissoes() {
     const [rows] = await connection.query(`
         SELECT
-            idfuncionario,
-            MIN(data) AS data_admissao
-        FROM funcionarios_contem_exames
-        WHERE idexame = 1
-        GROUP BY idfuncionario
+            f.id AS idfuncionario,
+            COALESCE(f.data_experiencia, adm.data_admissao) AS data_admissao
+        FROM funcionarios f
+        LEFT JOIN (
+            SELECT
+                fce.idfuncionario,
+                MIN(fce.data) AS data_admissao
+            FROM funcionarios_contem_exames fce
+            INNER JOIN exames e ON e.idexame = fce.idexame
+            WHERE LOWER(e.nome) = 'admissional'
+            GROUP BY fce.idfuncionario
+        ) adm ON adm.idfuncionario = f.id
+        WHERE COALESCE(f.data_experiencia, adm.data_admissao) IS NOT NULL
     `);
 
     const map = {};

@@ -1,5 +1,43 @@
 const connection = require('../config/db');
 
+let enderecoColumnReadyPromise = null;
+let enderecoColumnAvailable = null;
+
+async function garantirColunaEndereco() {
+  if (enderecoColumnAvailable === true) return true;
+  if (enderecoColumnAvailable === false) return false;
+
+  if (!enderecoColumnReadyPromise) {
+    enderecoColumnReadyPromise = (async () => {
+      try {
+        const [colunas] = await connection.query(`
+          SHOW COLUMNS FROM funcionarios LIKE 'endereco'
+        `);
+
+        const coluna = colunas?.[0];
+        const tipo = String(coluna?.Type || "").toLowerCase();
+        const tamanho = Number(tipo.match(/varchar\((\d+)\)/)?.[1] || 0);
+
+        if (tamanho > 0 && tamanho < 255) {
+          await connection.query(`
+            ALTER TABLE funcionarios
+              MODIFY COLUMN endereco VARCHAR(255) NULL
+          `);
+        }
+
+        enderecoColumnAvailable = true;
+      } catch (err) {
+        enderecoColumnAvailable = false;
+        console.warn("Coluna endereco indisponivel em funcionarios:", err.message);
+      }
+
+      return enderecoColumnAvailable;
+    })();
+  }
+
+  return enderecoColumnReadyPromise;
+}
+
 // Listar todos
 async function getColaboradores() {
   const [rows] = await connection.query(`
@@ -29,6 +67,8 @@ async function getColaboradorById(id) {
        f.cpf,
        f.rg,
        f.cnh,
+       f.data_experiencia,
+       IFNULL(f.responsavelOSs, 0) AS responsavelOSs,
        fi.datainicio,
        fi.datafinal,
        IFNULL(fi.motivo,'ativo') as motivo,
@@ -79,6 +119,8 @@ async function getStatusIntegracaoByColab(idfuncionario, idOS, dataDia) {
 }
 
 async function createColaborador(data) {
+  await garantirColunaEndereco();
+
   const sql = `
     INSERT INTO funcionarios 
     (nome, sexo, nascimento, cpf, rg, mail, telefone, endereco, sobre, senha, fotoperfil, versao_foto)
@@ -132,6 +174,8 @@ async function findByRG(rg) {
 
 // Atualizar
 async function updateColaborador(id, data) {
+  await garantirColunaEndereco();
+
   const sql = `
     UPDATE funcionarios SET
       nome = ?, sexo = ?, nascimento = ?, endereco = ?, telefone = ?,
@@ -159,7 +203,7 @@ async function updateColaborador(id, data) {
 async function updateProfissionalColab(idColaboradorPro, data) {
   const sql = `
     UPDATE funcionarios SET
-        cargo = ?, cnh = ?, empresaContrato = ?
+        cargo = ?, cnh = ?, empresaContrato = ?, data_experiencia = ?
         WHERE id = ?
   `;
 
@@ -167,6 +211,7 @@ async function updateProfissionalColab(idColaboradorPro, data) {
     data.cargo,
     data.vehicles_selected,
     data.empresacontrato,
+    data.data_experiencia || null,
     idColaboradorPro
   ]);
 
@@ -244,6 +289,14 @@ async function buscarColaboradoresDisponiveis(dataDia) {
       FROM funcionarios_contem_exames fce2
       LEFT JOIN exames e ON e.idexame = fce2.idexame
       GROUP BY fce2.idfuncionario
+    ),
+    entrada_func AS (
+      SELECT
+        f.id AS idfuncionario,
+        COALESCE(f.data_experiencia, exf.data_admissional) AS data_entrada,
+        exf.data_demissional
+      FROM funcionarios f
+      LEFT JOIN exames_func exf ON f.id = exf.idfuncionario
     )
 
     SELECT 
@@ -277,12 +330,12 @@ async function buscarColaboradoresDisponiveis(dataDia) {
     LEFT JOIN tb_setores nv ON c.idsetor = nv.id_catnvl
     LEFT JOIN params p ON 1=1
     LEFT JOIN tb_func_interrupto fi ON f.id = fi.id_func AND p.ref_date BETWEEN fi.datainicio AND fi.datafinal
-    LEFT JOIN exames_func exf ON f.id = exf.idfuncionario
+    LEFT JOIN entrada_func exf ON f.id = exf.idfuncionario
     LEFT JOIN score_por_func spf ON f.id = spf.idfuncionario
     WHERE 
       f.id <> 0 
       AND ativo_colaborador = 1
-      AND (p.ref_date >= exf.data_admissional)
+      AND (exf.data_entrada IS NOT NULL AND p.ref_date >= exf.data_entrada)
       AND (exf.data_demissional IS NULL OR p.ref_date <= exf.data_demissional)
     ORDER BY 
 	  CASE
@@ -399,6 +452,8 @@ async function buscarColaboradoresEmOS(dataDia) {
       END) AS status_OS, 
       ANY_VALUE(o.descricao) AS descricao, 
       ANY_VALUE(e.nome) AS nomeEmpresa,
+      ANY_VALUE(o.id_responsavel) AS idResp,
+      ANY_VALUE(IFNULL(resp.nome, '')) AS nomeResp,
       ANY_VALUE(COALESCE(oc.pta_alocada, 0)) AS pta_alocada,
       ANY_VALUE(COALESCE(oc.painel_eletrico_previsto, 0)) AS painel_eletrico_previsto,
       ANY_VALUE(IFNULL(c.nome, 'VERIFICAR GERÊNCIA')) AS nomeCidade, 
@@ -453,6 +508,7 @@ async function buscarColaboradoresEmOS(dataDia) {
   FROM tb_obras o 
   JOIN tb_empresa e           ON e.id_empresas = o.id_empresa 
   LEFT JOIN tb_cidades c      ON c.id_cidades = o.id_cidade 
+  LEFT JOIN funcionarios resp  ON resp.id = o.id_responsavel
   LEFT JOIN os_complementos oc ON oc.id_os = o.id_OSs
   LEFT JOIN funcionario_na_os fno 
          ON fno.id_OS = o.id_OSs 
@@ -1159,7 +1215,7 @@ async function getHallExperienciaConnectPear() {
       f.fotoperfil,
       f.versao_foto,
 
-      a.data_admissao,
+      COALESCE(f.data_experiencia, a.data_admissao) AS data_admissao,
 
       GROUP_CONCAT(
         CONCAT(
@@ -1186,7 +1242,7 @@ IFNULL(
 ) AS total_os
     FROM funcionarios f
 
-    INNER JOIN admissional a
+    LEFT JOIN admissional a
       ON a.idfuncionario = f.id
 
     LEFT JOIN demissional d
@@ -1251,12 +1307,13 @@ IFNULL(
       f.id <> 999
       AND f.cargo NOT IN (27,29)
       AND d.idfuncionario IS NULL
+      AND COALESCE(f.data_experiencia, a.data_admissao) IS NOT NULL
 
     GROUP BY
       f.id
 
     ORDER BY
-      a.data_admissao ASC
+      COALESCE(f.data_experiencia, a.data_admissao) ASC
 
     LIMIT 50
 
@@ -1333,7 +1390,7 @@ async function addConquista(
       data_conquista,
       ativo
     )
-    SELECT ?, ?, NOW(), 1
+    SELECT ?, ?, COALESCE(?, NOW()), 1
     WHERE NOT EXISTS (
       SELECT 1
       FROM tb_conquistas_colaborador
@@ -1355,6 +1412,8 @@ async function addConquista(
         dados.id_colaborador,
 
         dados.tipo,
+
+        dados.data_conquista || null,
 
         dados.id_colaborador,
 

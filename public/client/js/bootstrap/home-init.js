@@ -11,16 +11,47 @@ import { initNotificacoesSininho } from "../services/sockets/socket-notification
 
 import { } from "../services/sockets/reconnect-service.js";
 import { initSantaDropWalkWrapper } from "../services/ui/christmas-painel-inicio.js";
+import { aplicarEasterEggTituloConquistas } from "../services/ui/EasterEgg/titulo-conquistas.js";
 import { observarPermissoesPorRoles } from "../state/role.js";
 
 // =======================================================
 // VARIÁVEIS GLOBAIS
 // =======================================================
-let avisoIconeSelecionado = "📄";
+let avisoIconeSelecionado = "\ud83d\udcc4";
 let avisoEditandoId = null;
 
 let nomeUsuario = sessionStorage.getItem("nome_usuario");
 let changelogHomeCarregado = false;
+let reconhecimentoSlideTimer = null;
+let conquistasSlideHome = [];
+let conquistaSlideIndiceHome = 0;
+const TEMPO_SLIDE_RECONHECIMENTO_MS = 30000;
+
+const CONQUISTAS_MANUAIS_HOME = {
+  CIPA: { icone: "\u267b\ufe0f", nome: "Membro da CIPA", descricao: "Participa da Comiss\u00e3o Interna de Preven\u00e7\u00e3o de Acidentes." },
+  BRIGADISTA: { icone: "\u26d1\ufe0f", nome: "Brigadista", descricao: "Integrante da Brigada de Emerg\u00eancia da empresa." },
+  DESTAQUE_MES: { icone: "\ud83c\udfc5", nome: "Destaque do M\u00eas", descricao: "Reconhecimento mensal por desempenho, postura, entrega ou contribui\u00e7\u00e3o acima do esperado." },
+  DESTAQUE_ANO: { icone: "\ud83c\udfc6", nome: "Destaque do Ano", descricao: "Reconhecimento anual para colaborador com grande impacto, const\u00e2ncia e contribui\u00e7\u00e3o para a equipe." },
+  INOVADOR: { icone: "\ud83d\udca1", nome: "Inovador", descricao: "Concedida a colaboradores que criaram melhorias, automa\u00e7\u00f5es ou processos que geraram resultados positivos." },
+  ESPIRITO_EQUIPE: { icone: "\ud83e\udd1d", nome: "Esp\u00edrito de Equipe", descricao: "Reconhece colabora\u00e7\u00e3o, respeito e apoio constante aos colegas." },
+  HEROI_SEGURANCA: { icone: "\ud83d\udea8", nome: "Her\u00f3i da Seguran\u00e7a", descricao: "Concedida por atitudes relevantes de preven\u00e7\u00e3o de acidentes e promo\u00e7\u00e3o da seguran\u00e7a." },
+  MENTOR: { icone: "\ud83c\udf93", nome: "Mentor", descricao: "Reconhece profissionais que compartilham conhecimento e desenvolvem outros colaboradores." },
+  EMBAIXADOR: { icone: "\ud83c\udf0e", nome: "Embaixador", descricao: "Representa a empresa de forma exemplar perante clientes, fornecedores e parceiros." },
+  CLIENTE_DESTAQUE: { icone: "\ud83d\udcac", nome: "Elogiado pelo Cliente", descricao: "Conquista recebida atrav\u00e9s de elogios e reconhecimentos formais dos clientes." },
+  RESOLVE_TUDO: { icone: "\ud83e\udde9", nome: "Resolve Tudo", descricao: "Reconhece profissionais que encontram solu\u00e7\u00f5es para desafios complexos do dia a dia." },
+  LIDERANCA: { icone: "\ud83d\udc54", nome: "Lideran\u00e7a Inspiradora", descricao: "Concedida a l\u00edderes que influenciam positivamente suas equipes pelo exemplo." },
+  SUPERACAO: { icone: "\ud83c\udfd4\ufe0f", nome: "Supera\u00e7\u00e3o", descricao: "Reconhece colaboradores que superaram desafios importantes durante sua trajet\u00f3ria." },
+  ORGULHO_RTW: { icone: "\u2764\ufe0f", nome: "Orgulho RTW", descricao: "Uma das maiores honrarias concedidas pela empresa." },
+  SOLUCAO_INTELIGENTE: { icone: "\ud83e\udde0", nome: "Solu\u00e7\u00e3o Inteligente", descricao: "Reconhece solu\u00e7\u00f5es criativas e eficientes para problemas complexos." },
+  CORUJA_RTW: { icone: "\ud83e\udd89", nome: "Coruja", descricao: "Reconhece dedica\u00e7\u00e3o excepcional em per\u00edodos noturnos, paradas de manuten\u00e7\u00e3o ou atendimentos fora do hor\u00e1rio convencional." },
+  PRECISAO_RTW: { icone: "\ud83c\udfaf", nome: "Precis\u00e3o", descricao: "Concedida a profissionais com alto padr\u00e3o de qualidade, baixa incid\u00eancia de retrabalho e aten\u00e7\u00e3o aos detalhes." },
+  ORGANIZACAO_EXEMPLAR: { icone: "\ud83d\udccb", nome: "Organiza\u00e7\u00e3o Exemplar", descricao: "Reconhece organiza\u00e7\u00e3o exemplar de documentos, materiais, ferramentas e informa\u00e7\u00f5es." },
+  RESPOSTA_RAPIDA: { icone: "\u26a1", nome: "Resposta R\u00e1pida", descricao: "Concedida a profissionais \u00e1geis em demandas urgentes, emerg\u00eancias e situa\u00e7\u00f5es cr\u00edticas." },
+  COMUNICADOR_RTW: { icone: "\ud83d\udce1", nome: "Comunicador", descricao: "Reconhece comunica\u00e7\u00e3o clara, objetiva e eficiente com clientes, colegas e lideran\u00e7as." },
+  ALTA_PERFORMANCE: { icone: "\ud83e\udebe", nome: "Alta Performance", descricao: "Destinada aos profissionais com desempenho acima da m\u00e9dia e entregas consistentes." },
+  PONTUALIDADE_OURO: { icone: "\u23f1\ufe0f", nome: "Pontualidade de Ouro", descricao: "Concedida aos colaboradores comprometidos com hor\u00e1rios, prazos e compromissos assumidos." },
+  GUARDIAO_QUALIDADE: { icone: "\ud83d\udd10", nome: "Guardi\u00e3o da Qualidade", descricao: "Reconhece profissionais que contribuem continuamente para a excel\u00eancia dos servi\u00e7os." }
+};
 
 const Toast = Swal.mixin({
   toast: true,
@@ -210,30 +241,33 @@ export async function carregarAvisos() {
   const categorias = [
     { nome: "rh", destino: ".panel-rh" },
     { nome: "treinamentos", destino: ".panel-treinamentos" },
-    { nome: "diretoria", destino: ".panel-diretoria" },
     { nome: "seguranca", destino: ".panel-seguranca" }
   ];
 
   for (const cat of categorias) {
     try {
+      const el = document.querySelector(cat.destino);
+      if (!el) continue;
+
       const resp = await fetch(`/api/comunicados/${cat.nome}`, {
         headers: { "authorization": "Bearer " + sessionStorage.getItem("token") }
       });
 
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
       const lista = await resp.json();
-      const el = document.querySelector(cat.destino);
       el.innerHTML = "";
 
       lista.forEach(item => {
 
-        // 🔐 PERMISSÃO
+        // Permissao
         const podeEditarOuExcluir =
           usuarioId == item.criado_por ||
           usuarioNivel == 5 ||
           usuarioNivel == 99;
         el.innerHTML += `
           <div class="item-comunicado ${cat.nome}">
-              <div class="item-icon">${item.icone || "📄"}</div>
+              <div class="item-icon">${item.icone || "\ud83d\udcc4"}</div>
 
               <div style="width:100%;">
                   <div class="item-titulo">${item.titulo}</div>
@@ -241,15 +275,15 @@ export async function carregarAvisos() {
 
                   <div class="painel-acoes">
                       
-                      <!-- Botões (apenas se tiver permissão) -->
+                      <!-- Botoes (apenas se tiver permissao) -->
                       <div style="${!podeEditarOuExcluir ? 'display:none;' : ''}">
-                        <span class="btn-editar" title="Editar" data-id="${item.id}">✏️</span>
-                        <span class="btn-excluir" title="Apagar" data-id="${item.id}">🗑️</span>
+                        <span class="btn-editar" title="Editar" data-id="${item.id}">&#9999;&#65039;</span>
+                        <span class="btn-excluir" title="Apagar" data-id="${item.id}">&#128465;&#65039;</span>
                       </div>
 
                       <!-- Criado por -->
                       <p style="opacity: 0.7; font-size: 9px; text-align:right; margin:0;">
-                        ${reduzirNome(item.criado_por_nome) || "Desconhecido"} —
+                        ${reduzirNome(item.criado_por_nome) || "Desconhecido"} &mdash;
                         <strong>${tempoRelativo(item.data_registro)}</strong>
                       </p>
 
@@ -276,6 +310,7 @@ async function carregarAvisosExames() {
 
     const lista = await resp.json();
     const el = document.querySelector(".panel-rh");
+    if (!el) return;
 
     lista.forEach(item => {
 
@@ -283,7 +318,7 @@ async function carregarAvisosExames() {
 
       el.innerHTML += `
         <div class="item-comunicado exame">
-            <div class="item-icon">🩺</div>
+            <div class="item-icon">&#129658;</div>
 
             <div style="width:100%;">
                 <div class="item-titulo">Exame Agendado</div>
@@ -415,7 +450,7 @@ function garantirPopupVersaoHome() {
   document.body.insertAdjacentHTML("beforeend", `
     <div id="homePopupAtualizacao" class="atualizacao-overlay home-atualizacao-overlay">
       <div class="atualizacao-box home-atualizacao-box">
-        <h2>🚀 Nova atualização lançada!</h2>
+        <h2>&#128640; Nova atualização lançada!</h2>
         <p><strong>Versão:</strong> <span id="homeVersaoAtual">${VERSAO_SISTEMA}</span></p>
         <div class="home-changelog-container"></div>
         <button type="button" id="homeBtnPopupOk">OBRIGADO</button>
@@ -473,8 +508,9 @@ export async function initHome() {
   await carregarAvisos();
   await carregarHallExperiencia();
   initSantaDropWalkWrapper();
+
   // ==========================================
-  // SELEÇÃO DE ÍCONES → AGORA FUNCIONA
+  // SELEÇÃO DE ÍCONES -> AGORA FUNCIONA
   // ==========================================
   document.querySelectorAll("#iconeLista span").forEach(el => {
     el.addEventListener("click", () => {
@@ -592,6 +628,8 @@ export async function initHome() {
 
     }
 
+    document.dispatchEvent(new Event("chat-online:visibilidade-alterada"));
+
   };
 
   // ============================================================
@@ -703,39 +741,39 @@ export async function initHome() {
 
     const mensagensNormais = [
 
-      "🔎 Consultando sistema",
-      "📂 Buscando informações",
-      "🤖 Processando consulta",
-      "📡 Verificando programação",
-      "🧠 Cruzando dados operacionais",
-      "📑 Lendo OS cadastradas",
-      "👷 Procurando colaboradores",
-      "⚡ Consultando programação da equipe",
-      "📋 Organizando informações",
-      "🔧 Sincronizando dados da engenharia",
-      "🛰️ Acessando banco operacional",
-      "📊 Analisando produtividade",
-      "🛠️ Verificando disponibilidade",
-      "🏭 Consultando empresas vinculadas",
-      "📅 Validando programação do dia",
-      "🧾 Gerando resposta operacional"
+      "\ud83d\udd0e Consultando sistema",
+      "\ud83d\udcc2 Buscando informações",
+      "\ud83e\udd16 Processando consulta",
+      "\ud83d\udce1 Verificando programação",
+      "\ud83e\udde0 Cruzando dados operacionais",
+      "\ud83d\udcd1 Lendo OS cadastradas",
+      "\ud83d\udc77 Procurando colaboradores",
+      "\u26a1 Consultando programação da equipe",
+      "\ud83d\udccb Organizando informações",
+      "\ud83d\udd27 Sincronizando dados da engenharia",
+      "\ud83d\udef0\ufe0f Acessando banco operacional",
+      "\ud83d\udcca Analisando produtividade",
+      "\ud83d\udee0\ufe0f Verificando disponibilidade",
+      "\ud83c\udfed Consultando empresas vinculadas",
+      "\ud83d\udcc5 Validando programação do dia",
+      "\ud83e\uddfe Gerando resposta operacional"
 
     ];
 
     // ============================================================
-    // FRASES ENGRAÇADAS
+    // FRASES ENGRACADAS
     // ============================================================
 
     const mensagensEngracadas = [
 
-      "☕ O eletricista foi tomar café... buscando ele",
-      "🔦 Procurando colaborador com lanterna",
-      "⚠️ Tentando entender a letra da OS",
-      "🧰 Conferindo quem pegou as ferramentas",
-      "🚧 Desviando dos cones da obra",
-      "🔌 Reconectando neurônios da IA",
-      "🧠 Perguntando pro estagiário",
-      "🪫 IA com baixa bateria emocional"
+      "\u2615 O eletricista foi tomar café... buscando ele",
+      "\ud83d\udd26 Procurando colaborador com lanterna",
+      "\u26a0\ufe0f Tentando entender a letra da OS",
+      "\ud83e\uddf0 Conferindo quem pegou as ferramentas",
+      "\ud83d\udea7 Desviando dos cones da obra",
+      "\ud83d\udd0c Reconectando neurônios da IA",
+      "\ud83e\udde0 Perguntando pro estagiário",
+      "\ud83e\udeab IA com baixa bateria emocional"
 
     ];
 
@@ -837,7 +875,7 @@ export async function initHome() {
       loadingDiv.remove();
 
       adicionarMensagem(
-        "❌ Erro ao consultar IA.",
+        "\u274c Erro ao consultar IA.",
         "bot"
       );
 
@@ -1012,8 +1050,8 @@ export async function initHome() {
     // ========================================================
 
     html = html.replace(
-      /^\s*[*•-]\s+(.*)$/gm,
-      `<div class="ia-list-item">• $1</div>`
+      /^\s*[*\u2022-]\s+(.*)$/gm,
+      `<div class="ia-list-item">\u2022 $1</div>`
     );
 
     // ========================================================
@@ -1101,7 +1139,7 @@ const iaAlertIcon =
   );
 
 function mostrarInsightIA(
-  icone = "💡"
+  icone = "\ud83d\udca1"
 ) {
 
   iaAlertIcon.innerText =
@@ -1138,7 +1176,7 @@ async function verificarAlertasIA() {
       alertasMsg.innerHTML =
         `
 <strong>
-🧠 Central IA Operacional
+\ud83e\udde0 Central IA Operacional
 </strong>
 <br><br>
 ` +
@@ -1367,7 +1405,7 @@ function carregarFotoPerfil() {
       }
 
       $('#fotoavatarPerfil').on('error', function () {
-        console.warn("⚠️ Foto do perfil não encontrada. Carregando padrão.");
+        console.warn("Foto do perfil não encontrada. Carregando padrão.");
         $(this).attr('src', '/imagens/user-default.webp');
       });
     },
@@ -1495,7 +1533,7 @@ function renderizarColaboradorIA(
           .map(x => x[0])
           .slice(0, 2)
           .join("")
-        || "👤";
+        || "\ud83d\udc64";
 
       const card =
         document.createElement("div");
@@ -1537,7 +1575,7 @@ function renderizarColaboradorIA(
             para visualizar dados sensíveis.
             "
             >
-                🔒
+                \ud83d\udd12
             </div>`
           :
           ""
@@ -1546,7 +1584,7 @@ function renderizarColaboradorIA(
             Apenas usuários com permissão avançada
             podem visualizar os dados sensíveis.
             ">
-                    🛡️ Dados Protegidos
+                    \ud83d\udee1\ufe0f Dados Protegidos
                 </div>
                 <div class="ia-colab-sensitive-grid">
 
@@ -1717,6 +1755,8 @@ async function carregarHallExperiencia() {
   const lista =
     await resp.json();
 
+  iniciarSlideConquistasManuais(lista);
+
   const div =
     document.getElementById(
       "hall-ranking"
@@ -1750,11 +1790,11 @@ async function carregarHallExperiencia() {
         <div class="medalha">
 
           ${index === 0
-        ? "🥇"
+        ? "\ud83e\udd47"
         : index === 1
-          ? "🥈"
+          ? "\ud83e\udd48"
           : index === 2
-            ? "🥉"
+            ? "\ud83e\udd49"
             : `${index + 1}º`
       }
       
@@ -1874,3 +1914,277 @@ async function carregarHallExperiencia() {
     }
   );
 }
+
+function escaparHtmlHome(valor) {
+  return String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatarDataConquistaHome(valor, tipo) {
+  const data = dataLocalHome(valor);
+  if (!data) return "";
+
+  if (tipo === "DESTAQUE_MES") {
+    return data.toLocaleDateString("pt-BR", {
+      month: "long"
+    }).toUpperCase("pt-BR");
+  }
+
+  if (tipo === "DESTAQUE_ANO") {
+    return String(data.getFullYear());
+  }
+
+  return data.toLocaleDateString("pt-BR");
+}
+
+function montarConquistasManuaisHome(colaboradores) {
+  if (!Array.isArray(colaboradores)) return [];
+
+  return colaboradores
+    .flatMap(colaborador => {
+      return String(colaborador?.conquistas || "")
+        .split(",")
+        .map(item => item.trim())
+        .filter(Boolean)
+        .map(item => {
+          const [tipo, data] = item.split("|");
+          const meta = CONQUISTAS_MANUAIS_HOME[tipo];
+
+          if (!meta) return null;
+
+          return {
+            tipo,
+            data,
+            dataObj: dataLocalHome(data),
+            icone: meta.icone,
+            medalha: meta.nome,
+            descricao: meta.descricao || "",
+            nome: colaborador.nome,
+            foto: colaborador.fotoperfil
+              ? `${colaborador.fotoperfil}?v=${colaborador.versao_foto || ""}`
+              : "/imagens/user-default.webp"
+          };
+        })
+        .filter(Boolean);
+    })
+    .sort((a, b) => {
+      const dataA = a.dataObj ? a.dataObj.getTime() : 0;
+      const dataB = b.dataObj ? b.dataObj.getTime() : 0;
+      return dataB - dataA;
+    });
+}
+
+function renderizarSlideConquistaHome(item, posicao, total) {
+  const destino = document.getElementById("funcionario-mes-card");
+  if (!destino || !item) return;
+
+  destino.className = "funcionario-mes-card funcionario-medalha-slide";
+  destino.innerHTML = `
+    <div class="funcionario-medalha-icone" aria-hidden="true">${escaparHtmlHome(item.icone)}</div>
+    <div class="funcionario-mes-foto">
+      <img src="${escaparHtmlHome(item.foto)}" alt="Foto de ${escaparHtmlHome(item.nome)}">
+    </div>
+    <strong>${escaparHtmlHome(item.nome)}</strong>
+    <p>${escaparHtmlHome(item.medalha)}</p>
+    <div class="funcionario-medalha-data">
+      ${escaparHtmlHome(formatarDataConquistaHome(item.data, item.tipo))}
+    </div>
+    <div class="funcionario-medalha-descricao">
+      ${escaparHtmlHome(item.descricao)}
+    </div>
+    <div class="funcionario-slide-tempo">
+      <div class="funcionario-slide-progresso" aria-label="Tempo para o próximo reconhecimento">
+        <span></span>
+      </div>
+    </div>
+  `;
+}
+
+function reiniciarTimerSlideReconhecimento() {
+  if (reconhecimentoSlideTimer) {
+    clearInterval(reconhecimentoSlideTimer);
+    reconhecimentoSlideTimer = null;
+  }
+
+  if (conquistasSlideHome.length <= 1) return;
+
+  reconhecimentoSlideTimer = setInterval(() => {
+    alterarSlideReconhecimento(1, false);
+  }, TEMPO_SLIDE_RECONHECIMENTO_MS);
+}
+
+function alterarSlideReconhecimento(direcao = 1, reiniciar = true) {
+  if (!conquistasSlideHome.length) return;
+
+  conquistaSlideIndiceHome =
+    (conquistaSlideIndiceHome + direcao + conquistasSlideHome.length) %
+    conquistasSlideHome.length;
+
+  renderizarSlideConquistaHome(
+    conquistasSlideHome[conquistaSlideIndiceHome],
+    conquistaSlideIndiceHome,
+    conquistasSlideHome.length
+  );
+
+  if (reiniciar) reiniciarTimerSlideReconhecimento();
+}
+
+function iniciarSlideConquistasManuais(colaboradores) {
+  const destino = document.getElementById("funcionario-mes-card");
+  if (!destino) return;
+
+  aplicarEasterEggTituloConquistas();
+
+  if (reconhecimentoSlideTimer) {
+    clearInterval(reconhecimentoSlideTimer);
+    reconhecimentoSlideTimer = null;
+  }
+
+  conquistasSlideHome = montarConquistasManuaisHome(colaboradores);
+  conquistaSlideIndiceHome = 0;
+
+  if (!conquistasSlideHome.length) {
+    destino.className = "funcionario-mes-card vazio";
+    destino.innerHTML = `
+      <div class="funcionario-mes-foto">
+        <img src="/imagens/user-default.webp" alt="Reconhecimento">
+      </div>
+      <strong>Nenhuma medalha encontrada</strong>
+      <p>As conquistas adicionadas no perfil aparecem aqui.</p>
+    `;
+    return;
+  }
+
+  renderizarSlideConquistaHome(
+    conquistasSlideHome[conquistaSlideIndiceHome],
+    conquistaSlideIndiceHome,
+    conquistasSlideHome.length
+  );
+
+  reiniciarTimerSlideReconhecimento();
+}
+
+function dataLocalHome(valor) {
+  if (!valor) return null;
+
+  const limpa = String(valor).split("T")[0];
+  const [ano, mes, dia] = limpa.split("-").map(Number);
+
+  if (!ano || !mes || !dia) return null;
+
+  return new Date(ano, mes - 1, dia);
+}
+
+function obterMesAnteriorHome() {
+  const data = new Date();
+  data.setDate(1);
+  data.setMonth(data.getMonth() - 1);
+
+  return {
+    mes: data.getMonth() + 1,
+    ano: data.getFullYear(),
+    nome: data.toLocaleDateString("pt-BR", { month: "long" })
+  };
+}
+
+function temDestaqueMesAnterior(colaborador, referencia) {
+  return String(colaborador?.conquistas || "")
+    .split(",")
+    .map(item => item.trim())
+    .filter(Boolean)
+    .some(item => {
+      const [tipo, data] = item.split("|");
+      const dataConquista = dataLocalHome(data);
+
+      return tipo === "DESTAQUE_MES"
+        && dataConquista
+        && dataConquista.getMonth() + 1 === referencia.mes
+        && dataConquista.getFullYear() === referencia.ano;
+    });
+}
+
+function calcularTempoEmpresaHome(dataEntrada) {
+  const entrada = dataLocalHome(dataEntrada);
+  if (!entrada) return "Tempo de empresa não informado";
+
+  const hoje = new Date();
+  let anos = hoje.getFullYear() - entrada.getFullYear();
+  let meses = hoje.getMonth() - entrada.getMonth();
+
+  if (hoje.getDate() < entrada.getDate()) meses -= 1;
+
+  if (meses < 0) {
+    anos -= 1;
+    meses += 12;
+  }
+
+  const partes = [];
+  if (anos > 0) partes.push(`${anos} ${anos === 1 ? "ano" : "anos"}`);
+  if (meses > 0) partes.push(`${meses} ${meses === 1 ? "mês" : "meses"}`);
+
+  return partes.length
+    ? `${partes.join(" e ")} de empresa`
+    : "Menos de 1 mês de empresa";
+}
+
+function renderizarFuncionarioMesVazio(referencia) {
+  const destino = document.getElementById("funcionario-mes-card");
+  if (!destino) return;
+
+  destino.className = "funcionario-mes-card vazio";
+  destino.innerHTML = `
+    <div class="funcionario-mes-foto">
+      <img src="/imagens/user-default.webp" alt="Funcionário do mês">
+    </div>
+    <strong>Nenhum destaque encontrado</strong>
+    <p>Sem registro para ${escaparHtmlHome(referencia.nome)}/${referencia.ano}.</p>
+  `;
+}
+
+async function carregarFuncionarioMesAnterior() {
+  const destino = document.getElementById("funcionario-mes-card");
+  if (!destino) return;
+
+  const referencia = obterMesAnteriorHome();
+
+  try {
+    const resp = await fetch("/api/colaboradores/hall-experiencia", {
+      headers: { authorization: "Bearer " + sessionStorage.getItem("token") }
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    const colaboradores = await resp.json();
+    const destaque = Array.isArray(colaboradores)
+      ? colaboradores.find(colab => temDestaqueMesAnterior(colab, referencia))
+      : null;
+
+    if (!destaque) {
+      renderizarFuncionarioMesVazio(referencia);
+      return;
+    }
+
+    const foto = destaque.fotoperfil
+      ? `${destaque.fotoperfil}?v=${destaque.versao_foto || ""}`
+      : "/imagens/user-default.webp";
+
+    destino.className = "funcionario-mes-card";
+    destino.innerHTML = `
+      <div class="funcionario-mes-foto">
+        <img src="${escaparHtmlHome(foto)}" alt="Foto de ${escaparHtmlHome(destaque.nome)}">
+      </div>
+      <strong>${escaparHtmlHome(destaque.nome)}</strong>
+      <span class="funcionario-mes-tempo">
+        ${escaparHtmlHome(calcularTempoEmpresaHome(destaque.data_experiencia || destaque.data_admissao))}
+      </span>
+    `;
+  } catch (err) {
+    console.warn("Erro ao carregar funcionário do mês anterior:", err);
+    renderizarFuncionarioMesVazio(referencia);
+  }
+}
+

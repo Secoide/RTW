@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="css/forms/anexoExames.css">
     <link rel="stylesheet" href="css/cadastrosList.css">
     <link rel="stylesheet" href="css/material.css">
+    <link rel="stylesheet" href="css/spda.css">
+    <link rel="stylesheet" href="css/prototipo-atributos-material.css">
     <link rel="stylesheet" href="css/ferramentas.css">
     <link rel="stylesheet" href="css/ferias.css">
     <link rel="stylesheet" href="css/inicio.css">
@@ -50,7 +52,6 @@
 
     <!-- Seus scripts locais -->
     <script src="scripts/funcoes.js" defer></script>
-    <script src="scripts/mouse_direito.js" defer></script>
     <script src="scripts/get_DadosBD.js" defer></script>
     <script type="module" src="scripts/bt_acoes.js" defer></script>
     <!-- <script src="scripts/programacao.js" defer></script>-->
@@ -75,35 +76,52 @@
         <div id="online-button">
             👥 ONLINE
             <span id="online-count">0</span>
+            <span id="online-message-count" title="Mensagens não vistas">0</span>
         </div>
 
         <div id="online-popup"></div>
 
         <div id="online-panel">
-            <div class="online-panel-header">
-                <button type="button" class="online-tab active" data-online-tab="users">Online</button>
-                <button type="button" class="online-tab" data-online-tab="chat" data-roles="99">
-                    Chat <span id="online-chat-unread">0</span>
-                </button>
-            </div>
+            <div class="online-panel-layout">
+                <section class="online-chat-area" data-roles="99">
+                    <div class="online-chat-head">
+                        <div>
+                            <strong>Chat</strong>
+                            <span>mensagens temporárias da sessão</span>
+                        </div>
+                        <span id="online-chat-unread">0</span>
+                    </div>
 
-            <div id="online-list" class="online-tab-panel active"></div>
+                    <div class="online-chat-modes">
+                        <button type="button" class="online-chat-mode active" data-chat-mode="global">Grupo geral</button>
+                        <button type="button" class="online-chat-mode" data-chat-mode="private" title="Conversa privada será habilitada na próxima etapa">Privado</button>
+                    </div>
 
-            <div id="online-chat" class="online-tab-panel">
-                <div id="online-chat-messages"></div>
-                <form id="online-chat-form">
-                    <button id="online-chat-emoji" type="button" title="Emoticons">☺</button>
-                    <input id="online-chat-input" type="text" maxlength="300" placeholder="Mensagem rapida..." autocomplete="off">
-                    <button id="online-chat-send" type="submit">Enviar</button>
-                </form>
-                <div id="online-chat-emojis"></div>
-                <div id="online-chat-suggestions"></div>
+                    <div id="online-chat" class="online-tab-panel active">
+                        <div id="online-chat-messages"></div>
+                        <form id="online-chat-form">
+                            <button id="online-chat-emoji" type="button" title="Emoticons">☺</button>
+                            <input id="online-chat-input" type="text" maxlength="300" placeholder="Mensagem rápida..." autocomplete="off">
+                            <button id="online-chat-send" type="submit">Enviar</button>
+                        </form>
+                        <div id="online-chat-emojis"></div>
+                        <div id="online-chat-suggestions"></div>
+                    </div>
+                </section>
+
+                <aside class="online-users-area">
+                    <div class="online-users-head">
+                        <strong>Onlines</strong>
+                        <small>Clique para mencionar</small>
+                    </div>
+                    <div id="online-list" class="online-tab-panel active"></div>
+                </aside>
             </div>
         </div>
 
 
     </div>
-    <div id="ia-widget" data-roles="5,6,7,99">
+    <div id="ia-widget" data-roles="4,5,6,7,99">
 
         <div id="ia-button">
             🧠 Central IA
@@ -206,7 +224,10 @@
     <div id="modalMaterial" class="modal hidden">
         <div class="modal-content">
 
-            <h2>Cadastro de Material</h2>
+            <div class="material-modal-title">
+                <h2>Cadastro de Material</h2>
+                <span id="materialModoBadge" class="material-modo-badge novo">Novo cadastro</span>
+            </div>
 
             <!-- 🔹 MATERIAL -->
             <div class="form-group">
@@ -236,9 +257,18 @@
 
                         <input type="file" id="select_imagemmaterial" name="imagemmaterial" accept="image/*">
                         <input id="idMaterial" type="hidden" name="idMaterial" value="">
+                        <input id="imagemMaterialOrigemId" type="hidden" value="">
+                        <input id="modoEdicaoMaterial" type="hidden" value="0">
                         <button id="btn_uploadImagem" type="button" class="btn-upload">
                             📷 Carregar
                         </button>
+                        <button id="btn_usarImagemExistente" type="button" class="btn-upload material-img-link">
+                            Usar existente
+                        </button>
+                        <span id="imagemMaterialBloqueadaTexto" class="material-img-locked">
+                            Salve o material antes de adicionar foto
+                        </span>
+                        <small id="imagemMaterialOrigemTexto" class="material-img-source"></small>
                     </div>
 
                     <!-- 🔹 DADOS -->
@@ -278,6 +308,7 @@
                         <optgroup label="📏 Dimensionais">
                             <option value="Tamanho">Tamanho</option>
                             <option value="Bitola">Bitola</option>
+                            <option value="Número de vias">Número de vias</option>
                             <option value="Diâmetro">Diâmetro</option>
                             <option value="Comprimento">Comprimento</option>
                             <option value="Largura">Largura</option>
@@ -334,6 +365,26 @@
             </div>
 
             <!-- 🔹 ALERTA -->
+            <div id="materialImagemExistentePainel" class="material-imagem-existente" hidden>
+                <div class="material-imagem-existente-head">
+                    <strong>Usar imagem de outro material</strong>
+                    <button id="btnFecharImagemExistente" type="button" title="Fechar">×</button>
+                </div>
+                <input id="buscaImagemMaterialExistente" type="search" placeholder="Buscar material, código, fabricante ou atributo...">
+                <div id="listaImagemMaterialExistente" class="material-imagem-existente-lista">
+                    <span>Carregando materiais com imagem...</span>
+                </div>
+                <div id="paginacaoImagemMaterialExistente" class="material-imagem-existente-paginacao"></div>
+            </div>
+
+            <div id="materialEdicaoPainel" class="material-edicao-painel" hidden>
+                <span id="materialEdicaoTexto">Material existente selecionado.</span>
+                <div>
+                    <button id="btnEditarMaterialExistente" type="button">Editar este cadastro</button>
+                    <button id="btnUsarMaterialComoBase" type="button">Usar como base</button>
+                </div>
+            </div>
+
             <div id="alertDuplicado" class="alert-erro">
                 ⚠️ Essa variação já existe
             </div>

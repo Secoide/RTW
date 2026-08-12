@@ -74,6 +74,16 @@ async function selecionarFornecedor(id, idMaterialOS) {
   `, [id]);
 }
 
+async function deselecionarFornecedores(idMaterialOS) {
+  const [result] = await connection.query(`
+    UPDATE tb_materiais_os_fornecedores
+    SET selecionado = 0
+    WHERE id_material_os = ?
+  `, [idMaterialOS]);
+
+  return result.affectedRows > 0;
+}
+
 
 async function getById(id) {
     const [rows] = await connection.query(`
@@ -89,6 +99,8 @@ async function updateFornecedor(id, data) {
   const [result] = await connection.query(`
     UPDATE tb_materiais_os_fornecedores
     SET
+      id_fornecedor = COALESCE(?, id_fornecedor),
+      valor = COALESCE(?, valor),
       icms = COALESCE(?, icms),
       quantidade = COALESCE(?, quantidade),
       material_ok = COALESCE(?, material_ok),
@@ -97,6 +109,8 @@ async function updateFornecedor(id, data) {
       observacao = COALESCE(?, observacao)
     WHERE id = ?
   `, [
+    data.id_fornecedor ?? null,
+    data.valor ?? null,
     data.icms ?? null,
     data.quantidade ?? null,
     data.material_ok ?? null,
@@ -124,6 +138,7 @@ module.exports = {
     getFornecedoresByMaterialOS,
     addFornecedor,
     selecionarFornecedor,
+    deselecionarFornecedores,
     getById,
     updateFornecedor,
     deleteFornecedor

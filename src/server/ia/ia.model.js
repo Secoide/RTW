@@ -1,4 +1,4 @@
-const connection = require('../config/db');
+﻿const connection = require('../config/db');
 
 /* ==========================================================
    HELPERS DATA
@@ -98,7 +98,7 @@ function getPeriodo(periodo) {
     }
 
     // ======================================================
-    // MÊS ATUAL
+    // MÃŠS ATUAL
     // ======================================================
 
     if (periodo === 'mes_atual') {
@@ -323,7 +323,7 @@ function aplicarFiltros(
     }
 
     // ======================================================
-    // DATA ESPECÍFICA
+    // DATA ESPECÃFICA
     // ======================================================
 
     if (filtros.dataDia) {
@@ -363,7 +363,7 @@ function aplicarFiltros(
     }
 
     // ======================================================
-    // PERÍODO
+    // PERÃODO
     // ======================================================
 
     if (filtros.periodo) {
@@ -398,7 +398,7 @@ function aplicarFiltros(
     }
 
     // ======================================================
-    // ANO ESPECÍFICO
+    // ANO ESPECÃFICO
     // ======================================================
 
     if (
@@ -417,7 +417,7 @@ function aplicarFiltros(
     }
 
     // ======================================================
-    // MÊS / ANO ESPECÍFICO
+    // MÃŠS / ANO ESPECÃFICO
     // ======================================================
 
     if (
@@ -546,7 +546,7 @@ async function buscarDadosOperacionais(
 }
 
 // ==========================================================
-// HISTÓRICO COLABORADOR
+// HISTÃ“RICO COLABORADOR
 // ==========================================================
 
 async function buscarHistoricoColaborador(
@@ -659,7 +659,7 @@ async function buscarHistoricoColaborador(
 }
 
 /* ==========================================================
-   ESTATÍSTICA COLABORADOR
+   ESTATÃSTICA COLABORADOR
 ========================================================== */
 
 async function buscarEstatisticaColaborador(
@@ -852,7 +852,7 @@ async function buscarDisponiveis(
         }
 
         // ======================================================
-        // PERÍODO
+        // PERÃODO
         // ======================================================
 
         else if (
@@ -943,6 +943,14 @@ async function buscarDisponiveis(
       FROM funcionarios_contem_exames fce2
       LEFT JOIN exames e ON e.idexame = fce2.idexame
       GROUP BY fce2.idfuncionario
+    ),
+    entrada_func AS (
+      SELECT
+        f.id AS idfuncionario,
+        COALESCE(f.data_experiencia, exf.data_admissional) AS data_entrada,
+        exf.data_demissional
+      FROM funcionarios f
+      LEFT JOIN exames_func exf ON f.id = exf.idfuncionario
     )
 
     SELECT 
@@ -963,13 +971,13 @@ async function buscarDisponiveis(
     LEFT JOIN tb_setores nv ON c.idsetor = nv.id_catnvl
     LEFT JOIN params p ON 1=1
     LEFT JOIN tb_func_interrupto fi ON f.id = fi.id_func AND p.ref_date BETWEEN fi.datainicio AND fi.datafinal
-    LEFT JOIN exames_func exf ON f.id = exf.idfuncionario
+    LEFT JOIN entrada_func exf ON f.id = exf.idfuncionario
     LEFT JOIN score_por_func spf ON f.id = spf.idfuncionario
     LEFT JOIN funcionario_na_os fno ON f.id = fno.idfuncionario AND DATE(fno.data) = p.ref_date
     WHERE 
       f.id <> 0 
       AND ativo_colaborador = 1
-      AND (p.ref_date >= exf.data_admissional)
+      AND (exf.data_entrada IS NOT NULL AND p.ref_date >= exf.data_entrada)
       AND (exf.data_demissional IS NULL OR p.ref_date <= exf.data_demissional)
       AND fno.idfuncionario IS NULL
     ORDER BY 
@@ -1179,7 +1187,7 @@ async function buscarDetalhesColaborador(
             f.versao_foto,
             f.sobre,
 
-            exf.data_admissional,
+            COALESCE(f.data_experiencia, exf.data_admissional) AS data_experiencia,
             exf.data_demissional,
 
             /* =========================================================
@@ -1188,7 +1196,7 @@ async function buscarDetalhesColaborador(
 
             CASE
 
-                /* FUNCIONÁRIO DESLIGADO */
+                /* FUNCIONÃRIO DESLIGADO */
 
                 WHEN exf.data_demissional IS NOT NULL THEN
 
@@ -1196,7 +1204,7 @@ async function buscarDetalhesColaborador(
 
                         TIMESTAMPDIFF(
                             YEAR,
-                            exf.data_admissional,
+                            COALESCE(f.data_experiencia, exf.data_admissional),
                             exf.data_demissional
                         ),
                         ' anos, ',
@@ -1204,10 +1212,10 @@ async function buscarDetalhesColaborador(
                         TIMESTAMPDIFF(
                             MONTH,
                             DATE_ADD(
-                                exf.data_admissional,
+                                COALESCE(f.data_experiencia, exf.data_admissional),
                                 INTERVAL TIMESTAMPDIFF(
                                     YEAR,
-                                    exf.data_admissional,
+                                    COALESCE(f.data_experiencia, exf.data_admissional),
                                     exf.data_demissional
                                 ) YEAR
                             ),
@@ -1221,10 +1229,10 @@ async function buscarDetalhesColaborador(
                             DATE_ADD(
 
                                 DATE_ADD(
-                                    exf.data_admissional,
+                                    COALESCE(f.data_experiencia, exf.data_admissional),
                                     INTERVAL TIMESTAMPDIFF(
                                         YEAR,
-                                        exf.data_admissional,
+                                        COALESCE(f.data_experiencia, exf.data_admissional),
                                         exf.data_demissional
                                     ) YEAR
                                 ),
@@ -1233,10 +1241,10 @@ async function buscarDetalhesColaborador(
                                     MONTH,
 
                                     DATE_ADD(
-                                        exf.data_admissional,
+                                        COALESCE(f.data_experiencia, exf.data_admissional),
                                         INTERVAL TIMESTAMPDIFF(
                                             YEAR,
-                                            exf.data_admissional,
+                                            COALESCE(f.data_experiencia, exf.data_admissional),
                                             exf.data_demissional
                                         ) YEAR
                                     ),
@@ -1248,15 +1256,15 @@ async function buscarDetalhesColaborador(
                         ' dias'
                     )
 
-                /* FUNCIONÁRIO ATIVO */
+                /* FUNCIONÃRIO ATIVO */
 
-                WHEN exf.data_admissional IS NOT NULL THEN
+                WHEN COALESCE(f.data_experiencia, exf.data_admissional) IS NOT NULL THEN
 
                     CONCAT(
 
                         TIMESTAMPDIFF(
                             YEAR,
-                            exf.data_admissional,
+                            COALESCE(f.data_experiencia, exf.data_admissional),
                             CURDATE()
                         ),
                         ' anos, ',
@@ -1264,10 +1272,10 @@ async function buscarDetalhesColaborador(
                         TIMESTAMPDIFF(
                             MONTH,
                             DATE_ADD(
-                                exf.data_admissional,
+                                COALESCE(f.data_experiencia, exf.data_admissional),
                                 INTERVAL TIMESTAMPDIFF(
                                     YEAR,
-                                    exf.data_admissional,
+                                    COALESCE(f.data_experiencia, exf.data_admissional),
                                     CURDATE()
                                 ) YEAR
                             ),
@@ -1281,10 +1289,10 @@ async function buscarDetalhesColaborador(
                             DATE_ADD(
 
                                 DATE_ADD(
-                                    exf.data_admissional,
+                                    COALESCE(f.data_experiencia, exf.data_admissional),
                                     INTERVAL TIMESTAMPDIFF(
                                         YEAR,
-                                        exf.data_admissional,
+                                        COALESCE(f.data_experiencia, exf.data_admissional),
                                         CURDATE()
                                     ) YEAR
                                 ),
@@ -1293,10 +1301,10 @@ async function buscarDetalhesColaborador(
                                     MONTH,
 
                                     DATE_ADD(
-                                        exf.data_admissional,
+                                        COALESCE(f.data_experiencia, exf.data_admissional),
                                         INTERVAL TIMESTAMPDIFF(
                                             YEAR,
-                                            exf.data_admissional,
+                                            COALESCE(f.data_experiencia, exf.data_admissional),
                                             CURDATE()
                                         ) YEAR
                                     ),
@@ -1346,3 +1354,5 @@ module.exports = {
     buscarDetalhesColaborador,
     buscarAniversariantes
 };
+
+

@@ -33,6 +33,7 @@ const state = {
   paineis: [],
   clientes: [],
   responsaveis: [],
+  paineisView: "lista",
   galeria: {
     imagens: [],
     indice: 0
@@ -478,9 +479,25 @@ function abrirQrPainel(link) {
   const modal = byId("painelQrModal");
   const imagem = byId("painelQrImagem");
   const ancora = byId("painelQrLink");
+  const status = byId("painelQrStatus");
   if (!modal || !imagem || !ancora) return;
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(link)}`;
+  if (status) {
+    status.textContent = "Gerando QR Code...";
+    status.classList.remove("erro");
+  }
+  imagem.removeAttribute("hidden");
+  imagem.onload = () => {
+    if (status) status.textContent = "";
+  };
+  imagem.onerror = () => {
+    imagem.setAttribute("hidden", "hidden");
+    if (status) {
+      status.textContent = "Não foi possível gerar a imagem do QR Code.";
+      status.classList.add("erro");
+    }
+  };
   imagem.src = qrUrl;
   ancora.href = link;
   ancora.textContent = link;
@@ -767,6 +784,24 @@ function renderImagemPainel(painel) {
   `;
 }
 
+function getImagemPrincipalPainel(painel) {
+  const imagens = Array.isArray(painel.imagens) ? painel.imagens : [];
+  return imagens[0]?.imagem_url || painel.imagem_url || "";
+}
+
+function renderFotoCardPainel(painel) {
+  const imagem = getImagemPrincipalPainel(painel);
+  if (imagem) {
+    return `<img src="${escapeHtml(imagem)}" alt="Foto do painel ${escapeHtml(painel.numero_serie || "")}" loading="lazy">`;
+  }
+
+  return `
+    <div class="painel-card-placeholder" aria-hidden="true">
+      <i class="fa-solid fa-image"></i>
+    </div>
+  `;
+}
+
 function renderLinkPainel(painel) {
   if (!painel.link_externo) return '<span class="painel-muted">Sem link</span>';
 
@@ -782,12 +817,118 @@ function renderLinkPainel(painel) {
   `;
 }
 
+function renderPainelCardInfo(label, valor) {
+  const texto = valor || "-";
+  return `
+    <span class="painel-card-info" title="${escapeHtml(label)}: ${escapeHtml(texto)}">
+      <small>${escapeHtml(label)}</small>
+      <strong>${escapeHtml(texto)}</strong>
+    </span>
+  `;
+}
+
+function renderPainelCard(painel) {
+  const progresso = calcularProgressoPainel(painel);
+  const totalFotos = Array.isArray(painel.imagens) ? painel.imagens.length : 0;
+  const tooltipCard = [
+    `Cliente: ${painel.cliente || "-"}`,
+    `Atuacao: ${painel.atuacao_painel || "-"}`,
+    `Serie: ${painel.numero_serie || "-"}`
+  ].join(" | ");
+
+  return `
+    <article class="painel-card-registro" data-id="${painel.id_painel}" title="${escapeHtml(tooltipCard)}">
+      <div class="painel-card-body">
+        <header class="painel-card-header">
+          <div>
+            <span>${escapeHtml(painel.cliente || "Cliente não informado")}</span>
+            <h4>${escapeHtml(painel.atuacao_painel || "Sem descrição informada")}</h4>
+          </div>
+          <span class="painel-card-serie">${escapeHtml(painel.numero_serie)}</span>
+        </header>
+
+        <div class="painel-card-progress">
+          <span>
+            <strong>${progresso.percentual}%</strong>
+            <small>${progresso.concluidas}/${progresso.total} etapas</small>
+          </span>
+          <div class="painel-progress-bar">
+            <span style="width: ${progresso.percentual}%; --painel-progress-color: ${getCorProgresso(progresso.percentual)}"></span>
+          </div>
+        </div>
+
+        <div class="painel-card-grid">
+          ${renderPainelCardInfo("Data", formatarData(painel.data_registro))}
+          ${renderPainelCardInfo("Tensão", painel.tensao)}
+          ${renderPainelCardInfo("Freq.", painel.frequencia)}
+          ${renderPainelCardInfo("Dimensões", painel.dimensoes)}
+          ${renderPainelCardInfo("Projetista", painel.projetista)}
+          ${renderPainelCardInfo("Montador", painel.montador)}
+          ${renderPainelCardInfo("ART", painel.art)}
+          ${renderPainelCardInfo("Peso kg", painel.peso_kg ?? "-")}
+        </div>
+
+        <footer class="painel-card-actions">
+          <div class="painel-card-links">
+            ${painel.link_externo ? `
+              <button type="button" class="numdoc-icon-btn" data-action="qr-link" title="Gerar QR Code">
+                <i class="fa-solid fa-qrcode"></i>
+              </button>
+            ` : ""}
+            ${totalFotos ? `
+              <button type="button" class="numdoc-icon-btn" data-action="view-gallery" title="Visualizar galeria">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            ` : ""}
+          </div>
+          <div class="painel-card-manage">
+            <label class="painel-upload-btn" title="Adicionar imagens montadas">
+              <i class="fa-solid fa-image"></i>
+              <input type="file" accept="image/*" data-action="upload-image" multiple>
+            </label>
+            <button type="button" class="numdoc-icon-btn" data-action="edit-panel" title="Editar painel">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button type="button" class="numdoc-icon-btn delete" data-action="delete-panel" title="Excluir painel">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </article>
+  `;
+}
+
+function renderPaineisCards() {
+  const cards = byId("paineisCards");
+  if (!cards) return;
+
+  if (!state.paineis.length) {
+    cards.innerHTML = '<div class="painel-cards-empty">Nenhum painel cadastrado ainda.</div>';
+    return;
+  }
+
+  cards.innerHTML = state.paineis.map(renderPainelCard).join("");
+}
+
+function aplicarVisualizacaoPaineis() {
+  const mostrarCards = state.paineisView === "cards";
+  byId("paineisCards")?.toggleAttribute("hidden", !mostrarCards);
+  document.querySelector(".painel-table-wrap")?.toggleAttribute("hidden", mostrarCards);
+
+  document.querySelectorAll(".painel-view-btn").forEach(button => {
+    button.classList.toggle("active", button.dataset.painelView === state.paineisView);
+  });
+}
+
 function renderPaineis() {
   const tbody = byId("paineisTabelaBody");
   if (!tbody) return;
 
   if (!state.paineis.length) {
     tbody.innerHTML = '<tr class="numdoc-empty-row"><td colspan="17">Nenhum painel cadastrado ainda.</td></tr>';
+    renderPaineisCards();
+    aplicarVisualizacaoPaineis();
     return;
   }
 
@@ -823,6 +964,9 @@ function renderPaineis() {
       </td>
     </tr>
   `).join("");
+
+  renderPaineisCards();
+  aplicarVisualizacaoPaineis();
 
   if (focoPainel) {
     const row = tbody.querySelector(`tr[data-id="${CSS.escape(focoPainel)}"]`);
@@ -990,6 +1134,13 @@ function initEventos() {
   byId("painelGaleriaProxima")?.addEventListener("click", () => navegarGaleriaPainel(1));
   byId("painelGaleriaExcluir")?.addEventListener("click", excluirImagemGaleriaAtual);
 
+  document.querySelectorAll(".painel-view-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      state.paineisView = button.dataset.painelView || "lista";
+      aplicarVisualizacaoPaineis();
+    });
+  });
+
   document.querySelectorAll("#formNumeracaoDocumento input, #formNumeracaoDocumento select").forEach(input => {
     input.addEventListener("input", atualizarResultadoAtual);
     input.addEventListener("change", atualizarResultadoAtual);
@@ -1011,12 +1162,12 @@ function initEventos() {
     }
   });
 
-  byId("paineisTabelaBody")?.addEventListener("click", (event) => {
+  const handlePainelClick = (event) => {
     const button = event.target.closest("button[data-action]");
     if (!button) return;
 
-    const row = button.closest("tr[data-id]");
-    const painel = state.paineis.find(item => String(item.id_painel) === row?.dataset.id);
+    const container = button.closest("[data-id]");
+    const painel = state.paineis.find(item => String(item.id_painel) === container?.dataset.id);
     if (!painel) return;
 
     if (button.dataset.action === "edit-panel") preencherFormularioPainel(painel);
@@ -1024,17 +1175,23 @@ function initEventos() {
     if (button.dataset.action === "qr-link") abrirQrPainel(painel.link_externo);
     if (button.dataset.action === "view-gallery") abrirGaleriaPainel(painel);
     if (button.dataset.action === "toggle-checklist") {
-      row.querySelector(".painel-checklist")?.classList.toggle("active");
+      container.querySelector(".painel-checklist")?.classList.toggle("active");
     }
-  });
+  };
 
-  byId("paineisTabelaBody")?.addEventListener("change", (event) => {
+  byId("paineisTabelaBody")?.addEventListener("click", handlePainelClick);
+  byId("paineisCards")?.addEventListener("click", handlePainelClick);
+
+  const handlePainelChange = (event) => {
     const check = event.target.closest("input[data-check]");
     const upload = event.target.closest("input[data-action='upload-image']");
 
-    if (check) atualizarChecklistPainel(check.closest("tr[data-id]"), check);
-    if (upload) enviarImagemPainel(upload.closest("tr[data-id]"), upload);
-  });
+    if (check) atualizarChecklistPainel(check.closest("[data-id]"), check);
+    if (upload) enviarImagemPainel(upload.closest("[data-id]"), upload);
+  };
+
+  byId("paineisTabelaBody")?.addEventListener("change", handlePainelChange);
+  byId("paineisCards")?.addEventListener("change", handlePainelChange);
 }
 
 export async function initFerramentas() {

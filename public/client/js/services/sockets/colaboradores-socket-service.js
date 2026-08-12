@@ -69,42 +69,66 @@ export async function alocarColaboradores(osID, dataDia, nomes) {
   return true;
 }
 
-export function transferirColaboradores(colaboradores, datas) {
+export async function transferirColaboradores(colaboradores, datas) {
   const socket = getSocket();
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({
-      acao: "transferir_colaboradores",
-      colaboradores, // [{ idColab, idOS, nome }]
-      datas          // ["2025-10-01", "2025-10-02"]
-    }));
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    notificarFalhaSocket("Sem conexao com o servidor. A transferencia nao foi salva.");
+    return false;
   }
+
+  const podeEnviar = await sessaoAtiva();
+  if (!podeEnviar) return false;
+
+  socket.send(JSON.stringify({
+    acao: "transferir_colaboradores",
+    colaboradores, // [{ idColab, idOS, nome }]
+    datas          // ["2025-10-01", "2025-10-02"]
+  }));
+
+  return true;
 }
 
-export function removerColaboradores(osID, dataDia, ids) {
+export async function removerColaboradores(osID, dataDia, ids) {
   const socket = getSocket();
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    ids.forEach((id) => {
-      socket.send(JSON.stringify({
-        acao: "remover_colaborador",
-        osID,
-        id,
-        dataDia,   // 👈 padronizado
-      }));
-    });
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    notificarFalhaSocket("Sem conexao com o servidor. A remocao nao foi salva.");
+    return false;
   }
-}
 
-export function excluirColaboradorDaOS(osID, idColaborador, idNaOS, dataDia) {
-  const socket = getSocket();
-  if (socket && socket.readyState === WebSocket.OPEN) {
+  const podeEnviar = await sessaoAtiva();
+  if (!podeEnviar) return false;
+
+  ids.forEach((id) => {
     socket.send(JSON.stringify({
-      acao: "excluir_colaboradorEmOS",
+      acao: "remover_colaborador",
       osID,
-      id: idColaborador,
-      idNaOS,
+      id,
       dataDia,   // 👈 padronizado
     }));
+  });
+
+  return true;
+}
+
+export async function excluirColaboradorDaOS(osID, idColaborador, idNaOS, dataDia) {
+  const socket = getSocket();
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    notificarFalhaSocket("Sem conexao com o servidor. A exclusao nao foi salva.");
+    return false;
   }
+
+  const podeEnviar = await sessaoAtiva();
+  if (!podeEnviar) return false;
+
+  socket.send(JSON.stringify({
+    acao: "excluir_colaboradorEmOS",
+    osID,
+    id: idColaborador,
+    idNaOS,
+    dataDia,   // 👈 padronizado
+  }));
+
+  return true;
 }
 
 // =============================
@@ -238,11 +262,32 @@ export function handleConfirmarAlocacao({
 
   if ($painel.length === 0) return;
 
+  $painelDia.find(".painel_OS").not($painel).each(function () {
+    const $os = $(this);
+    const $colabsRemovidos = $os.find(`.p_colabs .colaborador[data-id="${idfuncionario}"]`);
+    if (!$colabsRemovidos.length) return;
+
+    $colabsRemovidos.remove();
+
+    const total = $os.find(".p_colabs .colaborador").length;
+    $os.find(".lbl_total").text(total);
+
+    if (total === 0) {
+      $os.find(".p_colabs").slideUp(150);
+      $os.find(".icone-olho").removeClass("fa-eye").addClass("fa-eye-slash");
+    }
+  });
+
   let $colab = $painel.find(`.colaborador[data-id="${idfuncionario}"]`);
+  const nomeConfirmado = nome || $painelDia
+    .find(`.painel_colaboradores .p_colabsDisp .colaborador[data-id="${idfuncionario}"] .nome`)
+    .first()
+    .text()
+    .trim();
 
   // 🔥 renderiza SOMENTE aqui (confirmado no banco)
   if ($colab.length === 0) {
-    adicionarColaboradorNaOS(idfuncionario, nome, $painel);
+    adicionarColaboradorNaOS(idfuncionario, nomeConfirmado, $painel);
   }
 
   // 🔥 remove loading apenas do dia correto

@@ -48,7 +48,8 @@ function securityConfig(app) {
             "'self'",
             "data:",
             "blob:",
-            "https://*.supabase.co"
+            "https://*.supabase.co",
+            "https://api.qrserver.com"
           ],
           "connect-src": [
             "'self'",

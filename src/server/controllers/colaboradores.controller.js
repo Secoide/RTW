@@ -1,5 +1,13 @@
 const ColabService = require('../services/colaboradores.service');
 
+function mensagemErroColaborador(err) {
+  const mensagem = err?.message || "";
+  if (mensagem.includes("Data too long") && mensagem.includes("'endereco'")) {
+    return "Endereço muito longo. Reduza o endereço e tente novamente.";
+  }
+  return mensagem || "Erro ao processar colaborador.";
+}
+
 // GET /api/colaboradores
 async function getColaboradores(req, res) {
   try {
@@ -39,7 +47,7 @@ async function createColaborador(req, res) {
   } catch (err) {
     res.status(400).json({
       sucesso: false,
-      mensagem: err.message
+      mensagem: mensagemErroColaborador(err)
     });
   }
 }
@@ -83,11 +91,15 @@ async function updateColaborador(req, res) {
 async function updateProfissionalColab(req, res) {
   try {
     const { id } = req.params; // vem da URL
-    const atualizado = await ColabService.atualizarProfissionalColab(id, req.body);
+    const atualizado = await ColabService.atualizarProfissionalColab(id, req.body, req.user);
 
     res.status(200).json({
       sucesso: true,
-      id: atualizado.id
+      id: atualizado.id,
+      mensagem: atualizado.aprovacaoGestorObras?.criouAprovacao
+        ? atualizado.aprovacaoGestorObras.mensagem
+        : "Dados profissionais atualizados.",
+      aprovacaoGestorObras: atualizado.aprovacaoGestorObras || null
     });
   } catch (err) {
     res.status(400).json({

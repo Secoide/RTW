@@ -51,14 +51,16 @@ export function highlightTextoSeguro(texto, termoBusca) {
 
   if (!texto) return "";
 
-  if (!termoBusca) return texto;
+  const textoSeguro = escapeHtml(texto);
+
+  if (!termoBusca) return textoSeguro;
 
   const termos = termoBusca
     .toLowerCase()
     .split(" ")
     .filter(t => t.length > 0);
 
-  let palavras = texto.split(/(\s+)/);
+  let palavras = textoSeguro.split(/(\s+)/);
 
   return palavras.map(p => {
 
@@ -73,4 +75,13 @@ export function highlightTextoSeguro(texto, termoBusca) {
     return p;
 
   }).join("");
+}
+
+export function escapeHtml(valor) {
+  return String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

@@ -15,8 +15,8 @@
                     treinamentos, eventos, documentos e atividades da empresa.
                 </p>
 
+                </div>
             </div>
-        </div>
     </div>
 
     <div id="homePopupAtualizacao" class="atualizacao-overlay home-atualizacao-overlay">
@@ -45,10 +45,6 @@
                     <div class="panel-rh"></div>
                 </div>
                 <div class="painel-comunicado">
-                    <h3>Comunicados da Diretoria</h3>
-                    <div class="panel-diretoria"></div>
-                </div>
-                <div class="painel-comunicado">
                     <h3>Avisos de Segurança</h3>
                     <div class="panel-seguranca"></div>
                 </div>
@@ -59,6 +55,14 @@
             </div>
         </div>
 
+            <div id="painel-aniversarios" class="painel-aniversarios-home">
+                    <h3>Aniversariantes do mês</h3>
+                    <div id="lista-aniversarios" class="area-cards"></div>
+
+                    <h3 class="aniversarios-proximos-titulo">Próximos aniversários</h3>
+                    <div id="lista-proximos" class="area-cards"></div>
+            </div>
+
         <!-- MODAL -->
         <div id="modalAviso" class="modal">
             <div class="modal-conteudo">
@@ -68,63 +72,62 @@
                 <label>Categoria:</label>
                 <select id="avisoCategoria">
                     <option value="rh">Avisos do RH</option>
-                    <option value="diretoria">Comunicados da Diretoria</option>
                     <option value="seguranca">Avisos de Segurança</option>
                     <option value="treinamentos">Treinamentos Futuros</option>
                 </select>
 
                 <label>Ícone:</label>
                 <div id="iconeLista" class="lista-icones">
-                    <span data-icone="📝">📝</span>
-                    <span data-icone="📂">📂</span>
-                    <span data-icone="📊">📊</span>
-                    <span data-icone="📈">📈</span>
+                    <span data-icone="&#128221;">&#128221;</span>
+                    <span data-icone="&#128194;">&#128194;</span>
+                    <span data-icone="&#128202;">&#128202;</span>
+                    <span data-icone="&#128200;">&#128200;</span>
 
                     <!-- Elétrica -->
-                    <span data-icone="⚡">⚡</span>
-                    <span data-icone="🔌">🔌</span>
-                    <span data-icone="💡">💡</span>
-                    <span data-icone="🧰">🧰</span>
-                    <span data-icone="🔧">🔧</span>
+                    <span data-icone="&#9889;">&#9889;</span>
+                    <span data-icone="&#128268;">&#128268;</span>
+                    <span data-icone="&#128161;">&#128161;</span>
+                    <span data-icone="&#129520;">&#129520;</span>
+                    <span data-icone="&#128295;">&#128295;</span>
 
                     <!-- Engenharia / Construção -->
-                    <span data-icone="📐">📐</span>
-                    <span data-icone="🧱">🧱</span>
-                    <span data-icone="🛠️">🛠️</span>
+                    <span data-icone="&#128208;">&#128208;</span>
+                    <span data-icone="&#129521;">&#129521;</span>
+                    <span data-icone="&#128736;">&#128736;</span>
 
                     <!-- Gestão / Administração / RH -->
-                    <span data-icone="🧑‍💼">🧑‍💼</span>
-                    <span data-icone="📆">📆</span>
+                    <span data-icone="&#129489;&#8205;&#128188;">&#129489;&#8205;&#128188;</span>
+                    <span data-icone="&#128198;">&#128198;</span>
                     <span data-icone="⏱️">⏱️</span>
-                    <span data-icone="💼">💼</span>
-                    <span data-icone="💬">💬</span>
-                    <span data-icone="🧾">🧾</span>
+                    <span data-icone="&#128188;">&#128188;</span>
+                    <span data-icone="&#128172;">&#128172;</span>
+                    <span data-icone="&#129534;">&#129534;</span>
 
                     <!-- Saúde -->
-                    <span data-icone="🩺">🩺</span>
-                    <span data-icone="💉">💉</span>
-                    <span data-icone="💊">💊</span>
+                    <span data-icone="&#129658;">&#129658;</span>
+                    <span data-icone="&#128137;">&#128137;</span>
+                    <span data-icone="&#128138;">&#128138;</span>
 
                     <!-- Financeiro -->
-                    <span data-icone="💸">💸</span>
-                    <span data-icone="💲">💲</span>
+                    <span data-icone="&#128184;">&#128184;</span>
+                    <span data-icone="&#128178;">&#128178;</span>
 
                     <!-- Segurança -->
-                    <span data-icone="🦺">🦺</span>
-                    <span data-icone="🔒">🔒</span>
-                    <span data-icone="📌">📌</span>
-                    <span data-icone="⚠️">⚠️</span>
+                    <span data-icone="&#129466;">&#129466;</span>
+                    <span data-icone="&#128274;">&#128274;</span>
+                    <span data-icone="&#128204;">&#128204;</span>
+                    <span data-icone="&#9888;">&#9888;</span>
 
                     <!-- Veículos -->
-                    <span data-icone="🚗">🚗</span>
-                    <span data-icone="🚚">🚚</span>
-                    <span data-icone="🚌">🚌</span>
-                    <span data-icone="🏍️">🏍️</span>
+                    <span data-icone="&#128663;">&#128663;</span>
+                    <span data-icone="&#128666;">&#128666;</span>
+                    <span data-icone="&#128652;">&#128652;</span>
+                    <span data-icone="&#127949;">&#127949;</span>
 
                     <!-- Outros -->
-                    <span data-icone="💎">💎</span>
-                    <span data-icone="🎗️">🎗️</span>
-                    <span data-icone="🏆">🏆</span>
+                    <span data-icone="&#128142;">&#128142;</span>
+                    <span data-icone="&#127895;">&#127895;</span>
+                    <span data-icone="&#127942;">&#127942;</span>
                     <span data-icone="⭐">⭐</span>
                 </div>
 
@@ -143,18 +146,28 @@
         </div>
     </div>
 
-    <div id="hall-experiencia">
+    <div id="hall-experiencia" class="hall-em-desenvolvimento">
         <h5>Tempo de empresa e Reconhecimentos</h5>
-        <div id="hall-ranking" style="font-size: 11px; color: rgb(255, 196, 0);">Em desenvolvimento...</div>
+        <div id="hall-ranking"></div>
     </div>
 
 
     <!-- PAINEL DE ANIVERSARIANTES (DIREITA) -->
-    <div id="painel-aniversarios">
-        <h4>🎂 Aniversariantes do mês</h4>
-        <div id="lista-aniversarios" class="area-cards"></div>
-
-        <h4 style="margin-top: 25px;">⏳ Próximos aniversários</h4>
-        <div id="lista-proximos" class="area-cards"></div>
+    <div id="painel-funcionario-mes">
+        <div class="funcionario-mes-head">
+            <span>Reconhecimento</span>
+            <h4>Conquistas recebidas</h4>
+        </div>
+        <div id="funcionario-mes-card" class="funcionario-mes-card vazio">
+            <div class="funcionario-mes-foto">
+                <img src="/imagens/user-default.webp" alt="Reconhecimento">
+            </div>
+            <strong>Nenhuma medalha encontrada</strong>
+            <p>As conquistas adicionadas no perfil aparecem aqui.</p>
+        </div>
+        <div class="funcionario-medalha-frase">
+            <i class="fa-solid fa-award"></i>
+            <span>Reconhecimento que <strong>gera transformação.</strong></span>
+        </div>
     </div>
 </div>

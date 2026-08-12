@@ -255,6 +255,35 @@
   min-width: 180px;
 }
 
+.painel-view-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 0;
+}
+
+.painel-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(244, 247, 248, 0.72);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.painel-view-btn:hover,
+.painel-view-btn.active {
+  color: #efda38;
+  border-color: rgba(238, 119, 34, 0.40);
+  background: rgba(238, 119, 34, 0.10);
+}
+
 .numdoc-field {
   display: flex;
   min-width: 0;
@@ -286,8 +315,204 @@
   margin-top: 14px;
 }
 
+.painel-table-wrap[hidden],
+.painel-cards-view[hidden] {
+  display: none !important;
+}
+
 .painel-table {
   min-width: 1800px;
+}
+
+.painel-cards-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  min-height: 0;
+  margin: 14px 20px 20px;
+  padding-right: 4px;
+  overflow: auto;
+}
+
+.painel-card-registro {
+  display: flex;
+  min-width: 0;
+  max-width: 330px;
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid rgba(238, 119, 34, 0.22);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(46, 46, 46, 0.96), rgba(21, 21, 21, 0.96));
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+}
+
+.painel-card-foto {
+  position: relative;
+  height: 140px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, rgba(239, 218, 56, 0.16), rgba(0, 0, 0, 0.28));
+}
+
+.painel-card-foto img,
+.painel-card-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.painel-card-placeholder {
+  display: grid;
+  place-items: center;
+  color: rgba(244, 247, 248, 0.34);
+  font-size: 42px;
+}
+
+.painel-card-serie {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border: 1px solid rgba(239, 218, 56, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #efda38;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.painel-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+}
+
+.painel-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 64px;
+}
+
+.painel-card-header > div {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  height: 58px;
+}
+
+.painel-card-header span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(244, 247, 248, 0.58);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.painel-card-header h4 {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: rgba(244, 247, 248, 0.94);
+  font-size: 15px;
+  line-height: 1.18;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-height: 36px;
+}
+
+.painel-card-progress {
+  display: grid;
+  gap: 7px;
+}
+
+.painel-card-progress > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.painel-card-progress strong {
+  color: #efda38;
+  font-size: 13px;
+}
+
+.painel-card-progress small {
+  color: rgba(244, 247, 248, 0.50);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.painel-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.painel-card-info {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.painel-card-info small,
+.painel-card-info strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.painel-card-info small {
+  color: rgba(244, 247, 248, 0.44);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.painel-card-info strong {
+  margin-top: 3px;
+  color: rgba(244, 247, 248, 0.82);
+  font-size: 12px;
+}
+
+.painel-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  padding-top: 2px;
+  margin-top: auto;
+}
+
+.painel-card-links,
+.painel-card-manage {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+}
+
+.painel-card-links:empty {
+  min-width: 67px;
+}
+
+.painel-cards-empty {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: rgba(244, 247, 248, 0.46);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 
@@ -480,6 +705,17 @@
   padding: 10px;
   border-radius: 12px;
   background: #fff;
+}
+
+.painel-qr-status {
+  min-height: 14px;
+  color: rgba(244, 247, 248, 0.62);
+  font-size: 11px;
+  text-align: center;
+}
+
+.painel-qr-status.erro {
+  color: #ff8f8f;
 }
 
 .painel-qr-card a {
@@ -793,10 +1029,18 @@
 }
 
 :root[data-theme='light'] .painel-check,
-:root[data-theme='light'] .painel-upload-btn {
+:root[data-theme='light'] .painel-upload-btn,
+:root[data-theme='light'] .painel-view-btn {
   border-color: rgba(17, 24, 39, 0.10);
   background: rgba(255, 255, 255, 0.82);
   color: #4b5563;
+}
+
+:root[data-theme='light'] .painel-view-btn:hover,
+:root[data-theme='light'] .painel-view-btn.active {
+  color: #172033;
+  border-color: rgba(238, 119, 34, 0.36);
+  background: rgba(239, 218, 56, 0.18);
 }
 
 :root[data-theme='light'] .painel-progress-btn {
@@ -825,6 +1069,37 @@
 
 :root[data-theme='light'] .painel-muted {
   color: rgba(31, 41, 55, 0.48);
+}
+
+:root[data-theme='light'] .painel-card-registro {
+  border-color: rgba(238, 119, 34, 0.18);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(240, 244, 244, 0.88));
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
+}
+
+:root[data-theme='light'] .painel-card-foto {
+  background: radial-gradient(circle at 50% 35%, rgba(239, 218, 56, 0.24), rgba(17, 24, 39, 0.08));
+}
+
+:root[data-theme='light'] .painel-card-placeholder {
+  color: rgba(31, 41, 55, 0.34);
+}
+
+:root[data-theme='light'] .painel-card-header span,
+:root[data-theme='light'] .painel-card-progress small,
+:root[data-theme='light'] .painel-card-info small {
+  color: rgba(31, 41, 55, 0.54);
+}
+
+:root[data-theme='light'] .painel-card-header h4,
+:root[data-theme='light'] .painel-card-info strong {
+  color: #172033;
+}
+
+:root[data-theme='light'] .painel-card-info,
+:root[data-theme='light'] .painel-cards-empty {
+  border-color: rgba(17, 24, 39, 0.09);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 :root[data-theme='light'] .painel-qr-card {

@@ -644,7 +644,7 @@ function load_estatisticas_func_empresa(idFunc, $box) {
     const ctx = document.getElementById('graficoHistClientes').getContext('2d');
 
     // Faz a requisição AJAX
-    $.getJSON(`/api/colaboradores/historico-empresas/${idFunc}`, function (resposta) {
+    return $.getJSON(`/api/colaboradores/historico-empresas/${idFunc}`, function (resposta) {
         const clientes = resposta.map(r => r.cliente);
         const quantidades = resposta.map(r => r.quantidade);
         const total = quantidades.reduce((soma, q) => soma + q, 0);
@@ -700,3 +700,9 @@ function load_estatisticas_func_empresa(idFunc, $box) {
         });
     });
 }
+
+window.load_exames_colaborador = load_exames_colaborador;
+window.load_cursos_colaborador = load_cursos_colaborador;
+window.load_integracoes_colaborador = load_integracoes_colaborador;
+window.load_epis_colaborador = load_epis_colaborador;
+window.load_estatisticas_func_empresa = load_estatisticas_func_empresa;

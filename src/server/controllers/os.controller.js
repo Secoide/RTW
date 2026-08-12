@@ -1,4 +1,5 @@
 const OSService = require('../services/os.service');
+const supabase = require("../config/supabase");
 
 async function getOrdemServico(req, res) {
   try {
@@ -34,12 +35,29 @@ async function getOrdemServicoById(req, res, next) {
   }
 }
 
+async function getHistoricoColaboradoresOS(req, res) {
+  try {
+    const historico = await OSService.buscarHistoricoColaboradoresOS(req.params.id);
+    res.json({
+      sucesso: true,
+      historico
+    });
+  } catch (err) {
+    console.error("Erro ao buscar histórico de colaboradores da OS:", err);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao buscar histórico de colaboradores da OS."
+    });
+  }
+}
+
 async function salvarOS(req, res) {
   try {
     const dados = req.body;
     const result = await OSService.salvarOS(dados);
     if (!result.sucesso) {
-      return res.status(400).json(result);
+      const status = result.codigo === "OS_DUPLICADA" ? 409 : 400;
+      return res.status(status).json(result);
     }
     return res.status(200).json(result);
   } catch (err) {
@@ -209,6 +227,69 @@ async function salvarComplementosOS(req, res) {
   }
 }
 
+async function getAnexosOS(req, res) {
+  try {
+    const anexos = await OSService.listarAnexosOS(req.params.id);
+    res.json(anexos);
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function uploadAnexoOS(req, res) {
+  try {
+    const result = await OSService.salvarAnexoOS(req.params.id, req.body, req.file, req.user);
+    res.status(201).json(result);
+  } catch (err) {
+    console.error("Erro ao anexar documento da OS:", err);
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function downloadAnexoOS(req, res) {
+  try {
+    const anexo = await OSService.buscarAnexoOS(req.params.idAnexo);
+
+    const { data, error } = await supabase.storage
+      .from("exames")
+      .download(anexo.arquivo_pdf);
+
+    if (error || !data) {
+      return res.status(404).json({ mensagem: "Arquivo não encontrado no Supabase." });
+    }
+
+    const buffer = Buffer.from(await data.arrayBuffer());
+    const nomeArquivo = `${String(anexo.nome || "anexo-os").replace(/[^\w.-]+/g, "_")}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${nomeArquivo}"`);
+    res.send(buffer);
+  } catch (err) {
+    res.status(404).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
+async function deleteAnexoOS(req, res) {
+  try {
+    const result = await OSService.removerAnexoOS(req.params.idAnexo);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({
+      sucesso: false,
+      mensagem: err.message
+    });
+  }
+}
+
 
 
 async function deleteOS(req, res) {
@@ -225,6 +306,7 @@ async function deleteOS(req, res) {
 module.exports = {
   getOrdemServico,
   getOrdemServicoById,
+  getHistoricoColaboradoresOS,
   salvarOS,
   updateOS,
   deleteOS,
@@ -236,5 +318,9 @@ module.exports = {
   vincularPainelOS,
   removerPainelOS,
   getComplementosOS,
-  salvarComplementosOS
+  salvarComplementosOS,
+  getAnexosOS,
+  uploadAnexoOS,
+  downloadAnexoOS,
+  deleteAnexoOS
 };

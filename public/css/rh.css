@@ -437,6 +437,10 @@
   transform: translateY(-1px);
 }
 
+#btnExportarRHPDF{
+  display: none;
+}
+
 .rh-busca-avancada {
   display: none;
   position: absolute;

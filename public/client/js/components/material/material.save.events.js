@@ -2,6 +2,7 @@ import { getVal } from "../../utils/dom/getVal.js";
 import { verificarDuplicado } from "../../utils/material/material.validation.js";
 import { materialState as state } from "../../state/material.state.js";
 import { resetModalMaterial } from "../forms/material.modal.js"
+import { aplicarImagemExistenteSelecionada } from "./material.form.events.js";
 function normalizar(attr) {
     return attr?.replace(/"/g, "").trim();
 }
@@ -46,8 +47,9 @@ export function initMaterialSave() {
             }
 
             const nomeNormalizado = nome.toUpperCase();
+            const idEditando = $("#modoEdicaoMaterial").val() === "1" ? $("#idMaterial").val() : "";
 
-            if (verificarDuplicado(nomeNormalizado)) {
+            if (!idEditando && verificarDuplicado(nomeNormalizado)) {
                 $("#alertDuplicado").show();
                 return;
             }
@@ -97,6 +99,43 @@ export function initMaterialSave() {
             // ==============================
             // 🔹 BUSCAR OU CRIAR MATERIAL
             // ==============================
+
+            if (idEditando) {
+                await $.ajax({
+                    url: `/api/materiais/variacoes/${idEditando}`,
+                    method: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        nome,
+                        categoria,
+                        codigo,
+                        fabricante,
+                        atributos: atributosValidados
+                    })
+                });
+
+                await aplicarImagemExistenteSelecionada(idEditando);
+
+                Toast.fire({
+                    icon: "success",
+                    theme: 'dark',
+                    title: "Material atualizado com sucesso"
+                });
+
+                if (typeof resetModalMaterial === "function") {
+                    resetModalMaterial();
+                }
+
+                $("#modalMaterial").addClass("hidden");
+                state.atributosSelecionados = [];
+
+                await Promise.all([
+                    typeof carregarCatalogoMateriais === "function" ? carregarCatalogoMateriais() : null,
+                    typeof carregarMateriais === "function" ? carregarMateriais() : null
+                ]);
+
+                return;
+            }
 
             let mat;
 
@@ -150,6 +189,8 @@ export function initMaterialSave() {
             });
 
             const idVariacao = vari?.insertId || vari?.id;
+
+            await aplicarImagemExistenteSelecionada(idVariacao);
 
             if (!idVariacao) {
                 throw new Error("ID da variação inválido");

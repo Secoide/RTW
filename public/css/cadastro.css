@@ -694,11 +694,116 @@ body.modal-open {
 
 .div_botoesAcao {
     margin-top: auto;
-    padding: 5px;
+    padding: 5px;    
+    bottom: 115px;
+    position: fixed;
 }
 
 .div_botoesAcao input {
     min-width: 100px;
+}
+
+.perfil-profissional-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.perfil-profissional-header > p {
+    margin: 0;
+}
+
+.bt_perfil_pdf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 32px;
+    border: 1px solid rgba(239, 218, 56, 0.32);
+    border-radius: 8px;
+    background: linear-gradient(90deg, #ee7722, #efda38);
+    color: #181818;
+    font-size: 12px;
+    font-weight: 650;
+    padding: 0 11px;
+    cursor: pointer;
+    transition: background 160ms ease, transform 160ms ease, border-color 160ms ease;
+}
+
+.bt_perfil_pdf:hover {
+    color: #181818;
+    background: linear-gradient(90deg, #efda38, #ee7722);
+    transform: translateY(-1px);
+}
+
+.perfil-pdf-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 80;
+    width: 238px;
+    padding: 10px;
+    border: 1px solid rgba(239, 218, 56, 0.28);
+    border-radius: 10px;
+    background: #202020;
+    color: var(--texto-principal);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.perfil-pdf-menu[hidden] {
+    display: none !important;
+}
+
+.perfil-pdf-menu strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #efda38;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.perfil-pdf-menu label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+    padding: 3px 2px;
+    color: rgba(244, 247, 248, 0.82);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.perfil-pdf-menu input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: #efda38;
+}
+
+.perfil-pdf-menu-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.perfil-pdf-menu-actions button {
+    min-height: 28px;
+    border-radius: 7px;
+    font-size: 11px;
+}
+
+.perfil-pdf-gerar {
+    background: linear-gradient(90deg, #ee7722, #efda38) !important;
+    color: #181818 !important;
+}
+
+.perfil-pdf-cancelar {
+    border-color: rgba(255, 138, 128, 0.35) !important;
+    background: rgba(120, 44, 39, 0.72) !important;
+    color: #fff !important;
 }
 
 .nomeEPI {
@@ -1102,9 +1207,109 @@ input:checked+.slider:before {
 }
 
 .painel_addConquista{
-    display:flex;
+    display:grid;
+    grid-template-columns:minmax(220px, 1fr) 150px auto;
+    align-items:end;
     gap:10px;
     margin-bottom:15px;
+    width:100%;
+    position:relative;
+    box-sizing:border-box;
+}
+
+.painel_addConquista #cbxConquista{
+    width:100%;
+    min-width:0;
+}
+
+.campoDataConquista{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    width:150px;
+    min-width:0;
+    color:var(--texto-secundario);
+    font-size:11px;
+    font-weight:600;
+}
+
+.campoDataConquista input{
+    height:34px;
+    width:100%;
+    min-width:0;
+    padding:0 10px;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+.painel_addConquista #btAdicionarConquista{
+    min-width:110px;
+    height:34px;
+    white-space:nowrap;
+}
+
+.conquista-select-tooltip{
+    position:fixed;
+    left:0;
+    top:0;
+    z-index:2147483647;
+    padding:10px 12px;
+    border:1px solid rgba(239, 218, 56, .28);
+    border-radius:10px;
+    background:linear-gradient(145deg, #272727, #171717);
+    color:#f4f7f8;
+    box-shadow:0 14px 34px rgba(0, 0, 0, .38);
+    opacity:0;
+    transform:translateY(-4px);
+    pointer-events:none;
+    transition:opacity .16s ease, transform .16s ease;
+}
+
+.conquista-select-tooltip.visivel{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.conquista-select-tooltip::before{
+    content:"";
+    position:absolute;
+    left:18px;
+    top:-6px;
+    width:10px;
+    height:10px;
+    border-left:1px solid rgba(239, 218, 56, .28);
+    border-top:1px solid rgba(239, 218, 56, .28);
+    background:#272727;
+    transform:rotate(45deg);
+}
+
+.conquista-select-tooltip strong,
+.conquista-select-tooltip span{
+    display:block;
+}
+
+.conquista-select-tooltip strong{
+    font-size:12px;
+    font-weight:800;
+    color:#efda38;
+}
+
+.conquista-select-tooltip span{
+    margin-top:4px;
+    font-size:11px;
+    line-height:1.35;
+    color:rgba(244, 247, 248, .72);
+}
+
+@media (max-width: 760px){
+    .painel_addConquista{
+        grid-template-columns:1fr;
+    }
+
+    .campoDataConquista,
+    .painel_addConquista #btAdicionarConquista{
+        width:100%;
+    }
 }
 
 .painel_conquistasGrid{
@@ -1413,6 +1618,13 @@ optgroup {
   color: var(--cor_letraFundo);
 }
 
+.painel_anexos_os {
+  display: none;
+  width: 100%;
+  height: 100%;
+  color: var(--cor_letraFundo);
+}
+
 .painel_estatistica{
   display: none;
   width: 100%;
@@ -1535,8 +1747,190 @@ optgroup {
   transition: width 0.22s ease;
 }
 
+.os-anexos-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px;
+}
+
+.os-anexos-header p {
+  margin: 0;
+  padding: 0;
+  color: var(--texto-principal);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.os-anexos-header span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(244, 247, 248, 0.58);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#btnAbrirAnexoOS {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  color: #101010;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#btnAbrirAnexoOS:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(238, 119, 34, .22);
+}
+
+.os-anexos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 12px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 10px;
+  scrollbar-width: none;
+}
+
+.os-anexos-lista::-webkit-scrollbar {
+  display: none;
+}
+
+.os-anexo-card {
+  min-height: 132px;
+  display: grid;
+  grid-template-rows: 42px 1fr 32px;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(238, 119, 34, 0.16), rgba(255, 255, 255, 0.045) 46%);
+  color: #f4f4f4;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.os-anexo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 218, 56, 0.36);
+  background: linear-gradient(180deg, rgba(239, 218, 56, 0.14), rgba(255, 255, 255, 0.06) 46%);
+}
+
+.os-anexo-icone {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  color: #efda38;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.os-anexo-icone i {
+  font-size: 20px;
+}
+
+.os-anexo-info {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.os-anexo-info strong {
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.18;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.os-anexo-info span {
+  overflow: hidden;
+  color: rgba(244, 247, 248, 0.56);
+  font-size: 10px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.os-anexo-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.os-anexo-acoes button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(244, 247, 248, 0.80);
+  cursor: pointer;
+}
+
+.os-anexo-acoes button:hover {
+  color: #efda38;
+  border-color: rgba(239, 218, 56, 0.32);
+}
+
+.os-anexo-acoes button[data-action="remover-anexo-os"]:hover {
+  color: #ff8b8b;
+  border-color: rgba(255, 107, 107, 0.35);
+}
+
 @media (max-width: 1100px) {
   .os-complementos-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.perfil-gestor-obras-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(420px, 100%);
+  padding: 11px 14px;
+  border: 1px dashed rgba(239, 218, 56, 0.38);
+  border-radius: 10px;
+  color: #f4f4f4;
+  cursor: pointer;
+}
+
+.perfil-gestor-obras-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #efda38;
+}
+
+.perfil-gestor-obras-check span {
+  font-size: 12px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.perfil-gestor-obras-check small {
+  min-width: 0;
+  color: rgba(244, 247, 248, 0.692);
+  font-size: 10px;
+}
+
+.perfil-gestor-obras-check small.pendente {
+  color: #efda38;
 }

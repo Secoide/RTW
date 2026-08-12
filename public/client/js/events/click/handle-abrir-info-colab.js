@@ -198,10 +198,27 @@ function preencherCamposBasicos(dados) {
     $('#sobremim').val(dados.sobre || "");
     $('#cpf').val(dados.cpf);
     $('#rg').val(dados.rg);
+    $('#dataExperiencia').val(formatDateToInput(dados.data_experiencia));
     $('#datainicio').val(formatDateToInput(dados.datainicio));
     $('#datafinal').val(formatDateToInput(dados.datafinal));
     $('#motivo').val(dados.motivo);
+    preencherGestorObras(dados);
 
+}
+
+function preencherGestorObras(dados) {
+    const pendente = dados.gestor_obras_pendente !== null
+        && dados.gestor_obras_pendente !== undefined;
+    const valorVisivel = pendente
+        ? Number(dados.gestor_obras_pendente || 0)
+        : Number(dados.responsavelOSs || 0);
+
+    $('#gestorObras').prop('checked', valorVisivel === 1);
+    $('#gestorObrasStatus')
+        .text(pendente
+            ? 'Aguardando aprovação da Engenharia.'
+            : 'Alteração exige aprovação da Engenharia.')
+        .toggleClass('pendente', pendente);
 }
 
 

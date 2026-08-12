@@ -1,0 +1,130 @@
+<main id="prototipoAtributosMaterial" class="proto-atributos">
+  <section class="proto-atributos-head">
+    <div>
+      <span class="proto-kicker">Protótipo</span>
+      <h2>Configuração Visual de Atributos</h2>
+      <p>Monte relações entre material, cor, bitola, material construtivo e tipo sem gravar no banco.</p>
+    </div>
+    <div class="proto-actions">
+      <button type="button" id="protoNovoMaterialPrincipal" class="bt_padrao bt_confirmar" title="Adicionar novo material principal">
+        <i class="fa-solid fa-cube"></i>
+        Material Principal
+      </button>
+      <button type="button" id="protoToggleSimulador" class="bt_padrao bt_atualizar" title="Simular escolhas">
+        <i class="fa-solid fa-vial-circle-check"></i>
+        Simular
+      </button>
+      <button type="button" id="protoDesfazer" class="bt_padrao bt_atualizar" title="Desfazer">
+        <i class="fa-solid fa-rotate-left"></i>
+      </button>
+      <button type="button" id="protoRefazer" class="bt_padrao bt_atualizar" title="Refazer">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+      <button type="button" id="protoExportarJson" class="bt_padrao bt_atualizar" title="Copiar configuração em JSON">
+        <i class="fa-solid fa-code"></i>
+        JSON
+      </button>
+      <button type="button" id="protoLimparTudo" class="bt_padrao bt_cancelar" title="Limpar conexões e escolhas">
+        <i class="fa-solid fa-trash"></i>
+        Limpar
+      </button>
+    </div>
+  </section>
+
+  <section class="proto-layout">
+    <div class="proto-stage-wrap">
+      <div class="proto-stage-toolbar">
+        <strong>Área de ligação</strong>
+        <span>Arraste pelo ponto amarelo de uma div até outra div.</span>
+      </div>
+
+      <div id="protoStage" class="proto-stage">
+        <button type="button" id="protoAddAtributo" class="proto-add-attr" title="Adicionar atributo">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+        <div id="protoSimuladorDrawer" class="proto-simulator" aria-hidden="true">
+          <div class="proto-simulator-head">
+            <div>
+              <span>Simulador</span>
+              <strong id="protoSimuladorStatus">Escolha as opções para testar as regras</strong>
+            </div>
+            <button type="button" id="protoSimuladorLimpar" title="Reiniciar simulação">
+              <i class="fa-solid fa-broom"></i>
+            </button>
+          </div>
+          <div id="protoSimuladorEscolhas" class="proto-simulator-selected"></div>
+          <div class="proto-simulator-search">
+            <input id="protoSimuladorBusca" type="text" placeholder="Digite para filtrar a próxima opção..." autocomplete="off">
+          </div>
+          <div id="protoSimuladorOpcoes" class="proto-simulator-options"></div>
+        </div>
+        <div id="protoAttrDrawer" class="proto-attr-drawer" aria-hidden="true">
+          <div class="proto-attr-drawer-head">
+            <strong>Atributos</strong>
+            <span>Adicionar ao palco</span>
+          </div>
+          <input id="protoBuscaAtributo" type="search" placeholder="Buscar atributo..." autocomplete="off">
+          <div id="protoListaAtributos" class="proto-attr-list"></div>
+        </div>
+        <article class="proto-node proto-node-main" data-node="material-principal" style="left: 48px; top: 180px;">
+          <button type="button" class="proto-node-handle" title="Arrastar linha"></button>
+          <span class="proto-node-label">Material principal</span>
+          <strong>Sem material</strong>
+          <small>Escolha um material principal para iniciar.</small>
+        </article>
+
+        <article class="proto-node" data-node="cor" style="left: 430px; top: 64px;">
+          <button type="button" class="proto-node-handle" title="Arrastar linha"></button>
+          <span class="proto-node-label">Atributo</span>
+          <strong>Cor</strong>
+          <small>Preto, azul, verde...</small>
+          <em data-count-for="cor">0 selecionadas</em>
+        </article>
+
+        <article class="proto-node" data-node="bitola" style="left: 760px; top: 88px;">
+          <button type="button" class="proto-node-handle" title="Arrastar linha"></button>
+          <span class="proto-node-label">Atributo</span>
+          <strong>Bitola</strong>
+          <small>1,5mm², 2,5mm²...</small>
+          <em data-count-for="bitola">0 selecionadas</em>
+        </article>
+
+        <article class="proto-node" data-node="material" style="left: 430px; top: 330px;">
+          <button type="button" class="proto-node-handle" title="Arrastar linha"></button>
+          <span class="proto-node-label">Atributo</span>
+          <strong>Material</strong>
+          <small>Cobre, alumínio...</small>
+          <em data-count-for="material">0 selecionados</em>
+        </article>
+
+        <article class="proto-node" data-node="tipo" style="left: 760px; top: 350px;">
+          <button type="button" class="proto-node-handle" title="Arrastar linha"></button>
+          <span class="proto-node-label">Atributo</span>
+          <strong>Tipo</strong>
+          <small>Flexível, rígido...</small>
+          <em data-count-for="tipo">0 selecionados</em>
+        </article>
+      </div>
+    </div>
+
+    <aside class="proto-panel">
+      <div class="proto-panel-head">
+        <span>Configuração</span>
+        <strong id="protoPanelTitulo">Nenhuma ligação selecionada</strong>
+      </div>
+
+      <div id="protoPanelConteudo" class="proto-panel-empty">
+        <i class="fa-solid fa-diagram-project"></i>
+        <p>Conecte duas divs para escolher as opções daquela relação.</p>
+      </div>
+
+      <div class="proto-preview">
+        <div>
+          <span>Resultado preparado</span>
+          <strong id="protoTotalVariacoes">0 variações possíveis</strong>
+        </div>
+        <textarea id="protoResumoJson" readonly spellcheck="false"></textarea>
+      </div>
+    </aside>
+  </section>
+</main>

@@ -5,7 +5,13 @@ const DEFAULT_PREFERENCES = {
   densidade: "normal",
   animacoes: true,
   notificacoesOnline: true,
-  abrirChatOnline: false
+  notificacoesProgramacao: true,
+  notificacoesChat: true,
+  notificacoesAlertas: true,
+  notificacoesGerais: true,
+  abrirChatOnline: false,
+  historicoChatDias: 10,
+  silenciarChatGlobal: false
 };
 
 let listenersRegistrados = false;
@@ -69,9 +75,13 @@ export function aplicarPreferenciasUsuario() {
 
   if (preferencias.abrirChatOnline) {
     setTimeout(() => {
-      document.querySelector(".online-tab[data-online-tab='chat']")?.click();
+      document.getElementById("online-chat-input")?.focus();
     }, 300);
   }
+
+  document.dispatchEvent(new CustomEvent("preferencias-usuario:alteradas", {
+    detail: { preferencias }
+  }));
 }
 
 function criarSwitch(id, titulo, descricao, checked) {
@@ -126,6 +136,10 @@ function criarModalSeNecessario() {
         <button type="button" class="preferencias-tab" data-pref-tab="seguranca">
           <i class="fa-solid fa-shield-halved"></i>
           <span>Segurança</span>
+        </button>
+        <button type="button" class="preferencias-tab" data-pref-tab="notificacoes">
+          <i class="fa-solid fa-bell"></i>
+          <span>Notificações</span>
         </button>
       </div>
 
@@ -207,6 +221,18 @@ function criarModalSeNecessario() {
         </div>
       </div>
 
+      <div class="preferencias-tab-panel" data-pref-panel="notificacoes">
+        <div class="preferencias-grid">
+          <section class="preferencias-section preferencias-section-wide">
+            <h3>Central de notificações</h3>
+            <p class="preferencias-section-desc">
+              Escolha quais avisos devem aparecer no sininho do perfil. As alterações ficam salvas apenas para este usuário e dispositivo.
+            </p>
+            <div id="preferenciasNotificacoes"></div>
+          </section>
+        </div>
+      </div>
+
       <div class="preferencias-actions">
         <button type="button" id="btnResetPreferencias">Restaurar padrão</button>
         <button type="button" id="btnSalvarPreferencias">Salvar preferências</button>
@@ -237,7 +263,33 @@ function preencherFormulario(preferencias) {
 
   document.getElementById("preferenciasAvisos").innerHTML = [
     criarSwitch("prefNotificacoesOnline", "Avisos de usuários online", "Mostra entradas e menções do chat online.", preferencias.notificacoesOnline),
-    criarSwitch("prefAbrirChatOnline", "Abrir chat online automaticamente", "Mantém a aba de chat pronta ao entrar na home.", preferencias.abrirChatOnline)
+    criarSwitch("prefAbrirChatOnline", "Abrir chat online automaticamente", "Mantém a aba de chat pronta ao entrar na home.", preferencias.abrirChatOnline),
+    criarSwitch("prefSilenciarChatGlobal", "Silenciar chat global", "Oculta avisos e contador de novas mensagens do Grupo geral.", preferencias.silenciarChatGlobal),
+    `
+      <label class="preferencia-field" for="prefHistoricoChatDias">
+        <span>Histórico do chat</span>
+        <select id="prefHistoricoChatDias">
+          <option value="0">Desativado</option>
+          <option value="5">5 dias</option>
+          <option value="10">10 dias</option>
+          <option value="15">15 dias</option>
+          <option value="30">30 dias</option>
+        </select>
+      </label>
+      <button type="button" id="btnLimparHistoricoChat" class="preferencias-inline-action">
+        <i class="fa-solid fa-broom"></i>
+        <span>Limpar histórico do chat agora</span>
+      </button>
+    `
+  ].join("");
+
+  document.getElementById("prefHistoricoChatDias").value = String(preferencias.historicoChatDias ?? 10);
+
+  document.getElementById("preferenciasNotificacoes").innerHTML = [
+    criarSwitch("prefNotifProgramacao", "Programação", "Recebe avisos quando a programação do dia for lançada ou alterada.", preferencias.notificacoesProgramacao),
+    criarSwitch("prefNotifChat", "Chat online", "Recebe avisos de mensagens, menções e chamadas do chat.", preferencias.notificacoesChat),
+    criarSwitch("prefNotifAlertas", "Alertas importantes", "Recebe avisos de atenção, falhas e alertas do sistema.", preferencias.notificacoesAlertas),
+    criarSwitch("prefNotifGerais", "Notificações gerais", "Recebe comunicados e avisos que não se encaixam nas categorias acima.", preferencias.notificacoesGerais)
   ].join("");
 }
 
@@ -247,7 +299,13 @@ function lerFormulario() {
     densidade: document.getElementById("prefDensidade").value,
     animacoes: document.getElementById("prefAnimacoes").checked,
     notificacoesOnline: document.getElementById("prefNotificacoesOnline").checked,
-    abrirChatOnline: document.getElementById("prefAbrirChatOnline").checked
+    notificacoesProgramacao: document.getElementById("prefNotifProgramacao").checked,
+    notificacoesChat: document.getElementById("prefNotifChat").checked,
+    notificacoesAlertas: document.getElementById("prefNotifAlertas").checked,
+    notificacoesGerais: document.getElementById("prefNotifGerais").checked,
+    abrirChatOnline: document.getElementById("prefAbrirChatOnline").checked,
+    historicoChatDias: Number(document.getElementById("prefHistoricoChatDias").value || 10),
+    silenciarChatGlobal: document.getElementById("prefSilenciarChatGlobal").checked
   };
 }
 
@@ -479,6 +537,19 @@ export function initPreferenciasUsuario() {
       salvarPreferencias({ ...DEFAULT_PREFERENCES });
       preencherFormulario({ ...DEFAULT_PREFERENCES });
       aplicarPreferenciasUsuario();
+      return;
+    }
+
+    if (event.target.closest("#btnLimparHistoricoChat")) {
+      document.dispatchEvent(new Event("chat-online:limpar-historico"));
+      Swal.fire({
+        icon: "success",
+        title: "Histórico limpo",
+        text: "As mensagens salvas neste navegador foram apagadas.",
+        theme: "dark",
+        timer: 1800,
+        showConfirmButton: false
+      });
       return;
     }
 

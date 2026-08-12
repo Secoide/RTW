@@ -95,6 +95,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
       descricao = "",
       nomeEmpresa: cliente = "",
       nomeCidade: cidade = "",
+      nomeResp: responsavel = "",
       total_colaboradores: totalColab = 0,
       pta_alocada = 0,
       painel_eletrico_previsto = 0,
@@ -106,7 +107,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
     const temPainel = Number(painel_eletrico_previsto) === 1;
     const iconesComplementos = `
       <span class="p_complementosOS">
-        ${temPta ? '<i class="fa-solid fa-arrow-down-up-across-line complementoOSIcone complementoOSIcone-pta" title="OS com PTA alocada"></i>' : ''}
+        ${temPta ? '<i class="fa-solid fa-arrow-down-up-across-line complementoOSIcone complementoOSIcone-pta" title="OS com PTA"></i>' : ''}
         ${temPainel ? '<i class="fa-solid fa-bolt complementoOSIcone complementoOSIcone-painel" title="OS com painel elétrico para montar/instalar"></i>' : ''}
       </span>
     `;
@@ -114,7 +115,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
     // Cabeçalho da OS
     let html = `
       <div class="painel_OS">
-        <div class="p_infoOS" data-os="${idOS}" data-cidade="${cidade}">
+        <div class="p_infoOS" data-os="${idOS}" data-cidade="${cidade}" data-resp="${responsavel}">
           <i title="${status_OS}" class="status_daOSnaOS ${statusClass} fa-solid fa-tag"></i>
           <p class="lbl_OS">${idOS}</p>
           <p class="lbl_descricaoOS" title="${descricao}">${descricao}</p>

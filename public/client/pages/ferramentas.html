@@ -231,6 +231,17 @@
       </div>
     </form>
 
+    <div class="painel-view-toolbar" aria-label="Modo de visualização dos painéis">
+      <button type="button" class="painel-view-btn active" data-painel-view="lista" title="Visualizar em lista">
+        <i class="fa-solid fa-list"></i>
+        <span>Lista</span>
+      </button>
+      <button type="button" class="painel-view-btn" data-painel-view="cards" title="Visualizar em cards">
+        <i class="fa-solid fa-grip"></i>
+        <span>Cards</span>
+      </button>
+    </div>
+
     <div class="numdoc-table-wrap painel-table-wrap">
       <table class="numdoc-table painel-table">
         <thead>
@@ -261,6 +272,8 @@
         </tbody>
       </table>
     </div>
+
+    <div id="paineisCards" class="painel-cards-view" hidden></div>
   </section>
 
   <div id="painelQrModal" class="painel-qr-modal" aria-hidden="true">
@@ -271,6 +284,7 @@
       <span>Link externo</span>
       <h3 id="painelQrTitulo">QR Code do painel</h3>
       <img id="painelQrImagem" alt="QR Code do link externo">
+      <small id="painelQrStatus" class="painel-qr-status"></small>
       <a id="painelQrLink" href="#" target="_blank" rel="noopener">Abrir link</a>
     </div>
   </div>

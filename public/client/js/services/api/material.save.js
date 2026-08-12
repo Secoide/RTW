@@ -8,6 +8,7 @@ export async function salvarNovoMaterial($tr) {
 
   const id_variacao = $tr.find("[data-field='id_variacao']").val();
   const quantidade = Number($tr.find("[data-field='quantidade']").val());
+  const observacao = $tr.find("[data-field='observacao']").val()?.trim() || null;
 
   if (!id_variacao) {
     alert("Selecione um material");
@@ -26,8 +27,10 @@ export async function salvarNovoMaterial($tr) {
 
   const payload = {
     id_os: state.osSelecionada,
+    id_lista: state.listaSelecionada,
     id_variacao,
-    quantidade
+    quantidade,
+    observacao
   };
 
   return await $.post("/api/materiais/os/cadastrar", payload);
@@ -43,6 +46,7 @@ export async function atualizarMaterial($tr) {
 
   const quantidade = Number($tr.find("[data-field='quantidade']").val());
   const id_variacao = $tr.find("[data-field='id_variacao']").val();
+  const observacao = $tr.find("[data-field='observacao']").val()?.trim() || null;
 
   if (!id) {
     alert("ID do material não encontrado");
@@ -56,6 +60,7 @@ export async function atualizarMaterial($tr) {
 
   const payload = {
     quantidade,
+    observacao,
     id_os: state.osSelecionada // 🔥 ESSENCIAL
   };
 

@@ -44,10 +44,21 @@ function registrarListenersSessaoProgramacao() {
   });
 
   document.addEventListener("ws:action-failed", (ev) => {
+    const precisaSincronizar = ev.detail?.precisaSincronizar === true;
+
     Swal.fire({
       icon: "error",
-      title: "Alteracao nao salva",
-      text: ev.detail?.mensagem || "Nao foi possivel salvar a alteracao."
+      title: "Alteração não salva",
+      text: precisaSincronizar
+        ? "A programação estava diferente do banco de dados. A tela foi sincronizada novamente. Se o erro continuar, recarregue a página."
+        : (ev.detail?.mensagem || "Não foi possível salvar a alteração."),
+      showCancelButton: precisaSincronizar,
+      confirmButtonText: precisaSincronizar ? "OK, entendi" : "OK",
+      cancelButtonText: "Recarregar página"
+    }).then((result) => {
+      if (precisaSincronizar && result.dismiss === Swal.DismissReason.cancel) {
+        location.reload();
+      }
     });
   });
 }

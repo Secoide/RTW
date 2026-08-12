@@ -17,6 +17,7 @@ export const ATRIBUTOS_POR_MATERIAL = {
     // 🔌 CONDUTORES
     "CABO": [
         "Bitola",
+        "Número de vias",
         "Material",
         "Cor"
     ],

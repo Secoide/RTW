@@ -21,9 +21,11 @@ export async function deleteFornecedor(id) {
   });
 }
 
-export async function selecionarFornecedor(id) {
+export async function selecionarFornecedor(id, selecionado = true) {
   return $.ajax({
     url: `/api/materiais/os/fornecedores/${id}/selecionar`,
-    method: "PUT"
+    method: "PUT",
+    contentType: "application/json",
+    data: JSON.stringify({ selecionado })
   });
 }

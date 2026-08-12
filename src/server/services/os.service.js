@@ -1,4 +1,8 @@
 const OSModel = require('../models/os.model');
+const supabase = require("../config/supabase");
+
+const BUCKET_ANEXOS_OS = "exames";
+const PASTA_ANEXOS_OS = "os_anexos";
 
 function validarCadastroOS(dados) {
   const camposObrigatorios = [
@@ -31,6 +35,11 @@ async function buscarOrdemServico(id) {
   return await OSModel.getOrdemServicoById(id);
 }
 
+async function buscarHistoricoColaboradoresOS(idOS) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+  return await OSModel.getHistoricoColaboradoresOS(idOS);
+}
+
 async function buscarOSPorData(dataDia) {
 
   return await OSModel
@@ -52,7 +61,11 @@ async function salvarOS(dados) {
 
     const existente = await OSModel.verificarOSExistente(dados.idos);
     if (existente.length > 0) {
-      return { sucesso: false, mensagem: "OS já cadastrada." };
+      return {
+        sucesso: false,
+        codigo: "OS_DUPLICADA",
+        mensagem: "OS já cadastrada."
+      };
     }
     await OSModel.inserirOS(dados);
     return { sucesso: true };
@@ -154,6 +167,69 @@ async function salvarComplementosOS(idOS, dados) {
   });
 }
 
+async function listarAnexosOS(idOS) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+  return await OSModel.listarAnexosOS(idOS);
+}
+
+async function salvarAnexoOS(idOS, dados, file, usuario) {
+  if (!idOS) throw new Error('ID da OS é obrigatório');
+  if (!String(dados.nome || '').trim()) throw new Error('Informe o nome do documento.');
+  if (!file || !file.buffer) throw new Error('Selecione um PDF para anexar.');
+
+  const os = await OSModel.getOrdemServicoById(idOS);
+  if (!os) throw new Error('OS nÃ£o encontrada para anexar documento.');
+
+  const nomeLimpo = String(dados.nome).trim();
+  const nomeArquivo = `${PASTA_ANEXOS_OS}/${idOS}_${Date.now()}.pdf`;
+
+  const { error } = await supabase.storage
+    .from(BUCKET_ANEXOS_OS)
+    .upload(nomeArquivo, file.buffer, {
+      contentType: "application/pdf",
+      upsert: true
+    });
+
+  if (error) {
+    console.error(error);
+    throw new Error("Erro ao enviar PDF ao Supabase.");
+  }
+
+  const id = await OSModel.inserirAnexoOS({
+    id_os: idOS,
+    nome: nomeLimpo,
+    arquivo_pdf: nomeArquivo,
+    criado_por: usuario?.id || null
+  });
+
+  return {
+    id,
+    message: "Documento anexado com sucesso."
+  };
+}
+
+async function buscarAnexoOS(idAnexo) {
+  if (!idAnexo) throw new Error('ID do anexo é obrigatório');
+  const anexo = await OSModel.buscarAnexoOS(idAnexo);
+  if (!anexo) throw new Error('Anexo não encontrado.');
+  return anexo;
+}
+
+async function removerAnexoOS(idAnexo) {
+  const anexo = await buscarAnexoOS(idAnexo);
+
+  if (anexo.arquivo_pdf) {
+    await supabase.storage
+      .from(BUCKET_ANEXOS_OS)
+      .remove([anexo.arquivo_pdf]);
+  }
+
+  const ok = await OSModel.removerAnexoOS(idAnexo);
+  if (!ok) throw new Error('Anexo não encontrado.');
+
+  return { message: "Anexo removido com sucesso." };
+}
+
 // Deletar
 async function deletarOS(id) {
   return await OSModel.deleteOS(id);
@@ -163,6 +239,7 @@ async function deletarOS(id) {
 module.exports = {
   listarOrdemServico,
   buscarOrdemServico,
+  buscarHistoricoColaboradoresOS,
   buscarOSPorData,
   salvarOS,
   atualizarOS,
@@ -175,5 +252,9 @@ module.exports = {
   removerPainelOS,
   buscarComplementosOS,
   salvarComplementosOS,
+  listarAnexosOS,
+  salvarAnexoOS,
+  buscarAnexoOS,
+  removerAnexoOS,
   deletarOS
 };

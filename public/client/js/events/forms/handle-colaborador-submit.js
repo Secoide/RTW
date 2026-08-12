@@ -175,7 +175,7 @@ export function initColabForm() {
             success: function (res) {
                 if (res.sucesso) {
                     $('[data-target]').show();
-                    const msg = `Dados profissionais atualizados!`;
+                    const msg = res.mensagem || `Dados profissionais atualizados!`;
                     const Toast = Swal.mixin({
                         toast: true,
                         position: "top-end",
@@ -188,10 +188,15 @@ export function initColabForm() {
                         }
                     });
                     Toast.fire({
-                        icon: "success",
+                        icon: res.aprovacaoGestorObras?.criouAprovacao ? "info" : "success",
                         theme: 'dark',
                         title: msg
                     });
+                    if (res.aprovacaoGestorObras?.criouAprovacao) {
+                        $('#gestorObrasStatus')
+                            .text('Aguardando aprovação da Engenharia.')
+                            .addClass('pendente');
+                    }
                     preencherTabelaColaboradoresRH();
                 } else {
                     alert(res.mensagem);

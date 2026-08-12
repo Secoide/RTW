@@ -1335,7 +1335,7 @@ $%Marcos Lopes$% - 25/02/1994
 • Destacar nome.     
 - Fale SEMPRE algo engraçado no começo sobre o colaborador detalhado, porem NÃO fale os dados neste paragrafo.
 - Quando tiver data demissional destaque que foi desligado no dia informado e o tempo que durou na empresa.
-- Quando tiver data admissional e sem data demissional, cite o tempo que esta na empresa.
+- Quando tiver data de entrada na empresa e sem data demissional, cite o tempo que esta na empresa.
 - NUNCA calcule tempo de empresa.
 - O campo "tempo_empresa" já vem calculado corretamente.
 - Apenas utilize exatamente o valor informado.
@@ -1354,7 +1354,7 @@ Retorne obrigatoriamente:
   "endereco":"",
   "cnh":"",
   "nascimento_idade":"",
-  "data_admissional":"",
+  "data_experiencia":"",
   "data_demissional":"",
   "fotoperfil":"",
   "versao_foto":"",

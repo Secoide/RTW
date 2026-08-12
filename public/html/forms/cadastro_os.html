@@ -1,4 +1,5 @@
 <script>
+(() => {
 
     document.addEventListener('DOMContentLoaded', () => {
         const nome = sessionStorage.getItem("nome_usuario");
@@ -8,6 +9,7 @@
             window.location.href = "login"; // redireciona para a página de login
         }
     });
+})();
 </script>
 
 
@@ -37,8 +39,12 @@
                         <i class="fa-solid fa-boxes-stacked"></i>
                         <span class="menu-text">Materiais</span>
                     </a>
+                    <a class="bt_menu" data-target=".painel_anexos_os" data-roles="99">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span class="menu-text">Anexos</span>
+                    </a>
                     <div class="push"></div>
-                    <a class="bt_menu" data-target=".painel_estatistica" data-roles="99">
+                    <a class="bt_menu" data-target=".painel_estatistica" data-roles="5,6,7,99">
                         <i class="fa-solid fa-chart-simple"></i>
                         <span class="menu-text">Estatística</span>
                     </a>
@@ -116,8 +122,6 @@
                                         </div>
                                     </div>
                                     <div class="p_btAnexo">
-                                        <input id="bt_analisarGraficoOS" class="bt_teste glass" type="button"
-                                            value="Analisar" style="display: none;">
                                         <input id="" class="bt_teste glass" type="button" value="Anexar" onclick=""
                                             style="display: none;">
                                     </div>
@@ -432,7 +436,7 @@
                                 <div class="os-complementos-checks">
                                     <label class="os-complemento-check">
                                         <input id="osComplementoPTA" type="checkbox">
-                                        <span>Terá PTA alocada</span>
+                                        <span>Terá PTA</span>
                                     </label>
 
                                     <label class="os-complemento-check os-complemento-check-painel">
@@ -473,8 +477,38 @@
                         </div>
                     </div>
 
+                    <div class="painel_anexos_os">
+                        <div class="os-anexos-header">
+                            <div>
+                                <p>Anexos da OS</p>
+                                <span>Documentos PDF vinculados diretamente a esta ordem de serviço.</span>
+                            </div>
+                            <button type="button" id="btnAbrirAnexoOS" class="bt_teste">
+                                <i class="fa-solid fa-file-circle-plus"></i>
+                                Anexar PDF
+                            </button>
+                        </div>
+                        <div id="osAnexosLista" class="os-anexos-lista">
+                            <div class="os-complemento-empty">Informe a OS para visualizar os anexos.</div>
+                        </div>
+                    </div>
+
                     <div class="painel_estatistica">
                         <p>Estatística</p>
+                        <div class="os-estatistica-head">
+                            <div>
+                                <strong>Análise de colaboradores na OS</strong>
+                                <span>Visualize a quantidade de colaboradores lançados por dia nesta Ordem de Serviço.</span>
+                            </div>
+                            <button id="bt_analisarGraficoOS" class="bt_teste" type="button" style="display: none;">
+                                <i class="fa-solid fa-chart-line"></i>
+                                Analisar
+                            </button>
+                        </div>
+                        <div id="osEstatisticaResumo" class="os-estatistica-resumo">
+                            Abra uma OS salva e clique em Analisar para gerar o gráfico.
+                        </div>
+                        <div id="areaGraficoOS" class="os-grafico-area"></div>
                     </div>
 
                 </div>
@@ -486,6 +520,7 @@
 </div>
 
 <script>
+(() => {
 
     function abrirAnexosCadOS() {
         $("#anexoCadOS").slideToggle(100);
@@ -503,119 +538,391 @@
 
 
 
-    $(document).off('click.cad-os-grafico', '#bt_analisarGraficoOS').on('click.cad-os-grafico', '#bt_analisarGraficoOS', function (e) {
-        //GERA GRAFICO DE COLABS POR DIA
+    $(document).off('click.cad-os-grafico', '#bt_analisarGraficoOS').on('click.cad-os-grafico', '#bt_analisarGraficoOS', async function () {
         const osID = $('#idOS').val().trim();
+        const $resumo = $('#osEstatisticaResumo');
+        const $areaGrafico = $('#areaGraficoOS');
 
-        $('#form_infoOS').empty().load('../infos_OS.html', function () {
-            $('#areaGrafico').html('<canvas id="graficoColaboradores" width="1100" height="300"></canvas>');
+        if (!osID) {
+            $resumo.html('<span class="os-estatistica-erro">Informe ou abra uma OS para gerar a análise.</span>');
+            return;
+        }
 
-            // Chamada AJAX para pegar os dados reais
-            $.getJSON('/api/historico_colaboradores_OS', { osID }, function (resposta) {
-                if (!resposta.length) {
-                    $('#titulo_OS').text(`OS ${osID} - Sem dados disponíveis.`);
-                    return;
-                }
+        if (typeof Chart === 'undefined') {
+            $resumo.html('<span class="os-estatistica-erro">Biblioteca de gráfico não carregada.</span>');
+            return;
+        }
 
-                // Cria mapa de data -> total
-                const mapa = {};
-                resposta.forEach(item => {
-                    const dataFormatada = formatarDataComDiaSemana(item.data);
-                    mapa[dataFormatada] = item.total_colaboradores;
-                });
+        $resumo.text('Carregando histórico da OS...');
+        $areaGrafico.html(`
+            <div class="os-grafico-toolbar">
+                <span class="os-grafico-dica"><i class="fa-solid fa-vector-square"></i> Clique e arraste no eixo X para filtrar um período.</span>
+                <select class="os-grafico-mes" title="Filtrar por mês/ano">
+                    <option value="">Todos os meses</option>
+                </select>
+                <span class="os-grafico-periodo">Período completo</span>
+                <button type="button" class="os-grafico-reset" title="Mostrar período completo">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+            <div class="os-grafico-viewport">
+                <div class="os-grafico-canvas-wrap">
+                    <canvas id="graficoColaboradoresOS"></canvas>
+                </div>
+                <div class="os-grafico-selecao"></div>
+            </div>
+        `);
 
-                // Define dataInicio e dataFim com base nos dados reais do MySQL
-                const dataInicio = new Date(resposta[0].data);
-                const dataFim = new Date(resposta[resposta.length - 1].data);
+        try {
+            const resposta = await $.getJSON(`/api/os/${encodeURIComponent(osID)}/historico-colaboradores`);
+            const historico = Array.isArray(resposta?.historico) ? resposta.historico : [];
 
-                const todasDatas = [];
-                for (let d = new Date(dataInicio); d <= dataFim; d.setDate(d.getDate() + 1)) {
-                    todasDatas.push(formatarDataComDiaSemana(d));
-                }
-
-                const ctx = document.getElementById('graficoColaboradores').getContext('2d');
+            if (!historico.length) {
                 if (window.graficoOS) window.graficoOS.destroy();
+                $areaGrafico.empty();
+                $resumo.html(`OS ${escapeOSComplemento(osID)} sem lançamentos de colaboradores para análise.`);
+                return;
+            }
 
-                const totais = todasDatas.map(data => mapa[data] || 0);
-                const mediaMovel = calcularMediaMovel(totais, 5);
+            const dadosNormalizados = historico
+                .map(item => ({
+                    data: normalizarDataISO(item.data),
+                    total: Number(item.total_colaboradores || 0),
+                    descricao: item.descricao || ''
+                }))
+                .filter(item => item.data)
+                .sort((a, b) => a.data.localeCompare(b.data));
 
-                const descricaoOS = resposta[0].descricao;
-
-                $('#titulo_OS').text(`OS ${osID} - ${descricaoOS}`);
-                window.graficoOS = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: todasDatas,
-                        datasets: [
-                            {
-                                label: `Total de Colaboradores`,
-                                data: totais,
-                                borderColor: 'green',
-                                backgroundColor: 'rgba(143, 143, 143, 0.1)',
-                                tension: 0.3,
-                                borderWidth: 1.5,
-                                pointRadius: 1.5
-                            },
-                            {
-                                label: 'Média Móvel',
-                                data: mediaMovel,
-                                borderColor: 'orange',
-                                borderDash: [5, 5],
-                                tension: 0.3,
-                                borderWidth: 1.5,
-                                pointRadius: 1.5
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        animation: {
-                            duration: 100,
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    font: { size: 9 },
-                                    color: 'white',   // 🔹 cor dos números do eixo X
-                                    autoSkip: true,
-                                    maxRotation: 90,
-                                    minRotation: 90,
-                                    align: 'start'
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Colaboradores',
-                                    color: 'white'     // 🔹 cor do título do eixo Y
-                                },
-                                ticks: {
-                                    font: { size: 11 },
-                                    color: 'darkred' // 🔹 cor dos números do eixo Y
-                                }
-                            }
-                        }
-                    }
-                });
-
-
-
+            const mapa = {};
+            dadosNormalizados.forEach(item => {
+                mapa[item.data] = item.total;
             });
 
-        });
+            const todasDatas = gerarIntervaloDatas(
+                dadosNormalizados[0].data,
+                dadosNormalizados[dadosNormalizados.length - 1].data
+            );
+            const totais = todasDatas.map(data => mapa[data] || 0);
+            const mediaMovel = calcularMediaMovelOS(totais, 5);
+            const labels = todasDatas.map(formatarDataComDiaSemanaOS);
+            const maiorEquipe = Math.max(...totais);
+            const diasComEquipe = totais.filter(total => total > 0).length;
+            const descricaoOS = dadosNormalizados[0].descricao || $('#descricaoOS').val() || '';
+
+            $resumo.html(`
+                <strong>OS ${escapeOSComplemento(osID)} - ${escapeOSComplemento(descricaoOS)}</strong>
+                <span>${diasComEquipe} dia(s) com equipe lançada | maior equipe: ${maiorEquipe} colaborador(es)</span>
+            `);
+
+            const ctx = document.getElementById('graficoColaboradoresOS').getContext('2d');
+            if (window.graficoOS) window.graficoOS.destroy();
+
+            window.graficoOS = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Colaboradores',
+                            data: totais,
+                            borderColor: '#efda38',
+                            backgroundColor: 'rgba(239, 218, 56, 0.12)',
+                            tension: 0.32,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#ee7722',
+                            fill: true
+                        },
+                        {
+                            label: 'Média móvel',
+                            data: mediaMovel,
+                            borderColor: 'rgba(255, 255, 255, 0.72)',
+                            borderDash: [6, 5],
+                            tension: 0.32,
+                            borderWidth: 1.6,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 180 },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--texto-principal') || '#fff',
+                                boxWidth: 10
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: { size: 10 },
+                                color: 'rgba(244, 247, 248, 0.72)',
+                                autoSkip: true,
+                                maxRotation: 55,
+                                minRotation: 0
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                font: { size: 11 },
+                                color: 'rgba(244, 247, 248, 0.72)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Colaboradores',
+                                color: 'rgba(244, 247, 248, 0.72)'
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.07)' }
+                        }
+                    }
+                }
+            });
+            configurarSelecaoGraficoOS($areaGrafico, window.graficoOS, {
+                labels,
+                datas: todasDatas,
+                totais
+            });
+        } catch (err) {
+            console.error('Erro ao gerar gráfico da OS:', err);
+            $areaGrafico.empty();
+            $resumo.html('<span class="os-estatistica-erro">Não foi possível carregar os dados do gráfico.</span>');
+        }
     });
+
+    function configurarSelecaoGraficoOS($areaGrafico, chart, dadosBase) {
+        const viewport = $areaGrafico.find('.os-grafico-viewport').get(0);
+        const canvasWrap = $areaGrafico.find('.os-grafico-canvas-wrap').get(0);
+        const selecao = $areaGrafico.find('.os-grafico-selecao').get(0);
+        const periodo = $areaGrafico.find('.os-grafico-periodo').get(0);
+        const filtroMes = $areaGrafico.find('.os-grafico-mes').get(0);
+        const reset = $areaGrafico.find('.os-grafico-reset').get(0);
+
+        if (!viewport || !canvasWrap || !selecao || !chart || !dadosBase?.labels?.length) return;
+
+        let inicioX = 0;
+        let fimX = 0;
+        let selecionando = false;
+
+        preencherFiltroMesAnoGraficoOS(filtroMes, dadosBase.datas);
+
+        const atualizarSelecaoVisual = () => {
+            const left = Math.min(inicioX, fimX);
+            const width = Math.abs(fimX - inicioX);
+            selecao.style.left = `${left}px`;
+            selecao.style.width = `${width}px`;
+        };
+
+        const obterXLocal = event => {
+            const rect = viewport.getBoundingClientRect();
+            return Math.min(rect.width, Math.max(0, event.clientX - rect.left));
+        };
+
+        const obterIndicePorPixel = xLocal => {
+            const rectCanvas = chart.canvas.getBoundingClientRect();
+            const rectViewport = viewport.getBoundingClientRect();
+            const pixelNoCanvas = xLocal + rectViewport.left - rectCanvas.left;
+            const escalaX = chart.scales?.x;
+
+            if (!escalaX) return 0;
+
+            const valor = escalaX.getValueForPixel(pixelNoCanvas);
+            const indice = Number.isFinite(valor)
+                ? Math.round(valor)
+                : Math.max(0, dadosBase.labels.indexOf(valor));
+
+            return Math.min(dadosBase.labels.length - 1, Math.max(0, indice));
+        };
+
+        const aplicarIntervalo = (inicio, fim) => {
+            const de = Math.min(inicio, fim);
+            const ate = Math.max(inicio, fim);
+            const labels = dadosBase.labels.slice(de, ate + 1);
+            const totais = dadosBase.totais.slice(de, ate + 1);
+            const mediaMovel = calcularMediaMovelOS(totais, 5);
+
+            if (!labels.length) return;
+
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = totais;
+            chart.data.datasets[1].data = mediaMovel;
+            chart.update();
+
+            if (periodo) {
+                periodo.textContent = `${formatarDataCurtaOS(dadosBase.datas[de])} até ${formatarDataCurtaOS(dadosBase.datas[ate])}`;
+            }
+        };
+
+        filtroMes?.addEventListener('change', () => {
+            if (!filtroMes.value) {
+                restaurarGraficoCompletoOS(chart, dadosBase, periodo);
+                return;
+            }
+
+            const indices = dadosBase.datas
+                .map((data, index) => data.startsWith(filtroMes.value) ? index : -1)
+                .filter(index => index >= 0);
+
+            if (!indices.length) {
+                restaurarGraficoCompletoOS(chart, dadosBase, periodo);
+                return;
+            }
+
+            aplicarIntervalo(indices[0], indices[indices.length - 1]);
+        });
+
+        const limparSelecao = () => {
+            selecionando = false;
+            selecao.classList.remove('ativo');
+            selecao.style.width = '0px';
+            viewport.classList.remove('selecionando');
+        };
+
+        viewport.addEventListener('pointerdown', event => {
+            const xLocal = obterXLocal(event);
+            const chartArea = chart.chartArea;
+
+            if (!chartArea || xLocal < chartArea.left || xLocal > chartArea.right) return;
+
+            selecionando = true;
+            inicioX = xLocal;
+            fimX = xLocal;
+            selecao.classList.add('ativo');
+            viewport.classList.add('selecionando');
+            atualizarSelecaoVisual();
+            viewport.setPointerCapture(event.pointerId);
+        });
+
+        viewport.addEventListener('pointermove', event => {
+            if (!selecionando) return;
+
+            fimX = obterXLocal(event);
+            atualizarSelecaoVisual();
+        });
+
+        viewport.addEventListener('pointerup', event => {
+            if (!selecionando) return;
+
+            fimX = obterXLocal(event);
+            const distancia = Math.abs(fimX - inicioX);
+
+            if (distancia >= 12) {
+                aplicarIntervalo(
+                    obterIndicePorPixel(inicioX),
+                    obterIndicePorPixel(fimX)
+                );
+            }
+
+            limparSelecao();
+
+            if (viewport.hasPointerCapture(event.pointerId)) {
+                viewport.releasePointerCapture(event.pointerId);
+            }
+        });
+
+        viewport.addEventListener('pointercancel', () => {
+            limparSelecao();
+        });
+
+        reset?.addEventListener('click', () => {
+            if (filtroMes) filtroMes.value = '';
+            restaurarGraficoCompletoOS(chart, dadosBase, periodo);
+        });
+    }
+
+
+    function preencherFiltroMesAnoGraficoOS(select, datas) {
+        if (!select || !Array.isArray(datas)) return;
+
+        const meses = [...new Set(datas.map(data => data.slice(0, 7)))];
+
+        select.innerHTML = '<option value="">Todos os meses</option>' + meses.map(mes => {
+            return `<option value="${mes}">${formatarMesAnoOS(mes)}</option>`;
+        }).join('');
+    }
+
+    function restaurarGraficoCompletoOS(chart, dadosBase, periodo) {
+        chart.data.labels = dadosBase.labels;
+        chart.data.datasets[0].data = dadosBase.totais;
+        chart.data.datasets[1].data = calcularMediaMovelOS(dadosBase.totais, 5);
+        chart.update();
+
+        if (periodo) {
+            periodo.textContent = 'Período completo';
+        }
+    }
+
+    function formatarMesAnoOS(valor) {
+        const [ano, mes] = valor.split('-').map(Number);
+        return `${String(mes).padStart(2, '0')}/${ano}`;
+    }
+
+    function formatarDataCurtaOS(dataIso) {
+        const [, mes, dia] = dataIso.split('-');
+        return `${dia}/${mes}`;
+    }
+
+    function normalizarDataISO(valor) {
+        if (!valor) return '';
+        if (valor instanceof Date && !Number.isNaN(valor.getTime())) {
+            return valor.toISOString().slice(0, 10);
+        }
+        const texto = String(valor);
+        const match = texto.match(/\d{4}-\d{2}-\d{2}/);
+        return match ? match[0] : '';
+    }
+
+    function criarDataUTC(dataIso) {
+        const [ano, mes, dia] = dataIso.split('-').map(Number);
+        return new Date(Date.UTC(ano, mes - 1, dia));
+    }
+
+    function gerarIntervaloDatas(inicio, fim) {
+        const datas = [];
+        const atual = criarDataUTC(inicio);
+        const limite = criarDataUTC(fim);
+
+        while (atual <= limite) {
+            datas.push(atual.toISOString().slice(0, 10));
+            atual.setUTCDate(atual.getUTCDate() + 1);
+        }
+
+        return datas;
+    }
+
+    function formatarDataComDiaSemanaOS(dataIso) {
+        const data = criarDataUTC(dataIso);
+        const dia = String(data.getUTCDate()).padStart(2, '0');
+        const mes = String(data.getUTCMonth() + 1).padStart(2, '0');
+        const semana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][data.getUTCDay()];
+        return `${dia}/${mes} ${semana}`;
+    }
+
+    function calcularMediaMovelOS(valores, janela) {
+        return valores.map((_, index) => {
+            const inicio = Math.max(0, index - janela + 1);
+            const fatia = valores.slice(inicio, index + 1);
+            const media = fatia.reduce((total, valor) => total + valor, 0) / fatia.length;
+            return Number(media.toFixed(2));
+        });
+    }
 
     function getFormOSAtual() {
         return $('#form_cadOS .cadOS').last();
     }
 
     function ocultarPaineisOS($form) {
-        $form.find('.painel_info, .painel_status, .painel_complementos, .painel_materiais_os, .painel_estatistica').hide();
+        $form.find('.painel_info, .painel_status, .painel_complementos, .painel_materiais_os, .painel_anexos_os, .painel_estatistica').hide();
     }
 
     var $formOSInicial = getFormOSAtual();
-    $formOSInicial.find('.painel_status, .painel_complementos, .painel_materiais_os, .painel_estatistica').hide();
+    $formOSInicial.find('.painel_status, .painel_complementos, .painel_materiais_os, .painel_anexos_os, .painel_estatistica').hide();
 
     // Controle dos botões do menu
     $(document).off('click.cad-os-menu', '#form_cadOS .cadOS .bt_menu').on('click.cad-os-menu', '#form_cadOS .cadOS .bt_menu', function () {
@@ -639,6 +946,10 @@
 
         if (target === '.painel_materiais_os') {
             carregarMateriaisOSResumo();
+        }
+
+        if (target === '.painel_anexos_os') {
+            carregarAnexosOS();
         }
     });
 
@@ -936,18 +1247,41 @@
         $lista.html('<div class="os-complemento-empty">Carregando materiais da OS...</div>');
 
         try {
-            const materiais = await $.getJSON(`/api/materiais/os/${encodeURIComponent(idOS)}`);
-            renderMateriaisOSResumo(idOS, materiais || []);
+            const listas = await $.getJSON(`/api/materiais/listas/os/${encodeURIComponent(idOS)}`);
+            const listasNormalizadas = Array.isArray(listas) ? listas : [];
+
+            if (!listasNormalizadas.length) {
+                renderMateriaisOSResumo(idOS, []);
+                return;
+            }
+
+            const listasComMateriais = await Promise.all(
+                listasNormalizadas.map(async (lista, index) => {
+                    const idLista = lista.id || lista.id_lista || lista.id_lista_material;
+                    const materiais = idLista
+                        ? await $.getJSON(`/api/materiais/os/${encodeURIComponent(idOS)}?id_lista=${encodeURIComponent(idLista)}`)
+                        : [];
+
+                    return {
+                        ...lista,
+                        id_lista: idLista,
+                        numero_lista: lista.numero_lista || lista.numero || index + 1,
+                        materiais: materiais || []
+                    };
+                })
+            );
+
+            renderMateriaisOSResumo(idOS, listasComMateriais);
         } catch (err) {
             console.error('Erro ao carregar materiais da OS:', err);
             $lista.html('<div class="os-complemento-empty">Não foi possível carregar os materiais desta OS.</div>');
         }
     }
 
-    function renderMateriaisOSResumo(idOS, materiais) {
+    function renderMateriaisOSResumo(idOS, listasMateriais) {
         const $lista = $('#osMateriaisResumo');
 
-        if (!materiais.length) {
+        if (!listasMateriais.length) {
             $lista.html(`
                 <button type="button" class="os-material-card vazio" data-os="${escapeOSComplemento(idOS)}">
                     <div>
@@ -960,16 +1294,19 @@
             return;
         }
 
-        const resumo = calcularResumoMateriaisOS(materiais);
-        const descricao = `${resumo.itens} item${resumo.itens === 1 ? '' : 's'} | Qtd. ${resumo.quantidade}`;
-        const percentual = Math.max(resumo.percentualCompra, resumo.percentualSeparacao);
-        const progressoLabel = resumo.percentualCompra >= resumo.percentualSeparacao ? 'Comprando' : 'Separando';
+        $lista.html(listasMateriais.map((lista, index) => {
+            const materiais = lista.materiais || [];
+            const resumo = calcularResumoMateriaisOS(materiais);
+            const tituloLista = lista.titulo || lista.nome || lista.descricao || `Lista #${lista.numero_lista || index + 1}`;
+            const descricao = `${resumo.itens} item${resumo.itens === 1 ? '' : 's'} | Qtd. ${resumo.quantidade}`;
+            const percentual = Math.max(resumo.percentualCompra, resumo.percentualSeparacao);
+            const progressoLabel = resumo.percentualCompra >= resumo.percentualSeparacao ? 'Comprando' : 'Separando';
 
-        $lista.html(`
-            <button type="button" class="os-material-card" data-os="${escapeOSComplemento(idOS)}">
+            return `
+            <button type="button" class="os-material-card" data-os="${escapeOSComplemento(idOS)}" data-lista="${escapeOSComplemento(lista.id_lista || '')}">
                 <div class="os-material-topo">
                     <div>
-                        <strong>Lista #1</strong>
+                        <strong>${escapeOSComplemento(tituloLista)}</strong>
                         <span>${escapeOSComplemento(descricao)}</span>
                     </div>
                     <em>${escapeOSComplemento(resumo.status)}</em>
@@ -989,7 +1326,152 @@
                     <span style="width:${percentual.toFixed(0)}%"></span>
                 </div>
             </button>
+        `;
+        }).join(''));
+    }
+
+    async function carregarAnexosOS() {
+        const idOS = getIdOSComplementos();
+        const $lista = $('#osAnexosLista');
+
+        if (!idOS) {
+            $lista.html('<div class="os-complemento-empty">Informe a OS para visualizar os anexos.</div>');
+            return;
+        }
+
+        $lista.html('<div class="os-complemento-empty">Carregando anexos da OS...</div>');
+
+        try {
+            const anexos = await $.getJSON(`/api/os/${encodeURIComponent(idOS)}/anexos`);
+            renderAnexosOS(anexos || []);
+        } catch (err) {
+            console.error('Erro ao carregar anexos da OS:', err);
+            $lista.html('<div class="os-complemento-empty">Não foi possível carregar os anexos desta OS.</div>');
+        }
+    }
+
+    function renderAnexosOS(anexos) {
+        const $lista = $('#osAnexosLista');
+
+        if (!anexos.length) {
+            $lista.html('<div class="os-complemento-empty">Nenhum documento anexado nesta OS.</div>');
+            return;
+        }
+
+        const icones = ['fa-file-pdf', 'fa-file-lines', 'fa-file-contract', 'fa-file-invoice', 'fa-folder-open'];
+
+        $lista.html(anexos.map((anexo, index) => `
+            <div class="os-anexo-card" data-id-anexo="${escapeOSComplemento(anexo.id_anexo_os)}">
+                <div class="os-anexo-icone">
+                    <i class="fa-solid ${icones[index % icones.length]}"></i>
+                </div>
+                <div class="os-anexo-info">
+                    <strong>${escapeOSComplemento(anexo.nome)}</strong>
+                    <span>${escapeOSComplemento(anexo.criado_em || 'Anexo registrado')}</span>
+                </div>
+                <div class="os-anexo-acoes">
+                    <button type="button" data-action="visualizar-anexo-os" title="Visualizar PDF">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    <button type="button" data-action="remover-anexo-os" title="Remover anexo">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join(''));
+    }
+
+    function abrirModalAnexoOS() {
+        const idOS = getIdOSComplementos();
+
+        if (!idOS) {
+            Swal.fire({ icon: 'warning', title: 'Informe a OS antes de anexar documentos.', theme: 'dark' });
+            return;
+        }
+
+        $('#modalAnexoOS').remove();
+        $('body').append(`
+            <div id="modalAnexoOS" class="modal-anexo-documento os-anexo-modal">
+                <div class="modal-anexo-backdrop">
+                    <div class="painel_dadosAnexo painel-anexo-documento">
+                        <form id="formAnexoOS" method="POST" enctype="multipart/form-data">
+                            <div class="modal-anexo-header">
+                                <div>
+                                    <h3>Anexar documento da OS</h3>
+                                    <p>Informe o nome do documento e selecione o PDF correspondente.</p>
+                                </div>
+                                <button type="button" class="modal-anexo-close" data-action="fechar-modal-anexo-os" title="Fechar" aria-label="Fechar">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <div class="modal-anexo-body">
+                                <label class="modal-anexo-field span-2">
+                                    <span>Nome do PDF relacionado</span>
+                                    <input id="nomeAnexoOS" class="tbx_teste glass" type="text" name="nome" placeholder="Ex: Proposta comercial, ART, memorial..." maxlength="160" required>
+                                </label>
+
+                                <label class="modal-anexo-upload span-2" for="documentoAnexoOS">
+                                    <input type="file" id="documentoAnexoOS" name="documento" accept="application/pdf" required>
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>
+                                        <b>Anexar PDF</b>
+                                        <small class="modal-anexo-file-name">Selecione o arquivo da OS.</small>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div id="uploadProgressAnexoOSWrapper" class="modal-anexo-progress" style="display:none;">
+                                <div class="progress">
+                                    <div id="uploadProgressAnexoOS" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        0%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-anexo-footer">
+                                <input id="btSalvarAnexoOS" class="bt_teste btn btn-primary" type="submit" value="Anexar PDF">
+                                <input type="reset" data-action="fechar-modal-anexo-os" value="Cancelar">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         `);
+    }
+
+    function fecharModalAnexoOS() {
+        $('#modalAnexoOS').remove();
+    }
+
+    async function removerAnexoOS(idAnexo) {
+        const confirmacao = await Swal.fire({
+            icon: 'warning',
+            title: 'Remover anexo?',
+            text: 'O PDF vinculado a esta OS será removido.',
+            showCancelButton: true,
+            confirmButtonText: 'Remover',
+            cancelButtonText: 'Cancelar',
+            theme: 'dark'
+        });
+
+        if (!confirmacao.isConfirmed) return;
+
+        try {
+            await $.ajax({
+                url: `/api/os/anexos/${encodeURIComponent(idAnexo)}`,
+                method: 'DELETE',
+                dataType: 'json'
+            });
+            carregarAnexosOS();
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Anexo não removido',
+                text: err.responseJSON?.mensagem || 'Erro ao remover anexo da OS.',
+                theme: 'dark'
+            });
+        }
     }
 
     async function carregarDadosComplementaresOS() {
@@ -1151,8 +1633,13 @@
         }
     }
 
-    function abrirListaMateriaisOS(idOS) {
+    function abrirListaMateriaisOS(idOS, idLista = '') {
         sessionStorage.setItem('material_focus_os', String(idOS));
+        if (idLista) {
+            sessionStorage.setItem('material_focus_lista', String(idLista));
+        } else {
+            sessionStorage.removeItem('material_focus_lista');
+        }
         const botaoMateriais = document.querySelector('.bt_menuP[data-pagina="/client/pages/lista_material.html"]');
         if (botaoMateriais) {
             $('#form_cadOS').empty();
@@ -1179,10 +1666,92 @@
         if ($(this).data('action') === 'abrir-painel-ferramentas') abrirPainelNasFerramentas(idPainel);
     });
     $(document).off('click', '.os-material-card').on('click', '.os-material-card', function () {
-        abrirListaMateriaisOS($(this).data('os'));
+        abrirListaMateriaisOS($(this).data('os'), $(this).data('lista'));
+    });
+    $(document).off('click', '#btnAbrirAnexoOS').on('click', '#btnAbrirAnexoOS', abrirModalAnexoOS);
+    $(document).off('click', '[data-action="fechar-modal-anexo-os"]').on('click', '[data-action="fechar-modal-anexo-os"]', fecharModalAnexoOS);
+    $(document).off('change', '#documentoAnexoOS').on('change', '#documentoAnexoOS', function () {
+        const nomeArquivo = this.files?.[0]?.name || 'Selecione o arquivo da OS.';
+        $(this).closest('.modal-anexo-upload').find('.modal-anexo-file-name').text(nomeArquivo);
+    });
+    $(document).off('submit', '#formAnexoOS').on('submit', '#formAnexoOS', function (e) {
+        e.preventDefault();
+
+        const idOS = getIdOSComplementos();
+        const fd = new FormData(this);
+
+        if (!idOS) {
+            Swal.fire({ icon: 'warning', title: 'Informe a OS antes de anexar documentos.', theme: 'dark' });
+            return;
+        }
+
+        $('#uploadProgressAnexoOSWrapper').show();
+        $('#uploadProgressAnexoOS')
+            .css('width', '0%')
+            .attr('aria-valuenow', 0)
+            .text('0%');
+
+        $.ajax({
+            url: `/api/os/${encodeURIComponent(idOS)}/anexos`,
+            method: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            xhr: function () {
+                const xhr = $.ajaxSettings.xhr();
+                if (xhr.upload) {
+                    xhr.upload.addEventListener('progress', function (event) {
+                        if (!event.lengthComputable) return;
+                        const pct = Math.round((event.loaded / event.total) * 100);
+                        $('#uploadProgressAnexoOS')
+                            .css('width', `${pct}%`)
+                            .attr('aria-valuenow', pct)
+                            .text(`${pct}%`);
+                    });
+                }
+                return xhr;
+            },
+            success: function (res) {
+                $('#uploadProgressAnexoOS')
+                    .css('width', '100%')
+                    .attr('aria-valuenow', 100)
+                    .text('100%');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: res.message || 'Documento anexado com sucesso.',
+                    timer: 1300,
+                    showConfirmButton: false,
+                    theme: 'dark'
+                });
+
+                fecharModalAnexoOS();
+                carregarAnexosOS();
+            },
+            error: function (xhr) {
+                $('#uploadProgressAnexoOSWrapper').fadeOut();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Documento não anexado',
+                    text: xhr.responseJSON?.mensagem || xhr.responseJSON?.message || xhr.responseJSON?.erro || 'Erro ao anexar documento da OS.',
+                    theme: 'dark'
+                });
+            }
+        });
+    });
+    $(document).off('click', '#osAnexosLista [data-action]').on('click', '#osAnexosLista [data-action]', function () {
+        const idAnexo = $(this).closest('.os-anexo-card').data('id-anexo');
+        if ($(this).data('action') === 'visualizar-anexo-os') {
+            window.open(`/api/os/anexos/${encodeURIComponent(idAnexo)}/download`, '_blank');
+        }
+        if ($(this).data('action') === 'remover-anexo-os') {
+            removerAnexoOS(idAnexo);
+        }
     });
 
     iniciarCombosServicoOS();
     renderServicosComplementaresOS();
     carregarPaineisComplementos();
+})();
 </script>

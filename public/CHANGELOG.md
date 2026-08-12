@@ -7,17 +7,18 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 ----- VERSÕES FUTURAS
-## [2.5.0] - 2026-05-20
+## [2.6.0] - 2026-05-20
 ## Nome: 📦 Materiais
 ### Adicionado
 - Adicionado guia geral da tela Materiais.
 - Adicionada nova aba 'Materiais' na OS com resumo visual da lista de materiais, progresso/status e atalho para abrir a lista completa na tela de Materiais;
+- Adicionado novo menu Estoque com tela própria para separar materiais das listas que chegaram ao estágio de estoque, exibindo pendências por bloco, detalhes dos itens, fotos, quantidades, progresso de separação e envio da lista para compras.
 
 ### Alterado
 
 ### Corrigido
 
-## [2.4.0] - 2026-05-20
+## [2.5.0] - 2026-05-20
 ## Nome:  Férias
 ### Adicionado
 - Novo sistema de Férias com calendário visual por colaborador;
@@ -30,7 +31,60 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
-## [2.3.0] - 2026-05-20
+## [2.4.0] - 2026-06-16
+## Nome: 🛠️ Ferramentas e Complementos
+- Adicionado novo menu 'Ferramentas';
+- Ferramentas não contratadas podem aparecer bloqueadas com prévia visual;
+- Nova ferramenta 'Numeração de Documentos', permitindo gerar, copiar, editar e apagar padrões de nomes para arquivos;
+- Nova ferramenta 'Registros Painel Elétrico' com cadastro em banco, edição, exclusão, checklist de produção e upload de imagem do painel montado;
+- Checklist visual dos painéis elétricos com etapas de produção e barra de progresso colorida conforme avanço;
+- Upload de múltiplas imagens para painéis elétricos, com galeria para visualizar fotos do painel montado;
+- Geração de QR Code para links externos dos painéis elétricos;
+- Nova aba Complementos no cadastro de OS;
+- Complementos da OS agora permitem informar tipo de serviço, observação complementar, PTA alocada e previsão de painel para montar/instalar;
+- Integração entre OS e Painéis Elétricos, permitindo vincular painel cadastrado a uma OS;
+- Atalho no painel vinculado da OS para abrir diretamente a tela de Ferramentas no painel correspondente;
+- Tipo de serviço da OS separado em duas combos: Categoria e Serviço, com serviços filtrados conforme a categoria escolhida;
+
+
+
+## [2.3.0] - 2026-07-02
+## Nome: 💬 Chat online
+### Adicionado
+- Widget Online ganhou aba de chat em tempo real, agora usuários conectados conseguem trocar mensagens rápidas pelo sistema;
+- Adicionado Chat em Grupo Geral e Chat Privado entre usuários online;
+- Mensagens do chat ficam salvas localmente no navegador por até 10 dias (padrão ou pode trocar nas configurações), sem uso de banco de dados;
+- Contador indica novas mensagens quando o chat está minimizado, exibindo alerta no botão Online;
+- Conversas privadas mostram badge no nome do usuário que enviou mensagem, com destaque piscando até a conversa ser aberta;
+- Chat Online mostra aviso visual quando chega nova mensagem com a janela minimizada;
+- Chat Online avisa quando o usuário é mencionado com @nome e mensagens com colaboradores citados (#nome) mostram atalhos rápidos de Info;
+- Ao digitar @ ou #, o chat já lista automaticamente usuários online ou colaboradores cadastrados;
+- Adicionadas opções para limpar o histórico local do Chat Online e silenciar avisos do chat global;
+- Adicionadas reações rápidas locais nas mensagens do Chat Online, com opções de curtir, confirmar e visualizar;
+- Novo guia de 'Chat Online' no Guia Geral;
+- Adicionada exportação em PDF da programação diária, incluindo apenas OS do dia selecionado que possuem colaboradores alocados;
+- Nova aba de Notificações nas preferências do perfil, permitindo escolher quais tipos de aviso aparecem no sininho do usuário;
+- Adicionada exportação em PDF no RH e no perfil do colaborador, permitindo imprimir resumos gerais e relatórios completos individuais com histórico, anexos operacionais e gráfico de participações;
+- Adicionada campo 'Data de admissão', data de entrada na empresa nos Dados Profissionais do colaborador;
+- Adicionado responsável da OS na exportação da programação para whatsapp;
+- Adicionado botão de ajustes na Programação com opção local para mostrar/ocultar o responsável da OS, mostrar/ocultar aniversariantes e incluir observações automaticamente na exportação da Programação para WhatsApp;
+- Novo guia de 'Ordem de Serviço - OS' no Guia Geral;
+
+### Alterado
+- Layout do Chat Online ampliado, com área de conversa e lista de usuários online lado a lado;
+- Lista Online deixou de exibir o próprio usuário logado;
+- Melhorado o painel de notificações do perfil com layout em cards, botão Limpar, contador, horário e melhor visual para notificações vazias;
+- Atualizados colunas do banco de dados para usarem a data de entrada no lugar do exame admissional;
+
+### Corrigido
+- Ajustado badge de mensagens privadas para aparecer alinhado ao nome de quem chamou;
+- Corrigido problema em que colaboradores adicionados por # ou $ podiam aparecer na OS sem terem sido gravados no banco após reconexão do servidor;
+- Não avisava quando a OS já estava cadastrada antes de tentar salvar novamente;
+
+### Removido
+
+
+## [2.2.0] - 2026-05-20
 ## Nome: 🏅 Conquitas e Experiências
 ### Adicionado
 - Sistema de Conquistas e Medalhas para reconhecimento dos colaboradores;
@@ -48,45 +102,39 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
-
-
-
-## [2.2.0] - 2026-06-16
-## Nome: 🛠️ Ferramentas e Complementos
-- Adicionado novo menu 'Ferramentas';
-- Ferramentas não contratadas podem aparecer bloqueadas com prévia visual;
-- Nova ferramenta 'Numeração de Documentos', permitindo gerar, copiar, editar e apagar padrões de nomes para arquivos;
-- Nova ferramenta 'Registros Painel Elétrico' com cadastro em banco, edição, exclusão, checklist de produção e upload de imagem do painel montado;
-- Checklist visual dos painéis elétricos com etapas de produção e barra de progresso colorida conforme avanço;
-- Upload de múltiplas imagens para painéis elétricos, com galeria para visualizar fotos do painel montado;
-- Geração de QR Code para links externos dos painéis elétricos;
-- Nova aba Complementos no cadastro de OS;
-- Complementos da OS agora permitem informar tipo de serviço, observação complementar, PTA alocada e previsão de painel para montar/instalar;
-- Integração entre OS e Painéis Elétricos, permitindo vincular painel cadastrado a uma OS;
-- Atalho no painel vinculado da OS para abrir diretamente a tela de Ferramentas no painel correspondente;
-- Tipo de serviço da OS separado em duas combos: Categoria e Serviço, com serviços filtrados conforme a categoria escolhida;
-
-
-
-## [2.1.0] - 2026-06-16
-## Nome: 🎨💬 Chat online
+## [2.1.0] - 2026-08-12
+## Nome: 📜 PDFs e Notificações
 ### Adicionado
-- Widget Online ganhou aba de chat em tempo real, agora usuários conectados conseguem trocar mensagens rápidas pelo sistema;
-- Mensagens do chat permanecem só durante a sessão da página e Contador indica novas mensagens quando o chat está fechado;
-- Chat Online avisa quando o usuário é mencionado com @nome e mensagens com colaboradores citados (#nome) mostram atalhos rápidos de Info;
-- Adicionado novo guia de 'Chat Online' no Guia Geral;
+- Adicionada exportação em PDF da programação diária, incluindo apenas OS do dia selecionado que possuem colaboradores alocados;
+- Adicionada exportação em PDF no perfil do colaborador, permitindo seleção de informações antes de gerar o PDF do perfil do colaborador. Imprimir resumos gerais e relatórios completos individuais com histórico, anexos operacionais e gráfico de participações;
+- Nova aba de Notificações nas preferências do perfil, permitindo escolher quais tipos de avisos aparecem no sininho do usuário;
+- Adicionado responsável da OS na exportação da programação para whatsapp;
+- Adicionado botão de ajustes na Programação com opção local para mostrar/ocultar o responsável da OS, mostrar/ocultar aniversariantes e incluir observações automaticamente na exportação da Programação para WhatsApp;
+- Novo guia de 'Ordem de Serviço - OS' no Guia Geral;
+- Adicionado slide de reconhecimentos de medalhas no painel de conquistas da tela início, alternando colaboradores a cada 30 segundos (Prévia, em teste!);
+- Retomada e melhorada a aba 'Estatística' na OS com gráfico de colaboradores por dia, média móvel, resumo da equipe e zoom com movimentação pelo eixo do dia;
+- Adicionada campo 'Data de admissão', data de entrada na empresa nos Dados Profissionais do colaborador;
+- Adicionado compo 'Gestor de Obras', ao alterar status uma notificação é enviada ao Gerente de Engenharia pelo sininho e sua alteração de responsável de OS é aplicada somente após aprovação, o mesmo pode ser reprovada;
 
 ### Alterado
 - Lista Online deixou de exibir o próprio usuário logado;
+- Melhorado o painel de notificações do perfil com layout em cards, botão Limpar, contador, horário e melhor visual para notificações vazias;
+- Atualizados colunas do banco de dados para usarem a data de entrada no lugar do exame admissional;
+- Repaginado janela de cadastro e informções das Ordens de Serviço;
+- Agora recarregar página volta para a mesma tela que estava trabalhando (ainda reseta dados que esteve preenchendo);
 
 ### Corrigido
+- Corrigido problema em que colaboradores adicionados por # ou $ podiam aparecer na OS sem terem sido gravados no banco após reconexão do servidor;
+- Não avisava quando a OS já estava cadastrada antes de tentar salvar novamente;
+- Corrigida a segurança das alterações de colaboradores na OS para não mostrar como salvo antes da confirmação do banco e avisar quando a programação precisar ser sincronizada novamente;
 
 ### Removido
+- Removido painel de avisos da Diretoria da tela início;
 
 
 
 ----- VERSAO ATUAL
-## [2.0.0] - 2026-06-16
+## [2.0.0] - 2026-07-01
 ## Nome: 🎨 Nova Identidade Visual 
 
 ### Adicionado
@@ -115,7 +163,6 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Adicionado aviso de erro quando a programação não conseguir ser finalizada por falha de conexão ou servidor;
 - Agora a notificação salva para usuários que não estavam online no momento do lançamento da programação;
 - Adicionada busca de terceiros na OS usando $;
-
 
 ### Alterado
 - Ajustado o aviso automático de atualização para aparecer na home após o login;

@@ -5,6 +5,8 @@ export function initMaterialChange() {
 
   $("#cbxOS").on("change", function () {
     state.osSelecionada = $(this).val();
+    state.modoVisualizacao = "kanban";
+    state.listaSelecionada = null;
     carregarMateriaisCompleto(); 
   });
 

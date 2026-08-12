@@ -1,4 +1,5 @@
 const NotificacoesModel = require("../models/notificacoes.model");
+const AprovacoesModel = require("../models/aprovacoes.model");
 
 async function listar(req, res) {
   try {
@@ -39,8 +40,56 @@ async function marcarTodasLidas(req, res) {
   }
 }
 
+async function aprovar(req, res) {
+  try {
+    const resultado = await AprovacoesModel.decidirResponsavelOS({
+      idAprovacao: req.params.id,
+      aprovado: true,
+      aprovadorId: req.user.id,
+      aprovadorRole: req.user.role
+    });
+
+    res.json({
+      sucesso: true,
+      mensagem: "Solicitação aprovada com sucesso.",
+      resultado
+    });
+  } catch (err) {
+    console.error("Erro ao aprovar solicitacao:", err);
+    res.status(err.status || 500).json({
+      sucesso: false,
+      mensagem: err.message || "Erro ao aprovar solicitação."
+    });
+  }
+}
+
+async function reprovar(req, res) {
+  try {
+    const resultado = await AprovacoesModel.decidirResponsavelOS({
+      idAprovacao: req.params.id,
+      aprovado: false,
+      aprovadorId: req.user.id,
+      aprovadorRole: req.user.role
+    });
+
+    res.json({
+      sucesso: true,
+      mensagem: "Solicitação reprovada.",
+      resultado
+    });
+  } catch (err) {
+    console.error("Erro ao reprovar solicitacao:", err);
+    res.status(err.status || 500).json({
+      sucesso: false,
+      mensagem: err.message || "Erro ao reprovar solicitação."
+    });
+  }
+}
+
 module.exports = {
   listar,
   marcarLida,
-  marcarTodasLidas
+  marcarTodasLidas,
+  aprovar,
+  reprovar
 };
