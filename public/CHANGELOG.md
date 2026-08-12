@@ -128,6 +128,8 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Corrigido problema em que colaboradores adicionados por # ou $ podiam aparecer na OS sem terem sido gravados no banco após reconexão do servidor;
 - Não avisava quando a OS já estava cadastrada antes de tentar salvar novamente;
 - Corrigida a segurança das alterações de colaboradores na OS para não mostrar como salvo antes da confirmação do banco e avisar quando a programação precisar ser sincronizada novamente;
+- Corrigido o carregamento da edição da OS para manter cidade, empresa, supervisor e responsável preenchidos mesmo com resposta mais lenta do servidor;
+
 
 ### Removido
 - Removido painel de avisos da Diretoria da tela início;
