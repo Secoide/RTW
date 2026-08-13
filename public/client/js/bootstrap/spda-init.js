@@ -25,13 +25,18 @@ const SPDA_ACOES_PONTO = [
   { id: "subsistemas_nao_conectados", titulo: "Subsistemas não conectados", icone: "fa-plug-circle-xmark" },
   { id: "caixa_sem_tampa", titulo: "Caixa de inspeção sem tampa", icone: "fa-box-open" },
   { id: "descida_solta", titulo: "Descida solta", icone: "fa-arrow-down-long" },
+  { id: "descidas_inexistentes_removidas", titulo: "Descidas inexistentes ou removidas", icone: "fa-circle-minus" },
   { id: "barra_chata_rompida", titulo: "Barra chata rompida", icone: "fa-grip-lines-vertical" },
   { id: "cabo_rompido", titulo: "Cabo rompido", icone: "fa-scissors" },
+  { id: "condutor_enterrado_exposto", titulo: "Condutor enterrado exposto", icone: "fa-route" },
+  { id: "baldinho_inspecao_soterrado", titulo: "Baldinho de inspeção soterrado", icone: "fa-box-archive" },
+  { id: "soldas_exotermicas_deterioradas", titulo: "Soldas exotérmicas deterioradas", icone: "fa-fire-flame-curved" },
   { id: "terminal_desgastado", titulo: "Terminal desgastado", icone: "fa-screwdriver-wrench" }
 ];
 
 const SPDA_MARGEM_EDICAO = 16;
 const SPDA_LIMITES_STORAGE_KEY = "spda_limites_medicao";
+const SPDA_TABELA_ENTER_SALVO = "spdaEnterSalvo";
 
 function byId(id) {
   return document.getElementById(id);
@@ -289,12 +294,15 @@ async function salvarValorTabelaEAvancar(input) {
   const indiceAtual = inputs.indexOf(input);
   const proximoId = inputs[indiceAtual + 1]?.dataset.spdaValor || "";
 
+  input.dataset[SPDA_TABELA_ENTER_SALVO] = "1";
   await atualizarTabelaMedicaoSpda(input.dataset.spdaValor, "valor", input.value.trim());
 
   if (!proximoId) return;
-  const proximo = document.querySelector(`#spdaTabelaConteudo [data-spda-valor="${CSS.escape(proximoId)}"]`);
-  proximo?.focus();
-  proximo?.select?.();
+  requestAnimationFrame(() => {
+    const proximo = document.querySelector(`#spdaTabelaConteudo [data-spda-valor="${CSS.escape(proximoId)}"]`);
+    proximo?.focus();
+    proximo?.select?.();
+  });
 }
 
 async function fecharAcoesPontosSpda() {
@@ -530,6 +538,7 @@ function criarAcoesPonto(ponto) {
         : Array.from(new Set([...pontoAtual.acoes, acao.id]));
       await salvarElementos({ silencioso: true });
       renderElementos();
+      renderLegendaIconesSpda();
       setHint(jaSelecionado ? `${acao.titulo} removido do ponto.` : `${acao.titulo} marcado no ponto.`);
     });
     legenda.appendChild(button);
@@ -1184,7 +1193,13 @@ function bindSpda() {
   byId("spdaTabelaConteudo")?.addEventListener("change", event => {
     const valorInput = event.target.closest("[data-spda-valor]");
     const avaliacaoSelect = event.target.closest("[data-spda-avaliacao]");
-    if (valorInput) atualizarTabelaMedicaoSpda(valorInput.dataset.spdaValor, "valor", valorInput.value.trim());
+    if (valorInput) {
+      if (valorInput.dataset[SPDA_TABELA_ENTER_SALVO] === "1") {
+        delete valorInput.dataset[SPDA_TABELA_ENTER_SALVO];
+        return;
+      }
+      atualizarTabelaMedicaoSpda(valorInput.dataset.spdaValor, "valor", valorInput.value.trim());
+    }
     if (avaliacaoSelect) atualizarTabelaMedicaoSpda(avaliacaoSelect.dataset.spdaAvaliacao, "avaliacao", avaliacaoSelect.value);
   });
   byId("spdaTabelaConteudo")?.addEventListener("keydown", event => {

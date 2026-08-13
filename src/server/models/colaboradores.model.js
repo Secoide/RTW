@@ -1073,6 +1073,17 @@ async function excluirColaboradorNaOS(idNaOS) {
   return result;
 }
 
+async function excluirColaboradorNaOSPorFuncionario(dataDia, idFuncionario, osID) {
+  const sql = `
+    DELETE FROM funcionario_na_os
+    WHERE \`data\` = ?
+      AND idfuncionario = ?
+      AND id_OS = ?
+  `;
+  const [result] = await connection.query(sql, [dataDia, idFuncionario, osID]);
+  return result;
+}
+
 async function alocarColaboradorNaOS(dataDia, idFuncionario, osID) {
   const sqlInsert = `
     INSERT INTO funcionario_na_os (\`data\`, idfuncionario, id_OS)
@@ -1448,6 +1459,7 @@ module.exports = {
   getColaboradoresCBX,
   getColaboradoresAniversariantes,
   excluirColaboradorNaOS,
+  excluirColaboradorNaOSPorFuncionario,
   alocarColaboradorNaOS,
   definirSupervisor,
   removerSupervisorAtual,

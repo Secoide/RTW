@@ -91,20 +91,21 @@ export async function initProgramacao() {
     initAbrirOSClick();
     initColaboradoresTransferencia(socket);
     initFiltros();
-    get_dadosColab();
     initExportarDados();
 
   } catch (err) {
     console.error("❌ Erro ao inicializar programação:", err);
   }
 
-  $(document).on("click", "#bt_atualizarProgramacao", async function () {
+  $(document).off("click.programacaoInit", "#bt_atualizarProgramacao");
+  $(document).on("click.programacaoInit", "#bt_atualizarProgramacao", async function () {
     const dataSelecionada = new Date($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
   });
 
 
-  document.addEventListener("click", (ev) => {
+  $(document).off("click.programacaoAnotacoes");
+  $(document).on("click.programacaoAnotacoes", function (ev) {
 
     // Abrir modal novo aviso
     if (ev.target.id === "btnAdicionarAnotacao") {
@@ -158,11 +159,10 @@ export async function initProgramacao() {
   // =======================================================
   // SELEÇÃO DE ÍCONES
   // =======================================================
-  document.querySelectorAll("#iconeAnotacao span").forEach(el => {
-    el.addEventListener("click", () => {
-      document.querySelectorAll("#iconeAnotacao span").forEach(s => s.classList.remove("ativo"));
-      el.classList.add("ativo");
-    });
+  $(document).off("click.programacaoIconeAnotacao", "#iconeAnotacao span");
+  $(document).on("click.programacaoIconeAnotacao", "#iconeAnotacao span", function () {
+    document.querySelectorAll("#iconeAnotacao span").forEach(s => s.classList.remove("ativo"));
+    this.classList.add("ativo");
   });
 
   async function salvarAnotacoesDia() {

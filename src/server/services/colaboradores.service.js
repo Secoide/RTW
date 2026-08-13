@@ -322,12 +322,18 @@ async function listarDisponiveis(
 
 }
 
-async function excluirColaboradorEmOS(osID, id, idNaOS) {
+async function excluirColaboradorEmOS(osID, id, idNaOS, dataDia) {
   try {
-    const result = await ColabModel.excluirColaboradorNaOS(idNaOS);
+    let result = idNaOS
+      ? await ColabModel.excluirColaboradorNaOS(idNaOS)
+      : { affectedRows: 0 };
+
+    if (result.affectedRows === 0 && osID && id && dataDia) {
+      result = await ColabModel.excluirColaboradorNaOSPorFuncionario(dataDia, id, osID);
+    }
 
     if (result.affectedRows === 0) {
-      throw new Error(`Nenhum colaborador com idNaOS ${idNaOS}`);
+      throw new Error(`Nenhum colaborador encontrado na OS ${osID} para a data ${dataDia || "-"}`);
     }
 
     console.log(`✅ Colaborador ID ${id} excluído da OS ${osID}`);

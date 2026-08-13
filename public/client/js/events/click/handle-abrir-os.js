@@ -64,7 +64,8 @@ async function prepararCombosOS(dados = null) {
 }
 
 export function initAbrirOSClick() {
-  $(document).on("click", "#bt_abrir_NovaOS", async function () {
+  $(document).off(".abrirOS");
+  $(document).on("click.abrirOS", "#bt_abrir_NovaOS", async function () {
     try {
       await carregarFormularioOS();
       await prepararCombosOS();
@@ -74,12 +75,12 @@ export function initAbrirOSClick() {
     }
   });
 
-  $(document).on("click", ".lbl_OS", async function () {
+  $(document).on("click.abrirOS", ".lbl_OS", async function () {
     const idOS = $(this).text().trim();
     get_carregarDadosOS(idOS);
   });
 
-  $(document).on("click", ".status_daOSnaOS", function () {
+  $(document).on("click.abrirOS", ".status_daOSnaOS", function () {
     const $os = $(this);
     const idOS = $os.closest(".p_infoOS").data("os");
     get_carregarDadosOS(idOS);
@@ -90,7 +91,7 @@ export function initAbrirOSClick() {
 
   initOSForm();
 
-  $(document).on("change", "#selectCliente", async function () {
+  $(document).on("change.abrirOS", "#selectCliente", async function () {
     const $wrap = $("#frm_cadastrarOS");
     const idEmpresas = $(this).val();
     if (!idEmpresas) return;
@@ -101,7 +102,7 @@ export function initAbrirOSClick() {
     ]);
   });
 
-  $(document).on("change", "#selectSupervisor", async function () {
+  $(document).on("change.abrirOS", "#selectSupervisor", async function () {
     const idSupervisorSelecionado = $(this).val();
 
     function atualizarCampos({ telefone = "-", email = "-" } = {}) {

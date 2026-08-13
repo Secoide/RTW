@@ -11,14 +11,15 @@ const PROGRAMACAO_EXPORT_PREFS_DEFAULT = {
 
 export function initExportarDados() {
   inicializarAjustesProgramacao();
+  $(document).off(".exportarProgramacao");
 
   // Botão "Exportar Dados" simples (RG/CPF)
-  $(document).on("click", ".bt_exportDados", function () {
+  $(document).on("click.exportarProgramacao", ".bt_exportDados", function () {
     exportarDADOS($(this));
   });
 
   // Botão que abre o menu popup
-  $(document).on("click", ".exportBtn", function (e) {
+  $(document).on("click.exportarProgramacao", ".exportBtn", function (e) {
     const $btn = $(this);
     const $menu = $("#popupMenuExportar");
 
@@ -31,14 +32,14 @@ export function initExportarDados() {
   });
 
   // Fecha o menu se clicar fora
-  $(document).on("click", function (e) {
+  $(document).on("click.exportarProgramacao", function (e) {
     if (!$(e.target).closest(".exportBtn, #popupMenuExportar").length) {
       $("#popupMenuExportar").hide();
     }
   });
 
   // Clique nas opções do menu
-  $(document).on("click", ".popup-option", function () {
+  $(document).on("click.exportarProgramacao", ".popup-option", function () {
     const type = $(this).data("type");
     const $btn = $("#popupMenuExportar").data("btn");
 

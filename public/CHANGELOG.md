@@ -100,8 +100,16 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Corrigido
 
-
 ----- VERSAO ATUAL
+## [2.1.1] - 2026-08-13
+## Nome: 🔨 Ajustes
+### Corrigido
+- Corrigida OS que continuava marcada como sem colaborador após adicionar um colaborador na programação;
+- Corrigido acúmulo de eventos na Programação ao sair e voltar para a tela, reduzindo risco de ações duplicadas, lentidão e alterações repetidas;
+- Corrigida a sincronização da Programação ao adicionar ou remover colaboradores da OS, evitando colaboradores presos na tela e ocupação incorreta na lista de disponíveis;
+
+
+
 ## [2.1.0] - 2026-08-12
 ## Nome: 📜 PDFs e Notificações
 ### Adicionado

@@ -759,11 +759,11 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  max-width: 192px;
+  max-width: 215px;
   padding: 4px 5px;
   border: 1px solid rgba(54, 54, 54, 0.16);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
   transform: translate(18px, -50%);
   pointer-events: auto;

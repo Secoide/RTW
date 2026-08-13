@@ -8,7 +8,8 @@ export function initPesquisarOS() {
     const $btn = $input.siblings(".clear-btn");
 
     // 🔎 mostra/esconde o botão X conforme o usuário digita
-    $input.on("input", function () {
+    $input.off("input.pesquisarOS");
+    $input.on("input.pesquisarOS", function () {
         try {
             if ($(this).val().length) {
                 $btn.show();
@@ -52,7 +53,8 @@ export function initPesquisarOS() {
     });
 
     // ❌ clique no X → limpa e atualiza
-    $btn.on("click", function () {
+    $btn.off("click.pesquisarOS");
+    $btn.on("click.pesquisarOS", function () {
         try {
             $btn.hide();
             $input.val("").trigger("input");

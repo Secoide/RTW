@@ -5,15 +5,16 @@ import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
 let modoFocoAtivo = false;
 
 export function initFiltros() {
-    $(document).on("click", ".filtroFocar", function () {
+    $(document).off(".filtrosOS");
+    $(document).on("click.filtrosOS", ".filtroFocar", function () {
         ativar_FiltroFoco($(this));
     });
 
-    $(document).on("click", ".filtroPrioridade", function () {
+    $(document).on("click.filtrosOS", ".filtroPrioridade", function () {
         ativar_FiltroPrioridade($(this));
     });
     
-    $(document).on("click", ".ocupadoEmOS", function () {
+    $(document).on("click.filtrosOS", ".ocupadoEmOS", function () {
         ativar_FiltroColabEmOS($(this));
     });
 }

@@ -11,13 +11,16 @@ function limparDestaqueStatusDiaProgramacao() {
   });
 }
 
+async function handleDateChangeProgramacao(e) {
+  if (e.target && e.target.id === "seletor_data") {
+    const dataBase = new Date(e.target.value);
+    await atualizarProgramacao(dataBase);
+  }
+}
+
 export function initDateChangeHandler() {
-  document.addEventListener("change", async (e) => {
-    if (e.target && e.target.id === "seletor_data") {
-      const dataBase = new Date(e.target.value);
-      await atualizarProgramacao(dataBase);
-    } 
-  });
+  document.removeEventListener("change", handleDateChangeProgramacao);
+  document.addEventListener("change", handleDateChangeProgramacao);
 }
 
 

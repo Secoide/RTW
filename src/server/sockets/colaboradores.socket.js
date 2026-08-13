@@ -147,8 +147,8 @@ async function handleConfirmarAlocacao(wss, ws, { osID, nome, idNaOS }) {
 
 async function handleExcluirColaborador(wss, ws, { osID, id, idNaOS, dataDia }) {
   try {
-    await ColaboradoresService.excluirColaboradorEmOS(osID, id, idNaOS);
-    broadcast(wss, ws, { acao: "remover_colaborador", osID, id, dataDia });
+    await ColaboradoresService.excluirColaboradorEmOS(osID, id, idNaOS, dataDia);
+    enviarTodos(wss, { acao: "remover_colaborador", osID, id, dataDia });
   } catch (err) {
     sendError(ws, "Falha ao excluir colaborador", err);
   }
@@ -244,6 +244,14 @@ async function handleAtualizarPrioridadeOS(wss, ws, { osID, prioridade }) {
 function broadcast(wss, ws, data) {
   wss.clients.forEach((cliente) => {
     if (cliente !== ws && cliente.readyState === WebSocket.OPEN) {
+      cliente.send(JSON.stringify(data));
+    }
+  });
+}
+
+function enviarTodos(wss, data) {
+  wss.clients.forEach((cliente) => {
+    if (cliente.readyState === WebSocket.OPEN) {
       cliente.send(JSON.stringify(data));
     }
   });

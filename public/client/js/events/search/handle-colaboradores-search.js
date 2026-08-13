@@ -24,9 +24,10 @@ function fecharSugestoes($input) {
  * Inicializa eventos de busca/seleção de colaboradores
  */
 export function initColaboradoresSearch(socket) {
+    $(document).off(".colabSearch");
 
     // Dentro de initColaboradoresSearch(socket)
-    $(document).on("input", ".buscarColab input", function () {
+    $(document).on("input.colabSearch", ".buscarColab input", function () {
         const input = $(this);
         const termoBruto = input.val();
         const buscaLimpa = termoBruto.trim();
@@ -112,7 +113,7 @@ export function initColaboradoresSearch(socket) {
 
 
     // Remover sugestões ao clicar fora
-    $(document).on("click", function (e) {
+    $(document).on("click.colabSearch", function (e) {
         if (!$(e.target).closest(".sugestoes, .buscarColab input").length) {
             $(".sugestoes").remove();
         }
@@ -120,13 +121,13 @@ export function initColaboradoresSearch(socket) {
 
 
     // Marca OS em foco
-    $(document).on("focusin", ".painel_OS .buscarColab input", function () {
+    $(document).on("focusin.colabSearch", ".painel_OS .buscarColab input", function () {
         OS_FOCUS = $(this).closest(".painel_OS");
         indiceSelecionado2 = -1;
     });
 
     // Clique em sugestão
-    $(document).on("click", ".itemSugestao", async function () {
+    $(document).on("click.colabSearch", ".itemSugestao", async function () {
         const id = $(this).data("id");
         const nome = $(this).data("nome");
 
@@ -201,7 +202,7 @@ export function initColaboradoresSearch(socket) {
     });
 
 // Navegação com teclado
-$(document).on("keydown", ".buscarColab input", function (e) {
+$(document).on("keydown.colabSearch", ".buscarColab input", function (e) {
     const $input = $(this);
     let $sugestoes = $input.closest(".buscarColab").find(".sugestoes:visible");
     if (!$sugestoes.length) $sugestoes = $(".sugestoes:visible").last();
@@ -241,14 +242,14 @@ $(document).on("keydown", ".buscarColab input", function (e) {
 });
 
 // Hover com mouse atualiza índice
-$(document).on("mouseenter", ".itemSugestao", function () {
+$(document).on("mouseenter.colabSearch", ".itemSugestao", function () {
     const $li = $(this);
     $li.addClass("selecionado").siblings().removeClass("selecionado");
     indiceSelecionado2 = $li.index();
 });
 
 // Clique em uma sugestão
-$(document).on("click", ".itemSugestao", function () {
+$(document).on("click.colabSearch", ".itemSugestao", function () {
     const $input = $(this).closest(".buscarColab").find("input");
     fecharSugestoes($input);
     $input.focus(); // <-- foco volta para o input após clique

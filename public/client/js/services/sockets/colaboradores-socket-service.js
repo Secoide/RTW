@@ -135,36 +135,127 @@ export async function excluirColaboradorDaOS(osID, idColaborador, idNaOS, dataDi
 // RECEBIMENTO DO SERVIDOR
 // =============================
 
-export function handleAlocarColaborador({ osID, nomes, dataDia }) {
-  const $painelDia = $(".painelDia").filter(function () {
-    return $(this).attr("data-dia") === dataDia;
+function getPainelDia(dataDia) {
+  return $(".painelDia").filter(function () {
+    return $(this).attr("data-dia") == dataDia;
   });
+}
 
-  const $destinoOS = $painelDia.find(".painel_OS").filter(function () {
-    return $(this).find(".lbl_OS").text().trim() == osID;
+function getPainelOS($painelDia, osID) {
+  return $painelDia.find(".painel_OS").filter(function () {
+    return $(this).find(".p_infoOS").data("os") == osID || $(this).find(".lbl_OS").text().trim() == osID;
+  }).first();
+}
+
+function atualizarTotalColaboradoresOS($os) {
+  const total = $os.find(".p_colabs .colaborador").length;
+  $os.find(".lbl_total").text(total);
+
+  if (total === 0) {
+    $os.addClass("os_semColab");
+    $os.find(".p_colabs").slideUp(150);
+    $os.find(".icone-olho").removeClass("fa-eye").addClass("fa-eye-slash");
+  } else {
+    $os.removeClass("os_semColab");
+    $os.find(".p_colabs").show();
+    $os.find(".icone-olho").removeClass("fa-eye-slash").addClass("fa-eye");
+  }
+}
+
+function atualizarOcupacaoColaboradorBase($painelDia, idColab, osID) {
+  const $colabsBase = $painelDia
+    .find(".painel_colaboradores .p_colabsDisp .colaborador")
+    .filter(function () {
+      return $(this).data("id") == idColab;
+    });
+
+  $colabsBase.each(function () {
+    const $colabBase = $(this);
+    const $ocupado = $colabBase.find(".ocupadoEmOS");
+    $ocupado.find("div").remove();
+    $ocupado.append(`<div>${osID}</div>`);
+    $colabBase.addClass("colaboradorEmOS");
   });
+}
+
+function limparOcupacaoColaboradorBase($painelDia, idColab, osID) {
+  const $colabsBase = $painelDia
+    .find(".painel_colaboradores .p_colabsDisp .colaborador")
+    .filter(function () {
+      return $(this).data("id") == idColab;
+    });
+
+  $colabsBase.each(function () {
+    const $colabBase = $(this);
+    $colabBase.find(".ocupadoEmOS div").filter(function () {
+      return $(this).text().trim() == osID;
+    }).remove();
+
+    if ($colabBase.find(".ocupadoEmOS div").length === 0) {
+      $colabBase.removeClass("colaboradorEmOS");
+    }
+  });
+}
+
+function adicionarColaboradorNaOS(idColab, nome, $destinoOS) {
+  if (!$destinoOS?.length) return $();
+
+  const $painelDia = $destinoOS.closest(".painelDia");
+  const $base = $painelDia
+    .find(".painel_colaboradores .p_colabsDisp .colaborador")
+    .filter(function () {
+      return $(this).data("id") == idColab;
+    })
+    .first();
+
+  let $novo;
+  if ($base.length) {
+    $novo = $base.clone(false, false);
+    $novo.find(".ocupadoEmOS div").remove();
+  } else {
+    $novo = $(`
+      <div class="colaborador areaRestrita" draggable="true" data-id="${idColab}" data-nome="${nome || ""}">
+        <i class="exame_ok fa-solid fa-circle areaRestrita" title="Exames em dia"></i>
+        <p class="nome areaRestrita" title="${nome || ""}">${nome || ""}</p>
+        <i class="bt_tirarColab fa-solid fa-x areaRestrita"></i>
+        <p class="ocupadoEmOS areaRestrita"></p>
+      </div>
+    `);
+  }
+
+  $novo
+    .removeClass("colaboradorEmOS salvando selecionado")
+    .removeAttr("data-loading")
+    .attr("data-id", idColab)
+    .attr("data-nome", nome || $novo.data("nome") || "");
+
+  if (!$novo.find(".bt_tirarColab").length) {
+    $novo.append('<i class="bt_tirarColab fa-solid fa-x areaRestrita"></i>');
+  }
+
+  const $lista = $destinoOS.find(".p_colabs").first();
+  const $busca = $lista.find(".buscarColab").first();
+  if ($busca.length) $novo.insertBefore($busca);
+  else $lista.append($novo);
+
+  atualizarTotalColaboradoresOS($destinoOS);
+  return $novo;
+}
+
+export function handleAlocarColaborador({ osID, nomes, dataDia }) {
+  const $painelDia = getPainelDia(dataDia);
+  const $destinoOS = getPainelOS($painelDia, osID);
 
   nomes.forEach(({ id, nome }) => {
     const jaExiste = $destinoOS.find(".p_colabs .colaborador").filter(function () {
-      return $(this).data("id") === id;
+      return $(this).data("id") == id;
     }).length > 0;
 
     if (!jaExiste) {
       adicionarColaboradorNaOS(id, nome, $destinoOS);
     }
 
-    const $colabBase = $painelDia
-      .find(".painel_colaboradores .p_colabsDisp .colaborador")
-      .filter(function () {
-        return $(this).data("id") === id;
-      })
-      .first();
-
-    if ($colabBase.length) {
-      $colabBase.find(".ocupadoEmOS div").remove();
-      $colabBase.find(".ocupadoEmOS").append(`<div>${osID}</div>`);
-      $colabBase.addClass("colaboradorEmOS");
-    }
+    atualizarOcupacaoColaboradorBase($painelDia, id, osID);
   });
 
   atualizarPainel($painelDia);
@@ -184,12 +275,7 @@ export function handleTransferenciaConcluida({ colaboradores, datas }) {
         adicionarColaboradorNaOS(idColab, nome, $os);
       }
 
-      const $colabBase = $painelDia.find(`.p_colabsDisp .colaborador[data-id="${idColab}"]`).first();
-      if ($colabBase.length) {
-        $colabBase.find(".ocupadoEmOS div").remove();
-        $colabBase.find(".ocupadoEmOS").append(`<div>${idOS}</div>`);
-        $colabBase.addClass("colaboradorEmOS");
-      }
+      atualizarOcupacaoColaboradorBase($painelDia, idColab, idOS);
     });
 
     atualizarPainel($painelDia);
@@ -197,13 +283,8 @@ export function handleTransferenciaConcluida({ colaboradores, datas }) {
 }
 
 export function handleRemoverColaborador({ osID, id, dataDia }) {
-  const $painelDia = $(".painelDia").filter(function () {
-    return $(this).attr("data-dia") == dataDia;
-  });
-
-  const $os = $painelDia.find(".painel_OS").filter(function () {
-    return $(this).find(".p_infoOS").data("os") == osID;
-  });
+  const $painelDia = getPainelDia(dataDia);
+  const $os = getPainelOS($painelDia, osID);
 
   if ($os.length === 0) return;
 
@@ -213,32 +294,11 @@ export function handleRemoverColaborador({ osID, id, dataDia }) {
 
   if ($colabRemovido.length > 0) {
     $colabRemovido.remove();
-
-    const total = $os.find(".p_colabs .colaborador").length;
-    $os.find(".lbl_total").text(total);
-
-    if (total === 0) {
-      $os.find(".p_colabs").slideUp(150);
-      $os.find(".icone-olho").removeClass("fa-eye").addClass("fa-eye-slash");
-    }
-
-    const $colabsBase = $painelDia
-      .find(".painel_colaboradores .p_colabsDisp .colaborador")
-      .filter(function () {
-        return $(this).data("id") == id;
-      });
-
-    $colabsBase.each(function () {
-      const $colabBase = $(this);
-      $colabBase.find(".ocupadoEmOS div").filter(function () {
-        return $(this).text().trim() == osID;
-      }).remove();
-
-      if ($colabBase.find(".ocupadoEmOS div").length === 0) {
-        $colabBase.removeClass("colaboradorEmOS");
-      }
-    });
+    atualizarTotalColaboradoresOS($os);
   }
+
+  limparOcupacaoColaboradorBase($painelDia, id, osID);
+  atualizarPainel($painelDia);
 }
 
 export function handleConfirmarAlocacao({
@@ -250,15 +310,11 @@ export function handleConfirmarAlocacao({
   dataDia
 }) {
 
-  const $painelDia = $(".painelDia").filter(function () {
-    return $(this).attr("data-dia") === dataDia;
-  });
+  const $painelDia = getPainelDia(dataDia);
 
   if ($painelDia.length === 0) return;
 
-  const $painel = $painelDia.find(".painel_OS").filter(function () {
-    return $(this).find(".lbl_OS").text().trim() == osID;
-  });
+  const $painel = getPainelOS($painelDia, osID);
 
   if ($painel.length === 0) return;
 
@@ -269,13 +325,7 @@ export function handleConfirmarAlocacao({
 
     $colabsRemovidos.remove();
 
-    const total = $os.find(".p_colabs .colaborador").length;
-    $os.find(".lbl_total").text(total);
-
-    if (total === 0) {
-      $os.find(".p_colabs").slideUp(150);
-      $os.find(".icone-olho").removeClass("fa-eye").addClass("fa-eye-slash");
-    }
+    atualizarTotalColaboradoresOS($os);
   });
 
   let $colab = $painel.find(`.colaborador[data-id="${idfuncionario}"]`);
@@ -311,6 +361,10 @@ export function handleConfirmarAlocacao({
       $colab.addClass(classe);
     }
   }
+
+  atualizarOcupacaoColaboradorBase($painelDia, idfuncionario, osID);
+  atualizarTotalColaboradoresOS($painel);
+  atualizarPainel($painelDia);
 }
 
 

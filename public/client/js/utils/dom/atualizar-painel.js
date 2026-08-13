@@ -36,6 +36,9 @@ export function esconderPainelOSsemColab() {
       if (!$os.hasClass('matchOS')) {
         $os.addClass('os_semColab');
       }
+    } else {
+      $os.removeClass('os_semColab');
+      $os.find('.icone-olho').removeClass('fa-eye-slash').addClass('fa-eye');
     };
   });
 }

@@ -29,14 +29,19 @@ function initCalendario() {
         }
     });
 
-    $(document).on("click", "#abrirCalendario", function () {
+    $(document).off("click.transferenciaColabs", "#abrirCalendario");
+    $(document).on("click.transferenciaColabs", "#abrirCalendario", function () {
         fp.open();
     });
 }
 
 export function initColaboradoresTransferencia(socket) {
+    $(document).off(".transferenciaColabs");
+    $(document).on("click.transferenciaColabs", "#abrirCalendario", function () {
+        if (fp) fp.open();
+    });
     // Ativar/confirmar seleção
-    $(document).on("click", ".bt_transferirColabs", function () {
+    $(document).on("click.transferenciaColabs", ".bt_transferirColabs", function () {
         const $btn = $(this);
         $("#abrirCalendario").attr("data-count", "");
 
@@ -87,7 +92,7 @@ export function initColaboradoresTransferencia(socket) {
     });
 
     // Selecionar OS com overlay
-    $(document).on("click", ".overlay-transferencia", function (e) {
+    $(document).on("click.transferenciaColabs", ".overlay-transferencia", function (e) {
         e.stopPropagation();
         $(this).toggleClass("selecionado");
         const $icon = $(this).find("i");
@@ -95,7 +100,7 @@ export function initColaboradoresTransferencia(socket) {
     });
 
     // Fechar modal
-    $(document).on("click", ".fechar-modal-data", function () {
+    $(document).on("click.transferenciaColabs", ".fechar-modal-data", function () {
         $(".overlay-transferencia").remove();
         $(".bt_transferirColabs").removeClass("fa-check-to-slot").addClass("fa-arrows-turn-right");
         $("#modalDataTransferencia").fadeOut();
@@ -105,7 +110,7 @@ export function initColaboradoresTransferencia(socket) {
         }
     });
 
-    $(document).on('click', '#confirmarTransferencia', async function () {
+    $(document).on('click.transferenciaColabs', '#confirmarTransferencia', async function () {
         const datas = fp ? fp.selectedDates.map(d => fp.formatDate(d, 'Y-m-d')) : [];
         if (!datas.length || !window.transferenciaColabs?.length) {
             alert('Selecione ao menos uma data e colaboradores.');

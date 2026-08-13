@@ -13,19 +13,22 @@ export function initOSForm() {
     initFormCadSupervisor();
     initFormCadCidade();
 
-    $(document).on('click', '#bt_cad_cliente', function (e) {
+    $(document).off("click.osForm", "#bt_cad_cliente");
+    $(document).on('click.osForm', '#bt_cad_cliente', function (e) {
         open_form_Cad_Cliente();
     });
-    $(document).on('click', '#bt_cad_supervisor', function (e) {
+    $(document).off("click.osForm", "#bt_cad_supervisor");
+    $(document).on('click.osForm', '#bt_cad_supervisor', function (e) {
         open_form_Cad_Supervisor();
     });
-    $(document).on('click', '#bt_cad_cidade', function (e) {
+    $(document).off("click.osForm", "#bt_cad_cidade");
+    $(document).on('click.osForm', '#bt_cad_cidade', function (e) {
         open_form_Cad_Cidade();
     });
 
 
-    $(document).off("submit", "#formOS");
-    $(document).on("submit", "#formOS", async function (e) {
+    $(document).off("submit.osForm", "#formOS");
+    $(document).on("submit.osForm", "#formOS", async function (e) {
         // delega o evento ao document
         e.preventDefault();
 
@@ -119,10 +122,10 @@ export function initOSForm() {
         }
     });
 
-    $(document).off("submit", "#formStatusOS");
+    $(document).off("submit.osForm", "#formStatusOS");
 
     // delega o evento ao document
-    $(document).on("submit", "#formStatusOS", function (e) {
+    $(document).on("submit.osForm", "#formStatusOS", function (e) {
         e.preventDefault();
         // Serializa dados do form
         const formData = $(this).serialize();

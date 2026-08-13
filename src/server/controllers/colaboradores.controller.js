@@ -194,9 +194,9 @@ async function getColaboradoresEmOS(req, res) {
 
 async function excluirColaboradorEmos(req, res, next) {
   try {
-    const { osID, id, idNaOS } = req.body;
+    const { osID, id, idNaOS, dataDia } = req.body;
 
-    const result = await ColabService.excluirColaboradorEmOS(osID, id, idNaOS);
+    const result = await ColabService.excluirColaboradorEmOS(osID, id, idNaOS, dataDia);
 
     res.json(result);
   } catch (err) {
