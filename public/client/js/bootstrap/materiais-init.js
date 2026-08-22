@@ -370,6 +370,7 @@ async function abrirCadastroMaterial(id) {
   $("#categoriaMaterial").val(item.categoria || "");
   $("#codigo").val(item.codigo || "");
   $("#fabricante").val(item.fabricante || "");
+  $("#unidadeMaterial").val(item.unidade || "un");
   $("#idMaterial").val(item.id);
   $("#imagemMaterialOrigemId").val("");
   $("#imagemMaterialOrigemTexto").text("");

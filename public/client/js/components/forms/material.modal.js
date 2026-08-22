@@ -24,6 +24,7 @@ export function resetModalMaterial() {
     $("#categoriaMaterial").val("");
     $("#codigo").val("");
     $("#fabricante").val("");
+    $("#unidadeMaterial").val("un");
     $("#imagemMaterialOrigemId").val("");
     $("#imagemMaterialOrigemTexto").text("");
     $("#imagemmaterial").attr("src", "/imagens/imagemmaterial.webp");

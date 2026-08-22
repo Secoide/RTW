@@ -140,6 +140,9 @@ function renderCardLista(lista, idOS) {
       </button>
 
       <div class="material-lista-card-actions">
+        <button class="material-lista-mover-os" data-id="${lista.id}" title="Copiar ou transferir para outra OS">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        </button>
         ${podeVoltar ? `
           <button class="material-lista-voltar" data-id="${lista.id}" title="Voltar para o estagio anterior" ${podeAlterar ? "" : "disabled"}>
             <i class="fa-solid fa-backward-step"></i>

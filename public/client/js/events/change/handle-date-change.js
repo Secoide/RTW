@@ -2,6 +2,28 @@ import { carregarColaboradoresDisp, carregarOSComColaboradores } from "../../ser
 import { formatarData_Semana } from "../../utils/formatters/date-format.js";
 import { mostrarErroUI } from "../../utils/dom/error-handler.js";
 
+let atualizacaoProgramacaoSeq = 0;
+
+export function criarDataLocalProgramacao(valor) {
+  if (valor instanceof Date) {
+    return new Date(valor.getFullYear(), valor.getMonth(), valor.getDate());
+  }
+
+  const match = String(valor || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return new Date(NaN);
+
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+export function formatarDataLocalProgramacao(data) {
+  if (!(data instanceof Date) || Number.isNaN(data.getTime())) return "";
+
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 function limparDestaqueStatusDiaProgramacao() {
   $(".painelDia.iluminar_verde").each(function () {
     const $painel = $(this);
@@ -13,7 +35,7 @@ function limparDestaqueStatusDiaProgramacao() {
 
 async function handleDateChangeProgramacao(e) {
   if (e.target && e.target.id === "seletor_data") {
-    const dataBase = new Date(e.target.value);
+    const dataBase = criarDataLocalProgramacao(e.target.value);
     await atualizarProgramacao(dataBase);
   }
 }
@@ -25,17 +47,22 @@ export function initDateChangeHandler() {
 
 
 export async function atualizarProgramacao(dataBase){
+  const sequenciaAtual = ++atualizacaoProgramacaoSeq;
   try {
         document.body.style.cursor = "wait";
+        window.__programacaoCarregando = true;
+        document.dispatchEvent(new CustomEvent("programacao:carregando", { detail: { carregando: true } }));
+
         if (isNaN(dataBase.getTime())) return;
         limparDestaqueStatusDiaProgramacao();
 
         document.querySelectorAll(".painelDia").forEach((painel, index) => {
-          const novaData = new Date(dataBase);
+          const novaData = criarDataLocalProgramacao(dataBase);
           novaData.setDate(dataBase.getDate() + (index - 1));
 
-          const dataFormatada = novaData.toISOString().split("T")[0];
+          const dataFormatada = formatarDataLocalProgramacao(novaData);
           painel.setAttribute("data-dia", dataFormatada);
+          $(painel).removeData("dia");
           painel.querySelector(".painel_Dia").textContent = formatarData_Semana(dataFormatada);
         });
 
@@ -45,6 +72,8 @@ export async function atualizarProgramacao(dataBase){
             await carregarOSComColaboradores(painel);
           })
         );
+
+        if (sequenciaAtual !== atualizacaoProgramacaoSeq) return;
         
         restaurarOSPrioridade();
         limparDestaqueStatusDiaProgramacao();
@@ -53,6 +82,10 @@ export async function atualizarProgramacao(dataBase){
         console.error("Erro ao atualizar os painéis:", err);
         mostrarErroUI("Falha ao aplicar pesquisa. Tente novamente."); // exemplo de handler central
       } finally {
-        document.body.style.cursor = "default";
+        if (sequenciaAtual === atualizacaoProgramacaoSeq) {
+          window.__programacaoCarregando = false;
+          document.body.style.cursor = "default";
+          document.dispatchEvent(new CustomEvent("programacao:carregando", { detail: { carregando: false } }));
+        }
       }
 }

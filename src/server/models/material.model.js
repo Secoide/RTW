@@ -165,6 +165,7 @@ async function getVariacaoByID(id) {
       mv.id_material,
       mv.codigo,
       mv.fabricante,
+      mv.unidade,
       imagem,
       versao_foto
 
@@ -241,12 +242,13 @@ async function createMaterial(data) {
 // 🔹 CRIAR variação
 async function createVariacao(data) {
   const [result] = await connection.query(`
-    INSERT INTO tb_materiais_variacoes (id_material, codigo, fabricante)
-    VALUES (?, ?, ?)
+    INSERT INTO tb_materiais_variacoes (id_material, codigo, fabricante, unidade)
+    VALUES (?, ?, ?, ?)
   `, [
     data.id_material,
     data.codigo || null,
-    data.fabricante || null
+    data.fabricante || null,
+    data.unidade || "un"
   ]);
 
   return { insertId: result.insertId };
@@ -315,11 +317,12 @@ async function atualizarImagemMaterial(userId, caminhoImagem) {
 async function updateVariacao(id, data) {
   const [result] = await connection.query(`
     UPDATE tb_materiais_variacoes
-    SET codigo = ?, fabricante = ?
+    SET codigo = ?, fabricante = ?, unidade = ?
     WHERE id = ?
   `, [
     data.codigo || null,
     data.fabricante || null,
+    data.unidade || "un",
     id
   ]);
 

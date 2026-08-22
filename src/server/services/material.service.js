@@ -138,6 +138,14 @@ async function duplicarListaOS(id, usuario) {
   return await MaterialOSModel.duplicarLista(id, usuario?.id || null);
 }
 
+async function copiarListaParaOS(id, idOSDestino, usuario) {
+  return await MaterialOSModel.duplicarLista(id, usuario?.id || null, idOSDestino);
+}
+
+async function transferirListaParaOS(id, idOSDestino, usuario) {
+  return await MaterialOSModel.transferirLista(id, idOSDestino, usuario?.id || null);
+}
+
 async function listarHistoricoListaOS(id) {
   return await MaterialOSModel.listarHistoricoLista(id);
 }
@@ -185,7 +193,8 @@ async function atualizarVariacao(id, data) {
 
   await MaterialModel.updateVariacao(id, {
     codigo: data.codigo,
-    fabricante: data.fabricante
+    fabricante: data.fabricante,
+    unidade: data.unidade || atual.unidade || "un"
   });
 
   if (Array.isArray(data.atributos)) {
@@ -355,6 +364,8 @@ module.exports = {
   avancarListaOS,
   voltarListaOS,
   duplicarListaOS,
+  copiarListaParaOS,
+  transferirListaParaOS,
   listarHistoricoListaOS,
 
   deletarMaterialOS,

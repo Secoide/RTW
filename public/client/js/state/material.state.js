@@ -9,6 +9,7 @@ export const materialState = {
   listaFiltrada: [],
   listaFornecedores: [],
   listaResponsaveis: [],
+  listaOSDisponiveis: [],
   listasOS: [],
   listaSelecionada: null,
   filtroStatusAtual: "",

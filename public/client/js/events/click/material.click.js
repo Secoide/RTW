@@ -9,6 +9,7 @@ import {
   duplicarListaMaterialOS,
   excluirListaMaterialOS,
   listarHistoricoListaMaterialOS,
+  moverListaMaterialOS,
   voltarListaMaterialOSComMotivo
 } from "../../services/api/material.api.js";
 import { getFornecedoresMaterial } from "../../services/api/material.fornecedor.api.js";
@@ -186,6 +187,37 @@ export function initMaterialClicks() {
 
       await duplicarListaMaterialOS(id);
       await carregarMateriaisCompleto();
+    });
+
+  $(document).off("click.materialMoverListaOS", ".material-lista-mover-os")
+    .on("click.materialMoverListaOS", ".material-lista-mover-os", async function (e) {
+      e.stopPropagation();
+      const id = $(this).data("id");
+      const lista = state.listasOS.find(item => Number(item.id) === Number(id));
+      const dados = await abrirModalMoverListaOS(lista);
+
+      if (!dados) return;
+
+      const confirmado = await confirmarAcaoMaterial({
+        titulo: dados.modo === "transferir" ? "Transferir lista" : "Copiar lista",
+        mensagem: dados.modo === "transferir"
+          ? "A lista sairá desta OS e passará a pertencer à OS selecionada."
+          : "Será criada uma nova lista na OS selecionada, mantendo a lista atual nesta OS.",
+        tipo: dados.modo === "transferir" ? "warning" : "success",
+        confirmar: dados.modo === "transferir" ? "Transferir" : "Copiar"
+      });
+
+      if (!confirmado) return;
+
+      try {
+        await moverListaMaterialOS(id, dados);
+        state.modoVisualizacao = "kanban";
+        state.listaSelecionada = null;
+        await carregarMateriaisCompleto();
+      } catch (err) {
+        console.error(err);
+        alert(err.responseJSON?.erro || "Nao foi possivel copiar ou transferir a lista.");
+      }
     });
 
   $(document).off("click.materialHistoricoLista", ".material-lista-historico")
@@ -1298,6 +1330,100 @@ export function initMaterialClicks() {
     $("#modalListaMaterial").prop("hidden", true);
   }
 
+  function abrirModalMoverListaOS(lista = null) {
+    return new Promise(resolve => {
+      const listaId = lista?.id || "";
+      const osAtual = String(lista?.id_os || state.osSelecionada || "");
+      const opcoesOS = renderOptionsOSDestino(osAtual);
+
+      if (!opcoesOS) {
+        alert("Nenhuma OS de destino disponivel.");
+        resolve(false);
+        return;
+      }
+
+      $("#modalMoverListaMaterial").remove();
+
+      const html = `
+        <div id="modalMoverListaMaterial" class="modal-confirmacao-material" role="dialog" aria-modal="true">
+          <div class="modal-confirmacao-material-box modal-mover-lista-material-box is-info">
+            <div class="modal-confirmacao-material-icone">
+              <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            </div>
+            <h3>Copiar ou transferir lista</h3>
+            <p>${escapeHtmlLocal(lista?.titulo || `Lista #${listaId}`)}</p>
+
+            <div class="modal-mover-lista-material-grid">
+              <label>
+                <span>Ação</span>
+                <select id="modalMoverListaMaterialModo">
+                  <option value="transferir">Transferir para outra OS</option>
+                  <option value="copiar">Copiar para outra OS</option>
+                </select>
+              </label>
+
+              <label>
+                <span>OS de destino</span>
+                <select id="modalMoverListaMaterialDestino">
+                  ${opcoesOS}
+                </select>
+              </label>
+            </div>
+
+            <small class="modal-mover-lista-material-info">
+              Transferir corrige lista criada na OS errada. Copiar cria uma nova lista na OS escolhida.
+            </small>
+
+            <div class="modal-confirmacao-material-actions">
+              <button type="button" id="btnCancelarMoverListaMaterial" class="bt_padrao bt_cancelar">Cancelar</button>
+              <button type="button" id="btnConfirmarMoverListaMaterial" class="bt_padrao bt_cad">Continuar</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      $("body").append(html);
+
+      const fechar = resposta => {
+        $("#modalMoverListaMaterial").remove();
+        $(document).off(".materialMoverListaModal");
+        resolve(resposta);
+      };
+
+      $("#btnCancelarMoverListaMaterial").on("click.materialMoverListaModal", () => fechar(false));
+      $("#btnConfirmarMoverListaMaterial").on("click.materialMoverListaModal", () => {
+        const modo = $("#modalMoverListaMaterialModo").val();
+        const idOSDestino = $("#modalMoverListaMaterialDestino").val();
+
+        if (!idOSDestino) {
+          $("#modalMoverListaMaterialDestino").focus();
+          return;
+        }
+
+        if (modo === "transferir" && String(idOSDestino) === osAtual) {
+          alert("Escolha uma OS diferente para transferir.");
+          $("#modalMoverListaMaterialDestino").focus();
+          return;
+        }
+
+        fechar({
+          modo,
+          id_os_destino: Number(idOSDestino)
+        });
+      });
+
+      $("#modalMoverListaMaterial").on("click.materialMoverListaModal", event => {
+        if (event.target.id === "modalMoverListaMaterial") fechar(false);
+      });
+
+      $(document).on("keydown.materialMoverListaModal", event => {
+        if (event.key === "Escape") fechar(false);
+      });
+
+      $("#modalMoverListaMaterialDestino").focus();
+    });
+  }
+
   function confirmarAcaoMaterial({ titulo, mensagem, tipo = "default", confirmar = "Confirmar", pedirMotivo = false, motivoObrigatorio = false }) {
     return new Promise(resolve => {
       const $modal = $("#modalConfirmacaoMaterial");
@@ -1387,6 +1513,28 @@ export function initMaterialClicks() {
         </option>
       `);
     });
+
+    return opcoes.join("");
+  }
+
+  function renderOptionsOSDestino(osAtual) {
+    const opcoes = [];
+
+    (state.listaOSDisponiveis || [])
+      .filter(os => os.statuss != 4)
+      .forEach(os => {
+        const id = String(os.id_OSs || "");
+        if (!id) return;
+
+        const descricao = os.descricao ? ` - ${os.descricao}` : "";
+        const atual = id === String(osAtual) ? " (OS atual)" : "";
+
+        opcoes.push(`
+          <option value="${escapeHtmlLocal(id)}">
+            OS ${escapeHtmlLocal(id)}${escapeHtmlLocal(descricao)}${escapeHtmlLocal(atual)}
+          </option>
+        `);
+      });
 
     return opcoes.join("");
   }

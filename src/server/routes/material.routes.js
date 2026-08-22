@@ -17,6 +17,7 @@ router.put('/listas/:id', verificarAutenticacao, controller.updateListaOS);
 router.put('/listas/:id/avancar', verificarAutenticacao, controller.avancarListaOS);
 router.put('/listas/:id/voltar', verificarAutenticacao, controller.voltarListaOS);
 router.post('/listas/:id/duplicar', verificarAutenticacao, controller.duplicarListaOS);
+router.post('/listas/:id/mover-os', verificarAutenticacao, controller.moverListaOS);
 router.delete('/listas/:id', verificarAutenticacao, controller.deleteListaOS);
 
 router.get('/os/:idOS', verificarAutenticacao, controller.getMateriaisOS);

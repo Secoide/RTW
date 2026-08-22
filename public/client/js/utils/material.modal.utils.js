@@ -11,7 +11,8 @@ export function montarObjetoVariacao(idMaterial) {
   return {
     id_material: idMaterial,
     codigo: $("#codigo").val(),
-    fabricante: $("#fabricante").val()
+    fabricante: $("#fabricante").val(),
+    unidade: $("#unidadeMaterial").val() || "un"
   };
 }
 

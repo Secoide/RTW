@@ -9,6 +9,7 @@ import { initEstoque } from "../../bootstrap/estoque-init.js";
 import { initGuia } from "../../bootstrap/guia-init.js";
 import { initFerramentas } from "../../bootstrap/ferramentas-init.js";
 import { initSpda } from "../../bootstrap/spda-init.js";
+import { initRelatos } from "../../bootstrap/relatos-init.js";
 import { initPrototipoAtributosMaterial, limparPrototipoAtributosMaterial } from "../../bootstrap/prototipo-atributos-material-init.js";
 
 const STORAGE_ULTIMA_PAGINA_MENU = "connectpear_ultima_pagina_menu";
@@ -64,6 +65,9 @@ export function carregarPagina(pagina, opcoes = {}) {
         }
         if (pagina.includes('spda')) {
           initSpda();
+        }
+        if (pagina.includes('relatos')) {
+          initRelatos();
         }
         if (pagina.includes('guia')) {
           initGuia();

@@ -1,4 +1,5 @@
 const SaasService = require("../services/saas.service");
+const FeedbackModel = require("../models/feedback.model");
 
 function tratarErro(res, err) {
   const status = err?.status || 500;
@@ -130,6 +131,31 @@ async function removerUsuario(req, res) {
   }
 }
 
+async function listarFeedbacks(req, res) {
+  try {
+    res.json({ sucesso: true, feedbacks: await FeedbackModel.listarTodosFeedbacks() });
+  } catch (err) {
+    tratarErro(res, err);
+  }
+}
+
+async function atualizarFeedback(req, res) {
+  try {
+    const feedback = await FeedbackModel.atualizarStatus(req.params.id, req.body);
+    res.json({ sucesso: true, feedback });
+  } catch (err) {
+    tratarErro(res, err);
+  }
+}
+
+async function excluirFeedback(req, res) {
+  try {
+    res.json(await FeedbackModel.excluirFeedback(req.params.id));
+  } catch (err) {
+    tratarErro(res, err);
+  }
+}
+
 module.exports = {
   login,
   status,
@@ -143,5 +169,8 @@ module.exports = {
   deletarEmpresa,
   salvarRecursosEmpresa,
   vincularUsuario,
-  removerUsuario
+  removerUsuario,
+  listarFeedbacks,
+  atualizarFeedback,
+  excluirFeedback
 };

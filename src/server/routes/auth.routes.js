@@ -7,6 +7,7 @@ const verificarAutenticacao = require('../middlewares/auth.middleware');
 
 router.post('/login', validate(loginSchema), authController.loginController);
 router.get('/status', verificarAutenticacao, authController.statusController);
+router.get('/empresa-aviso', verificarAutenticacao, authController.avisoEmpresaController);
 router.post('/alterar-senha', verificarAutenticacao, authController.alterarSenhaController);
 // 🆕 Recuperação de senha
 router.post('/recuperar-senha', authController.recuperarSenhaController);

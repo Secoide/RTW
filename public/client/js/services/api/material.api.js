@@ -24,6 +24,7 @@ export async function carregarResponsaveisLista() {
 export async function carregarOS() {
   const lista = await $.get("/api/os");
   const osFoco = sessionStorage.getItem("material_focus_os");
+  state.listaOSDisponiveis = lista || [];
 
   const $cbx = $("#cbxOS");
   $cbx.empty().append(`<option value="">Selecione uma OS</option>`);
@@ -127,6 +128,15 @@ export function voltarListaMaterialOSComMotivo(id, motivo = "") {
 
 export function duplicarListaMaterialOS(id) {
   return $.post(`${state.BASE_URL}/materiais/listas/${id}/duplicar`);
+}
+
+export function moverListaMaterialOS(id, payload) {
+  return $.ajax({
+    url: `${state.BASE_URL}/materiais/listas/${id}/mover-os`,
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(payload)
+  });
 }
 
 export function listarHistoricoListaMaterialOS(id) {

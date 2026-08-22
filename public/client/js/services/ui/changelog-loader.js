@@ -10,6 +10,48 @@ async function buscarTextoChangelog() {
   return response.text();
 }
 
+function compararVersoes(a, b) {
+  const partesA = String(a || "").split(".").map(Number);
+  const partesB = String(b || "").split(".").map(Number);
+  const tamanho = Math.max(partesA.length, partesB.length);
+
+  for (let i = 0; i < tamanho; i += 1) {
+    const valorA = Number.isFinite(partesA[i]) ? partesA[i] : 0;
+    const valorB = Number.isFinite(partesB[i]) ? partesB[i] : 0;
+
+    if (valorA > valorB) return 1;
+    if (valorA < valorB) return -1;
+  }
+
+  return 0;
+}
+
+export async function carregarVersoesChangelog(versaoAtual) {
+  const texto = await buscarTextoChangelog();
+  const linhas = texto.split(/\r?\n/);
+  const versoes = [];
+
+  linhas.forEach((linha, index) => {
+    const match = linha.match(/^## \[(\d+\.\d+\.\d+)\]\s*-\s*(.*)$/);
+    if (!match) return;
+
+    const versao = match[1];
+    if (compararVersoes(versao, versaoAtual) > 0) return;
+
+    const nomeLinha = linhas.slice(index + 1, index + 5)
+      .find(item => item.startsWith("## Nome:"));
+    const nome = nomeLinha ? nomeLinha.replace("## Nome:", "").trim() : "";
+
+    versoes.push({
+      versao,
+      data: match[2].trim(),
+      nome
+    });
+  });
+
+  return versoes.sort((a, b) => compararVersoes(b.versao, a.versao));
+}
+
 export async function carregarChangelog(versao) {
   const texto = await buscarTextoChangelog();
 

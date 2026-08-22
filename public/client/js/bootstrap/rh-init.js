@@ -4,6 +4,8 @@ import { open_form_AnexarExame } from "../events/forms/anexarExame.js";
 import { open_form_AnexarEPI } from "../events/forms/anexarEPI.js";
 import { exportarResumoRHPDF } from "../services/pdf/rh-pdf.js";
 
+let xhrTabelaColaboradoresRH = null;
+let cicloTabelaColaboradoresRH = 0;
 
 export async function inciarRH() {
     try {
@@ -340,15 +342,29 @@ function atualizarResumoRH() {
 //${colab.status_epi}
 export function preencherTabelaColaboradoresRH() {
     const tbody = $('#tb_colaboradoresRH tbody');
+    const cicloAtual = ++cicloTabelaColaboradoresRH;
     let buscarExame;
     let buscarCurso;
     let buscarIntegracao;
+
+    if (xhrTabelaColaboradoresRH?.readyState && xhrTabelaColaboradoresRH.readyState !== 4) {
+        xhrTabelaColaboradoresRH.abort();
+    }
+
     tbody.empty(); // Limpa antes de preencher
-    $.ajax({
+    xhrTabelaColaboradoresRH = $.ajax({
         url: 'api/rh/listar-geral',
         type: 'GET',
         success: function (data) {
+            if (cicloAtual !== cicloTabelaColaboradoresRH) {
+                return;
+            }
+
             data.forEach(colab => {
+                if (cicloAtual !== cicloTabelaColaboradoresRH) {
+                    return;
+                }
+
                 const linha = `
                         <tr class="rh_tb_lin_colob ${colab.exames} ${colab.contrato === "desligado" ? colab.contrato : colab.motivo}" style="font-size: 13px;"
                             data-id="${colab.idFunc}"
@@ -388,7 +404,15 @@ export function preencherTabelaColaboradoresRH() {
             aplicarFiltrosRH();
         },
         error: function (xhr) {
+            if (xhr.statusText === "abort") {
+                return;
+            }
             alert(xhr.responseJSON?.error || xhr.responseText || 'Erro no carregamento da tabela');
+        },
+        complete: function () {
+            if (cicloAtual === cicloTabelaColaboradoresRH) {
+                xhrTabelaColaboradoresRH = null;
+            }
         }
     });
 }

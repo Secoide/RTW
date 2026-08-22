@@ -43,6 +43,11 @@ export function initExportarDados() {
     const type = $(this).data("type");
     const $btn = $("#popupMenuExportar").data("btn");
 
+    if (!validarBotaoExportacaoProgramacao($btn)) {
+      $("#popupMenuExportar").hide();
+      return;
+    }
+
     switch (type) {
       case "whats":
         exportarWHATS($btn);
@@ -140,9 +145,48 @@ function salvarPreferenciasExportacaoProgramacao(preferencias) {
 // Funções internas
 // ===================
 
+function validarBotaoExportacaoProgramacao($btn) {
+  if (window.__programacaoCarregando) {
+    Swal.fire({
+      icon: "info",
+      title: "Programação carregando",
+      theme: "dark",
+      text: "Aguarde a programação terminar de atualizar antes de exportar."
+    });
+    return false;
+  }
+
+  if (!$btn?.length || !$.contains(document, $btn[0])) {
+    Swal.fire({
+      icon: "warning",
+      title: "Exportação não iniciada",
+      theme: "dark",
+      text: "A programação foi atualizada enquanto o menu estava aberto. Abra o menu novamente no dia desejado."
+    });
+    return false;
+  }
+
+  const $painelDia = $btn.closest(".painelDia");
+  if (!$painelDia.length || !obterDiaPainel($painelDia)) {
+    Swal.fire({
+      icon: "warning",
+      title: "Dia não identificado",
+      theme: "dark",
+      text: "Não foi possível identificar a data do painel. Atualize a programação e tente novamente."
+    });
+    return false;
+  }
+
+  return true;
+}
+
+function obterDiaPainel($painelDia) {
+  return String($painelDia.attr("data-dia") || "").slice(0, 10);
+}
+
 async function exportarDADOS($btn) {
   const $painelDia = $btn.closest(".painelDia");
-  const dataDia = $painelDia.data("dia");
+  const dataDia = obterDiaPainel($painelDia);
   const osID = $btn.closest(".painel_OS").find(".p_infoOS").data("os");
 
   try {
@@ -178,7 +222,7 @@ async function exportarWHATS($btn) {
 
   const preferenciasExportacao = carregarPreferenciasExportacaoProgramacao();
   const $painelDia = $btn.closest(".painelDia");
-  const diaOriginal = $painelDia.data("dia");
+  const diaOriginal = obterDiaPainel($painelDia);
   const dia = formatarData(diaOriginal);
 
   let enviar = `📆 *${dia.toUpperCase()}*\n\n`;
@@ -386,7 +430,7 @@ async function exportarPDF($btn) {
 }
 
 function coletarProgramacaoDiaPDF($painelDia) {
-  const diaOriginal = $painelDia.data("dia");
+  const diaOriginal = obterDiaPainel($painelDia);
   const diaFormatado = formatarData(diaOriginal);
   const ordens = [];
 
@@ -773,7 +817,7 @@ function exportarEXCEL() {
   const dadosExportados = [];
 
   $(".painelDia").each(function () {
-    const dia = $(this).data("dia");
+    const dia = obterDiaPainel($(this));
 
     $(this).find(".painel_OS").each(function () {
       const $os = $(this);

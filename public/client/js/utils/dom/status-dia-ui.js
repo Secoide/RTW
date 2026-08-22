@@ -1,5 +1,5 @@
 import { formatarData } from "../formatters/date-format.js";
-import { atualizarProgramacao } from "../../events/change/handle-date-change.js";
+import { atualizarProgramacao, criarDataLocalProgramacao } from "../../events/change/handle-date-change.js";
 
 const TEMPO_ILUMINAR_STATUS_MS = 3000;
 
@@ -38,7 +38,7 @@ export function mudarStatusProgramacaoDia({ statuss, dia, origem }) {
   if (origem === "local") return;
 
   const $painel = $(".painelDia").filter(function () {
-    return $(this).data("dia") == dia;
+    return $(this).attr("data-dia") == dia;
   });
 
   if ($painel.length === 0) {
@@ -65,7 +65,7 @@ export function mudarStatusProgramacaoDia({ statuss, dia, origem }) {
       avisos += `\n\n${novoAviso}`;
       $("#form_aviso").load("../aviso.html", function () {
         mostrarAviso(avisos);
-        const dataSelecionada = new Date($("#seletor_data").val());
+        const dataSelecionada = criarDataLocalProgramacao($("#seletor_data").val());
         atualizarProgramacao(dataSelecionada);
       });
     }

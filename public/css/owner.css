@@ -12,7 +12,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -40,7 +41,8 @@ button.danger {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 28px;
   padding: 0 8px;
@@ -50,6 +52,13 @@ select {
   color: #f4f7f8;
   outline: none;
   font-size: 11px;
+}
+
+textarea {
+  min-height: 56px;
+  padding: 7px 8px;
+  resize: vertical;
+  line-height: 1.35;
 }
 
 select option {
@@ -312,6 +321,102 @@ select option {
   width: 105px;
 }
 
+.owner-feedback-card {
+  min-height: 280px;
+}
+
+.owner-feedbacks {
+  display: grid;
+  gap: 6px;
+  max-height: 360px;
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.owner-feedbacks::-webkit-scrollbar {
+  display: none;
+}
+
+.owner-feedback {
+  display: grid;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(244, 247, 248, 0.82);
+  font-size: 10px;
+}
+
+.owner-feedback-top,
+.owner-feedback-edit {
+  display: grid;
+  gap: 6px;
+}
+
+.owner-feedback-top {
+  grid-template-columns: 1fr auto;
+  align-items: start;
+}
+
+.owner-feedback-top strong {
+  display: block;
+  color: #fff;
+  font-size: 11px;
+}
+
+.owner-feedback-top small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(244, 247, 248, 0.55);
+}
+
+.owner-feedback p {
+  margin: 0;
+  color: rgba(244, 247, 248, 0.72);
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.owner-feedback-status {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.owner-feedback-status.aguardando {
+  color: #efda38;
+}
+
+.owner-feedback-status.aprovado {
+  color: #74d98b;
+}
+
+.owner-feedback-status.nao_aprovado {
+  color: #ff8b8b;
+}
+
+.owner-feedback-status.corrigido {
+  color: #7db7ff;
+}
+
+.owner-feedback-edit {
+  grid-template-columns: 130px minmax(180px, 1fr) auto auto;
+  align-items: start;
+}
+
+.owner-feedback-edit textarea {
+  min-height: 46px;
+  resize: vertical;
+}
+
+#ownerFeedbackStatusFiltro {
+  width: 135px;
+}
+
 @media (max-width: 900px) {
   .owner-panel {
     height: auto;
@@ -326,5 +431,10 @@ select option {
 
   .owner-span-2 {
     grid-column: auto;
+  }
+
+  .owner-feedback-top,
+  .owner-feedback-edit {
+    grid-template-columns: 1fr;
   }
 }

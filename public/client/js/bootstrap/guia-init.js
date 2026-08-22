@@ -1,11 +1,28 @@
 export function initGuia() {
 
+    const guiaInicial = obterGuiaInicial();
+
     carregarGuia(
-        'introducao'
+        guiaInicial
     );
+
+    $('.itemGuia')
+        .removeClass(
+            'ativo'
+        );
+
+    $(`.itemGuia[data-guia="${guiaInicial}"]`)
+        .addClass(
+            'ativo'
+        );
 
     $('.submenuGuia')
         .removeClass(
+            'aberto'
+        );
+
+    $(`.submenuGuia[data-menu="${guiaInicial}"]`)
+        .addClass(
             'aberto'
         );
 
@@ -153,6 +170,37 @@ export function initGuia() {
 
 }
 
+function obterGuiaInicial() {
+
+    try {
+
+        const guia =
+            sessionStorage.getItem(
+                'connectpear_guia_inicial'
+            );
+
+        if (
+            guia
+        ) {
+
+            sessionStorage.removeItem(
+                'connectpear_guia_inicial'
+            );
+
+            return guia;
+
+        }
+
+    } catch {
+
+        return 'introducao';
+
+    }
+
+    return 'introducao';
+
+}
+
 function carregarGuia(
     secao
 ) {
@@ -187,6 +235,8 @@ function carregarGuia(
 
         materiais: getMateriais(),
 
+        spda: getSPDA(),
+
         'chat-online': getChatOnline(),
 
         faq: getFAQ()
@@ -195,7 +245,7 @@ function carregarGuia(
 
     $('#conteudoGuia')
         .html(
-            html[secao]
+            html[secao] || html.introducao
         );
 
 }
@@ -5754,6 +5804,399 @@ No cadastro de material, é possível carregar uma imagem para facilitar a ident
 
 A tela Materiais conecta cadastro técnico, lista da OS, cotações de fornecedores e acompanhamento de compra/separação em uma única visão.
 
+</div>
+
+`;
+
+}
+
+function getSPDA() {
+
+    return `
+
+<div id="spda-visao-geral" class="guiaTitulo">
+    &#9889; Guia completo do SPDA
+</div>
+
+<div class="guiaCard guiaInfo">
+    <b>Objetivo da tela:</b><br>
+    A tela <b>SPDA</b> foi criada para cadastrar estruturas vinculadas a uma OS, anexar a planta baixa e marcar visualmente pontos,
+    medi&ccedil;&otilde;es, continuidade, aterramento, defeitos, componentes el&eacute;tricos, rede, PPCI, cabos e observa&ccedil;&otilde;es diretamente sobre a planta.
+</div>
+
+<div class="guiaCard">
+    <h4>&#128203; Fluxo geral recomendado</h4>
+    <ol>
+        <li>Selecione a <b>OS</b> no topo ou no painel lateral.</li>
+        <li>Cadastre a estrutura ou pr&eacute;dio que ser&aacute; analisado.</li>
+        <li>Anexe a planta baixa em imagem ou PDF.</li>
+        <li>Enquadre a planta, se necess&aacute;rio, para trabalhar com mais aproxima&ccedil;&atilde;o.</li>
+        <li>Adicione os pontos numerados na planta.</li>
+        <li>Informe as medi&ccedil;&otilde;es de continuidade e aterramento.</li>
+        <li>Marque defeitos, componentes, cabos e observa&ccedil;&otilde;es quando houver.</li>
+        <li>Use a tabela lateral para preencher ou revisar valores rapidamente.</li>
+        <li>Salve as marca&ccedil;&otilde;es antes de sair da tela.</li>
+        <li>Exporte a planta quando precisar gerar uma vers&atilde;o para relat&oacute;rio ou impress&atilde;o.</li>
+    </ol>
+</div>
+
+<div id="spda-acesso" class="guiaSubtitulo">
+    &#128682; Acesso, OS e sele&ccedil;&atilde;o inicial
+</div>
+
+<div class="guiaCard">
+    <h4>&#128196; Selecionar OS</h4>
+    <p>
+        A tela sempre trabalha vinculada a uma <b>Ordem de Servi&ccedil;o</b>. Ao selecionar uma OS, o sistema carrega as estruturas
+        SPDA j&aacute; cadastradas para aquela ordem. Se nenhuma estrutura existir, cadastre uma nova no painel lateral.
+    </p>
+    <ul>
+        <li><b>OS:</b> identifica em qual servi&ccedil;o o levantamento ser&aacute; salvo.</li>
+        <li><b>Estruturas:</b> s&atilde;o os pr&eacute;dios, blocos ou &aacute;reas avaliadas dentro da OS.</li>
+        <li><b>Trocar OS:</b> recarrega a lista de estruturas daquela OS.</li>
+    </ul>
+</div>
+
+<div id="spda-estrutura" class="guiaSubtitulo">
+    &#127970; Cadastro da estrutura
+</div>
+
+<div class="guiaCard">
+    <h4>&#127970; Campos da estrutura</h4>
+    <p>
+        Cada estrutura representa uma planta ou pr&eacute;dio analisado. O cadastro serve para identificar o local e preencher
+        informa&ccedil;&otilde;es que podem ser usadas no relat&oacute;rio.
+    </p>
+    <ul>
+        <li><b>Nome do pr&eacute;dio:</b> nome principal exibido no topo do editor.</li>
+        <li><b>Subsistemas:</b> descri&ccedil;&atilde;o resumida dos subsistemas presentes.</li>
+        <li><b>Tipo de estrutura:</b> exemplo: alvenaria, met&aacute;lica, mista ou outra condi&ccedil;&atilde;o.</li>
+        <li><b>Descri&ccedil;&atilde;o:</b> observa&ccedil;&atilde;o geral sobre a estrutura, descidas ou caracter&iacute;sticas do SPDA.</li>
+    </ul>
+</div>
+
+<div class="guiaCard">
+    <h4>&#128190; Salvar estrutura</h4>
+    <p>
+        Depois de preencher os dados, clique em salvar. A estrutura passa a aparecer na lista lateral e pode receber planta,
+        pontos, medi&ccedil;&otilde;es e marca&ccedil;&otilde;es.
+    </p>
+</div>
+
+<div id="spda-planta" class="guiaSubtitulo">
+    &#128206; Planta baixa, enquadramento e navega&ccedil;&atilde;o
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-paperclip"></i> Anexar planta baixa</h4>
+    <p>
+        Use o bot&atilde;o de clipe para anexar a planta da estrutura. O sistema aceita imagem e PDF. A planta aparece no quadro
+        central, onde todos os elementos ser&atilde;o posicionados.
+    </p>
+    <ul>
+        <li><b>Imagem:</b> recomendada quando a planta j&aacute; estiver em PNG, JPG, JPEG ou WEBP.</li>
+        <li><b>PDF:</b> usado quando a planta estiver em arquivo PDF.</li>
+        <li><b>Boa pr&aacute;tica:</b> utilize imagem com boa resolu&ccedil;&atilde;o para manter a leitura dos pontos.</li>
+    </ul>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-crop-simple"></i> Enquadrar planta</h4>
+    <p>
+        O enquadramento define qual &aacute;rea da planta deve abrir em destaque ao trabalhar. Ele n&atilde;o apaga a planta original;
+        apenas melhora a visualiza&ccedil;&atilde;o inicial.
+    </p>
+    <ol>
+        <li>Clique no bot&atilde;o de enquadramento.</li>
+        <li>Arraste um ret&acirc;ngulo sobre a regi&atilde;o principal da planta.</li>
+        <li>Solte o mouse para salvar o enquadramento.</li>
+        <li>Use o clique do meio do mouse para mover a planta e acessar outras &aacute;reas.</li>
+    </ol>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-vector-square"></i> &Aacute;rea do PDF</h4>
+    <p>
+        A &aacute;rea do PDF serve para marcar qual regi&atilde;o deve ser exportada. &Eacute; &uacute;til quando a planta &eacute; grande e voc&ecirc;
+        deseja emitir apenas uma parte espec&iacute;fica.
+    </p>
+</div>
+
+<div class="guiaCard">
+    <h4>&#128433; Mover a planta</h4>
+    <p>
+        Para navegar pela planta sem alterar os pontos, segure o <b>bot&atilde;o do meio do mouse</b> e arraste. Isso move a planta
+        junto com os elementos, medi&ccedil;&otilde;es, legendas e marca&ccedil;&otilde;es.
+    </p>
+</div>
+
+<div id="spda-ferramentas" class="guiaSubtitulo">
+    &#128736; Barra de ferramentas e &iacute;cones
+</div>
+
+<div class="guiaCard">
+    <h4>&#128295; Ferramentas principais</h4>
+    <ul>
+        <li><i class="fa-solid fa-plug-circle-bolt"></i> <b>Entrada de Luz:</b> adiciona ponto de entrada el&eacute;trica.</li>
+        <li><i class="fa-solid fa-tower-broadcast"></i> <b>Transformador:</b> adiciona transformador na planta.</li>
+        <li><i class="fa-solid fa-square"></i> <b>QGBT:</b> adiciona quadro geral de baixa tens&atilde;o.</li>
+        <li><i class="fa-solid fa-square-half-stroke"></i> <b>QDF:</b> adiciona quadro de distribui&ccedil;&atilde;o.</li>
+        <li><i class="fa-solid fa-wave-square"></i> <b>Cabo / alimenta&ccedil;&atilde;o:</b> desenha o caminho do cabo entre componentes el&eacute;tricos.</li>
+        <li><i class="fa-solid fa-ethernet"></i> <b>Entrada de Rede:</b> adiciona entrada de rede.</li>
+        <li><i class="fa-solid fa-server"></i> <b>Rack:</b> adiciona rack de rede.</li>
+        <li><i class="fa-solid fa-house-fire"></i> <b>Central de inc&ecirc;ndio:</b> adiciona central PPCI.</li>
+        <li><i class="fa-solid fa-bell"></i> <b>Sensor / acionador:</b> adiciona sensor ou acionador.</li>
+        <li><i class="fa-solid fa-fire-extinguisher"></i> <b>Extintor:</b> adiciona extintor com sequ&ecirc;ncia autom&aacute;tica EXT-01, EXT-02...</li>
+        <li><i class="fa-solid fa-drafting-compass"></i> <b>Civil:</b> espa&ccedil;o reservado para comandos geom&eacute;tricos futuros.</li>
+    </ul>
+</div>
+
+<div class="guiaCard">
+    <h4>&#128205; Ferramentas de marca&ccedil;&atilde;o e medi&ccedil;&atilde;o</h4>
+    <ul>
+        <li><i class="fa-regular fa-circle"></i> <b>Marca&ccedil;&atilde;o circular:</b> cria uma &aacute;rea circular pontilhada com identifica&ccedil;&atilde;o !1, !2...</li>
+        <li><i class="fa-regular fa-square"></i> <b>Marca&ccedil;&atilde;o retangular:</b> cria uma &aacute;rea retangular pontilhada com identifica&ccedil;&atilde;o !1, !2...</li>
+        <li><i class="fa-solid fa-comment-dots"></i> <b>Anota&ccedil;&otilde;es das marca&ccedil;&otilde;es:</b> insere na planta o texto das marca&ccedil;&otilde;es que possuem anota&ccedil;&atilde;o.</li>
+        <li><i class="fa-solid fa-location-dot"></i> <b>Numera&ccedil;&atilde;o:</b> adiciona os pontos 01, 02, 03...</li>
+        <li><i class="fa-solid fa-route"></i> <b>Continuidade:</b> cria medi&ccedil;&atilde;o em m&Omega; entre dois pontos.</li>
+        <li><i class="fa-solid fa-arrow-down-long"></i> <b>Aterramento:</b> cria medi&ccedil;&atilde;o em &Omega; para um ponto.</li>
+        <li><i class="fa-solid fa-eye"></i> <b>Vis&atilde;o:</b> mostra ou oculta a&ccedil;&otilde;es de defeito n&atilde;o selecionadas.</li>
+        <li><i class="fa-solid fa-floppy-disk"></i> <b>Salvar:</b> grava as marca&ccedil;&otilde;es no banco.</li>
+        <li><i class="fa-solid fa-rotate-left"></i> <b>Desfazer:</b> remove a &uacute;ltima marca&ccedil;&atilde;o adicionada.</li>
+        <li><i class="fa-solid fa-circle-question"></i> <b>Ajuda:</b> abre este guia diretamente na se&ccedil;&atilde;o SPDA.</li>
+    </ul>
+</div>
+
+<div id="spda-medicoes" class="guiaSubtitulo">
+    &#128207; Pontos, continuidade e aterramento
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-location-dot"></i> Adicionar numera&ccedil;&atilde;o</h4>
+    <ol>
+        <li>Clique no &iacute;cone de numera&ccedil;&atilde;o.</li>
+        <li>Clique na planta onde o ponto deve ficar.</li>
+        <li>O sistema cria o pr&oacute;ximo n&uacute;mero dispon&iacute;vel automaticamente.</li>
+        <li>Se um n&uacute;mero foi removido, o sistema reaproveita a sequ&ecirc;ncia faltante.</li>
+    </ol>
+    <p>
+        Ao clicar em um ponto, as a&ccedil;&otilde;es de defeito aparecem ao lado. Clicando fora, elas minimizam.
+    </p>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-route"></i> Continuidade</h4>
+    <ol>
+        <li>Clique no &iacute;cone de continuidade.</li>
+        <li>Selecione o primeiro ponto numerado.</li>
+        <li>Selecione o segundo ponto numerado.</li>
+        <li>O sistema cria um arco entre os pontos e um campo de medi&ccedil;&atilde;o em <b>m&Omega;</b>.</li>
+        <li>Digite o valor medido. A unidade aparece visualmente ao lado.</li>
+    </ol>
+    <p>
+        O controle no meio da linha permite ajustar o grau do arco. Use clique direito na medi&ccedil;&atilde;o para remover ou definir
+        como <b>equipotencializa&ccedil;&atilde;o</b>.
+    </p>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-arrow-down-long"></i> Aterramento</h4>
+    <ol>
+        <li>Clique no &iacute;cone de aterramento.</li>
+        <li>Selecione o ponto numerado desejado.</li>
+        <li>O sistema cria um campo de valor em <b>&Omega;</b> acima do ponto.</li>
+        <li>Digite o valor medido.</li>
+        <li>Segure o campo e arraste para reposicionar o valor.</li>
+    </ol>
+    <p>
+        Valores em branco ficam aguardando. Valor <b>0</b> reprova. A letra <b>X</b> indica medi&ccedil;&atilde;o impossibilitada.
+    </p>
+</div>
+
+<div class="guiaCard">
+    <h4>&#128309; Equipotencializa&ccedil;&atilde;o</h4>
+    <p>
+        Algumas medi&ccedil;&otilde;es de continuidade servem apenas para indicar equipotencializa&ccedil;&atilde;o entre pr&eacute;dios ou estruturas met&aacute;licas.
+        Clique com o direito na medi&ccedil;&atilde;o e marque como equipotencializa&ccedil;&atilde;o. A linha e o campo ficam em azul claro,
+        e a tabela mostra o status correspondente.
+    </p>
+</div>
+
+<div id="spda-defeitos" class="guiaSubtitulo">
+    &#9888; Defeitos e legenda dos pontos
+</div>
+
+<div class="guiaCard">
+    <h4>&#9888; A&ccedil;&otilde;es de defeito dispon&iacute;veis</h4>
+    <ul>
+        <li><i class="fa-solid fa-bolt"></i> Eletroduto quebrado.</li>
+        <li><i class="fa-solid fa-link-slash"></i> Abra&ccedil;adeira ferrujada.</li>
+        <li><i class="fa-solid fa-plug-circle-xmark"></i> Subsistemas n&atilde;o conectados.</li>
+        <li><i class="fa-solid fa-box"></i> Caixa de inspe&ccedil;&atilde;o sem tampa.</li>
+        <li><i class="fa-solid fa-arrow-down"></i> Descida solta.</li>
+        <li><i class="fa-solid fa-circle-minus"></i> Descidas inexistentes ou removidas.</li>
+        <li><i class="fa-solid fa-grip-lines-vertical"></i> Barra chata rompida.</li>
+        <li><i class="fa-solid fa-scissors"></i> Cabo rompido.</li>
+        <li><i class="fa-solid fa-route"></i> Condutor enterrado exposto.</li>
+        <li><i class="fa-solid fa-box-archive"></i> Baldinho de inspe&ccedil;&atilde;o soterrado.</li>
+        <li><i class="fa-solid fa-fire-flame-curved"></i> Soldas exot&eacute;rmicas deterioradas.</li>
+        <li><i class="fa-solid fa-triangle-exclamation"></i> Sem adesivo de Advert&ecirc;ncia.</li>
+        <li><i class="fa-solid fa-screwdriver-wrench"></i> Terminal desgastado.</li>
+    </ul>
+</div>
+
+<div class="guiaCard">
+    <h4>&#128221; Legenda na planta</h4>
+    <p>
+        Quando um ponto possui defeitos selecionados, o sistema cria uma legenda pr&oacute;xima ao ponto com linhas de refer&ecirc;ncia.
+        A legenda pode ser movida segurando o texto com o mouse. Se mover para o lado esquerdo do ponto, a dire&ccedil;&atilde;o da linha
+        se ajusta automaticamente.
+    </p>
+</div>
+
+<div id="spda-componentes" class="guiaSubtitulo">
+    &#128268; Componentes el&eacute;tricos, rede e PPCI
+</div>
+
+<div class="guiaCard">
+    <h4>&#128268; Como adicionar componentes</h4>
+    <ol>
+        <li>Clique no &iacute;cone do componente desejado.</li>
+        <li>Leve o mouse at&eacute; a planta.</li>
+        <li>Clique no local onde o componente deve ser inserido.</li>
+        <li>Para mover depois, segure o componente e arraste.</li>
+        <li>Para remover ou editar, use clique direito no componente.</li>
+    </ol>
+    <p>
+        Componentes el&eacute;tricos podem ser usados como origem e destino do cabo de alimenta&ccedil;&atilde;o.
+    </p>
+</div>
+
+<div id="spda-cabos" class="guiaSubtitulo">
+    &#128279; Cabo / alimenta&ccedil;&atilde;o
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-wave-square"></i> Criar caminho do cabo</h4>
+    <ol>
+        <li>Clique no bot&atilde;o de cabo / alimenta&ccedil;&atilde;o.</li>
+        <li>Clique no componente el&eacute;trico de origem.</li>
+        <li>Clique nos pontos intermedi&aacute;rios para desenhar o caminho, igual uma polilinha.</li>
+        <li>Clique no componente el&eacute;trico de destino para finalizar.</li>
+        <li>O sistema cria a linha tracejada vermelha e mostra os campos de bitola e dist&acirc;ncia.</li>
+    </ol>
+    <p>
+        A bitola pode ser preenchida como <b>#50mm&sup2;</b>. A dist&acirc;ncia fica em <b>mts</b> e deve ser salva junto com as marca&ccedil;&otilde;es.
+    </p>
+</div>
+
+<div id="spda-marcacoes" class="guiaSubtitulo">
+    &#128205; Marca&ccedil;&otilde;es visuais e anota&ccedil;&otilde;es
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-regular fa-circle"></i> Marca&ccedil;&atilde;o circular</h4>
+    <ol>
+        <li>Clique na ferramenta circular.</li>
+        <li>Clique e arraste do centro para fora.</li>
+        <li>Ao soltar, o sistema cria a &aacute;rea circular e a etiqueta !1, !2, !3...</li>
+        <li>A etiqueta pode ser movida segurando o mouse, mas permanece relacionada &agrave; marca&ccedil;&atilde;o.</li>
+    </ol>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-regular fa-square"></i> Marca&ccedil;&atilde;o retangular</h4>
+    <ol>
+        <li>Clique na ferramenta retangular.</li>
+        <li>Clique no primeiro canto da &aacute;rea.</li>
+        <li>Arraste at&eacute; o canto oposto.</li>
+        <li>Ao soltar, o sistema cria o ret&acirc;ngulo e a etiqueta autom&aacute;tica.</li>
+    </ol>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-comment-dots"></i> Anota&ccedil;&otilde;es das marca&ccedil;&otilde;es</h4>
+    <p>
+        Cada marca&ccedil;&atilde;o pode receber uma anota&ccedil;&atilde;o. Essa informa&ccedil;&atilde;o pode ser editada clicando no n&uacute;mero da marca&ccedil;&atilde;o
+        ou pela tabela de anota&ccedil;&otilde;es.
+    </p>
+    <ol>
+        <li>Crie uma marca&ccedil;&atilde;o circular ou retangular.</li>
+        <li>Clique no n&uacute;mero !1, !2 ou correspondente.</li>
+        <li>Preencha a anota&ccedil;&atilde;o e salve.</li>
+        <li>Clique no bot&atilde;o de coment&aacute;rio.</li>
+        <li>Se existirem anota&ccedil;&otilde;es, uma pr&eacute;via pontilhada acompanha o mouse.</li>
+        <li>Clique na planta para inserir o texto simples com o n&uacute;mero e a anota&ccedil;&atilde;o.</li>
+        <li>Depois de inserido, segure o texto para mover ou use clique direito para remover.</li>
+    </ol>
+</div>
+
+<div id="spda-tabelas" class="guiaSubtitulo">
+    &#128202; Tabelas laterais
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-table-list"></i> Tabela de preenchimento</h4>
+    <p>
+        A tabela lateral agiliza o preenchimento dos valores. Ela possui abas para continuidade e aterramento.
+    </p>
+    <ul>
+        <li><b>Continuidade:</b> lista os pares de pontos e aceita valores em m&Omega;.</li>
+        <li><b>Aterramento:</b> lista os pontos individuais e aceita valores em &Omega;.</li>
+        <li><b>Enter:</b> salva o campo atual e pula para a pr&oacute;xima linha.</li>
+        <li><b>X:</b> indica que a medi&ccedil;&atilde;o n&atilde;o foi poss&iacute;vel no local.</li>
+        <li><b>Status:</b> calculado automaticamente conforme limites configurados.</li>
+    </ul>
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-sliders"></i> Limites de reprova&ccedil;&atilde;o</h4>
+    <p>
+        No canto superior da tabela existe a configura&ccedil;&atilde;o dos limites. Por padr&atilde;o, continuidade acima de 200 m&Omega;
+        reprova e aterramento acima de 10 &Omega; reprova. Esses limites podem ser ajustados conforme o crit&eacute;rio usado no servi&ccedil;o.
+    </p>
+</div>
+
+<div class="guiaCard">
+    <h4>!A Anota&ccedil;&otilde;es gerais das marca&ccedil;&otilde;es</h4>
+    <p>
+        O bot&atilde;o <b>!A</b> abre a tabela de anota&ccedil;&otilde;es das marca&ccedil;&otilde;es. Ela permite revisar rapidamente o texto de !1, !2, !3
+        sem precisar clicar em cada marca&ccedil;&atilde;o na planta.
+    </p>
+</div>
+
+<div id="spda-exportacao" class="guiaSubtitulo">
+    &#128424; Exporta&ccedil;&atilde;o e impress&atilde;o
+</div>
+
+<div class="guiaCard">
+    <h4><i class="fa-solid fa-file-pdf"></i> Exportar planta</h4>
+    <p>
+        A exporta&ccedil;&atilde;o gera uma janela em HTML preparada para salvar em PDF ou imprimir. A exporta&ccedil;&atilde;o remove controles de edi&ccedil;&atilde;o
+        e mant&eacute;m a planta com pontos, linhas, valores, componentes, cabos, legendas e anota&ccedil;&otilde;es vis&iacute;veis.
+    </p>
+    <ul>
+        <li>Controles de mover, remover e a&ccedil;&otilde;es n&atilde;o aparecem no arquivo final.</li>
+        <li>A &aacute;rea do PDF pode ser definida antes da exporta&ccedil;&atilde;o.</li>
+        <li>Use a configura&ccedil;&atilde;o da impressora para ajustar escala e tamanho final quando necess&aacute;rio.</li>
+    </ul>
+</div>
+
+<div id="spda-boas-praticas" class="guiaSubtitulo">
+    &#128640; Boas pr&aacute;ticas
+</div>
+
+<div class="guiaCard guiaInfo">
+    <b>Recomenda&ccedil;&otilde;es de uso:</b><br>
+    <ul>
+        <li>Salve as marca&ccedil;&otilde;es com frequ&ecirc;ncia durante levantamentos longos.</li>
+        <li>Adicione primeiro a numera&ccedil;&atilde;o, depois medi&ccedil;&otilde;es e defeitos.</li>
+        <li>Use a tabela lateral para revisar rapidamente valores em branco, X ou reprovados.</li>
+        <li>Evite sobrepor textos e valores em regi&otilde;es muito carregadas da planta.</li>
+        <li>Use marca&ccedil;&otilde;es !1, !2, !3 para destacar &aacute;reas que precisam de observa&ccedil;&atilde;o especial.</li>
+        <li>Quando a planta for grande, use enquadramento para trabalhar melhor, mas mantenha a planta original completa anexada.</li>
+        <li>Antes de exportar, confira se a &aacute;rea do PDF est&aacute; correta e se as anota&ccedil;&otilde;es importantes foram inseridas.</li>
+    </ul>
 </div>
 
 `;

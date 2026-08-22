@@ -5,7 +5,7 @@ import { fecharSocket, getSocket } from "../services/sockets/socket-service.js";
 import { carregarAniversariantes } from "../services/api/aniversariantes.js";
 import { reduzirNome } from "../utils/formatters/strings-format.js";
 import { VERSAO_SISTEMA } from "../config/system-version.js";
-import { carregarChangelog } from "../services/ui/changelog-loader.js";
+import { carregarChangelog, carregarVersoesChangelog } from "../services/ui/changelog-loader.js";
 import { initPreferenciasUsuario } from "../services/ui/user-preferences.js";
 import { initNotificacoesSininho } from "../services/sockets/socket-notifications.js";
 
@@ -22,6 +22,7 @@ let avisoEditandoId = null;
 
 let nomeUsuario = sessionStorage.getItem("nome_usuario");
 let changelogHomeCarregado = false;
+let versoesChangelogHomeCarregadas = false;
 let reconhecimentoSlideTimer = null;
 let conquistasSlideHome = [];
 let conquistaSlideIndiceHome = 0;
@@ -392,6 +393,13 @@ document.addEventListener("click", (ev) => {
   }
 });
 
+document.addEventListener("change", (ev) => {
+  if (ev.target.id !== "homeVersaoSelect") return;
+
+  const versao = ev.target.value || VERSAO_SISTEMA;
+  carregarDetalhesVersaoHome(versao, true);
+});
+
 async function iniciarVersaoHome(tentativas = 0) {
   const btnVersao = document.getElementById("homeVersaoBtn");
   const textoVersao = document.getElementById("homeVersaoAtual");
@@ -405,10 +413,12 @@ async function iniciarVersaoHome(tentativas = 0) {
   }
 
   changelogHomeCarregado = false;
+  versoesChangelogHomeCarregadas = false;
   if (btnVersao) btnVersao.textContent = VERSAO_SISTEMA;
   textoVersao.textContent = VERSAO_SISTEMA;
 
-  await carregarDetalhesVersaoHome();
+  await carregarOpcoesVersaoHome();
+  await carregarDetalhesVersaoHome(VERSAO_SISTEMA, true);
 
   if (localStorage.getItem("versao_sistema_vista") !== VERSAO_SISTEMA) {
     popup.style.display = "flex";
@@ -422,20 +432,46 @@ async function abrirDetalhesVersaoHome() {
   if (!popup) return;
 
   popup.style.display = "flex";
-  await carregarDetalhesVersaoHome();
+  await carregarOpcoesVersaoHome();
+  await carregarDetalhesVersaoHome(VERSAO_SISTEMA, true);
 }
 
-async function carregarDetalhesVersaoHome() {
+async function carregarOpcoesVersaoHome() {
+  garantirPopupVersaoHome();
+  const select = document.getElementById("homeVersaoSelect");
+  if (!select || versoesChangelogHomeCarregadas) return;
+
+  select.innerHTML = `<option value="${VERSAO_SISTEMA}">v${VERSAO_SISTEMA}</option>`;
+
+  try {
+    const versoes = await carregarVersoesChangelog(VERSAO_SISTEMA);
+    select.innerHTML = versoes.map(item => {
+      const nome = item.nome ? ` - ${item.nome}` : "";
+      const data = item.data ? ` (${item.data})` : "";
+      return `<option value="${item.versao}">v${item.versao}${data}${nome}</option>`;
+    }).join("");
+    select.value = VERSAO_SISTEMA;
+    versoesChangelogHomeCarregadas = true;
+  } catch (err) {
+    console.error("Erro ao carregar versoes do changelog:", err);
+  }
+}
+
+async function carregarDetalhesVersaoHome(versao = VERSAO_SISTEMA, forcar = false) {
   garantirPopupVersaoHome();
   const container = document.querySelector(".home-changelog-container");
+  const textoVersao = document.getElementById("homeVersaoAtual");
+  const select = document.getElementById("homeVersaoSelect");
 
   if (!container) return;
 
-  if (changelogHomeCarregado) return;
+  if (!forcar && changelogHomeCarregado && versao === VERSAO_SISTEMA) return;
 
+  if (textoVersao) textoVersao.textContent = versao;
+  if (select && select.value !== versao) select.value = versao;
   container.innerHTML = "<p class=\"home-changelog-loading\">Carregando detalhes...</p>";
-  container.innerHTML = await carregarChangelog(VERSAO_SISTEMA);
-  changelogHomeCarregado = true;
+  container.innerHTML = await carregarChangelog(versao);
+  changelogHomeCarregado = versao === VERSAO_SISTEMA;
 }
 
 function fecharDetalhesVersaoHome() {
@@ -452,6 +488,12 @@ function garantirPopupVersaoHome() {
       <div class="atualizacao-box home-atualizacao-box">
         <h2>&#128640; Nova atualização lançada!</h2>
         <p><strong>Versão:</strong> <span id="homeVersaoAtual">${VERSAO_SISTEMA}</span></p>
+        <label class="home-versao-selector" for="homeVersaoSelect">
+          <span>Consultar outra versao</span>
+          <select id="homeVersaoSelect" aria-label="Selecionar versao do changelog">
+            <option value="${VERSAO_SISTEMA}">v${VERSAO_SISTEMA}</option>
+          </select>
+        </label>
         <div class="home-changelog-container"></div>
         <button type="button" id="homeBtnPopupOk">OBRIGADO</button>
       </div>
@@ -472,6 +514,68 @@ document.querySelectorAll("#iconeLista span").forEach(el => {
 });
 
 
+const HOME_AVISO_EMPRESA_KEY_PREFIX = "connectpear_aviso_empresa_ok";
+
+async function carregarAvisoEmpresaHome() {
+  try {
+    const response = await fetch("/api/auth/empresa-aviso", {
+      credentials: "include",
+      cache: "no-store"
+    });
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const aviso = data?.aviso;
+    const mensagem = String(aviso?.mensagem || "").trim();
+
+    if (!mensagem) return;
+
+    const idEmpresa = aviso.id_empresa_saas || "empresa";
+    const chaveAviso = aviso.chave || mensagem;
+    const storageKey = `${HOME_AVISO_EMPRESA_KEY_PREFIX}_${idEmpresa}_${chaveAviso}`;
+
+    if (localStorage.getItem(storageKey) === "ok") return;
+
+    mostrarAvisoEmpresaHome(mensagem, storageKey);
+  } catch (err) {
+    console.error("Erro ao carregar aviso tecnico:", err);
+  }
+}
+
+function mostrarAvisoEmpresaHome(mensagem, storageKey) {
+  let popup = document.getElementById("homeAvisoEmpresaPopup");
+
+  if (!popup) {
+    document.body.insertAdjacentHTML("beforeend", `
+      <aside id="homeAvisoEmpresaPopup" class="home-aviso-empresa-popup" role="status" aria-live="polite">
+        <div class="home-aviso-empresa-icon"><i class="fa-solid fa-bullhorn"></i></div>
+        <div class="home-aviso-empresa-body">
+          <strong>Aviso Técnico</strong>
+          <p id="homeAvisoEmpresaTexto"></p>
+          <button type="button" id="homeAvisoEmpresaOk">OK</button>
+        </div>
+      </aside>
+    `);
+
+    popup = document.getElementById("homeAvisoEmpresaPopup");
+  }
+
+  const texto = document.getElementById("homeAvisoEmpresaTexto");
+  const botao = document.getElementById("homeAvisoEmpresaOk");
+
+  if (texto) texto.textContent = mensagem;
+  if (botao) {
+    botao.onclick = () => {
+      localStorage.setItem(storageKey, "ok");
+      popup?.remove();
+    };
+  }
+
+  popup.hidden = false;
+  requestAnimationFrame(() => popup.classList.add("show"));
+}
+
 // =======================================================
 // MAIN
 // =======================================================
@@ -479,6 +583,7 @@ export async function initHome() {
 
   const socket = getSocket();
   iniciarVersaoHome();
+  carregarAvisoEmpresaHome();
   observarPermissoesPorRoles();
   initColaboradoresContextMenu(socket);
 

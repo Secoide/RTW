@@ -63,6 +63,7 @@ app.use('/api/setor', require('./routes/setor.routes'));
 app.use('/api/materiais', require('./routes/material.routes'));
 app.use("/api/paineis-eletricos", require("./routes/paineisEletricos.routes"));
 app.use("/api/spda", require("./routes/spda.routes"));
+app.use("/api/feedback", require("./routes/feedback.routes"));
 
 app.use("/api/fornecedor", require('./routes/fornecedor.routes'));
 

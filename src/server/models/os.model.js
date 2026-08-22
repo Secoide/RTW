@@ -1,6 +1,60 @@
 const connection = require('../config/db');
 
 let osAnexosTableReady = false;
+let osCadastroSchemaReady = false;
+
+async function garantirSchemaCadastroOS() {
+  if (osCadastroSchemaReady) return;
+
+  try {
+    const [colunasDataConclusao] = await connection.query(`
+      SHOW COLUMNS FROM tb_obras LIKE 'dataconclusao'
+    `);
+
+    if (colunasDataConclusao[0] && colunasDataConclusao[0].Null === 'NO') {
+      await connection.query(`
+        ALTER TABLE tb_obras
+          MODIFY dataconclusao DATE NULL
+      `);
+    }
+
+    const [indicesDescricao] = await connection.query(`
+      SHOW INDEX FROM tb_obras
+      WHERE Key_name = 'descricao'
+        AND Column_name = 'descricao'
+        AND Non_unique = 0
+    `);
+
+    if (indicesDescricao.length) {
+      await connection.query(`
+        ALTER TABLE tb_obras
+          DROP INDEX descricao
+      `);
+    }
+  } catch (err) {
+    console.warn("Não foi possível ajustar o schema de cadastro de OS:", err.message);
+  }
+
+  osCadastroSchemaReady = true;
+}
+
+function normalizarValorDecimal(valor) {
+  const texto = String(valor ?? '').trim();
+  if (!texto) return 0;
+
+  const limpo = texto
+    .replace(/[^\d,.-]/g, '')
+    .replace(/\.(?=\d{3}(?:\D|$))/g, '')
+    .replace(',', '.');
+
+  const numero = Number(limpo);
+  return Number.isFinite(numero) ? numero : 0;
+}
+
+function normalizarIdOpcional(valor) {
+  const texto = String(valor ?? '').trim();
+  return texto ? texto : null;
+}
 
 async function garantirTabelaAnexosOS() {
   if (osAnexosTableReady) return;
@@ -117,6 +171,8 @@ async function getOSByDate(dataDia) {
 
 
 async function atualizarOS({ idos, descricao, dataconclusao, cliente, cidade, supervisor, responsavel, orcado }) {
+  await garantirSchemaCadastroOS();
+
   const sql = `
     UPDATE tb_obras SET
       descricao = ?, dataconclusao = ?, id_empresa = ?, id_cidade = ?,
@@ -128,9 +184,9 @@ async function atualizarOS({ idos, descricao, dataconclusao, cliente, cidade, su
     dataconclusao || null,
     cliente,
     cidade,
-    supervisor || null,
-    responsavel || null,
-    orcado || 0,
+    normalizarIdOpcional(supervisor),
+    normalizarIdOpcional(responsavel),
+    normalizarValorDecimal(orcado),
     idos,
   ]);
   return result;
@@ -212,6 +268,8 @@ async function verificarOSExistente(idos) {
 }
 
 async function inserirOS({ idos, descricao, dataconclusao, cliente, cidade, supervisor, responsavel, orcado }) {
+  await garantirSchemaCadastroOS();
+
   const hoje = new Date();
   const dataAtual = hoje.toISOString().split("T")[0]; // yyyy-mm-dd
 
@@ -227,9 +285,9 @@ async function inserirOS({ idos, descricao, dataconclusao, cliente, cidade, supe
     dataAtual,
     cliente,
     cidade,
-    supervisor || null,
-    responsavel || null,
-    orcado || 0,
+    normalizarIdOpcional(supervisor),
+    normalizarIdOpcional(responsavel),
+    normalizarValorDecimal(orcado),
   ]);
   return result;
 }

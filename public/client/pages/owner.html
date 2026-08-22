@@ -98,6 +98,10 @@
                 <span>Observação interna</span>
                 <input id="ownerEmpresaObs" type="text">
               </label>
+              <label class="owner-span-2">
+                <span>Aviso para usuários da empresa</span>
+                <textarea id="ownerEmpresaAvisoPopup" rows="3" maxlength="600" placeholder="Mensagem exibida no canto inferior esquerdo até o usuário confirmar OK. Deixe em branco para não exibir."></textarea>
+              </label>
             </div>
             <div class="owner-form-actions">
               <button type="submit">
@@ -131,6 +135,29 @@
               </form>
             </div>
             <div id="ownerUsuariosLista" class="owner-users"></div>
+          </section>
+
+          <section class="owner-card owner-feedback-card">
+            <div class="owner-section-title">
+              <div class="owner-user-search">
+                <h2>Relatos e sugestões</h2>
+                <input id="ownerFeedbackBusca" type="search" placeholder="Buscar relato, usuário ou empresa">
+              </div>
+              <div class="owner-actions">
+                <select id="ownerFeedbackStatusFiltro" title="Filtrar status">
+                  <option value="">Todos</option>
+                  <option value="aguardando">Aguardando</option>
+                  <option value="aprovado">Aprovado</option>
+                  <option value="nao_aprovado">Não aprovado</option>
+                  <option value="corrigido">Corrigido</option>
+                </select>
+                <button type="button" id="btnAtualizarFeedbacks">
+                  <i class="fa-solid fa-rotate"></i>
+                  Atualizar
+                </button>
+              </div>
+            </div>
+            <div id="ownerFeedbacksLista" class="owner-feedbacks"></div>
           </section>
         </section>
       </section>

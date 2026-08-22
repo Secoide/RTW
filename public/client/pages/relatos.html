@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="/css/relatos.css">
+
+<main id="relatosSistema" class="relatos-page">
+  <section class="relatos-head">
+    <div>
+      <span>Feedback do sistema</span>
+      <h1>Relatar erros, problemas ou sugestões</h1>
+      <p>Use este espaço para informar erros, dificuldades, dicas ou ideias de melhoria.</p>
+    </div>
+    <button type="button" id="btnAtualizarRelatos" class="relatos-btn secundario">
+      <i class="fa-solid fa-rotate"></i>
+      Atualizar
+    </button>
+  </section>
+
+  <section class="relatos-layout">
+    <form id="formRelatoSistema" class="relatos-card relatos-form">
+      <label>
+        <span>Tipo</span>
+        <select id="relatoTipo" name="tipo">
+          <option value="problema">Problema</option>
+          <option value="erro">Erro</option>
+          <option value="dica">Dica</option>
+          <option value="melhoria">Melhoria</option>
+          <option value="sugestao">Sugestão</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Título</span>
+        <input id="relatoTitulo" name="titulo" maxlength="120" placeholder="Ex: Botão salvar não responde" required>
+      </label>
+
+      <label>
+        <span>Detalhes</span>
+        <textarea id="relatoDetalhes" name="detalhes" maxlength="5000" rows="8" placeholder="Descreva onde aconteceu, o que tentou fazer e o que apareceu na tela." required></textarea>
+      </label>
+
+      <button type="submit" id="btnEnviarRelato" class="relatos-btn principal">
+        <i class="fa-solid fa-paper-plane"></i>
+        Enviar relato
+      </button>
+      <button type="button" id="btnCancelarEdicaoRelato" class="relatos-btn secundario" hidden>
+        <i class="fa-solid fa-xmark"></i>
+        Cancelar edição
+      </button>
+    </form>
+
+    <section class="relatos-card relatos-lista-card">
+      <div class="relatos-section-title">
+        <div>
+          <span>Meus envios</span>
+          <strong id="relatosResumo">Carregando...</strong>
+        </div>
+      </div>
+      <div id="relatosLista" class="relatos-lista">
+        <div class="relatos-empty">Carregando relatos...</div>
+      </div>
+    </section>
+  </section>
+</main>

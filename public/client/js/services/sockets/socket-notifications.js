@@ -143,6 +143,10 @@ function montarMetaNotificacao(item) {
     meta.tipo = "chat";
     meta.titulo = "Chat online";
     meta.icone = "fa-comments";
+  } else if (tipo.includes("feedback")) {
+    meta.tipo = "geral";
+    meta.titulo = "Relato atualizado";
+    meta.icone = "fa-comment-dots";
   } else if (tipo.includes("erro") || tipo.includes("alerta")) {
     meta.tipo = "alerta";
     meta.titulo = "Atenção";

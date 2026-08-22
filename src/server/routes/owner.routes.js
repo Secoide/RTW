@@ -18,5 +18,8 @@ router.delete("/empresas/:id", verificarOwner, ownerController.deletarEmpresa);
 router.put("/empresas/:id/recursos", verificarOwner, ownerController.salvarRecursosEmpresa);
 router.post("/empresas/:id/usuarios", verificarOwner, ownerController.vincularUsuario);
 router.delete("/empresas/:id/usuarios/:idUsuario", verificarOwner, ownerController.removerUsuario);
+router.get("/feedbacks", verificarOwner, ownerController.listarFeedbacks);
+router.put("/feedbacks/:id", verificarOwner, ownerController.atualizarFeedback);
+router.delete("/feedbacks/:id", verificarOwner, ownerController.excluirFeedback);
 
 module.exports = router;

@@ -40,6 +40,7 @@ export function initMaterialSave() {
             const categoria = getVal("#categoriaMaterial");
             const codigo = getVal("#codigo");
             const fabricante = getVal("#fabricante");
+            const unidade = getVal("#unidadeMaterial") || "un";
 
             if (!nome) {
                 alert("Informe o nome");
@@ -110,6 +111,7 @@ export function initMaterialSave() {
                         categoria,
                         codigo,
                         fabricante,
+                        unidade,
                         atributos: atributosValidados
                     })
                 });
@@ -184,7 +186,8 @@ export function initMaterialSave() {
                 data: JSON.stringify({
                     id_material: mat.id,
                     codigo,
-                    fabricante
+                    fabricante,
+                    unidade
                 })
             });
 

@@ -1,0 +1,261 @@
+.relatos-page {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 14px;
+  color: #f3f3f3;
+  background: linear-gradient(145deg, #252525, #151515);
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.relatos-page *,
+.relatos-page *::before,
+.relatos-page *::after {
+  box-sizing: border-box;
+}
+
+.relatos-page::-webkit-scrollbar,
+.relatos-lista::-webkit-scrollbar {
+  display: none;
+}
+
+.relatos-head,
+.relatos-card {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.24);
+}
+
+.relatos-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+  padding: 14px;
+}
+
+.relatos-head span,
+.relatos-form span,
+.relatos-section-title span {
+  color: #efda38;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.relatos-head h1 {
+  margin: 3px 0;
+  font-size: 20px;
+}
+
+.relatos-head p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+}
+
+.relatos-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 420px) 1fr;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.relatos-card {
+  padding: 12px;
+}
+
+.relatos-form {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.relatos-form label {
+  display: grid;
+  gap: 5px;
+}
+
+.relatos-form input,
+.relatos-form select,
+.relatos-form textarea {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.22);
+  color: #f5f5f5;
+  outline: none;
+}
+
+.relatos-form input,
+.relatos-form select {
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+.relatos-form textarea {
+  padding: 10px;
+  resize: vertical;
+}
+
+.relatos-form select option {
+  background: #1b1b1b;
+  color: #f5f5f5;
+}
+
+.relatos-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 7px;
+  color: #f5f5f5;
+  cursor: pointer;
+}
+
+.relatos-btn.principal {
+  border-color: transparent;
+  background: linear-gradient(90deg, #ee7722, #efda38);
+  color: #151515;
+  font-weight: 800;
+}
+
+.relatos-btn.secundario {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.relatos-btn.perigo {
+  border-color: rgba(255, 122, 122, 0.35);
+  background: rgba(120, 35, 35, 0.42);
+  color: #ffd7d7;
+}
+
+.relatos-btn:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.relatos-lista-card {
+  min-height: 360px;
+}
+
+.relatos-section-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.relatos-section-title strong {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+}
+
+.relatos-lista {
+  display: grid;
+  gap: 8px;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.relato-item {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-left: 3px solid #efda38;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.relato-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.relato-item h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.relato-item p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 12px;
+  line-height: 1.42;
+  white-space: pre-wrap;
+}
+
+.relato-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 10px;
+}
+
+.relato-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.relato-acoes .relatos-btn {
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 11px;
+}
+
+.relato-status {
+  display: inline-flex;
+  align-items: center;
+  min-width: max-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f5f5;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.relato-status.aguardando { color: #efda38; }
+.relato-status.aprovado { color: #74d98b; }
+.relato-status.nao_aprovado { color: #ff8b8b; }
+.relato-status.corrigido { color: #7db7ff; }
+
+.relato-resposta {
+  padding: 8px;
+  border-radius: 7px;
+  background: rgba(239, 218, 56, 0.08);
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.relatos-empty {
+  padding: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .relatos-layout,
+  .relatos-head {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

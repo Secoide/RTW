@@ -99,7 +99,8 @@ async function listarRecursosEmpresa(idEmpresa) {
 async function listarEmpresas() {
   const [rows] = await connection.query(`
     SELECT id_empresa_saas, codigo, nome, cnpj, plano, status, data_inicio,
-      data_vencimento, observacao, criado_em, atualizado_em
+      data_vencimento, observacao, aviso_popup_texto, aviso_popup_chave,
+      aviso_popup_atualizado_em, criado_em, atualizado_em
     FROM sistema_empresas
     ORDER BY nome ASC
   `);
@@ -110,7 +111,8 @@ async function listarEmpresas() {
 async function buscarEmpresaPorId(idEmpresa) {
   const [rows] = await connection.query(`
     SELECT id_empresa_saas, codigo, nome, cnpj, plano, status, data_inicio,
-      data_vencimento, observacao, criado_em, atualizado_em
+      data_vencimento, observacao, aviso_popup_texto, aviso_popup_chave,
+      aviso_popup_atualizado_em, criado_em, atualizado_em
     FROM sistema_empresas
     WHERE id_empresa_saas = ?
   `, [idEmpresa]);
@@ -119,10 +121,13 @@ async function buscarEmpresaPorId(idEmpresa) {
 }
 
 async function criarEmpresa(data) {
+  const avisoChave = data.aviso_popup_texto ? String(Date.now()) : null;
+
   const [result] = await connection.query(`
     INSERT INTO sistema_empresas
-      (codigo, nome, cnpj, plano, status, data_inicio, data_vencimento, observacao)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (codigo, nome, cnpj, plano, status, data_inicio, data_vencimento, observacao,
+       aviso_popup_texto, aviso_popup_chave, aviso_popup_atualizado_em)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     data.codigo,
     data.nome,
@@ -131,17 +136,28 @@ async function criarEmpresa(data) {
     data.status || "ativo",
     data.data_inicio || null,
     data.data_vencimento || null,
-    data.observacao || null
+    data.observacao || null,
+    data.aviso_popup_texto || null,
+    avisoChave,
+    data.aviso_popup_texto ? new Date() : null
   ]);
 
   return buscarEmpresaPorId(result.insertId);
 }
 
 async function atualizarEmpresa(idEmpresa, data) {
+  const empresaAtual = await buscarEmpresaPorId(idEmpresa);
+  const textoAnterior = String(empresaAtual?.aviso_popup_texto || "").trim();
+  const textoNovo = String(data.aviso_popup_texto || "").trim();
+  const avisoMudou = textoAnterior !== textoNovo;
+  const avisoChave = textoNovo ? (avisoMudou ? String(Date.now()) : empresaAtual?.aviso_popup_chave || String(Date.now())) : null;
+
   await connection.query(`
     UPDATE sistema_empresas
     SET codigo = ?, nome = ?, cnpj = ?, plano = ?, status = ?,
-      data_inicio = ?, data_vencimento = ?, observacao = ?
+      data_inicio = ?, data_vencimento = ?, observacao = ?,
+      aviso_popup_texto = ?, aviso_popup_chave = ?,
+      aviso_popup_atualizado_em = ?
     WHERE id_empresa_saas = ?
   `, [
     data.codigo,
@@ -152,6 +168,9 @@ async function atualizarEmpresa(idEmpresa, data) {
     data.data_inicio || null,
     data.data_vencimento || null,
     data.observacao || null,
+    textoNovo || null,
+    avisoChave,
+    textoNovo ? (avisoMudou ? new Date() : empresaAtual?.aviso_popup_atualizado_em || new Date()) : null,
     idEmpresa
   ]);
 
@@ -215,6 +234,17 @@ async function removerUsuarioEmpresa(idEmpresa, idUsuario) {
   return listarUsuariosEmpresa(idEmpresa);
 }
 
+async function buscarAvisoEmpresa(idEmpresa) {
+  const [rows] = await connection.query(`
+    SELECT id_empresa_saas, aviso_popup_texto, aviso_popup_chave, aviso_popup_atualizado_em
+    FROM sistema_empresas
+    WHERE id_empresa_saas = ?
+    LIMIT 1
+  `, [idEmpresa]);
+
+  return rows[0] || null;
+}
+
 module.exports = {
   RECURSOS_PADRAO,
   listarRecursos,
@@ -229,5 +259,6 @@ module.exports = {
   salvarRecursosEmpresa,
   listarUsuariosEmpresa,
   vincularUsuarioEmpresa,
-  removerUsuarioEmpresa
+  removerUsuarioEmpresa,
+  buscarAvisoEmpresa
 };

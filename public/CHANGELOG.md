@@ -100,14 +100,25 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Corrigido
 
+
+
 ----- VERSAO ATUAL
-## [2.1.1] - 2026-08-13
+## [2.1.2] - 2026-08-13
 ## Nome: 🔨 Ajustes
+### Adicionado
+- Adicionado aviso pop-up por empresa, configurado e enviado pelo suporte e exibido na Home até o usuário confirmar OK (Mensagens Técnicas);
+- Adicionado canal de relatos no sistema para usuários enviarem erros, bugs, dicas e melhorias, com acompanhamento de status. Edite e apague o relato enquanto ele ainda está aguardando análise;
+
 ### Corrigido
 - Corrigida OS que continuava marcada como sem colaborador após adicionar um colaborador na programação;
 - Corrigido acúmulo de eventos na Programação ao sair e voltar para a tela, reduzindo risco de ações duplicadas, lentidão e alterações repetidas;
 - Corrigida a sincronização da Programação ao adicionar ou remover colaboradores da OS, evitando colaboradores presos na tela e ocupação incorreta na lista de disponíveis;
+- Corrigido filtro por arraste no gráfico da OS para selecionar corretamente a data inicial e final do período escolhido;
+- Cadastro de OS que não deixava cadastrar quando já havia descrição igual em outra OS;
+- Corrigida lentidão ao atualizar dados profissionais do colaborador, evitando acúmulo de eventos, recargas duplicadas e verificações desnecessárias após editar vários perfis;
 
+### Alterado
+- Exportação da programação agora faz 4 verificaões para evitar a todos pontos pegar datas diferentes da data exibida no painel selecionado;
 
 
 ## [2.1.0] - 2026-08-12
@@ -137,7 +148,6 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Não avisava quando a OS já estava cadastrada antes de tentar salvar novamente;
 - Corrigida a segurança das alterações de colaboradores na OS para não mostrar como salvo antes da confirmação do banco e avisar quando a programação precisar ser sincronizada novamente;
 - Corrigido o carregamento da edição da OS para manter cidade, empresa, supervisor e responsável preenchidos mesmo com resposta mais lenta do servidor;
-
 
 ### Removido
 - Removido painel de avisos da Diretoria da tela início;

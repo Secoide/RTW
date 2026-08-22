@@ -13,7 +13,8 @@ function normalizarEmpresa(data = {}) {
     status: limpar(data.status) || "ativo",
     data_inicio: data.data_inicio || null,
     data_vencimento: data.data_vencimento || null,
-    observacao: limpar(data.observacao)
+    observacao: limpar(data.observacao),
+    aviso_popup_texto: limpar(data.aviso_popup_texto)
   };
 }
 
@@ -106,6 +107,22 @@ async function removerUsuarioEmpresa(idEmpresa, idUsuario) {
   return SaasModel.removerUsuarioEmpresa(idEmpresa, idUsuario);
 }
 
+async function buscarAvisoEmpresa(idEmpresa) {
+  if (!idEmpresa) return null;
+
+  const aviso = await SaasModel.buscarAvisoEmpresa(idEmpresa);
+  const mensagem = limpar(aviso?.aviso_popup_texto);
+
+  if (!mensagem) return null;
+
+  return {
+    id_empresa_saas: aviso.id_empresa_saas,
+    mensagem,
+    chave: aviso.aviso_popup_chave || String(aviso.aviso_popup_atualizado_em || ""),
+    atualizado_em: aviso.aviso_popup_atualizado_em || null
+  };
+}
+
 module.exports = {
   buscarContextoUsuario,
   listarRecursos,
@@ -116,5 +133,6 @@ module.exports = {
   deletarEmpresa,
   salvarRecursosEmpresa,
   vincularUsuarioEmpresa,
-  removerUsuarioEmpresa
+  removerUsuarioEmpresa,
+  buscarAvisoEmpresa
 };

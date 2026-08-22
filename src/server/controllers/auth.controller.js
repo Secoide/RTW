@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service');
+const SaasService = require('../services/saas.service');
 
 function getCookieOptions() {
   return {
@@ -192,6 +193,20 @@ function statusController(req, res) {
   });
 }
 
+async function avisoEmpresaController(req, res, next) {
+  try {
+    const idEmpresa = req.user?.saas?.empresa?.id_empresa_saas;
+    const aviso = await SaasService.buscarAvisoEmpresa(idEmpresa);
+
+    res.json({
+      sucesso: true,
+      aviso
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 
 module.exports = {
   loginController,
@@ -200,5 +215,6 @@ module.exports = {
   resetarSenhaController,
   logoutController,
   logoutAllController,
-  statusController
+  statusController,
+  avisoEmpresaController
 };

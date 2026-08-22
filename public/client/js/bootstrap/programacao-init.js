@@ -12,7 +12,7 @@ import { initFiltros } from "../events/click/handle-filtros-os.js";
 import { get_dadosColab } from "../services/api/colaboradores-api.js";
 import { initExportarDados } from "../events/click/handle-exportar-dados.js";
 import "../events/click/handle-status-dia.js";
-import { atualizarProgramacao } from "../events/change/handle-date-change.js";
+import { atualizarProgramacao, criarDataLocalProgramacao, formatarDataLocalProgramacao } from "../events/change/handle-date-change.js";
 
 const Toast = Swal.mixin({
         toast: true,
@@ -70,7 +70,7 @@ export async function initProgramacao() {
 
     const socket = getSocket(); // 🔗 cria ou retorna o mesmo socket
     initDateChangeHandler();
-    const hoje = new Date().toISOString().split("T")[0];
+    const hoje = formatarDataLocalProgramacao(new Date());
     const seletor = document.getElementById("seletor_data");
 
     if (seletor) {
@@ -99,7 +99,7 @@ export async function initProgramacao() {
 
   $(document).off("click.programacaoInit", "#bt_atualizarProgramacao");
   $(document).on("click.programacaoInit", "#bt_atualizarProgramacao", async function () {
-    const dataSelecionada = new Date($("#seletor_data").val());
+    const dataSelecionada = criarDataLocalProgramacao($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
   });
 
@@ -232,7 +232,7 @@ export async function initProgramacao() {
                     theme: 'dark',
                     title: "Anotações salvas"
                 });
-        const dataSelecionada = new Date($("#seletor_data").val());
+        const dataSelecionada = criarDataLocalProgramacao($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
 
     } catch (err) {

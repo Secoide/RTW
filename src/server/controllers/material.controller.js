@@ -294,6 +294,48 @@ async function duplicarListaOS(req, res) {
   }
 }
 
+async function moverListaOS(req, res) {
+  try {
+    const modo = String(req.body?.modo || "").trim().toLowerCase();
+    const idOSDestino = Number(req.body?.id_os_destino || 0);
+
+    if (!["copiar", "transferir"].includes(modo)) {
+      return res.status(400).json({ erro: "Informe se deseja copiar ou transferir a lista." });
+    }
+
+    if (!idOSDestino) {
+      return res.status(400).json({ erro: "Informe a OS de destino." });
+    }
+
+    if (modo === "copiar") {
+      const nova = await MaterialService.copiarListaParaOS(req.params.id, idOSDestino, req.user);
+      if (!nova) return res.status(404).json({ erro: "Lista nao encontrada" });
+
+      return res.status(201).json({
+        sucesso: true,
+        modo,
+        lista_id: nova.insertId,
+        mensagem: "Lista copiada para a OS selecionada."
+      });
+    }
+
+    const resultado = await MaterialService.transferirListaParaOS(req.params.id, idOSDestino, req.user);
+    if (!resultado) return res.status(404).json({ erro: "Lista nao encontrada" });
+
+    res.json({
+      sucesso: true,
+      modo,
+      semAlteracao: resultado.semAlteracao === true,
+      mensagem: resultado.semAlteracao
+        ? "A lista ja pertence a esta OS."
+        : "Lista transferida para a OS selecionada."
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: "Erro ao copiar ou transferir lista" });
+  }
+}
+
 async function updateFornecedorMaterialOS(req, res) {
   try {
     const ok = await MaterialFornecedorService.atualizarFornecedor(
@@ -436,6 +478,7 @@ module.exports = {
   avancarListaOS,
   voltarListaOS,
   duplicarListaOS,
+  moverListaOS,
   updateFornecedorMaterialOS,
   selecionarFornecedor,
   uploadImagemMaterial,

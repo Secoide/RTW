@@ -609,12 +609,15 @@ async function avancarLista(id, status, meta = {}) {
   return result.affectedRows > 0;
 }
 
-async function duplicarLista(id, usuarioId = null) {
+async function duplicarLista(id, usuarioId = null, idOSDestino = null) {
   const lista = await getListaById(id);
   if (!lista) return null;
 
+  const destino = idOSDestino || lista.id_os;
+  const temObservacao = await garantirColunaObservacao();
+
   const nova = await createLista({
-    id_os: lista.id_os,
+    id_os: destino,
     titulo: `${lista.titulo || "Lista"} (copia)`,
     descricao: lista.descricao,
     status: lista.status,
@@ -627,31 +630,85 @@ async function duplicarLista(id, usuarioId = null) {
     criado_por: usuarioId
   });
 
+  const colunasExtras = temObservacao ? ", observacao" : "";
+  const valoresExtras = temObservacao ? ", observacao" : "";
+
   await connection.query(`
     INSERT INTO tb_materiais_os
-      (id_os, id_lista, id_variacao, quantidade, quantidade_separada, quantidade_comprada, id_fornecedor, status)
+      (id_os, id_lista, id_variacao, quantidade${colunasExtras}, quantidade_separada, quantidade_comprada, id_fornecedor, status)
     SELECT
-      id_os,
+      ?,
       ?,
       id_variacao,
-      quantidade,
+      quantidade${valoresExtras},
       0,
       0,
       NULL,
       'pendente'
     FROM tb_materiais_os
     WHERE id_lista = ?
-  `, [nova.insertId, id]);
+  `, [destino, nova.insertId, id]);
 
   await registrarHistoricoLista({
     id_lista: nova.insertId,
     acao: "duplicada",
     status_destino: lista.status,
     usuario_id: usuarioId,
-    motivo: `Duplicada da lista #${id}`
+    motivo: destino === lista.id_os
+      ? `Duplicada da lista #${id}`
+      : `Copiada da OS ${lista.id_os} para a OS ${destino}`
   });
 
   return nova;
+}
+
+async function transferirLista(id, idOSDestino, usuarioId = null) {
+  const lista = await getListaById(id);
+  if (!lista) return null;
+
+  const destino = Number(idOSDestino);
+  if (!destino || Number(lista.id_os) === destino) return { semAlteracao: true };
+
+  const conn = await connection.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    await conn.query(`
+      UPDATE tb_materiais_listas
+      SET id_os = ?,
+          atualizado_em = CURRENT_TIMESTAMP
+      WHERE id = ?
+        AND ativo = 1
+    `, [destino, id]);
+
+    await conn.query(`
+      UPDATE tb_materiais_os
+      SET id_os = ?
+      WHERE id_lista = ?
+    `, [destino, id]);
+
+    await conn.query(`
+      INSERT INTO tb_materiais_listas_historico
+        (id_lista, acao, status_origem, status_destino, usuario_id, motivo)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [
+      id,
+      "transferida",
+      lista.status,
+      lista.status,
+      usuarioId,
+      `Transferida da OS ${lista.id_os} para a OS ${destino}`
+    ]);
+
+    await conn.commit();
+    return { sucesso: true };
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 async function listarHistoricoLista(id) {
@@ -856,6 +913,7 @@ module.exports = {
   updateLista,
   avancarLista,
   duplicarLista,
+  transferirLista,
   listarHistoricoLista,
 
   deleteMaterialOS,

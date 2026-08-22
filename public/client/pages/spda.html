@@ -86,10 +86,54 @@
         </div>
 
         <div class="spda-tools">
-          <label class="spda-upload-button" title="Anexar planta baixa">
-            <input id="spdaInputPlanta" type="file" accept="application/pdf,image/png,image/jpeg,image/jpg,image/webp">
-            <i class="fa-solid fa-paperclip"></i>
-          </label>
+          <button type="button" class="spda-element-btn spda-element-eletrica" data-spda-componente="entrada_luz"
+            title="Entrada de Luz">
+            <i class="fa-solid fa-plug-circle-bolt"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-eletrica" data-spda-componente="transformador"
+            title="Transformador">
+            <i class="fa-solid fa-tower-broadcast"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-eletrica" data-spda-componente="qgbt" title="QGBT">
+            <i class="fa-solid fa-table-cells-large"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-eletrica" data-spda-componente="qdf" title="QDF">
+            <i class="fa-solid fa-border-all"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-cabo-option" data-tool="cabo" title="Cabo / alimentacao">
+            <i class="fa-solid fa-wave-square"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-rede" data-spda-componente="entrada_rede"
+            title="Entrada de Rede">
+            <i class="fa-solid fa-ethernet"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-rede" data-spda-componente="rack" title="Rack">
+            <i class="fa-solid fa-server"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-ppci" data-spda-componente="central_incendio"
+            title="Central de incendio">
+            <i class="fa-solid fa-house-fire"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-ppci" data-spda-componente="sensor_acionador"
+            title="Sensor / acionador">
+            <i class="fa-solid fa-bell"></i>
+          </button>
+          <button type="button" class="spda-element-btn spda-element-ppci" data-spda-componente="extintor"
+            title="Extintor">
+            <i class="fa-solid fa-fire-extinguisher"></i>
+          </button>|
+          <button type="button" class="spda-element-btn spda-element-civil" title="Civil">
+            <i class="fa-solid fa-drafting-compass"></i>
+          </button>|
+          <button type="button" class="spda-tool spda-mark-tool" data-tool="marcacao_circular"
+            title="Marcação circular">
+            <i class="fa-regular fa-circle"></i>
+          </button>
+          <button type="button" class="spda-tool spda-mark-tool" data-tool="marcacao_retangular"
+            title="Marcação retangular">
+            <i class="fa-regular fa-square"></i>
+          </button>
+          |
           <button type="button" class="spda-tool" data-tool="numero" title="Adicionar numeração">
             <i class="fa-solid fa-location-dot"></i>
           </button>
@@ -99,17 +143,40 @@
           <button type="button" class="spda-tool" data-tool="aterramento" title="Adicionar medição de aterramento">
             <i class="fa-solid fa-arrow-down-long"></i>
           </button>
-          <button type="button" id="spdaToggleAcoes" class="spda-tool ativo" title="Mostrar ou ocultar ações não selecionadas">
-            <i class="fa-solid fa-eye"></i>
+          <button type="button" class="spda-tool spda-capture-break-tool" data-tool="rompimento_captacao"
+            title="Problema na capta&ccedil;&atilde;o: cabo ou barra rompida">
+            <i class="fa-solid fa-scissors"></i>
           </button>
+          <button type="button" class="spda-element-btn spda-element-captacao" data-spda-componente="captor_extraviado"
+            title="Captor extraviado">
+            <i class="fa-solid fa-location-crosshairs"></i>
+          </button>
+          <button type="button" id="spdaToggleAcoes" class="spda-tool ativo"
+            title="Mostrar ou ocultar ações não selecionadas">
+            <i class="fa-solid fa-eye"></i>
+          </button>|
+          <label class="spda-upload-button" title="Anexar planta baixa">
+            <input id="spdaInputPlanta" type="file" accept="application/pdf,image/png,image/jpeg,image/jpg,image/webp">
+            <i class="fa-solid fa-paperclip"></i>
+          </label>
+          <button type="button" id="spdaEditarEnquadramento" class="spda-tool"
+            title="Editar enquadramento inicial da planta">
+            <i class="fa-solid fa-crop-simple"></i>
+          </button>
+          <button type="button" id="spdaAreaPdf" class="spda-tool" title="Definir área do PDF">
+            <i class="fa-solid fa-vector-square"></i>
+          </button>
+          <button type="button" id="spdaExportarLivre" class="spda-tool" title="Exportar planta em tamanho livre">
+            <i class="fa-solid fa-file-pdf"></i>
+          </button>|
           <button type="button" id="spdaSalvarElementos" class="spda-tool" title="Salvar marcações">
             <i class="fa-solid fa-floppy-disk"></i>
           </button>
-          <button type="button" id="spdaImprimir" class="spda-tool" title="Imprimir planta em PDF">
-            <i class="fa-solid fa-print"></i>
-          </button>
           <button type="button" id="spdaDesfazer" class="spda-tool spda-danger-tool" title="Desfazer última marcação">
             <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <button type="button" id="spdaAbrirGuia" class="spda-tool" title="Abrir guia do SPDA">
+            <i class="fa-solid fa-circle-question"></i>
           </button>
         </div>
       </div>
@@ -127,6 +194,10 @@
         <button type="button" id="spdaTabelaToggle" class="spda-table-toggle" title="Abrir tabela de preenchimento">
           <i class="fa-solid fa-table-list"></i>
         </button>
+        <button type="button" id="spdaAnotacoesToggle" class="spda-table-toggle spda-annotation-toggle"
+          title="Abrir anotações das marcações">
+          !A
+        </button>
 
         <aside id="spdaTabelaPainel" class="spda-fill-panel" aria-label="Tabela de preenchimento SPDA">
           <button type="button" id="spdaTabelaFechar" class="spda-fill-close" title="Minimizar tabela">
@@ -137,7 +208,8 @@
               <span>Preenchimento rápido</span>
               <strong>Tabela de medições</strong>
             </div>
-            <button type="button" id="spdaTabelaConfigToggle" class="spda-fill-config-toggle" title="Configurar limites">
+            <button type="button" id="spdaTabelaConfigToggle" class="spda-fill-config-toggle"
+              title="Configurar limites">
               <i class="fa-solid fa-sliders"></i>
             </button>
           </div>
@@ -161,6 +233,27 @@
           <div id="spdaTabelaConteudo" class="spda-fill-content"></div>
         </aside>
 
+        <aside id="spdaAnotacoesPainel" class="spda-fill-panel spda-annotation-panel"
+          aria-label="Anotações das marcações SPDA">
+          <button type="button" id="spdaAnotacoesFechar" class="spda-fill-close" title="Minimizar anotações">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <div class="spda-fill-head">
+            <div>
+              <span>Marcações</span>
+              <strong>Anotações gerais</strong>
+            </div>
+            <button type="button" class="spda-fill-config-toggle spda-mark-tool" data-tool="anotacoes_marcacoes"
+              title="Adicionar anotações das marcações na planta">
+              <i class="fa-solid fa-comment-dots"></i>
+            </button>
+          </div>
+          <p class="spda-fill-note">
+            Use esta tabela para revisar ou preencher as observações das marcações !1, !2, !3...
+          </p>
+          <div id="spdaAnotacoesConteudo" class="spda-fill-content"></div>
+        </aside>
+
         <div id="spdaCanvas" class="spda-canvas">
           <div id="spdaPlantaPlaceholder" class="spda-planta-placeholder">
             <i class="fa-regular fa-map"></i>
@@ -170,6 +263,14 @@
           <div id="spdaPlantaLayer" class="spda-planta-layer"></div>
           <svg id="spdaSvgLayer" class="spda-svg-layer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
           <div id="spdaOverlayLayer" class="spda-overlay-layer"></div>
+          <div id="spdaFrameOverlay" class="spda-frame-overlay" hidden>
+            <div class="spda-frame-help">
+              <strong>Enquadrar planta</strong>
+              <span>Arraste um retangulo sobre a area principal que deve abrir em destaque.</span>
+              <button type="button" id="spdaPularEnquadramento">Pular</button>
+            </div>
+            <div id="spdaFrameSelection" class="spda-frame-selection"></div>
+          </div>
         </div>
       </div>
     </section>

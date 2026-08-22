@@ -7,11 +7,12 @@ import {
 
 
 export function initColabForm() {
-    $(document).off("submit", "#form_atestar");
-    $(document).off("submit", "#formColaborador");
+    $(document).off("submit.colabForm", "#form_atestar");
+    $(document).off("submit.colabForm", "#formColaborador");
+    $(document).off("submit.colabForm", "#formColaboradorProfissional");
 
 
-    $(document).on("submit", "#formColaborador", async function (e) {
+    $(document).on("submit.colabForm", "#formColaborador", async function (e) {
         e.preventDefault();
         
         const botaoClicado = e.originalEvent.submitter?.name || '';
@@ -121,7 +122,7 @@ export function initColabForm() {
 
 
     // delega o evento ao document
-    $(document).on("submit", "#form_atestar", function (e) {
+    $(document).on("submit.colabForm", "#form_atestar", function (e) {
         e.preventDefault();
         const formData = $(this).serialize();
 
@@ -161,10 +162,20 @@ export function initColabForm() {
     });
 
 
-    $(document).on('submit', '#formColaboradorProfissional', function (e) {
+    $(document).on('submit.colabForm', '#formColaboradorProfissional', function (e) {
         e.preventDefault();
+        const $form = $(this);
+        const $botao = $form.find('[type="submit"], button:not([type]), #bt_editColabProf').filter(':visible').last();
+
+        if ($form.data('salvando')) {
+            return;
+        }
+
+        $form.data('salvando', true);
+        $botao.prop('disabled', true).addClass('salvando');
+
         // Serializa dados do form
-        const formData = $(this).serialize();
+        const formData = $form.serialize();
 
         const idColaborador = $('#idColaboradorPro').val(); // pega do input hidden
         $.ajax({
@@ -204,6 +215,10 @@ export function initColabForm() {
             },
             error: function () {
                 alert('Erro ao salvar os dados profissional.');
+            },
+            complete: function () {
+                $form.data('salvando', false);
+                $botao.prop('disabled', false).removeClass('salvando');
             }
         });
     });

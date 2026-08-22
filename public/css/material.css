@@ -352,6 +352,13 @@ h1 {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.material-lista-card-actions .material-lista-mover-os {
+  margin-right: auto;
+  border-color: rgba(56, 189, 248, 0.48);
+  background: rgba(14, 116, 144, 0.34);
+  color: #b7ecff;
+}
+
 .material-lista-card-actions button {
   width: 28px;
   height: 28px;
@@ -365,6 +372,12 @@ h1 {
 .material-lista-card-actions button:hover {
   background: linear-gradient(90deg, #ee7722, #efda38);
   color: #111;
+}
+
+.material-lista-card-actions .material-lista-mover-os:hover {
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+  border-color: rgba(186, 230, 253, 0.78);
+  color: #08111a;
 }
 
 .material-lista-card-actions .material-lista-excluir:hover {
@@ -544,6 +557,49 @@ h1 {
 #listaMaterial .material-lista-card-actions button:disabled:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--texto-principal);
+}
+
+.modal-mover-lista-material-box {
+  width: min(460px, calc(100vw - 28px));
+}
+
+.modal-mover-lista-material-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 14px 0 8px;
+}
+
+.modal-mover-lista-material-grid label {
+  display: grid;
+  gap: 5px;
+  text-align: left;
+}
+
+.modal-mover-lista-material-grid span {
+  color: var(--texto-secundario);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modal-mover-lista-material-grid select {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--material-border, rgba(255, 255, 255, 0.14));
+  background: var(--material-surface-muted, rgba(255, 255, 255, 0.08));
+  color: var(--material-text, var(--texto-principal));
+  padding: 0 10px;
+  outline: none;
+}
+
+.modal-mover-lista-material-info {
+  display: block;
+  color: var(--texto-secundario);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
 }
 
 .material-detalhe-view {

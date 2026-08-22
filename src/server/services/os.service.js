@@ -67,7 +67,30 @@ async function salvarOS(dados) {
         mensagem: "OS já cadastrada."
       };
     }
-    await OSModel.inserirOS(dados);
+    try {
+      await OSModel.inserirOS(dados);
+    } catch (err) {
+      if (err?.code === "ER_DUP_ENTRY") {
+        const mensagemBanco = String(err.sqlMessage || err.message || "");
+        if (mensagemBanco.includes("PRIMARY") || mensagemBanco.includes("id_OSs")) {
+          return {
+            sucesso: false,
+            codigo: "OS_DUPLICADA",
+            mensagem: "OS já cadastrada."
+          };
+        }
+
+        if (mensagemBanco.includes("descricao")) {
+          return {
+            sucesso: false,
+            codigo: "DESCRICAO_DUPLICADA",
+            mensagem: "Já existe uma OS com essa descrição. O sistema tentou liberar descrições repetidas; tente salvar novamente."
+          };
+        }
+      }
+
+      throw err;
+    }
     return { sucesso: true };
   }
 

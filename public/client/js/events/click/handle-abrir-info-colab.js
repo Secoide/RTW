@@ -17,7 +17,9 @@ function erroDeSessaoExpirada(error) {
 
 export function initAbrirInfoColabClick() {
     initaddConquistas();
-    $(document).on("click", "#bt_perfilhome", function () {
+    $(document)
+        .off("click.abrirInfoColab", "#bt_perfilhome")
+        .on("click.abrirInfoColab", "#bt_perfilhome", function () {
         const idUsuario = sessionStorage.getItem("id_usuario");
         if (idUsuario) {
 
@@ -26,23 +28,33 @@ export function initAbrirInfoColabClick() {
             console.warn("âš ï¸ Nenhum usuÃ¡rio logado na sessÃ£o.");
         }
     });
-    $(document).on("click", ".bt_form_cad_colab", function () {
+    $(document)
+        .off("click.abrirInfoColab", ".bt_form_cad_colab")
+        .on("click.abrirInfoColab", ".bt_form_cad_colab", function () {
         open_form_cad_colaborador();
     });
-    $(document).on("input", ".input_cpf", function () {
+    $(document)
+        .off("input.abrirInfoColab", ".input_cpf")
+        .on("input.abrirInfoColab", ".input_cpf", function () {
         this.value = formatarCPF(this.value);
     });
 
-    $(document).on('click', '#bt_anexarExame_noPerfil', function () {
+    $(document)
+        .off('click.abrirInfoColab', '#bt_anexarExame_noPerfil')
+        .on('click.abrirInfoColab', '#bt_anexarExame_noPerfil', function () {
         const idFunc = $('#idColaborador').val();
         open_form_AnexarExame(idFunc);
     });
-    $(document).on('click', '#bt_anexarCurso_noPerfil', function () {
+    $(document)
+        .off('click.abrirInfoColab', '#bt_anexarCurso_noPerfil')
+        .on('click.abrirInfoColab', '#bt_anexarCurso_noPerfil', function () {
         const idFunc = $('#idColaborador').val();
         open_form_AnexarCurso(idFunc);
     });
 
-    $(document).on("change", "#selectSetor", async function () {
+    $(document)
+        .off("change.abrirInfoColab", "#selectSetor")
+        .on("change.abrirInfoColab", "#selectSetor", async function () {
         const $wrap = $('#formColaboradorProfissional');
         const idSetor = $(this).val();
         if (!idSetor) {
@@ -50,6 +62,14 @@ export function initAbrirInfoColabClick() {
         }
         await preencherCbxCargo(idSetor, $wrap);
     });
+
+    $(document)
+        .off("change.abrirInfoColab", "#gestorObras")
+        .on("change.abrirInfoColab", "#gestorObras", function () {
+            const valorOriginal = Number($(this).data("valorOriginal") || 0);
+            const valorAtual = this.checked ? 1 : 0;
+            $("#gestorObrasEstadoEnviado").prop("disabled", valorAtual === valorOriginal);
+        });
 
 }
 
@@ -143,7 +163,7 @@ export async function get_carregarPerfilUsuario(funcId) {
         // ðŸ”¹ 9 - Profissional
         $('#empresacontrato').val(dados.empresaContrato);
         $('#idColaboradorPro').val(dados.id);
-        $('#selectSetor').val(dados.setor).trigger('change');
+        $('#selectSetor').val(dados.setor);
 
         await preencherCbxCargo(dados.setor, $wrap)
         setTimeout(() => {
@@ -214,6 +234,10 @@ function preencherGestorObras(dados) {
         : Number(dados.responsavelOSs || 0);
 
     $('#gestorObras').prop('checked', valorVisivel === 1);
+    $('#gestorObras')
+        .data('valorOriginal', valorVisivel)
+        .attr('data-valor-original', valorVisivel);
+    $('#gestorObrasEstadoEnviado').prop('disabled', true);
     $('#gestorObrasStatus')
         .text(pendente
             ? 'Aguardando aprovação da Engenharia.'

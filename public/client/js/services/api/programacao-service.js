@@ -13,6 +13,7 @@ export async function carregarColaboradoresDisp(painel, renderizarColabEmOS) {
     if (!res.ok) throw new Error("Erro ao buscar colaboradores disponíveis");
 
     const colaboradores = await res.json();
+    if (painel.getAttribute("data-dia") !== dia) return [];
 
     // 👇 pega o container dentro do painel atual
     const container = painel.querySelector(".p_colabsDisp");
@@ -37,13 +38,15 @@ export async function carregarOSComColaboradores(painel) {
     if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
 
     const OrdemServico = await res.json();
+    const painelDia = painel.closest(".painelDia");
+    if (painelDia?.getAttribute("data-dia") !== dia) return [];
 
     // 👇 container dentro do painel
     const container = painel.querySelector(".painel_dasOS");
     renderOSComColaboradores(OrdemServico, container);
     renderColoboradorEmOS();
-    await atualizarStatusDia(painel.closest(".painelDia"));
-    atualizarIconeAnotacoes(painel.closest(".painelDia"));
+    await atualizarStatusDia(painelDia);
+    atualizarIconeAnotacoes(painelDia);
     atualizarPainel($(painel));
     return OrdemServico;
   } catch (err) {
