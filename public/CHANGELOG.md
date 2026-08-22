@@ -108,6 +108,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Adicionado
 - Adicionado aviso pop-up por empresa, configurado e enviado pelo suporte e exibido na Home até o usuário confirmar OK (Mensagens Técnicas);
 - Adicionado canal de relatos no sistema para usuários enviarem erros, bugs, dicas e melhorias, com acompanhamento de status. Edite e apague o relato enquanto ele ainda está aguardando análise;
+- Adicionada seleção de versões anteriores na janela de versão do sistema, permitindo consultar detalhes de atualizações já lançadas diretamente pelo botão Versão no menu;
 
 ### Corrigido
 - Corrigida OS que continuava marcada como sem colaborador após adicionar um colaborador na programação;

@@ -481,7 +481,11 @@ function fecharDetalhesVersaoHome() {
 }
 
 function garantirPopupVersaoHome() {
-  if (document.getElementById("homePopupAtualizacao")) return;
+  const popupExistente = document.getElementById("homePopupAtualizacao");
+  if (popupExistente) {
+    garantirEstruturaSeletorVersaoHome(popupExistente);
+    return;
+  }
 
   document.body.insertAdjacentHTML("beforeend", `
     <div id="homePopupAtualizacao" class="atualizacao-overlay home-atualizacao-overlay">
@@ -489,7 +493,7 @@ function garantirPopupVersaoHome() {
         <h2>&#128640; Nova atualização lançada!</h2>
         <p><strong>Versão:</strong> <span id="homeVersaoAtual">${VERSAO_SISTEMA}</span></p>
         <label class="home-versao-selector" for="homeVersaoSelect">
-          <span>Consultar outra versao</span>
+          <span>Consultar outra versão</span>
           <select id="homeVersaoSelect" aria-label="Selecionar versao do changelog">
             <option value="${VERSAO_SISTEMA}">v${VERSAO_SISTEMA}</option>
           </select>
@@ -499,6 +503,28 @@ function garantirPopupVersaoHome() {
       </div>
     </div>
   `);
+}
+
+function garantirEstruturaSeletorVersaoHome(popup) {
+  const box = popup?.querySelector(".home-atualizacao-box");
+  if (!box || box.querySelector("#homeVersaoSelect")) return;
+
+  const container = box.querySelector(".home-changelog-container");
+  const referencia = container || box.querySelector("#homeBtnPopupOk");
+  const seletorHtml = `
+    <label class="home-versao-selector" for="homeVersaoSelect">
+      <span>Consultar outra versão</span>
+      <select id="homeVersaoSelect" aria-label="Selecionar versao do changelog">
+        <option value="${VERSAO_SISTEMA}">v${VERSAO_SISTEMA}</option>
+      </select>
+    </label>
+  `;
+
+  if (referencia) {
+    referencia.insertAdjacentHTML("beforebegin", seletorHtml);
+  } else {
+    box.insertAdjacentHTML("beforeend", seletorHtml);
+  }
 }
 
 
