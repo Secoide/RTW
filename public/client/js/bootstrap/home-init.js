@@ -439,7 +439,11 @@ async function abrirDetalhesVersaoHome() {
 async function carregarOpcoesVersaoHome() {
   garantirPopupVersaoHome();
   const select = document.getElementById("homeVersaoSelect");
-  if (!select || versoesChangelogHomeCarregadas) return;
+  if (!select) return;
+
+  const selectJaTemHistorico = [...select.options]
+    .some(option => option.value && option.value !== VERSAO_SISTEMA);
+  if (versoesChangelogHomeCarregadas && selectJaTemHistorico) return;
 
   select.innerHTML = `<option value="${VERSAO_SISTEMA}">v${VERSAO_SISTEMA}</option>`;
 
