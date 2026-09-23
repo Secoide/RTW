@@ -808,6 +808,12 @@
         flex-direction: column;
         padding-left: 0px;
         align-items: center;
+        width: min(100%, 620px);
+    }
+
+    .resumoAnualColab {
+        width: 100%;
+        text-align: left;
     }
 
     .painel_dadosColab {

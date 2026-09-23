@@ -11,10 +11,10 @@ function getCookieOptions() {
 }
 
 async function loginController(req, res, next) {
-  const { username, password } = req.body;
+  const { username, password, empresaSaasId } = req.body;
 
   try {
-    const result = await authService.login(username, password);
+    const result = await authService.login(username, password, { empresaSaasId });
 
     if (!result.sucesso) {
       return res.status(401).json(result);
@@ -116,6 +116,18 @@ async function logoutController(req, res) {
   });
 }
 
+async function listarEmpresasLoginAdminController(req, res, next) {
+  try {
+    const empresas = await SaasService.listarEmpresasParaLoginAdmin();
+    res.json({
+      sucesso: true,
+      empresas
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function logoutAllController(req, res) {
   const usuarioId = req.session?.usuarioId;
   const store = req.sessionStore;
@@ -210,6 +222,7 @@ async function avisoEmpresaController(req, res, next) {
 
 module.exports = {
   loginController,
+  listarEmpresasLoginAdminController,
   alterarSenhaController,
   recuperarSenhaController,
   resetarSenhaController,

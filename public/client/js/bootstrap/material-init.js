@@ -23,6 +23,7 @@ import {
 export async function initMaterial() {
 
   initMostrarImagemMaterial();
+  initAtalhosSetorMaterial();
   initMaterialClicks();
   initMaterialChange();
   initFornecedorClicks();
@@ -43,6 +44,26 @@ export async function initMaterial() {
   await carregarOS();
 
   await carregarMateriaisCompleto(); 
+}
+
+function initAtalhosSetorMaterial() {
+  $(document)
+    .off("click.materialAtalhosSetor", ".material-atalho-os")
+    .on("click.materialAtalhosSetor", ".material-atalho-os", function () {
+      const idOS = $(this).data("os");
+      if (!idOS) return;
+
+      const $cbxOS = $("#cbxOS");
+      const idNormalizado = String(idOS);
+
+      if (!$cbxOS.find(`option[value="${idNormalizado}"]`).length) {
+        $cbxOS.append(`<option value="${idNormalizado}">OS ${idNormalizado}</option>`);
+      }
+
+      $cbxOS
+        .val(idNormalizado)
+        .trigger("change");
+    });
 }
 
 function initMostrarImagemMaterial() {

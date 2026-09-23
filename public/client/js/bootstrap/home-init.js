@@ -23,10 +23,13 @@ let avisoEditandoId = null;
 let nomeUsuario = sessionStorage.getItem("nome_usuario");
 let changelogHomeCarregado = false;
 let versoesChangelogHomeCarregadas = false;
+let galeriaAtualizacaoHome = { versao: "", imagens: [], indice: 0 };
 let reconhecimentoSlideTimer = null;
 let conquistasSlideHome = [];
 let conquistaSlideIndiceHome = 0;
+let hallRankingEntradaAnimada = false;
 const TEMPO_SLIDE_RECONHECIMENTO_MS = 30000;
+const CHAVE_ULTIMO_RECONHECIMENTO_HOME = "home_ultimo_reconhecimento_colaborador";
 
 const CONQUISTAS_MANUAIS_HOME = {
   CIPA: { icone: "\u267b\ufe0f", nome: "Membro da CIPA", descricao: "Participa da Comiss\u00e3o Interna de Preven\u00e7\u00e3o de Acidentes." },
@@ -51,7 +54,9 @@ const CONQUISTAS_MANUAIS_HOME = {
   COMUNICADOR_RTW: { icone: "\ud83d\udce1", nome: "Comunicador", descricao: "Reconhece comunica\u00e7\u00e3o clara, objetiva e eficiente com clientes, colegas e lideran\u00e7as." },
   ALTA_PERFORMANCE: { icone: "\ud83e\udebe", nome: "Alta Performance", descricao: "Destinada aos profissionais com desempenho acima da m\u00e9dia e entregas consistentes." },
   PONTUALIDADE_OURO: { icone: "\u23f1\ufe0f", nome: "Pontualidade de Ouro", descricao: "Concedida aos colaboradores comprometidos com hor\u00e1rios, prazos e compromissos assumidos." },
-  GUARDIAO_QUALIDADE: { icone: "\ud83d\udd10", nome: "Guardi\u00e3o da Qualidade", descricao: "Reconhece profissionais que contribuem continuamente para a excel\u00eancia dos servi\u00e7os." }
+  GUARDIAO_QUALIDADE: { icone: "\ud83d\udd10", nome: "Guardi\u00e3o da Qualidade", descricao: "Reconhece profissionais que contribuem continuamente para a excel\u00eancia dos servi\u00e7os." },
+  COMPRAS_ESTRATEGICAS: { icone: "\ud83e\ude99", nome: "Compras Estrat\u00e9gicas", descricao: "Reconhece profissionais do setor de Compras que obt\u00eam boas cota\u00e7\u00f5es e decis\u00f5es de aquisi\u00e7\u00e3o para a empresa." },
+  DOCUMENTADOR_TECNICO: { icone: "\ud83d\udd8a\ufe0f", nome: "Documentador T\u00e9cnico", descricao: "Reconhece profissionais que registram fotos, relat\u00f3rios, medi\u00e7\u00f5es e evid\u00eancias completas nas plataformas solicitadas pela empresa." }
 };
 
 const Toast = Swal.mixin({
@@ -350,6 +355,12 @@ async function carregarAvisosExames() {
 // EVENTO GLOBAL PARA BOTÕES (DELEGAÇÃO)
 // =======================================================
 document.addEventListener("click", (ev) => {
+  const controleGaleria = ev.target.closest("[data-home-galeria]");
+  if (controleGaleria) {
+    alterarGaleriaAtualizacaoHome(controleGaleria.dataset.homeGaleria === "proxima" ? 1 : -1);
+    return;
+  }
+
   if (ev.target.closest("#homeVersaoBtn, #menuVersaoBtn")) {
     abrirDetalhesVersaoHome();
     return;
@@ -474,8 +485,71 @@ async function carregarDetalhesVersaoHome(versao = VERSAO_SISTEMA, forcar = fals
   if (textoVersao) textoVersao.textContent = versao;
   if (select && select.value !== versao) select.value = versao;
   container.innerHTML = "<p class=\"home-changelog-loading\">Carregando detalhes...</p>";
-  container.innerHTML = await carregarChangelog(versao);
+  const [changelog, imagens] = await Promise.all([
+    carregarChangelog(versao),
+    carregarImagensAtualizacaoHome(versao)
+  ]);
+  container.innerHTML = changelog;
   changelogHomeCarregado = versao === VERSAO_SISTEMA;
+}
+
+async function carregarImagensAtualizacaoHome(versao) {
+  const galeria = document.getElementById("homeAtualizacaoGaleria");
+  if (!galeria) return [];
+
+  galeria.hidden = true;
+  galeriaAtualizacaoHome = { versao, imagens: [], indice: 0 };
+
+  try {
+    const resposta = await fetch(`/api/atualizacoes/imagens?versao=${encodeURIComponent(versao)}&t=${Date.now()}`, {
+      credentials: "include",
+      cache: "no-store"
+    });
+    if (!resposta.ok) return [];
+
+    const imagens = await resposta.json();
+    if (galeriaAtualizacaoHome.versao !== versao) return [];
+
+    galeriaAtualizacaoHome.imagens = Array.isArray(imagens) ? imagens : [];
+    renderizarGaleriaAtualizacaoHome();
+    return galeriaAtualizacaoHome.imagens;
+  } catch (erro) {
+    console.warn("Imagens da atualizacao indisponiveis:", erro.message);
+    return [];
+  }
+}
+
+function renderizarGaleriaAtualizacaoHome() {
+  const galeria = document.getElementById("homeAtualizacaoGaleria");
+  const imagens = galeriaAtualizacaoHome.imagens;
+  if (!galeria || !imagens.length) return;
+
+  const total = imagens.length;
+  const indice = ((galeriaAtualizacaoHome.indice % total) + total) % total;
+  galeriaAtualizacaoHome.indice = indice;
+  const anterior = imagens[(indice - 1 + total) % total];
+  const principal = imagens[indice];
+  const proxima = imagens[(indice + 1) % total];
+  const $anterior = $("#homeAtualizacaoImagemAnterior");
+  const $principal = $("#homeAtualizacaoImagemPrincipal");
+  const $proxima = $("#homeAtualizacaoImagemProxima");
+  const $previewEsquerda = $(".home-atualizacao-preview-esquerda");
+  const $previewDireita = $(".home-atualizacao-preview-direita");
+
+  $principal.attr("src", principal).attr("alt", `Imagem ${indice + 1} da atualizacao`);
+  $anterior.attr("src", anterior);
+  $proxima.attr("src", proxima);
+  $previewEsquerda.toggle(total > 1);
+  $previewDireita.toggle(total > 1);
+  $(".home-atualizacao-carousel-button").prop("disabled", total < 2);
+  $("#homeAtualizacaoIndicadores").text(`${indice + 1} / ${total}`);
+  galeria.hidden = false;
+}
+
+function alterarGaleriaAtualizacaoHome(direcao) {
+  if (galeriaAtualizacaoHome.imagens.length < 2) return;
+  galeriaAtualizacaoHome.indice += direcao;
+  renderizarGaleriaAtualizacaoHome();
 }
 
 function fecharDetalhesVersaoHome() {
@@ -496,6 +570,16 @@ function garantirPopupVersaoHome() {
       <div class="atualizacao-box home-atualizacao-box">
         <h2>&#128640; Nova atualização lançada!</h2>
         <p><strong>Versão:</strong> <span id="homeVersaoAtual">${VERSAO_SISTEMA}</span></p>
+        <section id="homeAtualizacaoGaleria" class="home-atualizacao-galeria" hidden aria-label="Imagens da atualizacao">
+          <div class="home-atualizacao-carousel">
+            <button type="button" class="home-atualizacao-carousel-button" data-home-galeria="anterior" aria-label="Imagem anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="home-atualizacao-preview home-atualizacao-preview-esquerda"><img id="homeAtualizacaoImagemAnterior" alt="Imagem anterior da atualizacao"></div>
+            <figure class="home-atualizacao-imagem-principal"><img id="homeAtualizacaoImagemPrincipal" alt="Imagem principal da atualizacao"></figure>
+            <div class="home-atualizacao-preview home-atualizacao-preview-direita"><img id="homeAtualizacaoImagemProxima" alt="Proxima imagem da atualizacao"></div>
+            <button type="button" class="home-atualizacao-carousel-button" data-home-galeria="proxima" aria-label="Proxima imagem"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div id="homeAtualizacaoIndicadores" class="home-atualizacao-indicadores" aria-hidden="true"></div>
+        </section>
         <label class="home-versao-selector" for="homeVersaoSelect">
           <span>Consultar outra versão</span>
           <select id="homeVersaoSelect" aria-label="Selecionar versao do changelog">
@@ -642,6 +726,7 @@ export async function initHome() {
   await carregarAniversariantes();
   await carregarAvisos();
   await carregarHallExperiencia();
+  iniciarTourCardHall();
   initSantaDropWalkWrapper();
 
   // ==========================================
@@ -1914,79 +1999,124 @@ async function carregarHallExperiencia() {
       "hall-ranking"
     );
 
+  const renderizarMedalhasHall = medalhas => {
+    const lista = Array.isArray(medalhas) ? medalhas : [];
+    const itens = lista.map(m => `
+      <span
+        class="medalha-item"
+        data-tooltip="${escaparHtmlHome(m?.titulo || 'Medalha')}"
+        title="${escaparHtmlHome(m?.titulo || 'Medalha')}"
+      >
+        ${escaparHtmlHome(m?.icone || '🏅')}
+      </span>
+    `).join('');
+    const temMedalhasExtras = lista.length > 6;
+    let repeticoes = 1;
+
+    if (temMedalhasExtras) {
+      const tamanhoEstimadoGrupo = Math.max(39, lista.length * 23 + 24);
+      repeticoes = Math.max(2, Math.ceil(400 / tamanhoEstimadoGrupo));
+
+      if (repeticoes % 2 !== 0)
+        repeticoes += 1;
+    }
+
+    return `
+      <div class="medalhas${temMedalhasExtras ? ' medalhas-rolando' : ''}" data-tour="hall-medals">
+        <div class="medalhas-trilho">
+          ${Array.from({ length: repeticoes }, (_, grupoIndex) => `
+            <div class="medalhas-grupo"${grupoIndex > 0 ? ' aria-hidden="true"' : ''}>
+              ${itens}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  };
+
   div.innerHTML = "";
 
-  lista.forEach((c, index) => {
-
-    div.innerHTML += `
+  div.innerHTML = lista.map((c, index) => `
 
       <div class="
           card-experiencia
           ${index === 0 ? 'top1' : ''}
           ${c.classeCard || ''}
-      ">
+      " data-tour="hall-card">
 
-        <div
-          class="foto-progress"
-          style="
-            --percent:${c.progresso}
-          "
-        >
+        ${String(c.classeCard || "").includes("card-")
+        ? '<span class="hall-bandeira-alvo" data-tour="hall-flag" aria-hidden="true"></span>'
+        : ""}
 
-          <img
-            src="${c.fotoperfil}?v=${c.versao_foto}"
+        <div class="medalha" data-tour="hall-position">
+          ${index + 1}º
+      </div>
+
+        <div class="hall-card-info">
+          <div
+            class="foto-progress"
+            data-tour="hall-photo"
+            style="--percent:${c.progresso}"
           >
+            <img
+              src="${c.fotoperfil}?v=${c.versao_foto}"
+              alt="Foto de ${c.nome}"
+            >
+          </div>
 
-        </div>
+          <div class="nome" data-tour="hall-name">
+            ${c.nome}
+          </div>
 
-        <div class="medalha">
+          <div class="titulo" data-tour="hall-title">
+            ${c.titulo}
+          </div>
 
-          ${index === 0
-        ? "\ud83e\udd47"
-        : index === 1
-          ? "\ud83e\udd48"
-          : index === 2
-            ? "\ud83e\udd49"
-            : `${index + 1}º`
-      }
-      
-      </div>
+          <div class="dias" data-tour="hall-time">
+            ${formatarTempoEmpresaDetalhadoHome(c.data_admissao)}
+          </div>
 
-        <div class="nome">
-          ${c.nome}
-        </div>
-
-        <div class="titulo">
-          ${c.titulo}
-        </div>
-
-        <div class="dias">
-
-          ${c.diasRestantes}
-          dias para
-
-          ${c.proximoMarco}
-          ${c.proximoMarco === 1 ? 'ano' : 'anos'}
-
-        </div>
-        <div class="medalhas">
-
-            ${c.medalhas
-        .map(m => `
-                  <span
-                    class="medalha-item"
-                    data-tooltip="${m.titulo}"
-                  >
-                    ${m.icone}
-                  </span>
-                `)
-        .join('')
-      }
+          ${renderizarMedalhasHall(c.medalhas)}
 
         </div>
       </div>
-      
-    `;
+
+    `).join('');
+
+  div.querySelectorAll('.medalhas-rolando .medalha-item').forEach(medalha => {
+    const faixa = medalha.closest('.medalhas-rolando');
+
+    medalha.addEventListener('mouseenter', () => {
+      faixa?.classList.add('medalhas-pausada');
+    });
+
+    medalha.addEventListener('mouseleave', () => {
+      faixa?.classList.remove('medalhas-pausada');
+    });
+  });
+
+  const animarEntrada = !hallRankingEntradaAnimada;
+  hallRankingEntradaAnimada = true;
+
+  const primeirosCards = animarEntrada
+    ? Array.from(div.children).slice(0, 10)
+    : [];
+  const reduzirMovimento = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+  primeirosCards.forEach((card, index) => {
+    card.classList.add('hall-card-sequencial');
+
+    if (reduzirMovimento) {
+      card.classList.add('hall-card-rank-visible', 'hall-card-info-visible');
+      return;
+    }
+
+    window.setTimeout(() => {
+      card.classList.add('hall-card-rank-visible');
+      window.setTimeout(() => {
+        card.classList.add('hall-card-info-visible');
+      }, 260);
+    }, index * 430);
 
   });
   const hallRanking =
@@ -2067,6 +2197,112 @@ async function carregarHallExperiencia() {
   );
 }
 
+function iniciarTourCardHall() {
+  const botao = document.getElementById("btnGuiaCardHall");
+  if (!botao || botao.dataset.tourBound === "true") return;
+
+  botao.dataset.tourBound = "true";
+  botao.addEventListener("click", () => {
+    const card = document.querySelector('#hall-ranking [data-tour="hall-card"]');
+    const driverFactory = window.driver?.js?.driver || window.driver?.driver;
+
+    if (!card) {
+      Toast.fire({
+        icon: "info",
+        title: "Hall ainda sem colaboradores"
+      });
+      return;
+    }
+
+    if (typeof driverFactory !== "function") {
+      Toast.fire({
+        icon: "warning",
+        title: "Guia temporariamente indisponível"
+      });
+      return;
+    }
+
+    const steps = [
+      {
+        element: '[data-tour="hall-card"]',
+        popover: {
+          title: "Card do colaborador",
+          description: "Este card reúne a posição no Hall, a evolução do tempo de empresa e os reconhecimentos recebidos."
+        }
+      },
+      {
+        element: '[data-tour="hall-position"]',
+        popover: {
+          title: "Posição no Hall",
+          description: "Mostra a colocação atual do colaborador no ranking de experiência."
+        }
+      },
+      {
+        element: '[data-tour="hall-photo"]',
+        popover: {
+          title: "Foto e progresso",
+          description: "A foto identifica o colaborador. O anel ao redor mostra o avanço em direção ao próximo marco de tempo de empresa."
+        }
+      },
+      {
+        element: '[data-tour="hall-name"]',
+        popover: {
+          title: "Nome",
+          description: "Identifica o colaborador reconhecido neste card."
+        }
+      },
+      {
+        element: '[data-tour="hall-title"]',
+        popover: {
+          title: "Título de experiência",
+          description: "É definido automaticamente conforme o tempo de empresa, desde Origem RTW até os títulos mais avançados."
+        }
+      },
+      {
+        element: '[data-tour="hall-time"]',
+        popover: {
+          title: "Tempo de empresa",
+          description: "Exibe o tempo completo desde a admissão, com anos, meses e dias."
+        }
+      },
+      {
+        element: '[data-tour="hall-medals"]',
+        popover: {
+          title: "Medalhas e conquistas",
+          description: "Os ícones representam reconhecimentos automáticos ou conquistas concedidas manualmente. Passe o mouse sobre uma medalha para ver seu nome."
+        }
+      }
+    ];
+
+    const bandeira = card.querySelector('[data-tour="hall-flag"]');
+    if (bandeira) {
+      steps.splice(2, 0, {
+        element: '[data-tour="hall-flag"]',
+        popover: {
+          title: "Bandeira de destaque",
+          description: "Alguns cards exibem uma bandeira no canto superior esquerdo para indicar um destaque ou reconhecimento especial do colaborador."
+        }
+      });
+    }
+
+    const tour = driverFactory({
+      showProgress: true,
+      animate: true,
+      allowClose: true,
+      overlayColor: "#000000",
+      overlayOpacity: 0.78,
+      nextBtnText: "Próximo",
+      prevBtnText: "Voltar",
+      doneBtnText: "Concluir",
+      progressText: "{{current}} de {{total}}",
+      popoverClass: "hall-card-tour",
+      steps
+    });
+
+    tour.drive();
+  });
+}
+
 function escaparHtmlHome(valor) {
   return String(valor ?? "")
     .replaceAll("&", "&amp;")
@@ -2094,36 +2330,125 @@ function formatarDataConquistaHome(valor, tipo) {
   return data.toLocaleDateString("pt-BR");
 }
 
-function montarConquistasManuaisHome(colaboradores) {
+function obterTipoConquistaManualHome(titulo, icone, tiposManuaisRegistrados = new Set()) {
+  const tituloNormalizado = String(titulo || "").trim();
+  const tituloSemSufixoRtw = tituloNormalizado
+    .replace(/\s+RTW$/i, "")
+    .trim();
+
+  for (const [tipo, meta] of Object.entries(CONQUISTAS_MANUAIS_HOME)) {
+    if (
+      tiposManuaisRegistrados.has(tipo)
+      && meta.icone === icone
+    ) {
+      return tipo;
+    }
+
+    if (
+      tituloNormalizado === meta.nome
+      || tituloSemSufixoRtw === meta.nome
+    ) {
+      return tipo;
+    }
+  }
+
+  if (tituloNormalizado.startsWith("Funcionário do Mês -")) return "DESTAQUE_MES";
+  if (tituloNormalizado.startsWith("Destaque do Ano -")) return "DESTAQUE_ANO";
+
+  return null;
+}
+
+function limparDetalheConquistaAutomaticaHome(titulo) {
+  return String(titulo || "")
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim();
+}
+
+function descreverConquistaAutomaticaHome(titulo) {
+  const tituloLimpo = limparDetalheConquistaAutomaticaHome(titulo);
+  const descricoes = {
+    "Viajante": "Conquistada ao atuar em 10 ou mais cidades diferentes.",
+    "Explorador": "Conquistada ao atuar em 20 ou mais cidades diferentes.",
+    "Desbravador": "Conquistada ao atuar em 50 ou mais cidades diferentes.",
+    "Multifunção": "Conquistada ao atender 10 ou mais clientes diferentes.",
+    "Especialista Multifunção": "Conquistada ao atender 50 ou mais clientes diferentes.",
+    "Mestre Multifunção": "Conquistada ao atender 100 ou mais clientes diferentes.",
+    "Iniciante de Campo": "Conquistada ao participar de 10 ou mais Ordens de Serviço.",
+    "Operador": "Conquistada ao participar de 50 ou mais Ordens de Serviço.",
+    "Centurião": "Conquistada ao participar de 100 ou mais Ordens de Serviço.",
+    "Veterano de Campo": "Conquistada ao participar de 500 ou mais Ordens de Serviço.",
+    "Mestre das OS": "Conquistada ao participar de 1.000 ou mais Ordens de Serviço.",
+    "Mestre RTW": "Conquistada após completar 5 anos de empresa.",
+    "Pilar RTW": "Conquistada após completar 10 anos de empresa.",
+    "Fundação RTW": "Conquistada após completar 15 anos de empresa.",
+    "Lenda RTW": "Conquistada após completar 20 anos de empresa.",
+    "Patrimônio RTW": "Conquistada após completar 25 anos de empresa.",
+    "Guardião da Segurança": "Gerada quando o colaborador possui CIPA e Brigadista.",
+    "Rota Ampliada": "Conquistada ao atuar em dois ou mais estados."
+  };
+
+  return descricoes[tituloLimpo]
+    || "Conquista gerada automaticamente a partir dos indicadores do colaborador.";
+}
+
+function montarConquistasHome(colaboradores) {
   if (!Array.isArray(colaboradores)) return [];
 
   return colaboradores
     .flatMap(colaborador => {
-      return String(colaborador?.conquistas || "")
+      const registros = String(colaborador?.conquistas || "")
         .split(",")
         .map(item => item.trim())
         .filter(Boolean)
         .map(item => {
           const [tipo, data] = item.split("|");
-          const meta = CONQUISTAS_MANUAIS_HOME[tipo];
+          return { tipo, data };
+        });
+      const tiposManuaisRegistrados = new Set(
+        registros.map(item => item.tipo)
+      );
 
-          if (!meta) return null;
+      const colaboradorId = String(
+        colaborador?.id
+        ?? colaborador?.id_funcionario
+        ?? colaborador?.matricula
+        ?? colaborador?.nome
+        ?? ""
+      );
 
-          return {
-            tipo,
-            data,
-            dataObj: dataLocalHome(data),
-            icone: meta.icone,
-            medalha: meta.nome,
-            descricao: meta.descricao || "",
-            nome: colaborador.nome,
-            foto: colaborador.fotoperfil
-              ? `${colaborador.fotoperfil}?v=${colaborador.versao_foto || ""}`
-              : "/imagens/user-default.webp"
-          };
-        })
-        .filter(Boolean);
+      const medalhas = Array.isArray(colaborador?.medalhas)
+        ? colaborador.medalhas
+        : [];
+
+      return medalhas.map(medalha => {
+        const tipo = obterTipoConquistaManualHome(
+          medalha?.titulo,
+          medalha?.icone,
+          tiposManuaisRegistrados
+        );
+        const registro = tipo
+          ? registros.find(item => item.tipo === tipo)
+          : null;
+        const meta = registro && tipo ? CONQUISTAS_MANUAIS_HOME[tipo] : null;
+        const tituloAutomatico = medalha?.titulo || "Reconhecimento";
+
+        return {
+          tipo: registro?.tipo || "AUTOMATICA",
+          data: registro?.data || "",
+          dataObj: registro?.data ? dataLocalHome(registro.data) : null,
+          icone: medalha?.icone || meta?.icone || "\ud83c\udfc5",
+          medalha: meta?.nome || limparDetalheConquistaAutomaticaHome(tituloAutomatico),
+          descricao: meta?.descricao
+            || descreverConquistaAutomaticaHome(tituloAutomatico),
+          nome: colaborador.nome,
+          colaboradorId,
+          foto: colaborador.fotoperfil
+            ? `${colaborador.fotoperfil}?v=${colaborador.versao_foto || ""}`
+            : "/imagens/user-default.webp"
+        };
+      });
     })
+    .filter(Boolean)
     .sort((a, b) => {
       const dataA = a.dataObj ? a.dataObj.getTime() : 0;
       const dataB = b.dataObj ? b.dataObj.getTime() : 0;
@@ -2143,9 +2468,11 @@ function renderizarSlideConquistaHome(item, posicao, total) {
     </div>
     <strong>${escaparHtmlHome(item.nome)}</strong>
     <p>${escaparHtmlHome(item.medalha)}</p>
-    <div class="funcionario-medalha-data">
-      ${escaparHtmlHome(formatarDataConquistaHome(item.data, item.tipo))}
-    </div>
+    ${item.data
+      ? `<div class="funcionario-medalha-data">
+          ${escaparHtmlHome(formatarDataConquistaHome(item.data, item.tipo))}
+        </div>`
+      : `<div class="funcionario-medalha-data">Reconhecimento automático</div>`}
     <div class="funcionario-medalha-descricao">
       ${escaparHtmlHome(item.descricao)}
     </div>
@@ -2197,8 +2524,7 @@ function iniciarSlideConquistasManuais(colaboradores) {
     reconhecimentoSlideTimer = null;
   }
 
-  conquistasSlideHome = montarConquistasManuaisHome(colaboradores);
-  conquistaSlideIndiceHome = 0;
+  conquistasSlideHome = montarConquistasHome(colaboradores);
 
   if (!conquistasSlideHome.length) {
     destino.className = "funcionario-mes-card vazio";
@@ -2211,6 +2537,21 @@ function iniciarSlideConquistasManuais(colaboradores) {
     `;
     return;
   }
+
+  const ultimoColaborador = sessionStorage.getItem(CHAVE_ULTIMO_RECONHECIMENTO_HOME);
+  const candidatos = conquistasSlideHome.filter(item =>
+    item.colaboradorId !== ultimoColaborador
+  );
+  const listaParaEscolha = candidatos.length ? candidatos : conquistasSlideHome;
+  const escolhido = listaParaEscolha[
+    Math.floor(Math.random() * listaParaEscolha.length)
+  ];
+
+  conquistaSlideIndiceHome = conquistasSlideHome.indexOf(escolhido);
+  sessionStorage.setItem(
+    CHAVE_ULTIMO_RECONHECIMENTO_HOME,
+    escolhido.colaboradorId
+  );
 
   renderizarSlideConquistaHome(
     conquistasSlideHome[conquistaSlideIndiceHome],
@@ -2257,7 +2598,69 @@ function temDestaqueMesAnterior(colaborador, referencia) {
         && dataConquista
         && dataConquista.getMonth() + 1 === referencia.mes
         && dataConquista.getFullYear() === referencia.ano;
-    });
+  });
+}
+
+function adicionarMesesHome(data, quantidade) {
+  const resultado = new Date(data);
+  const diaOriginal = resultado.getDate();
+
+  resultado.setDate(1);
+  resultado.setMonth(resultado.getMonth() + quantidade);
+
+  const ultimoDiaDoMes = new Date(
+    resultado.getFullYear(),
+    resultado.getMonth() + 1,
+    0
+  ).getDate();
+
+  resultado.setDate(Math.min(diaOriginal, ultimoDiaDoMes));
+  return resultado;
+}
+
+function formatarTempoEmpresaDetalhadoHome(dataAdmissao) {
+  const admissao = dataLocalHome(dataAdmissao);
+  if (!admissao) return "Tempo não informado";
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  if (admissao > hoje) return "0 dias";
+
+  let anos = hoje.getFullYear() - admissao.getFullYear();
+  let cursor = new Date(admissao);
+  cursor.setFullYear(cursor.getFullYear() + anos);
+
+  if (cursor > hoje) {
+    anos -= 1;
+    cursor = new Date(admissao);
+    cursor.setFullYear(cursor.getFullYear() + anos);
+  }
+
+  let meses = Math.max(
+    0,
+    (hoje.getFullYear() - cursor.getFullYear()) * 12
+      + hoje.getMonth() - cursor.getMonth()
+  );
+  let cursorComMeses = adicionarMesesHome(cursor, meses);
+
+  if (cursorComMeses > hoje) {
+    meses -= 1;
+    cursorComMeses = adicionarMesesHome(cursor, meses);
+  }
+
+  const dias = Math.max(
+    0,
+    Math.round((hoje - cursorComMeses) / (1000 * 60 * 60 * 24))
+  );
+
+  const partes = [];
+  if (anos > 0) partes.push(`${anos} ${anos === 1 ? "ano" : "anos"}`);
+  if (meses > 0) partes.push(`${meses} ${meses === 1 ? "mês" : "meses"}`);
+  if (dias > 0 || partes.length === 0) partes.push(`${dias} ${dias === 1 ? "dia" : "dias"}`);
+
+  if (partes.length === 1) return partes[0];
+  return `${partes.slice(0, -1).join(", ")} e ${partes[partes.length - 1]}`;
 }
 
 function calcularTempoEmpresaHome(dataEntrada) {

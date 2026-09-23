@@ -1,7 +1,9 @@
 import { renderColaboradoresDisponiveis, renderOSComColaboradores, renderColoboradorEmOS, atualizarStatusDia, atualizarIconeAnotacoes } from "../../utils/dom/programacao-render.js";
 
-import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
+import { atualizarPainel, resetarPaginacaoOSProgramacao } from "../../utils/dom/atualizar-painel.js";
 import { tentarMostrarColaboradorFantasma } from "../ui/EasterEgg/colaborador-fantasma.js";
+
+const LIMITE_OS_PROGRAMACAO = 10;
 
 export async function carregarColaboradoresDisp(painel, renderizarColabEmOS) {
   try {
@@ -28,30 +30,90 @@ export async function carregarColaboradoresDisp(painel, renderizarColabEmOS) {
 }
 
 
-export async function carregarOSComColaboradores(painel) {
+function montarUrlOSProgramacao(dia, { limit = LIMITE_OS_PROGRAMACAO, offset = 0, busca = "" } = {}) {
+  const params = new URLSearchParams({
+    dataDia: dia,
+    limit: String(limit),
+    offset: String(offset)
+  });
+
+  if (busca) params.set("busca", busca);
+  return `/api/colaboradores/emOS?${params.toString()}`;
+}
+
+function normalizarRespostaOS(resposta) {
+  if (Array.isArray(resposta)) {
+    return {
+      dados: resposta,
+      total: resposta.length,
+      quantidade: new Set(resposta.map(item => item.id_OSs).filter(Boolean)).size,
+      offset: 0,
+      limit: resposta.length || LIMITE_OS_PROGRAMACAO,
+      busca: ""
+    };
+  }
+
+  const dados = Array.isArray(resposta?.dados) ? resposta.dados : [];
+  return {
+    dados,
+    total: Number(resposta?.total || 0),
+    quantidade: Number(resposta?.quantidade || new Set(dados.map(item => item.id_OSs).filter(Boolean)).size),
+    offset: Number(resposta?.offset || 0),
+    limit: Number(resposta?.limit || LIMITE_OS_PROGRAMACAO),
+    busca: resposta?.busca || ""
+  };
+}
+
+export async function carregarOSComColaboradores(painel, opcoes = {}) {
   try {
     const dia = painel.closest(".painelDia")?.getAttribute("data-dia");
     if (!dia) throw new Error("Painel sem data-dia");
 
-    const url = `/api/colaboradores/emOS?dataDia=${dia}`;
+    const painelDia = painel.closest(".painelDia");
+    const append = opcoes.append === true;
+    const busca = String(opcoes.busca ?? $(painelDia).data("buscaOsServidor") ?? "").trim();
+    const offset = append
+      ? Number($(painelDia).data("osCarregadasServidor") || 0)
+      : Number(opcoes.offset || 0);
+
+    const url = montarUrlOSProgramacao(dia, {
+      limit: Number(opcoes.limit || LIMITE_OS_PROGRAMACAO),
+      offset,
+      busca
+    });
     const res = await fetch(url, { method: "GET", credentials: "include" });
     if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
 
-    const OrdemServico = await res.json();
-    const painelDia = painel.closest(".painelDia");
+    const resposta = normalizarRespostaOS(await res.json());
     if (painelDia?.getAttribute("data-dia") !== dia) return [];
 
     // 👇 container dentro do painel
     const container = painel.querySelector(".painel_dasOS");
-    renderOSComColaboradores(OrdemServico, container);
-    renderColoboradorEmOS();
+    renderOSComColaboradores(resposta.dados, container, { append });
+    renderColoboradorEmOS(painelDia);
+
+    const totalCarregado = $(container)
+      .find(".painel_OS .p_infoOS[data-os]")
+      .map((_, el) => $(el).data("os"))
+      .get()
+      .filter((id, index, lista) => lista.indexOf(id) === index)
+      .length;
+
+    $(painelDia)
+      .data("paginacaoServidor", true)
+      .data("totalOsServidor", resposta.total)
+      .data("osCarregadasServidor", totalCarregado)
+      .data("buscaOsServidor", busca);
+
+    if (!append) resetarPaginacaoOSProgramacao(painelDia);
+
     await atualizarStatusDia(painelDia);
     atualizarIconeAnotacoes(painelDia);
     atualizarPainel($(painel));
-    return OrdemServico;
+    return resposta;
   } catch (err) {
     console.error("❌ Erro em carregarOSComColaboradores:", err);
-    return [];
+    return { dados: [], total: 0, quantidade: 0 };
   }
 }
 

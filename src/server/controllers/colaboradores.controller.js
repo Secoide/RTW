@@ -181,10 +181,17 @@ async function getColaboradoresDisp(req, res) {
 async function getColaboradoresEmOS(req, res) {
   try {
     const dataDia = req.query.dataDia;
+    const limit = Number(req.query.limit);
+    const offset = Number(req.query.offset);
+    const busca = String(req.query.busca || "").trim();
 
-    const colaboradores = await ColabService.listarColaboradoresEmOS(dataDia);
+    const resultado = await ColabService.listarColaboradoresEmOS(dataDia, {
+      limit: Number.isFinite(limit) ? limit : null,
+      offset: Number.isFinite(offset) ? offset : 0,
+      busca
+    });
 
-    res.json(colaboradores);
+    res.json(resultado);
   } catch (err) {
     console.error("❌ Erro no controller getColaboradoresEmOS:", err.message);
     console.error(err.stack);
@@ -284,10 +291,26 @@ async function cadastrarAtestado(req, res) {
     return res.status(200).json(resultado);
   } catch (err) {
     console.error('Erro ao cadastrar atestado:', err.message);
-    if (err.message === 'Campos obrigatórios não preenchidos.') {
-      return res.status(400).json({ sucesso: false, mensagem: err.message });
-    }
-    return res.status(500).json({ sucesso: false, mensagem: 'Erro ao cadastrar atestado.' });
+    return res.status(err.statusCode || 500).json({
+      sucesso: false,
+      mensagem: err.message || 'Erro ao cadastrar atestado.'
+    });
+  }
+}
+
+async function excluirFaltaPendente(req, res) {
+  try {
+    const resultado = await ColabService.excluirFaltaPendente(req.params.id, {
+      id: req.user.id,
+      role: req.user.role
+    });
+    return res.json(resultado);
+  } catch (err) {
+    console.error('Erro ao excluir falta pendente:', err.message);
+    return res.status(err.status || 500).json({
+      sucesso: false,
+      mensagem: err.message || 'Erro ao excluir falta pendente.'
+    });
   }
 }
 
@@ -299,6 +322,72 @@ async function getHistoricoAtestar(req, res) {
     res.json(colaborador);
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao buscar historico de atestados do colaborador' });
+  }
+}
+
+async function getResumoAnualColaborador(req, res) {
+  try {
+    const anoAtual = new Date().getFullYear();
+    const anoInformado = Number(req.query.ano || anoAtual);
+    const ano = Number.isInteger(anoInformado) && anoInformado >= 2000 && anoInformado <= anoAtual
+      ? anoInformado
+      : anoAtual;
+
+    const resumo = await ColabService.buscarResumoAnualColaborador(req.params.id, ano);
+    res.json(resumo);
+  } catch (err) {
+    console.error('Erro ao buscar resumo anual do colaborador:', err);
+    res.status(500).json({ erro: 'Erro ao buscar resumo anual do colaborador' });
+  }
+}
+
+async function downloadAnexoAtestado(req, res) {
+  try {
+    const arquivo = await ColabService.baixarAnexoAtestado(req.params.id);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${arquivo.nomeArquivo}"`);
+    return res.send(arquivo.buffer);
+  } catch (err) {
+    return res.status(404).json({ erro: err.message || 'PDF do atestado não encontrado.' });
+  }
+}
+
+async function cadastrarFaltaJustificada(req, res) {
+  try {
+    const resultado = await ColabService.cadastrarFaltaJustificada({
+      data: req.body.data,
+      idColab: req.body.idColab,
+      file: req.file
+    });
+
+    return res.status(201).json(resultado);
+  } catch (err) {
+    console.error('Erro ao cadastrar falta justificada:', err.message);
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: err.message || 'Erro ao cadastrar falta justificada.'
+    });
+  }
+}
+
+async function solicitarFaltaIndevida(req, res) {
+  try {
+    const resultado = await ColabService.solicitarFaltaIndevida({
+      data: req.body.data,
+      idColab: req.body.idColab,
+      solicitadoPor: req.user.id
+    });
+
+    return res.status(201).json({
+      sucesso: true,
+      ...resultado
+    });
+  } catch (err) {
+    console.error('Erro ao solicitar análise de falta:', err.message);
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: err.message || 'Erro ao enviar falta para análise.'
+    });
   }
 }
 
@@ -571,6 +660,16 @@ async function getHallExperiencia(req, res) {
             c => c.tipo === 'GUARDIAO_QUALIDADE'
           );
 
+        const temComprasEstrategicas =
+          conquistas.some(
+            c => c.tipo === 'COMPRAS_ESTRATEGICAS'
+          );
+
+        const temDocumentadorTecnico =
+          conquistas.some(
+            c => c.tipo === 'DOCUMENTADOR_TECNICO'
+          );
+
         // =====================================
         // MEDALHAS
         // =====================================
@@ -674,6 +773,24 @@ async function getHallExperiencia(req, res) {
             titulo:
               "Guardião da Qualidade"
 
+          });
+
+        }
+
+        if (temComprasEstrategicas) {
+
+          medalhas.push({
+            icone: "🪙",
+            titulo: "Compras Estratégicas"
+          });
+
+        }
+
+        if (temDocumentadorTecnico) {
+
+          medalhas.push({
+            icone: "🖊️",
+            titulo: "Documentador Técnico"
           });
 
         }
@@ -891,19 +1008,18 @@ async function getHallExperiencia(req, res) {
 
 
         // =====================================
-        // MOTORISTA
+        // ATUAÇÃO EM CAMPO
         // =====================================
 
-        if (
-          colab.cnh &&
-          colab.cnh.trim() !== ''
-        ) {
+        if (colab.estados_atendidos >= 2) {
+
           medalhas.push({
-            icone: "🪪",
-            titulo:
-              `CNH Categoria ${colab.cnh}`
+            icone: "🧭",
+            titulo: "Rota Ampliada (+2 estados)"
           });
+
         }
+
         if (
           colab.cidades_atendidas >= 50
         ) {
@@ -938,7 +1054,7 @@ async function getHallExperiencia(req, res) {
 
           medalhas.push({
 
-            icone: "🚁",
+            icone: "🧳",
 
             titulo:
               "Viajante (+10 cidades)"
@@ -1059,18 +1175,43 @@ async function getHallExperiencia(req, res) {
           });
 
         }
-        if (anosInteiros >= 15) {
+        if (anosInteiros >= 25) {
+
+          medalhas.push({
+
+            icone: "🏰",
+
+            titulo:
+              "Patrimônio RTW (25 anos)"
+
+          });
+
+        }
+        if (anosInteiros >= 20) {
 
           medalhas.push({
 
             icone: "🏛️",
 
             titulo:
-              "Fundação RTW (15 anos)"
+              "Fundação RTW (20 anos)"
 
           });
 
-        } if (anosInteiros >= 10) {
+        }
+        if (anosInteiros >= 15) {
+
+          medalhas.push({
+
+            icone: "👑",
+
+            titulo:
+              "Lenda RTW (15 anos)"
+
+          });
+
+        }
+        if (anosInteiros >= 10) {
 
           medalhas.push({
 
@@ -1162,8 +1303,22 @@ async function getHallExperiencia(req, res) {
         // TÍTULO
         // =====================================
 
+        const marcoDoisMeses = new Date(admissao);
+        marcoDoisMeses.setMonth(marcoDoisMeses.getMonth() + 2);
+
+        const marcoSeisMeses = new Date(admissao);
+        marcoSeisMeses.setMonth(marcoSeisMeses.getMonth() + 6);
+
         let titulo =
-          "🌱 Aprendiz RTW";
+          "🌰 Origem RTW";
+
+        if (hoje >= marcoDoisMeses)
+          titulo =
+            "🌱 Aprendiz RTW";
+
+        if (hoje >= marcoSeisMeses)
+          titulo =
+            "🌳 Crescimento RTW";
 
         if (anos >= 1)
           titulo =
@@ -1171,11 +1326,15 @@ async function getHallExperiencia(req, res) {
 
         if (anos >= 2)
           titulo =
-            "🏗️ Veterano RTW";
+            "🔰 Veterano RTW";
 
         if (anos >= 3)
           titulo =
-            "🥇 Especialista RTW";
+            "♟️ Especialista RTW";
+
+        if (anos >= 4)
+          titulo =
+            "⚜️ Referência RTW";
 
         if (anos >= 5)
           titulo =
@@ -1197,6 +1356,48 @@ async function getHallExperiencia(req, res) {
           titulo =
             "🏰 Patrimônio RTW";
 
+        const titulosManuais = new Set([
+          temCoruja ? "Coruja RTW" : null,
+          temPrecisao ? "Precisão RTW" : null,
+          temOrganizacao ? "Organização Exemplar" : null,
+          temRespostaRapida ? "Resposta Rápida" : null,
+          temComunicador ? "Comunicador RTW" : null,
+          temAltaPerformance ? "Alta Performance" : null,
+          temPontualidade ? "Pontualidade de Ouro" : null,
+          temGuardiaoQualidade ? "Guardião da Qualidade" : null,
+          temComprasEstrategicas ? "Compras Estratégicas" : null,
+          temDocumentadorTecnico ? "Documentador Técnico" : null,
+          temCipa ? "Membro da CIPA" : null,
+          temBrigadista ? "Brigadista" : null,
+          temInovador ? "Inovador RTW" : null,
+          temEspEquipe ? "Espírito de Equipe" : null,
+          temHeroiSeguranca ? "Herói da Segurança" : null,
+          temMentor ? "Mentor RTW" : null,
+          temEmbaixador ? "Embaixador RTW" : null,
+          temClienteDestaque ? "Elogiado pelo Cliente" : null,
+          temResolveTudo ? "Resolve Tudo" : null,
+          temLideranca ? "Liderança Inspiradora" : null,
+          temSuperacao ? "Superação" : null,
+          temOrgulhoRTW ? "Orgulho RTW" : null,
+          temSolucaoInteligente ? "Solução Inteligente" : null
+        ].filter(Boolean));
+
+        if (destaqueMes) {
+          const data = new Date(destaqueMes.data);
+          titulosManuais.add(
+            `Funcionário do Mês - ${meses[data.getMonth()]}/${data.getFullYear()}`
+          );
+        }
+
+        if (destaqueAno) {
+          const data = new Date(destaqueAno.data);
+          titulosManuais.add(`Destaque do Ano - ${data.getFullYear()}`);
+        }
+
+        const medalhasAutomaticas = medalhas.filter(
+          medalha => !titulosManuais.has(medalha.titulo)
+        );
+
         return {
 
           ...colab,
@@ -1212,6 +1413,8 @@ async function getHallExperiencia(req, res) {
           diasRestantes,
 
           medalhas,
+
+          medalhas_automaticas: medalhasAutomaticas,
 
           progresso:
             Number(
@@ -1347,8 +1550,13 @@ module.exports = {
   setColaboradorSupervisor,
   removerSupervisorAtual,
   getHistoricoAtestar,
+  downloadAnexoAtestado,
+  getResumoAnualColaborador,
   getDadosCPFRG,
   cadastrarAtestado,
+  excluirFaltaPendente,
+  cadastrarFaltaJustificada,
+  solicitarFaltaIndevida,
   getHistoricoColabPorEmpresas,
   uploadFoto,
   getHallExperiencia,

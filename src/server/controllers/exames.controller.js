@@ -28,7 +28,6 @@ async function getExame(req, res) {
 // POST /api/exame
 async function createExame(req, res) {
   try {
-    console.log("BODY:", req.body);
     const novo = await ExameService.criarExame(req.body);
     res.status(201).json(novo);
   } catch (err) {

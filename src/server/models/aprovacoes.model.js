@@ -1,5 +1,7 @@
 const connection = require("../config/db");
 const NotificacoesModel = require("./notificacoes.model");
+const ColaboradoresModel = require("./colaboradores.model");
+const supabase = require("../config/supabase");
 
 let tabelasGarantidas = false;
 
@@ -95,6 +97,34 @@ async function usuarioPodeAprovarResponsavelOS(idUsuario, role) {
   return rows.length > 0;
 }
 
+async function buscarUsuariosRH() {
+  const [rows] = await connection.query(`
+    SELECT DISTINCT f.id, f.nome
+    FROM funcionarios f
+    LEFT JOIN tb_cargos c ON f.cargo = c.id
+    LEFT JOIN tb_setores s ON c.idsetor = s.id_catnvl
+    WHERE f.id <> 999
+      AND (
+        IFNULL(c.nivel_acesso, 0) = 4
+        OR IFNULL(s.nivel_acesso, 0) = 4
+        OR LOWER(IFNULL(s.categoria, '')) LIKE '%recursos humanos%'
+        OR LOWER(IFNULL(s.categoria, '')) = 'rh'
+        OR LOWER(IFNULL(c.cargo, '')) LIKE '%recursos humanos%'
+        OR IFNULL(c.nivel_acesso, 0) = 99
+        OR IFNULL(s.nivel_acesso, 0) = 99
+      )
+  `);
+
+  return rows;
+}
+
+async function usuarioPodeAprovarFalta(idUsuario, role) {
+  if ([4, 99].includes(Number(role))) return true;
+
+  const usuarios = await buscarUsuariosRH();
+  return usuarios.some(usuario => Number(usuario.id) === Number(idUsuario));
+}
+
 async function buscarPendenteResponsavelOS(idFuncionario) {
   await garantirTabelas();
 
@@ -109,6 +139,22 @@ async function buscarPendenteResponsavelOS(idFuncionario) {
     ORDER BY id_aprovacao DESC
     LIMIT 1
   `, [idFuncionario]);
+
+  return rows[0] || null;
+}
+
+async function buscarPendenteFaltaIndevida(idInterrupcao) {
+  await garantirTabelas();
+
+  const [rows] = await connection.query(`
+    SELECT id_aprovacao
+    FROM sistema_aprovacoes
+    WHERE status = 'pendente'
+      AND tipo = 'falta_indevida'
+      AND entidade_tabela = 'tb_func_interrupto'
+      AND entidade_id = ?
+    LIMIT 1
+  `, [idInterrupcao]);
 
   return rows[0] || null;
 }
@@ -228,8 +274,207 @@ async function decidirResponsavelOS({ idAprovacao, aprovado, aprovadorId, aprova
   };
 }
 
+async function solicitarFaltaIndevida({ idInterrupcao, idFuncionario, data, solicitadoPor }) {
+  const pendente = await buscarPendenteFaltaIndevida(idInterrupcao);
+
+  if (pendente) {
+    return {
+      criouAprovacao: false,
+      id_aprovacao: pendente.id_aprovacao,
+      mensagem: 'Esta falta já está aguardando análise do RH.'
+    };
+  }
+
+  const [funcionarios] = await connection.query(`
+    SELECT nome
+    FROM funcionarios
+    WHERE id = ?
+    LIMIT 1
+  `, [idFuncionario]);
+  const nomeFuncionario = funcionarios[0]?.nome || 'Colaborador';
+  const solicitante = await buscarNomeUsuario(solicitadoPor);
+
+  const [result] = await connection.query(`
+    INSERT INTO sistema_aprovacoes
+      (tipo, entidade_tabela, entidade_id, campo, valor_atual, valor_solicitado, solicitado_por)
+    VALUES
+      ('falta_indevida', 'tb_func_interrupto', ?, 'status', 'pendente', 'aprovado', ?)
+  `, [idInterrupcao, solicitadoPor]);
+
+  const idAprovacao = result.insertId;
+  const mensagem = `Falta pendente de ${nomeFuncionario} em ${String(data).split('-').reverse().join('/')}. Escolha se é justificada ou não justificada. Registrada por: ${solicitante}.`;
+
+  for (const usuario of await buscarUsuariosRH()) {
+    await NotificacoesModel.criarParaUsuario({
+      idUsuario: usuario.id,
+      tipo: 'aprovacao_falta_indevida',
+      referencia: `aprovacao:${idAprovacao}`,
+      mensagem
+    });
+  }
+
+  return {
+    criouAprovacao: true,
+    id_aprovacao: idAprovacao,
+    mensagem: 'Falta enviada para análise do RH.'
+  };
+}
+
+async function decidirFaltaIndevida({ idAprovacao, justificada, aprovadorId, aprovadorRole, file }) {
+  await garantirTabelas();
+
+  if (!await usuarioPodeAprovarFalta(aprovadorId, aprovadorRole)) {
+    const erro = new Error('Apenas o setor de RH pode analisar esta falta.');
+    erro.status = 403;
+    throw erro;
+  }
+
+  const [rows] = await connection.query(`
+    SELECT a.*, fi.id_func, fi.datainicio, f.nome AS nome_funcionario
+    FROM sistema_aprovacoes a
+    JOIN tb_func_interrupto fi ON fi.id_funcInterrups = a.entidade_id
+    JOIN funcionarios f ON f.id = fi.id_func
+    WHERE a.id_aprovacao = ?
+      AND a.status = 'pendente'
+      AND a.tipo = 'falta_indevida'
+    LIMIT 1
+  `, [idAprovacao]);
+
+  const aprovacao = rows[0];
+  if (!aprovacao) {
+    const erro = new Error('Falta não encontrada ou já analisada.');
+    erro.status = 404;
+    throw erro;
+  }
+
+  let anexoPdf = null;
+  if (justificada) {
+    if (!file?.buffer) {
+      const erro = new Error('Anexe o PDF do atestado para marcar a falta como justificada.');
+      erro.status = 400;
+      throw erro;
+    }
+
+    anexoPdf = `atestados/${aprovacao.id_func}_${String(aprovacao.datainicio).slice(0, 10)}_${Date.now()}.pdf`;
+    const { error } = await supabase.storage
+      .from('exames')
+      .upload(anexoPdf, file.buffer, {
+        contentType: 'application/pdf',
+        upsert: false
+      });
+
+    if (error) {
+      throw new Error('Não foi possível salvar o PDF do atestado.');
+    }
+  }
+
+  const atualizada = await ColaboradoresModel.atualizarFaltaPendente(aprovacao.entidade_id, {
+    motivo: justificada ? 'Falta Justificada' : 'Falta Não Justificada',
+    descricao: justificada ? 'Falta Justificada' : 'Falta Não Justificada',
+    status: 'aprovado',
+    anexoPdf
+  });
+
+  if (!atualizada) {
+    const erro = new Error('A falta não está mais pendente para análise.');
+    erro.status = 409;
+    throw erro;
+  }
+
+  await connection.query(`
+    DELETE FROM sistema_aprovacoes
+    WHERE id_aprovacao = ?
+  `, [idAprovacao]);
+  await NotificacoesModel.desativarPorReferencia(`aprovacao:${idAprovacao}`);
+
+  await NotificacoesModel.criarParaUsuario({
+    idUsuario: aprovacao.solicitado_por,
+    tipo: 'aprovacao_resultado',
+    referencia: `aprovacao_resultado:${idAprovacao}`,
+    mensagem: justificada
+      ? `O RH marcou a falta de ${aprovacao.nome_funcionario} como justificada.`
+      : `O RH marcou a falta de ${aprovacao.nome_funcionario} como não justificada.`
+  });
+
+  return {
+    sucesso: true,
+    justificada,
+    mensagem: justificada ? 'Falta marcada como justificada.' : 'Falta marcada como não justificada.'
+  };
+}
+
+async function excluirFaltaPendente({ idInterrupcao, aprovadorId, aprovadorRole }) {
+  await garantirTabelas();
+
+  if (!await usuarioPodeAprovarFalta(aprovadorId, aprovadorRole)) {
+    const erro = new Error('Apenas o setor de RH pode excluir esta falta pendente.');
+    erro.status = 403;
+    throw erro;
+  }
+
+  const [faltas] = await connection.query(`
+    SELECT id_funcInterrups
+    FROM tb_func_interrupto
+    WHERE id_funcInterrups = ?
+      AND motivo = 'Falta Indevida'
+      AND status = 'avaliar'
+    LIMIT 1
+  `, [idInterrupcao]);
+
+  if (!faltas.length) {
+    const erro = new Error('Falta não encontrada ou já analisada.');
+    erro.status = 404;
+    throw erro;
+  }
+
+  const [aprovacoes] = await connection.query(`
+    SELECT id_aprovacao
+    FROM sistema_aprovacoes
+    WHERE entidade_tabela = 'tb_func_interrupto'
+      AND entidade_id = ?
+      AND tipo = 'falta_indevida'
+      AND status = 'pendente'
+  `, [idInterrupcao]);
+
+  const idsAprovacao = aprovacoes.map((item) => item.id_aprovacao);
+  if (idsAprovacao.length) {
+    const referencias = idsAprovacao.map((id) => `aprovacao:${id}`);
+    const placeholders = referencias.map(() => '?').join(', ');
+
+    await connection.query(
+      `UPDATE sistema_notificacoes SET ativo = 0 WHERE referencia IN (${placeholders})`,
+      referencias
+    );
+    await connection.query(
+      `DELETE FROM sistema_aprovacoes WHERE id_aprovacao IN (${idsAprovacao.map(() => '?').join(', ')})`,
+      idsAprovacao
+    );
+  }
+
+  const [resultado] = await connection.query(`
+    DELETE FROM tb_func_interrupto
+    WHERE id_funcInterrups = ?
+      AND status = 'avaliar'
+  `, [idInterrupcao]);
+
+  if (!resultado.affectedRows) {
+    const erro = new Error('A falta não está mais pendente para exclusão.');
+    erro.status = 409;
+    throw erro;
+  }
+
+  return {
+    sucesso: true,
+    mensagem: 'Falta pendente excluída com sucesso.'
+  };
+}
+
 module.exports = {
   buscarPendenteResponsavelOS,
+  buscarPendenteFaltaIndevida,
   solicitarResponsavelOS,
-  decidirResponsavelOS
+  decidirResponsavelOS,
+  solicitarFaltaIndevida,
+  decidirFaltaIndevida,
+  excluirFaltaPendente
 };

@@ -1,7 +1,9 @@
 // /public/client/js/events/controls/handle-pesquisar-os.js
-import { removerAcentos } from "../../utils/formatters/text-formatter.js";
-import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
+import { resetarPaginacaoOSProgramacao } from "../../utils/dom/atualizar-painel.js";
+import { carregarOSComColaboradores } from "../../services/api/programacao-service.js";
 import { mostrarErroUI }  from "../../utils/dom/error-handler.js";
+
+const timersBuscaDia = new WeakMap();
 
 export function initPesquisarOS() {
     const $input = $(".pesquisarOS");
@@ -11,41 +13,26 @@ export function initPesquisarOS() {
     $input.off("input.pesquisarOS");
     $input.on("input.pesquisarOS", function () {
         try {
-            if ($(this).val().length) {
-                $btn.show();
+            const input = this;
+            const $inputAtual = $(input);
+            const $painelDia = $inputAtual.closest(".painelDia");
+            const termo = $inputAtual.val().trim();
+            const timerAtual = timersBuscaDia.get(input);
+
+            if (timerAtual) clearTimeout(timerAtual);
+
+            if (termo.length) {
+                $inputAtual.siblings(".clear-btn").show();
             } else {
-                $btn.hide();
+                $inputAtual.siblings(".clear-btn").hide();
+                resetarPaginacaoOSProgramacao($painelDia);
             }
 
-            const termo = removerAcentos($(this).val().toLowerCase());
-            const $painelDia = $(this).closest(".painelDia");
+            const novoTimer = setTimeout(async () => {
+                await carregarOSComColaboradores($painelDia[0], { busca: termo, offset: 0 });
+            }, 250);
 
-            $painelDia.find(".painel_OS").each(function () {
-                const $painel = $(this);
-                const osTexto = $painel.find(".lbl_OS").text().toLowerCase();
-                const descricaoOS = $painel.find(".lbl_descricaoOS").text().toLowerCase();
-                const clienteOS = $painel.find(".lbl_clienteOS").text().toLowerCase();
-
-                if (termo.length === 0) {
-                    $painel.removeClass("matchOS noMatchOS");
-                    if ($painel.find(".p_colabs .colaborador").length == 0) {
-                        $painel.find(".p_colabs").hide();
-                    }
-                } else if (osTexto.includes(termo)) {
-                    $painel.find(".p_colabs").show();
-                    $painel.addClass("matchOS").removeClass("noMatchOS os_semColab");
-                } else if (removerAcentos(descricaoOS).includes(termo)) {
-                    $painel.addClass("matchOS").removeClass("noMatchOS os_semColab");
-                } else if (removerAcentos(clienteOS).includes(termo)) {
-                    $painel.addClass("matchOS").removeClass("noMatchOS os_semColab");
-                } else {
-                    if ($painel.find(".p_colabs .colaborador").length == 0) {
-                        $painel.find(".p_colabs").hide();
-                    }
-                    $painel.addClass("noMatchOS").removeClass("matchOS");
-                }
-            });
-            atualizarPainel($painelDia);
+            timersBuscaDia.set(input, novoTimer);
         } catch (err) {
             console.error("Erro em initPesquisarOS:", err);
             mostrarErroUI("Falha ao aplicar pesquisa. Tente novamente."); // exemplo de handler central
@@ -56,11 +43,16 @@ export function initPesquisarOS() {
     $btn.off("click.pesquisarOS");
     $btn.on("click.pesquisarOS", function () {
         try {
-            $btn.hide();
-            $input.val("").trigger("input");
-            $(".painelDia").each(function () {
-                atualizarPainel($(this));
-            });
+            const $painelDia = $(this).closest(".painelDia");
+            const $inputAtual = $(this).siblings(".pesquisarOS");
+            const timerAtual = timersBuscaDia.get($inputAtual[0]);
+
+            if (timerAtual) clearTimeout(timerAtual);
+
+            $(this).hide();
+            $inputAtual.val("");
+            resetarPaginacaoOSProgramacao($painelDia);
+            carregarOSComColaboradores($painelDia[0], { busca: "", offset: 0 });
         } catch (err) {
             console.error("Erro ao limpar pesquisa:", err);
             mostrarErroUI("Falha ao limpar busca.");

@@ -1,5 +1,5 @@
 import { getSocket } from "./socket-service.js";
-import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
+import { atualizarPainel, atualizarPainelOS, aplicarPaginacaoOSProgramacao } from "../../utils/dom/atualizar-painel.js";
 
 function notificarSessaoExpirada() {
   if (typeof window.encerrarSessaoExpirada === "function") {
@@ -258,7 +258,7 @@ export function handleAlocarColaborador({ osID, nomes, dataDia }) {
     atualizarOcupacaoColaboradorBase($painelDia, id, osID);
   });
 
-  atualizarPainel($painelDia);
+  atualizarPainelOS($destinoOS);
 }
 
 export function handleTransferenciaConcluida({ colaboradores, datas }) {
@@ -278,7 +278,7 @@ export function handleTransferenciaConcluida({ colaboradores, datas }) {
       atualizarOcupacaoColaboradorBase($painelDia, idColab, idOS);
     });
 
-    atualizarPainel($painelDia);
+    aplicarPaginacaoOSProgramacao($painelDia);
   });
 }
 
@@ -298,7 +298,7 @@ export function handleRemoverColaborador({ osID, id, dataDia }) {
   }
 
   limparOcupacaoColaboradorBase($painelDia, id, osID);
-  atualizarPainel($painelDia);
+  atualizarPainelOS($os);
 }
 
 export function handleConfirmarAlocacao({
@@ -364,7 +364,7 @@ export function handleConfirmarAlocacao({
 
   atualizarOcupacaoColaboradorBase($painelDia, idfuncionario, osID);
   atualizarTotalColaboradoresOS($painel);
-  atualizarPainel($painelDia);
+  atualizarPainelOS($painel);
 }
 
 

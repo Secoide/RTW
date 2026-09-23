@@ -11,6 +11,7 @@ import { initColaboradoresTransferencia } from "../events/transferencia/handle-c
 import { initFiltros } from "../events/click/handle-filtros-os.js";
 import { get_dadosColab } from "../services/api/colaboradores-api.js";
 import { initExportarDados } from "../events/click/handle-exportar-dados.js";
+import { carregarOSComColaboradores } from "../services/api/programacao-service.js";
 import "../events/click/handle-status-dia.js";
 import { atualizarProgramacao, criarDataLocalProgramacao, formatarDataLocalProgramacao } from "../events/change/handle-date-change.js";
 
@@ -27,6 +28,16 @@ const Toast = Swal.mixin({
     });
 
 let listenersSessaoRegistrados = false;
+
+function limparResiduosProgramacao() {
+  $(".sugestoes, .overlay-transferencia").remove();
+  $(".colaborador").removeClass("selecionado salvando").removeAttr("data-loading");
+  $(".painelDia").removeClass("bloqueado");
+  $(".p_colabs").removeClass("destino-highlight destino-validado aberta-por-hover");
+  $(".bt_transferirColabs").removeClass("fa-check-to-slot").addClass("fa-arrows-turn-right");
+  window.modoTransferencia = false;
+  window.transferenciaColabs = [];
+}
 
 function registrarListenersSessaoProgramacao() {
   if (listenersSessaoRegistrados) return;
@@ -67,6 +78,7 @@ export async function initProgramacao() {
   try {
 
     registrarListenersSessaoProgramacao();
+    limparResiduosProgramacao();
 
     const socket = getSocket(); // 🔗 cria ou retorna o mesmo socket
     initDateChangeHandler();
@@ -101,6 +113,18 @@ export async function initProgramacao() {
   $(document).on("click.programacaoInit", "#bt_atualizarProgramacao", async function () {
     const dataSelecionada = criarDataLocalProgramacao($("#seletor_data").val());
     atualizarProgramacao(dataSelecionada);
+  });
+
+  $(document).off("click.programacaoPaginacao", ".programacao-carregar-mais-os");
+  $(document).on("click.programacaoPaginacao", ".programacao-carregar-mais-os", async function () {
+    const $btn = $(this);
+    const painelDia = $btn.closest(".painelDia")[0];
+    $btn.prop("disabled", true).addClass("carregando");
+    try {
+      await carregarOSComColaboradores(painelDia, { append: true });
+    } finally {
+      $btn.prop("disabled", false).removeClass("carregando");
+    }
   });
 
 

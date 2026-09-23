@@ -208,10 +208,16 @@
               <span>Preenchimento rápido</span>
               <strong>Tabela de medições</strong>
             </div>
-            <button type="button" id="spdaTabelaConfigToggle" class="spda-fill-config-toggle"
-              title="Configurar limites">
-              <i class="fa-solid fa-sliders"></i>
-            </button>
+            <div class="spda-fill-head-actions">
+              <button type="button" id="spdaTabelaExportarExcel" class="spda-fill-config-toggle spda-fill-export-toggle"
+                data-spda-export-excel="continuidade" title="Exportar continuidade em Excel">
+                <i class="fa-solid fa-file-excel"></i>
+              </button>
+              <button type="button" id="spdaTabelaConfigToggle" class="spda-fill-config-toggle"
+                title="Configurar limites">
+                <i class="fa-solid fa-sliders"></i>
+              </button>
+            </div>
           </div>
           <div id="spdaTabelaConfig" class="spda-fill-config" hidden>
             <label>

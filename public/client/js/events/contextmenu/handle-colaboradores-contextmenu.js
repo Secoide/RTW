@@ -17,8 +17,10 @@ function criarMenuContextual(e, opcoesMenu) {
   $(".menuMouseDir").remove();
 
   const menu = $('<div class="menuMouseDir"></div>').css({
-    top: e.pageY,
-    left: e.pageX,
+    position: "fixed",
+    top: 0,
+    left: 0,
+    visibility: "hidden",
     zIndex: 9999
   });
 
@@ -35,6 +37,32 @@ function criarMenuContextual(e, opcoesMenu) {
       return addSeparator();
     }
 
+    if (item.submenu) {
+      const option = $('<div class="opcao-menu opcao-menu-submenu"></div>')
+        .html(`${item.label}<i class="fa-solid fa-chevron-right menu-submenu-seta"></i>`)
+        .attr("data-roles", item.roles === "*" ? "*" : item.roles.join(","));
+      const submenu = $('<div class="menu-submenu"></div>');
+
+      item.submenu.forEach(subitem => {
+        if (!subitem) return;
+
+        const suboption = $('<div class="opcao-menu opcao-menu-subitem"></div>')
+          .html(subitem.label)
+          .attr("data-roles", subitem.roles === "*" ? "*" : subitem.roles.join(","));
+
+        suboption.on("click", () => {
+          subitem.action?.();
+          menu.remove();
+        });
+
+        submenu.append(suboption);
+      });
+
+      option.append(submenu);
+      menu.append(option);
+      return;
+    }
+
     const option = $('<div class="opcao-menu"></div>')
       .html(item.label)
       .attr("data-roles", item.roles === "*" ? "*" : item.roles.join(","));
@@ -48,7 +76,36 @@ function criarMenuContextual(e, opcoesMenu) {
   });
 
   $("body").append(menu);
+  posicionarMenuContextual(menu, e);
   setTimeout(() => $(document).one("click", () => menu.remove()), 0);
+}
+
+function posicionarMenuContextual(menu, e) {
+  const margem = 8;
+  const largura = menu.outerWidth() || 180;
+  const altura = menu.outerHeight() || 120;
+  const viewportLargura = window.innerWidth || document.documentElement.clientWidth;
+  const viewportAltura = window.innerHeight || document.documentElement.clientHeight;
+
+  let left = e.clientX;
+  let top = e.clientY;
+
+  if (left + largura + margem > viewportLargura) {
+    left = viewportLargura - largura - margem;
+  }
+
+  if (top + altura + margem > viewportAltura) {
+    top = e.clientY - altura;
+  }
+
+  left = Math.max(margem, left);
+  top = Math.max(margem, top);
+
+  menu.css({
+    top,
+    left,
+    visibility: "visible"
+  });
 }
 
 
@@ -66,16 +123,24 @@ const Toast = Swal.mixin({
 
 
 async function registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fnoID) {
-  $colab.addClass("falta-indevida");
-
   try {
-    await $.post("/api/colaboradores/atestar", {
-      periodoinicial: dataDia,
-      periodofinal: dataDia,
-      atestado: "Falta-Indevida",
-      descricaoatest: "",
+    const resposta = await $.post("/api/colaboradores/falta-indevida", {
+      data: dataDia,
       idColab: funcID
     });
+
+    if (!resposta?.sucesso) {
+      throw new Error(resposta?.mensagem || "Não foi possível enviar a falta para análise.");
+    }
+
+    if (resposta.criouAprovacao === false) {
+      Toast.fire({
+        icon: "info",
+        title: "Falta já pendente",
+        text: resposta.mensagem || "O RH ainda precisa analisar esta falta."
+      });
+      return;
+    }
 
     $colab.remove();
     if (socket?.readyState === WebSocket.OPEN) {
@@ -101,15 +166,143 @@ async function registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fno
       toast: true,
       icon: "success",
       theme: "dark",
-      title: "Falta indevida registrada",
+      title: "Falta enviada para análise",
+      text: "O RH irá verificar se ela foi justificada ou não.",
       position: "top-end",
       showConfirmButton: false,
-      timer: 3000,
+      timer: 6000,
       timerProgressBar: true
     });
-  } catch {
-    alert("Erro de comunicaÃ§Ã£o com o servidor.");
+  } catch (err) {
+    const mensagem = err?.responseJSON?.mensagem
+      || err?.message
+      || "Erro de comunicação com o servidor.";
+    alert(mensagem);
   }
+}
+
+function registrarFaltaNaoJustificada(funcID, $colab) {
+  abrirModalRegistroFalta(funcID, $colab, false);
+}
+
+function registrarFaltaJustificada(funcID, $colab) {
+  abrirModalRegistroFalta(funcID, $colab, true);
+}
+
+function abrirModalRegistroFalta(funcID, $colab, justificada) {
+  $("#modalRegistroFalta").remove();
+
+  const hoje = new Date().toISOString().slice(0, 10);
+  const titulo = justificada ? "Atestado apresentado" : "Falta não justificada";
+  const descricao = justificada
+    ? "Registre a data e, se necessário, anexe o atestado em PDF."
+    : "Registre somente o dia da falta não justificada.";
+  const campoAnexo = justificada ? `
+    <label class="modal-anexo-upload span-2" for="documentoFaltaJustificada">
+      <input type="file" id="documentoFaltaJustificada" accept="application/pdf">
+      <i class="fa-solid fa-file-pdf"></i>
+      <span>
+        <b>Anexar atestado em PDF</b>
+        <small class="modal-falta-file-name">Selecione o arquivo, se houver.</small>
+      </span>
+    </label>
+  ` : "";
+
+  $("body").append(`
+    <div id="modalRegistroFalta" class="modal-anexo-documento modal-registro-falta">
+      <div class="modal-anexo-backdrop">
+        <div class="painel_dadosAnexo painel-anexo-documento">
+          <form id="formRegistroFalta" method="POST" enctype="multipart/form-data">
+            <div class="modal-anexo-header">
+              <div>
+                <h3>${titulo}</h3>
+                <p>${descricao}</p>
+              </div>
+              <button type="button" class="modal-anexo-close bt-fechar-registro-falta" title="Fechar" aria-label="Fechar">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="modal-anexo-body">
+              <label class="modal-anexo-field span-2">
+                <span>Data da falta</span>
+                <input id="dataRegistroFalta" class="tbx_teste glass" type="date" name="data" value="${hoje}" required>
+              </label>
+              ${campoAnexo}
+            </div>
+            <div class="modal-anexo-footer">
+              <input type="submit" class="bt_teste" value="Registrar">
+              <input type="reset" class="bt_teste bt-fechar-registro-falta" value="Cancelar">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `);
+
+  $("#modalRegistroFalta").on("click", ".bt-fechar-registro-falta", () => {
+    $("#modalRegistroFalta").remove();
+  });
+
+  $("#documentoFaltaJustificada").on("change", function () {
+    const nome = this.files?.[0]?.name || "Selecione o arquivo, se houver.";
+    $(this).closest(".modal-anexo-upload").find(".modal-falta-file-name").text(nome);
+  });
+
+  $("#formRegistroFalta").on("submit", async function (event) {
+    event.preventDefault();
+
+    const data = $("#dataRegistroFalta").val();
+    const file = $("#documentoFaltaJustificada")[0]?.files?.[0] || null;
+
+    if (file && !file.name.toLowerCase().endsWith(".pdf")) {
+      Toast.fire({ icon: "error", title: "Anexe somente arquivos PDF." });
+      return;
+    }
+
+    try {
+      if (justificada) {
+        const formData = new FormData();
+        formData.append("data", data);
+        formData.append("idColab", funcID);
+        if (file) formData.append("documento", file);
+
+        await $.ajax({
+          url: "/api/colaboradores/falta-justificada",
+          method: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          dataType: "json"
+        });
+      } else {
+        await $.ajax({
+          url: "/api/colaboradores/atestar",
+          method: "POST",
+          data: {
+            periodoinicial: data,
+            periodofinal: data,
+            atestado: "Falta Não Justificada",
+            descricaoatest: "Falta Não Justificada",
+            idColab: funcID
+          },
+          dataType: "json"
+        });
+      }
+
+      $colab?.addClass("falta-indevida");
+      $("#modalRegistroFalta").remove();
+      preencherTabelaColaboradoresRH();
+      Toast.fire({
+        icon: "success",
+        title: justificada ? "Falta justificada registrada." : "Falta não justificada registrada."
+      });
+    } catch (xhr) {
+      Toast.fire({
+        icon: "error",
+        title: xhr.responseJSON?.mensagem || "Não foi possível registrar a falta."
+      });
+    }
+  });
 }
 
 function removerDaOS($colab, socket, osID, funcID, fnoID, dataDia) {
@@ -686,6 +879,7 @@ export function initColaboradoresContextMenu(socket) {
     const precisaAttIntegracao =
       $colab.hasClass("status-integracao-vencido") ||
       $colab.hasClass("status-integracao-atenÃ§Ã£o");
+    const faltaIndevidaPendente = $colab.attr("data-falta-indevida-pendente") === "1";
 
     const opcoesMenu = [
       {
@@ -703,7 +897,7 @@ export function initColaboradoresContextMenu(socket) {
           roles: [6, 7, 99], action: () => definirSupervisor(fnoID, osID, dataDia, $painelOS, $colab)
         },
       {
-        label: '<i class="fa-solid fa-ban"></i> Marcar Falta Indevida',
+        label: `<i class="fa-solid fa-${faltaIndevidaPendente ? "pen-to-square" : "ban"}"></i> ${faltaIndevidaPendente ? "Alterar" : "Alertar"} Falta Indevida`,
         roles: [4, 6, 7, 99], action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket, osID, fnoID)
       },
       ...(precisaAttIntegracao
@@ -732,6 +926,7 @@ export function initColaboradoresContextMenu(socket) {
     const funcID = $colab.data("id");
     const $painelDia = $colab.closest(".painelDia");
     const dataDia = $painelDia.attr("data-dia");
+    const faltaIndevidaPendente = $colab.attr("data-falta-indevida-pendente") === "1";
 
     const opcoesMenu = [
       {
@@ -740,7 +935,7 @@ export function initColaboradoresContextMenu(socket) {
       },
       "SEPARADOR",
       {
-        label: '<i class="fa-solid fa-ban"></i> Marcar Falta Indevida',
+        label: `<i class="fa-solid fa-${faltaIndevidaPendente ? "pen-to-square" : "ban"}"></i> ${faltaIndevidaPendente ? "Alterar" : "Alertar"} Falta Indevida`,
         roles: [4, 6, 7, 99],
         action: () => registrarFaltaIndevida($colab, funcID, dataDia, socket)
       }
@@ -778,29 +973,20 @@ export function initColaboradoresContextMenu(socket) {
       },
       "SEPARADOR",
       {
-        label: '<i class="fa-solid fa-ban"></i> Marcar Falta Indevida',
+        label: '<i class="fa-solid fa-ban"></i> Marcar falta',
         roles: [4, 5, 6, 7, 99],
-        action: () => {
-          const $date = $('<input type="date" style="position:absolute;left:-9999px;">').appendTo("body");
-          $date.on("change", function () {
-            const dataSel = this.value;
-            $colab.addClass("falta-indevida");
-
-            $.post("/api/colaboradores/atestar", {
-              periodoinicial: dataSel,
-              periodofinal: dataSel,
-              atestado: "Falta Indevida",
-              descricaoatest: "",
-              idColab: funcID
-            })
-              .done(res => res.sucesso
-                ? alert("Falta indevida registrada!")
-                : alert("Erro: " + res.mensagem))
-              .fail(() => alert("Erro de comunicaÃ§Ã£o."))
-              .always(() => $date.remove());
-          });
-          $date.trigger("focus").trigger("click");
-        }
+        submenu: [
+          {
+            label: '<i class="fa-solid fa-circle-xmark"></i> Falta não justificada',
+            roles: [4, 5, 6, 7, 99],
+            action: () => registrarFaltaNaoJustificada(funcID, $colab)
+          },
+          {
+            label: '<i class="fa-solid fa-file-circle-check"></i> Atestado apresentado',
+            roles: [4, 5, 6, 7, 99],
+            action: () => registrarFaltaJustificada(funcID)
+          }
+        ]
       },
       "SEPARADOR",
       {

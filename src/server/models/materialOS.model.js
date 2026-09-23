@@ -6,6 +6,8 @@ let observacaoColumnReadyPromise = null;
 let observacaoColumnAvailable = null;
 let conferenciaColumnsReadyPromise = null;
 let conferenciaColumnsAvailable = null;
+let materialLivreColumnsReadyPromise = null;
+let materialLivreColumnsAvailable = null;
 
 async function garantirColunaOC() {
   if (ocColumnAvailable === true) return true;
@@ -108,22 +110,75 @@ async function garantirColunasConferencia() {
   return conferenciaColumnsReadyPromise;
 }
 
+async function garantirColunasMaterialLivre() {
+  if (materialLivreColumnsAvailable === true) return true;
+  if (materialLivreColumnsAvailable === false) return false;
+
+  if (!materialLivreColumnsReadyPromise) {
+    materialLivreColumnsReadyPromise = (async () => {
+      try {
+        const [idVariacao] = await connection.query(`
+          SHOW COLUMNS FROM tb_materiais_os LIKE 'id_variacao'
+        `);
+
+        if (idVariacao.length && String(idVariacao[0].Null || "").toUpperCase() === "NO") {
+          await connection.query(`
+            ALTER TABLE tb_materiais_os
+              MODIFY COLUMN id_variacao INT NULL
+          `);
+        }
+
+        const colunasNecessarias = [
+          ["material_livre_descricao", "ADD COLUMN material_livre_descricao VARCHAR(255) NULL AFTER id_variacao"],
+          ["material_livre", "ADD COLUMN material_livre TINYINT(1) NOT NULL DEFAULT 0 AFTER material_livre_descricao"]
+        ];
+
+        for (const [nome, ddl] of colunasNecessarias) {
+          const [colunas] = await connection.query(`
+            SHOW COLUMNS FROM tb_materiais_os LIKE ?
+          `, [nome]);
+
+          if (!colunas.length) {
+            await connection.query(`
+              ALTER TABLE tb_materiais_os
+                ${ddl}
+            `);
+          }
+        }
+
+        materialLivreColumnsAvailable = true;
+      } catch (err) {
+        materialLivreColumnsAvailable = false;
+        console.warn("Colunas de material livre indisponiveis em tb_materiais_os:", err.message);
+      }
+
+      return materialLivreColumnsAvailable;
+    })();
+  }
+
+  return materialLivreColumnsReadyPromise;
+}
+
 async function getMateriaisByOS(idOS, idLista = null) {
   const temOC = await garantirColunaOC();
   const temObservacao = await garantirColunaObservacao();
   const temConferencia = await garantirColunasConferencia();
+  const temMaterialLivre = await garantirColunasMaterialLivre();
 
   const [rows] = await connection.query(`
     SELECT
       mo.id,
       MAX(mo.id_lista) AS id_lista,
-      MAX(m.nome) AS nome,
-      MAX(m.categoria) AS categoria,
+      MAX(mo.id_variacao) AS id_variacao,
+      MAX(COALESCE(m.nome, ${temMaterialLivre ? "mo.material_livre_descricao" : "NULL"}, 'Material especifico')) AS nome,
+      MAX(COALESCE(m.categoria, 'Especifico')) AS categoria,
+      MAX(${temMaterialLivre ? "mo.material_livre_descricao" : "NULL"}) AS material_livre_descricao,
+      MAX(${temMaterialLivre ? "CASE WHEN mo.material_livre = 1 OR mo.id_variacao IS NULL THEN 1 ELSE 0 END" : "0"}) AS material_livre,
       MAX(mv.imagem) AS imagem,
       MAX(mv.versao_foto) AS versao_foto,
       MAX(mv.codigo) AS codigo,
       MAX(mv.fabricante) AS fabricante,
-      MAX(mv.unidade) AS unidade,
+      MAX(COALESCE(mv.unidade, 'un')) AS unidade,
       MAX(mv.valor_orcamento_atual) AS valor_orcamento_atual,
       MAX(forn_min.menor_valor) AS menor_valor,
       MAX(forn_min.fornecedor_menor_nome) AS fornecedor_menor_nome,
@@ -155,9 +210,9 @@ async function getMateriaisByOS(idOS, idLista = null) {
       NULL AS conferencia_faltando,
       NULL AS conferencia_em`}
     FROM tb_materiais_os mo
-    JOIN tb_materiais_variacoes mv
+    LEFT JOIN tb_materiais_variacoes mv
       ON mv.id = mo.id_variacao
-    JOIN tb_materiais m
+    LEFT JOIN tb_materiais m
       ON m.id = mv.id_material
     LEFT JOIN tb_materiais_atributos_valores av
       ON av.id_variacao = mv.id
@@ -211,6 +266,7 @@ async function getMateriaisByOS(idOS, idLista = null) {
 async function getMaterialOSById(id) {
   const temOC = await garantirColunaOC();
   const temObservacao = await garantirColunaObservacao();
+  const temMaterialLivre = await garantirColunasMaterialLivre();
 
   const [rows] = await connection.query(`
     SELECT
@@ -218,6 +274,8 @@ async function getMaterialOSById(id) {
       id_os,
       id_lista,
       id_variacao,
+      ${temMaterialLivre ? "material_livre_descricao" : "NULL AS material_livre_descricao"},
+      ${temMaterialLivre ? "material_livre" : "0 AS material_livre"},
       quantidade,
       ${temObservacao ? "observacao" : "NULL AS observacao"},
       quantidade_separada,
@@ -426,6 +484,140 @@ async function getListasConferencia() {
   return rows;
 }
 
+async function getListasPorSetorUsuario(usuarioId) {
+  const contexto = await buscarContextoSetorUsuario(usuarioId);
+  const estagios = getEstagiosPorContexto(contexto);
+
+  if (!estagios.length) {
+    return {
+      contexto,
+      estagios: [],
+      listas: []
+    };
+  }
+
+  const placeholders = estagios.map(() => "?").join(", ");
+  const [rows] = await connection.query(`
+    SELECT
+      l.id_os,
+      o.descricao AS os_descricao,
+      e.nome AS cliente_nome,
+      MIN(l.status) AS status,
+      GROUP_CONCAT(DISTINCT l.status ORDER BY l.status ASC SEPARATOR ',') AS estagios_os,
+      GROUP_CONCAT(l.status ORDER BY l.status ASC SEPARATOR ',') AS estagios_listas,
+      GROUP_CONCAT(
+        CONCAT(
+          l.status,
+          ':',
+          COALESCE(lr.percentual_separacao, 0),
+          ':',
+          COALESCE(lr.percentual_compra, 0)
+        )
+        ORDER BY l.status ASC
+        SEPARATOR ','
+      ) AS progresso_listas,
+      COUNT(DISTINCT l.id) AS total_listas,
+      GROUP_CONCAT(DISTINCT l.id ORDER BY l.id ASC SEPARATOR ',') AS listas_ids,
+      MIN(COALESCE(l.status_atualizado_em, l.atualizado_em, l.criado_em)) AS mais_antiga
+    FROM tb_materiais_listas l
+    LEFT JOIN tb_obras o
+      ON o.id_OSs = l.id_os
+    LEFT JOIN tb_empresa e
+      ON e.id_empresas = o.id_empresa
+    LEFT JOIN (
+      SELECT
+        mo.id_lista,
+        COUNT(mo.id) AS itens,
+        ROUND(
+          (
+            SUM(CASE
+              WHEN COALESCE(mo.quantidade, 0) > 0
+                AND (
+                  COALESCE(mo.quantidade_comprada, 0) >= COALESCE(mo.quantidade, 0)
+                  OR COALESCE(mo.quantidade_separada, 0) >= GREATEST(COALESCE(mo.quantidade, 0) - COALESCE(mo.quantidade_comprada, 0), 0)
+                )
+              THEN 1 ELSE 0
+            END) / NULLIF(COUNT(mo.id), 0)
+          ) * 100,
+          0
+        ) AS percentual_separacao,
+        ROUND(
+          (
+            SUM(CASE
+              WHEN COALESCE(mo.quantidade_comprada, 0) >= COALESCE(mo.quantidade, 0)
+                AND COALESCE(mo.quantidade, 0) > 0
+              THEN 1 ELSE 0
+            END) / NULLIF(COUNT(mo.id), 0)
+          ) * 100,
+          0
+        ) AS percentual_compra
+      FROM tb_materiais_os mo
+      GROUP BY mo.id_lista
+    ) lr
+      ON lr.id_lista = l.id
+    WHERE l.ativo = 1
+      AND l.status IN (${placeholders})
+      AND COALESCE(lr.itens, 0) > 0
+    GROUP BY l.id_os, o.descricao, e.nome
+    ORDER BY mais_antiga ASC, l.id_os DESC
+  `, estagios);
+
+  return {
+    contexto,
+    estagios,
+    listas: rows
+  };
+}
+
+async function buscarContextoSetorUsuario(usuarioId) {
+  const [rows] = await connection.query(`
+    SELECT
+      f.id,
+      f.nome,
+      COALESCE(c.cargo, '') AS cargo,
+      COALESCE(s.categoria, '') AS setor,
+      GREATEST(
+        IFNULL(c.nivel_acesso, 0),
+        IFNULL(s.nivel_acesso, 0)
+      ) AS nivel_acesso
+    FROM funcionarios f
+    LEFT JOIN tb_cargos c
+      ON f.cargo = c.id
+    LEFT JOIN tb_setores s
+      ON c.idsetor = s.id_catnvl
+    WHERE f.id = ?
+    LIMIT 1
+  `, [usuarioId]);
+
+  return rows[0] || null;
+}
+
+function getEstagiosPorContexto(contexto) {
+  const texto = normalizarTexto([
+    contexto?.cargo,
+    contexto?.setor
+  ].filter(Boolean).join(" "));
+  const nivel = Number(contexto?.nivel_acesso || 0);
+
+  if ([6, 7, 99].includes(nivel)) {
+    return ["orcamento", "engenharia", "estoque", "compras"];
+  }
+
+  if (texto.includes("compr")) return ["compras"];
+  if (texto.includes("estoque") || texto.includes("almox")) return ["estoque"];
+  if (texto.includes("orcament")) return ["orcamento"];
+  if (texto.includes("engenh")) return ["orcamento", "engenharia"];
+
+  return [];
+}
+
+function normalizarTexto(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 async function getListaById(id) {
   const [rows] = await connection.query(`
     SELECT *
@@ -440,27 +632,51 @@ async function getListaById(id) {
 
 async function createMaterialOS(data) {
   const temObservacao = await garantirColunaObservacao();
+  const temMaterialLivre = await garantirColunasMaterialLivre();
+  const materialLivreDescricao = String(data.material_livre_descricao || "").trim();
+  const ehMaterialLivre = normalizarBoolean(data.material_livre) || (!data.id_variacao && materialLivreDescricao);
+
+  if (!ehMaterialLivre && !data.id_variacao) {
+    throw new Error("Material nao informado");
+  }
+
+  if (ehMaterialLivre && !temMaterialLivre) {
+    throw new Error("Estrutura para material livre indisponivel");
+  }
 
   const colunas = [
     "id_os",
     "id_lista",
-    "id_variacao",
+    "id_variacao"
+  ];
+
+  const valoresSql = ["?", "?", "?"];
+  const parametros = [
+    data.id_os,
+    data.id_lista || null,
+    ehMaterialLivre ? null : data.id_variacao
+  ];
+
+  if (temMaterialLivre) {
+    colunas.push("material_livre_descricao", "material_livre");
+    valoresSql.push("?", "?");
+    parametros.push(ehMaterialLivre ? materialLivreDescricao : null, ehMaterialLivre ? 1 : 0);
+  }
+
+  colunas.push(
     "quantidade",
     "quantidade_separada",
     "quantidade_comprada",
     "id_fornecedor"
-  ];
+  );
 
-  const valoresSql = ["?", "?", "?", "?", "?", "?", "?"];
-  const parametros = [
-    data.id_os,
-    data.id_lista || null,
-    data.id_variacao,
+  valoresSql.push("?", "?", "?", "?");
+  parametros.push(
     data.quantidade,
     data.quantidade_separada || 0,
     data.quantidade_comprada || 0,
     data.id_fornecedor || null
-  ];
+  );
 
   if (temObservacao) {
     colunas.push("observacao");
@@ -615,6 +831,7 @@ async function duplicarLista(id, usuarioId = null, idOSDestino = null) {
 
   const destino = idOSDestino || lista.id_os;
   const temObservacao = await garantirColunaObservacao();
+  const temMaterialLivre = await garantirColunasMaterialLivre();
 
   const nova = await createLista({
     id_os: destino,
@@ -632,14 +849,17 @@ async function duplicarLista(id, usuarioId = null, idOSDestino = null) {
 
   const colunasExtras = temObservacao ? ", observacao" : "";
   const valoresExtras = temObservacao ? ", observacao" : "";
+  const colunasMaterialLivre = temMaterialLivre ? ", material_livre_descricao, material_livre" : "";
+  const valoresMaterialLivre = temMaterialLivre ? ", material_livre_descricao, material_livre" : "";
 
   await connection.query(`
     INSERT INTO tb_materiais_os
-      (id_os, id_lista, id_variacao, quantidade${colunasExtras}, quantidade_separada, quantidade_comprada, id_fornecedor, status)
+      (id_os, id_lista, id_variacao${colunasMaterialLivre}, quantidade${colunasExtras}, quantidade_separada, quantidade_comprada, id_fornecedor, status)
     SELECT
       ?,
       ?,
       id_variacao,
+      ${valoresMaterialLivre ? valoresMaterialLivre.replace(/^, /, "") + "," : ""}
       quantidade${valoresExtras},
       0,
       0,
@@ -900,6 +1120,7 @@ module.exports = {
   getListasByOS,
   getListasEstoque,
   getListasConferencia,
+  getListasPorSetorUsuario,
   getListaById,
 
   createMaterialOS,

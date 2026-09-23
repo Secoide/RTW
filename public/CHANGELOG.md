@@ -85,30 +85,60 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 ## [2.2.0] - 2026-05-20
-## Nome: 🏅 Conquitas e Experiências
+## Nome: 🏅 Conquistas e Experiências
 ### Adicionado
 - Sistema de Conquistas e Medalhas para reconhecimento dos colaboradores;
 - Nova aba "Conquistas" no perfil dos colaboradores;
+- Exibição de medalhas automáticas e manuais, sistema de tooltip com descrição das medalhas;
 - Cadastro manual de conquistas diretamente pelo perfil;
 - Integração das conquistas com o Hall da Experiência;
-- Exibição de medalhas automáticas e manuais, sistema de tooltip com descrição das medalhas;
 - Adicionado Guia completo de Medalhas e Conquistas;
-- Clique com o direito em medalhas manuais do colaborador para mostrar opção para remover medalha;
+- Clique com o direito em medalhas manuais do colaborador (no perfil) para mostrar opção para remover medalha;
+- Adicionado resumo anual de desempenho no perfil do colaborador, com status, legenda, percentual e alerta gerencial. Restrito somente para o setor da Produção;
+- Criada a aba 'Feriados' na tela de Gestão, integrada sua utilização ao resumo anual no perfil do colaborador;
 
 ### Alterado
 - Reestruturação visual da pagina Home com novo Hall da Experiência;
 
+
+
+## [2.1.3] - 2026-09-23
+## Nome: 🧭 Guia Interativo
+### Adicionado
+- Adicionado tour explicativo em algumas áreas do sistema. Clique no botão ? para iniciar a apresentação e entender cada recurso;
+- Adicionada seleção, exibição, edição e salvamento de ícones na tela Gestão aba Exame;
+- Adicionados registros de faltas justificadas/não justificadas com anexos para colaboradores, clique com o botão direto na tabela RH e escolha o registro;
+- Criado fluxo de análise do RH para faltas indevidas pendentes, o gestor da Programação OS registra a ocorrência, o RH é notificado e verifica se a falta foi justificada mediante exame ou não justificada;
+- Adicionada consulta de colaboradores integrados por empresa. Acesse a tela Gestão, aba Empresa, ira aparecer um botão caso a empresa correspondente tenha integração marcada. Ao clicar na janela, tera informação de Nome completo, Função e Vencimento em dias de cada colaborador integrado;
+
+### Alterado
+- Ajustado nome completo dos colaboradores na tabela do RH para aparecer em negrito;
+- Alterado paginação visual na Programação para carregar 10 OSs por dia, com botão “Carregar mais 10”, mantendo buscas e filtros funcionando fora do limite inicial;
+- Marcado de falta indevida na tela da Programação OS, mudou para 'Alertar Falta Indevida';
+- Agora não é possivel limpar notificações que exigem decisão do usuário primeiramente;
+- Melhorada visualmente a aba Atestar com histórico, pendências e bloqueio de períodos duplicados;
+
 ### Corrigido
+- Corrigido salvamento das preferências do usuário que quebrava quando uma opção temporariamente removida não existia na janela;
+- Menu do botão direito ficava escondido ao abrir perto da parte inferior da tela;
+- Ajustado tema claro da Programação e RH para manter cores, textos e painéis visíveis corretamente.
+- Corrigido desempenho da Programação para evitar atualizações completas desnecessárias ao alterar colaboradores na OS e limpar eventos/estados temporários acumulados ao reabrir a tela.
+- Cores de colaboradores na OS não apareciam conforme sua função;
+
+### Removido:
+- Removido notificação de conexão para não exibir “Conectado ao servidor” no acesso normal, mantendo o aviso apenas quando o sistema reconecta após uma queda.
 
 
 
------ VERSAO ATUAL
-## [2.1.2] - 2026-08-13
+## [2.1.2] - 2026-08-22
 ## Nome: 🔨 Ajustes
 ### Adicionado
 - Adicionado aviso pop-up por empresa, configurado e enviado pelo suporte e exibido na Home até o usuário confirmar OK (Mensagens Técnicas);
 - Adicionado canal de relatos no sistema para usuários enviarem erros, bugs, dicas e melhorias, com acompanhamento de status. Edite e apague o relato enquanto ele ainda está aguardando análise;
 - Adicionada seleção de versões anteriores na janela de versão do sistema, permitindo consultar detalhes de atualizações já lançadas diretamente pelo botão Versão no menu;
+
+### Alterado
+- Exportação da programação agora faz 4 verificaões para evitar a todos pontos pegar datas diferentes da data exibida no painel selecionado;
 
 ### Corrigido
 - Corrigida OS que continuava marcada como sem colaborador após adicionar um colaborador na programação;
@@ -118,8 +148,6 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Cadastro de OS que não deixava cadastrar quando já havia descrição igual em outra OS;
 - Corrigida lentidão ao atualizar dados profissionais do colaborador, evitando acúmulo de eventos, recargas duplicadas e verificações desnecessárias após editar vários perfis;
 
-### Alterado
-- Exportação da programação agora faz 4 verificaões para evitar a todos pontos pegar datas diferentes da data exibida no painel selecionado;
 
 
 ## [2.1.0] - 2026-08-12
@@ -238,7 +266,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
-## [1.4.2] - 2025-12-15
+## [1.4.2] - 2026-05-11
 ## Nome: 📝 Anotações
 ### Adicionado
 - Nova animação na tela de login com exibição de frases motivacionais;
@@ -320,7 +348,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Informação de onlines na página da programação;
 
 
-## [1.3.1] - 2025-12-15
+## [1.3.1] - 2026-01-30
 ## Nome: 🔨 Ajustes
 ### Adicionado
 - Adicionado resumo para NR-33 nos icones da tabela RH;
@@ -333,7 +361,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Sistema de inatividade removido para melhorias;
 
 
-## [1.3.0] - 2025-12-15
+## [1.3.0] - 2025-12-17
 ## Nome: 🔐 Login e Senhas
 ### Adicionado
 - Indicador de nível de senha para Nova senha ao alterar;
@@ -380,7 +408,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Botão de anexar integração;
 - Botão desligar colaborador na aba Atestar;
 
-## [1.2.4] - 2025-11-20
+## [1.2.4] - 2025-12-01
 ## Nome: ✍🏻 Assinatura Digital 
 ### Adicionado
 - Assinatura de EPIs entregues com assinatura digital via link (Em teste);
@@ -404,7 +432,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - *(Nenhum item marcado como obsoleto nesta versão)*
 
 
-## [1.1.1] - 2025-11-10
+## [1.1.1] - 2025-11-07
 ## Nome: 🔐 Ajustes 
 ### Adicionado
 - Apague curso, exame, integração utilizando o mouse direito em cima do painel correspondente dentro do formulario do colaborador;
@@ -421,7 +449,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - 
 
 
-## [1.1.0] - 2025-11-01
+## [1.1.0] - 2025-11-03
 ## Nome: 🔐 Inicio
 ### Adicionado
 - Colaborador pode ser selecionado como supervisor de uma OS em uma data especifica, clique com o botão direito do mouse em cima do colaborador no painel da OS e defina como colaborador.
@@ -465,7 +493,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - 
 
 
-## [1.0.0] - 2025-07-01
+## [1.0.0] - 2025-07-21
 ### Adicionado
 - Lançamento inicial do programa
 

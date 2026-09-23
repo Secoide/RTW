@@ -187,7 +187,7 @@ async function createExame(data) {
   const [supervisorResult] = await connection.query(sql, [
     data.nome,
     data.descricao,
-    '',
+    data.icone || '',
     data.vencimento === '0' || data.vencimento === 0 || data.vencimento === false ? 0 : 1
   ]);
 
@@ -229,6 +229,11 @@ async function updateExame(id, data) {
   if (data.descricao !== undefined) {
     campos.push("descricao = ?");
     valores.push(data.descricao);
+  }
+
+  if (data.icone !== undefined) {
+    campos.push("icone = ?");
+    valores.push(data.icone || '');
   }
 
   if (data.vencimento !== undefined) {

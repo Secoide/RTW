@@ -1,6 +1,17 @@
 const ExameModel = require('../models/exames.model');
 const supabase = require("../config/supabase");
 
+function normalizarIcone(icone) {
+  const tokens = String(icone || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const familia = tokens.find(token => /^(fa-(solid|regular|brands|light|thin|duotone)|fas|far|fab|fal|fat|fad)$/i.test(token));
+  const nome = tokens.find(token => /^fa-[a-z0-9-]+$/i.test(token) && !/^fa-(solid|regular|brands|light|thin|duotone)$/i.test(token));
+
+  return nome ? `${familia || "fa-solid"} ${nome}` : "";
+}
+
 // Listar todos
 async function listarExames() {
   return await ExameModel.getExames();
@@ -21,7 +32,10 @@ async function criarExame(data) {
   if (!data.nome) {
     throw new Error('Informe pelo menos o nome do exame');
   }
-  const result = await ExameModel.createExame(data);
+  const result = await ExameModel.createExame({
+    ...data,
+    icone: normalizarIcone(data.icone)
+  });
 
   return {
     message: "Exame cadastrado com sucesso!",
@@ -55,7 +69,10 @@ async function agendaExame(data) {
 
 // Atualizar
 async function atualizarExame(id, data) {
-  return await ExameModel.updateExame(id, data);
+  const payload = data.icone === undefined
+    ? data
+    : { ...data, icone: normalizarIcone(data.icone) };
+  return await ExameModel.updateExame(id, payload);
 }
 
 // Deletar

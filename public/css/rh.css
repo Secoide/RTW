@@ -158,6 +158,7 @@
   /* centraliza verticalmente */
   gap: 8px;
   /* espaço entre foto e nome */
+  font-weight: 700;
 }
 
 #rh .tb_zebrada th:nth-child(8),
@@ -577,6 +578,128 @@
 
 .rh-insight i {
   color: #efda38;
+}
+
+:root[data-theme='light'] #rh .painelSubMenu {
+  border-color: rgba(25, 25, 25, 0.12);
+  background: linear-gradient(145deg, rgba(248, 248, 246, 0.98), rgba(224, 224, 220, 0.98));
+  box-shadow: 0 14px 30px rgba(20, 20, 20, 0.10);
+  color: #202020;
+}
+
+:root[data-theme='light'] .painelBuscar .bt_submenu:has(#myInputPesquisaNomeRH) {
+  border-color: rgba(20, 20, 20, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+:root[data-theme='light'] #myInputPesquisaNomeRH {
+  color: #202020;
+}
+
+:root[data-theme='light'] #myInputPesquisaNomeRH::placeholder {
+  color: rgba(32, 32, 32, 0.42);
+}
+
+:root[data-theme='light'] .painelBuscar .bt_submenu:has(#chkDesligados) label,
+:root[data-theme='light'] #rh .painelAcoes .bt_padrao,
+:root[data-theme='light'] #rh .menuSuspensoRegistar > .bt_padrao,
+:root[data-theme='light'] #bt_atualizarRH .bt_padrao,
+:root[data-theme='light'] .rh-btn-filtro,
+:root[data-theme='light'] .rh-btn-limpar,
+:root[data-theme='light'] .rh-chip {
+  border-color: rgba(20, 20, 20, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(32, 32, 32, 0.78);
+}
+
+:root[data-theme='light'] .painelBuscar .bt_submenu:has(#chkDesligados) label::before {
+  color: rgba(32, 32, 32, 0.58);
+}
+
+:root[data-theme='light'] #rh .painelAcoes .bt_padrao:hover,
+:root[data-theme='light'] #rh .menuSuspensoRegistar > .bt_padrao:hover,
+:root[data-theme='light'] #bt_atualizarRH .bt_padrao:hover,
+:root[data-theme='light'] .rh-btn-filtro:hover,
+:root[data-theme='light'] .rh-btn-filtro.ativo,
+:root[data-theme='light'] .rh-btn-filtro.tem-filtro,
+:root[data-theme='light'] .rh-btn-limpar:hover,
+:root[data-theme='light'] .rh-chip:hover,
+:root[data-theme='light'] .rh-chip.ativo,
+:root[data-theme='light'] .painelBuscar .bt_submenu:has(#chkDesligados) label:hover,
+:root[data-theme='light'] .painelBuscar .bt_submenu:has(#chkDesligados:checked) label {
+  border-color: rgba(238, 119, 34, 0.36);
+  background: rgba(239, 218, 56, 0.22);
+  color: #8a4b00;
+}
+
+:root[data-theme='light'] .rh-busca-avancada {
+  border-color: rgba(238, 119, 34, 0.22);
+  background: linear-gradient(145deg, #fafafa, #e8e8e4);
+  box-shadow: 0 20px 42px rgba(20, 20, 20, 0.14);
+}
+
+:root[data-theme='light'] .rh-avancado-campo label,
+:root[data-theme='light'] .rh-insight {
+  color: rgba(32, 32, 32, 0.62);
+}
+
+:root[data-theme='light'] .rh-avancado-campo input,
+:root[data-theme='light'] .rh-avancado-campo select {
+  border-color: rgba(20, 20, 20, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  color: #202020;
+}
+
+:root[data-theme='light'] .rh-resumo-card,
+:root[data-theme='light'] .rh-insight {
+  border-color: rgba(20, 20, 20, 0.10);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+:root[data-theme='light'] .rh-resumo-card span {
+  color: #202020;
+}
+
+:root[data-theme='light'] .rh-resumo-card small {
+  color: rgba(32, 32, 32, 0.54);
+}
+
+:root[data-theme='light'] #rh .tb_zebrada {
+  color: #202020;
+}
+
+:root[data-theme='light'] #rh .tb_zebrada th {
+  border-bottom-color: rgba(20, 20, 20, 0.18);
+  background: #3f3f3f;
+  color: #ffffff;
+}
+
+:root[data-theme='light'] #rh .tb_zebrada td {
+  border-bottom-color: rgba(20, 20, 20, 0.22);
+  color: #242424;
+}
+
+:root[data-theme='light'] #rh .tb_zebrada tbody tr {
+  background: #f4f4f2;
+}
+
+:root[data-theme='light'] #rh .tb_zebrada tbody tr:nth-child(even) {
+  background: #e8e8e5;
+}
+
+:root[data-theme='light'] #rh .tb_zebrada tbody tr:hover {
+  background: #fff5cc;
+}
+
+:root[data-theme='light'] #rh .tb_zebrada .VENCIDO,
+:root[data-theme='light'] #rh .tb_zebrada .AGENDADO,
+:root[data-theme='light'] #rh .tb_zebrada .ALERTA,
+:root[data-theme='light'] #rh .tb_zebrada .Ferias,
+:root[data-theme='light'] #rh .tb_zebrada .Paternidade,
+:root[data-theme='light'] #rh .tb_zebrada .Maternidade,
+:root[data-theme='light'] #rh .tb_zebrada .Afastamento,
+:root[data-theme='light'] #rh .tb_zebrada .Saude {
+  color: #202020;
 }
 
 .bt_teste {

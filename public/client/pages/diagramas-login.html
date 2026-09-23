@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo_GS.png">
+  <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
+  <title>ConnectPear Engenharia a Campo - Login</title>
+
+  <link rel="stylesheet" type="text/css" href="/css/padrao/cores.css">
+  <link rel="stylesheet" type="text/css" href="/css/padrao/padrao.css">
+  <link rel="stylesheet" type="text/css" href="/css/login.css">
+  <link rel="stylesheet" type="text/css" href="/css/diagramas.css">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="diagramas-login-body">
+  <div id="fundo_img_id" class="fundo_img diagramas-login-bg">
+    <div id="snow-layer"></div>
+    <div id="form_login_id" class="painel_login centralizada glass diagramas-login-panel">
+      <aside class="login_brand diagramas-login-brand">
+        <img src="/logo_teste.png" alt="Logo ConnectPear" class="login_logo">
+        <div class="login_brand_text">
+          <span>ConnectPear Engenharia a Campo</span>
+          <h1>Ferramentas eletricas conectadas ao grupo.</h1>
+          <p>Acesse o ambiente tecnico para dimensionamentos e rotinas eletricas em campo.</p>
+        </div>
+      </aside>
+
+      <div class="form_login">
+        <p class="tituloLogin">Entrar em Engenharia a Campo</p>
+        <p class="subtituloLogin">Use o mesmo usuario da empresa.</p>
+        <form id="formLogin" method="POST" autocomplete="on" data-redirect="/eng_eletric/carregamento">
+          <label for="username">Usuario ou E-mail</label><br>
+          <input id="username" type="text" name="username" autocomplete="username email" placeholder="Digite seu usuario ou e-mail" required>
+
+          <div id="adminEmpresaLoginWrap" class="admin-empresa-login" hidden>
+            <label for="adminEmpresaLogin">Empresa de acesso</label><br>
+            <select id="adminEmpresaLogin" name="empresaSaasId">
+              <option value="">Selecione a empresa...</option>
+            </select>
+            <small>Disponivel apenas para o admin global.</small>
+          </div>
+
+          <label for="password">Senha</label><br>
+          <div class="senha-wrap">
+            <input id="password" type="password" name="password" autocomplete="current-password" required>
+            <button id="togglePassword" type="button" title="Mostrar senha" aria-label="Mostrar senha">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <div id="capsLockAviso" class="caps-lock-aviso">Caps Lock ativo</div>
+
+          <label class="lembrar-login" for="lembrarLogin">
+            <input id="lembrarLogin" type="checkbox">
+            <span>Lembrar usuario/e-mail neste dispositivo</span>
+          </label>
+
+          <a class="esquecisenha" href="#">Esqueci minha senha</a>
+          <div class="divbutton">
+            <input class="botao-degrade" type="submit" value="Entrar">
+            <a class="semconta" href="#">Nao consigo acessar minha conta</a>
+          </div>
+        </form>
+        <div id="loginAssociationNotice" class="login-association-notice" hidden>
+          <span>Sem associacao com empresa. Contate o suporte ConnectPear para avaliacao e vinculo correto.</span>
+          <button type="button" id="loginAssociationOk">OK</button>
+        </div>
+      </div>
+    </div>
+    <div class="login-footer-status" aria-label="Versao e status do sistema">
+      <span class="versao" title="Versao atual do sistema."></span>
+      <span class="footer-separator">|</span>
+      <span class="login-developer-credit">Filial tecnica do grupo <strong>ConnectPear</strong></span>
+      <span class="footer-separator">|</span>
+      <span id="loginServerStatus" class="login-server-status">
+        <span class="status-dot checking"></span>
+        <span>Servidor...</span>
+      </span>
+      <span class="footer-separator">|</span>
+      <span id="loginDatabaseStatus" class="login-server-status">
+        <span class="status-dot checking"></span>
+        <span>Banco...</span>
+      </span>
+    </div>
+  </div>
+
+  <script type="module" src="/client/js/main-login.js"></script>
+</body>
+
+</html>

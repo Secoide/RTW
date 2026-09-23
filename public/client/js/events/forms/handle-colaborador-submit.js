@@ -124,39 +124,65 @@ export function initColabForm() {
     // delega o evento ao document
     $(document).on("submit.colabForm", "#form_atestar", function (e) {
         e.preventDefault();
-        const formData = $(this).serialize();
+
+        const $form = $(this);
+        const $botao = $form.find('[type="submit"]');
+        const dataInicio = String($form.find('[name="periodoinicial"]').val() || "");
+        const dataFinal = String($form.find('[name="periodofinal"]').val() || "");
+        const $status = $("#atestar-form-status");
+
+        if ($form.data("salvando")) return;
+
+        if (!dataInicio || !dataFinal) {
+            $status.text("Informe a data inicial e a data final.");
+            return;
+        }
+
+        if (dataFinal < dataInicio) {
+            $status.text("A data final não pode ser anterior à inicial.");
+            return;
+        }
+
+        $form.data("salvando", true);
+        $botao.prop("disabled", true);
+        $status.text("Verificando período...");
 
         $.ajax({
-            url: 'api/colaboradores/atestar',
+            url: '/api/colaboradores/atestar',
             type: 'POST',
-            data: formData,
+            data: $form.serialize(),
             dataType: 'json',
             success: function (res) {
-                if (res.sucesso) {
-                    preencherTabelaAtestar($('.painel_todos').find('#id').val());
-                    const msg = `Atestar cadastrado com sucesso!`;
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: "top-end",
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.onmouseenter = Swal.stopTimer;
-                            toast.onmouseleave = Swal.resumeTimer;
-                        }
-                    });
-                    Toast.fire({
-                        icon: "success",
-                        theme: 'dark',
-                        title: msg
-                    });
-                } else {
-                    alert(res.mensagem);
+                if (!res.sucesso) {
+                    $status.text(res.mensagem || "Não foi possível salvar o registro.");
+                    return;
                 }
+
+                const idColaborador = $form.find('[name="idColab"]').val();
+                preencherTabelaAtestar(idColaborador);
+                $form[0].reset();
+                $form.find('[name="idColab"]').val(idColaborador);
+                $status.text("Registro salvo com segurança.");
+
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                Toast.fire({
+                    icon: "success",
+                    theme: 'dark',
+                    title: "Registro salvo com sucesso"
+                });
             },
-            error: function () {
-                alert('Erro ao excluir historico.');
+            error: function (xhr) {
+                $status.text(xhr.responseJSON?.mensagem || "Não foi possível salvar o registro.");
+            },
+            complete: function () {
+                $form.data("salvando", false);
+                $botao.prop("disabled", false);
             }
         });
     });

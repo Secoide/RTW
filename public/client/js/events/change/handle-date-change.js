@@ -1,6 +1,7 @@
 import { carregarColaboradoresDisp, carregarOSComColaboradores } from "../../services/api/programacao-service.js";
 import { formatarData_Semana } from "../../utils/formatters/date-format.js";
 import { mostrarErroUI } from "../../utils/dom/error-handler.js";
+import { resetarPaginacaoOSProgramacao } from "../../utils/dom/atualizar-painel.js";
 
 let atualizacaoProgramacaoSeq = 0;
 
@@ -61,6 +62,7 @@ export async function atualizarProgramacao(dataBase){
           novaData.setDate(dataBase.getDate() + (index - 1));
 
           const dataFormatada = formatarDataLocalProgramacao(novaData);
+          resetarPaginacaoOSProgramacao(painel);
           painel.setAttribute("data-dia", dataFormatada);
           $(painel).removeData("dia");
           painel.querySelector(".painel_Dia").textContent = formatarData_Semana(dataFormatada);

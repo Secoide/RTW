@@ -1,5 +1,6 @@
-﻿const MaterialFornecedorModel = require('../models/materialFornecedor.model');
+const MaterialFornecedorModel = require('../models/materialFornecedor.model');
 const MaterialOSModel = require('../models/materialOS.model');
+const MaterialModel = require('../models/material.model');
 
 const STATUS = {
   PENDENTE: "pendente",
@@ -30,15 +31,24 @@ async function adicionarFornecedor(data) {
   // ðŸ”¥ validaÃ§Ã£o
   validarFornecedor(data, item.quantidade);
 
-  // ðŸ”¥ insert
-  return await MaterialFornecedorModel.addFornecedor(data);
+  const novo = await MaterialFornecedorModel.addFornecedor(data);
+  await recalcularValorCatalogoDoItem(item);
+  return novo;
 }
 
 
 // ================= UPDATE =================
 
 async function atualizarFornecedor(id, data) {
-  return await MaterialFornecedorModel.updateFornecedor(id, data);
+  const fornecedor = await MaterialFornecedorModel.getById(id);
+  if (!fornecedor) return false;
+
+  const ok = await MaterialFornecedorModel.updateFornecedor(id, data);
+  if (!ok) return false;
+
+  const item = await MaterialOSModel.getMaterialOSById(fornecedor.id_material_os);
+  await recalcularValorCatalogoDoItem(item);
+  return true;
 }
 
 async function selecionarFornecedor(idFornecedor, options = {}) {
@@ -113,7 +123,26 @@ function calcularStatus(item) {
 // ================= DELETE =================
 
 async function deletarFornecedor(id) {
-  return await MaterialFornecedorModel.deleteFornecedor(id);
+  const fornecedor = await MaterialFornecedorModel.getById(id);
+  if (!fornecedor) return false;
+
+  const ok = await MaterialFornecedorModel.deleteFornecedor(id);
+  if (!ok) return false;
+
+  const item = await MaterialOSModel.getMaterialOSById(fornecedor.id_material_os);
+  await recalcularValorCatalogoDoItem(item);
+  return true;
+}
+
+async function recalcularValorCatalogoDoItem(item) {
+  if (!item?.id_variacao) return false;
+
+  try {
+    return await MaterialModel.recalcularValorOrcamentoVariacao(item.id_variacao);
+  } catch (err) {
+    console.warn("Nao foi possivel recalcular valor atual do material:", err.message);
+    return false;
+  }
 }
 
 

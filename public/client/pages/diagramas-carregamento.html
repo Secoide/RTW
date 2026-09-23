@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo_GS.png">
+  <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
+  <title>ConnectPear Engenharia a Campo - Carregando</title>
+  <link rel="stylesheet" type="text/css" href="/css/diagramas.css">
+  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="diagramas-loading-body">
+  <main class="diagramas-loading">
+    <img src="/logo_teste.png" alt="Logo ConnectPear" class="diagramas-loading-logo">
+    <strong>Preparando Engenharia a Campo</strong>
+    <span id="diagramasLoadingText">Carregando ferramentas eletricas...</span>
+    <div class="diagramas-loading-track">
+      <div id="diagramasLoadingBar"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    const etapas = [
+      "Validando sessao tecnica",
+      "Carregando criterios eletricos",
+      "Preparando dimensionamento de cargas",
+      "Abrindo Engenharia a Campo"
+    ];
+    const barra = document.getElementById("diagramasLoadingBar");
+    const texto = document.getElementById("diagramasLoadingText");
+    let progresso = 0;
+
+    const timer = setInterval(() => {
+      progresso = Math.min(100, progresso + 8);
+      barra.style.width = `${progresso}%`;
+      texto.textContent = etapas[Math.min(etapas.length - 1, Math.floor(progresso / 26))];
+
+      if (progresso >= 100) {
+        clearInterval(timer);
+        setTimeout(() => {
+          window.location.href = "/eng_eletric";
+        }, 360);
+      }
+    }, 110);
+  </script>
+</body>
+
+</html>

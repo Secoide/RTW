@@ -5,7 +5,7 @@
     overflow: hidden;
     pointer-events: "none";
     background:
-        linear-gradient(145deg, #1f1f1f 0%, #242424 48%, #000000 100%);
+        linear-gradient(145deg, #000000 0%, #181818 48%, #000000 100%)
 }
 
 .fundo_img .bg {
@@ -41,7 +41,7 @@
     min-height: 430px;
     padding: 0;
     border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(0 161 255 / 30%);
     overflow: hidden;
     box-shadow: 0 22px 70px rgba(0, 0, 0, 0.48);
     backdrop-filter: blur(12px);
@@ -74,12 +74,46 @@ input {
 }
 
 input:focus {
-    border-color: #efda38;
-    box-shadow: 0 0 0 3px rgba(238, 119, 34, 0.14);
+    border-color: #3498f1;
+    box-shadow: 0 0 0 3px rgba(52, 152, 241, 0.14);
 }
 
 .senha-wrap {
     position: relative;
+}
+
+.admin-empresa-login {
+    display: none;
+    margin: 8px 0 12px;
+}
+
+.admin-empresa-login.show {
+    display: block;
+}
+
+.admin-empresa-login select {
+    width: 100%;
+    height: 40px;
+    margin-top: 6px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 7px;
+    background: rgba(26, 26, 26, 0.92);
+    color: #f4f4f4;
+    font-size: 13px;
+    outline: none;
+}
+
+.admin-empresa-login select:focus {
+    border-color: #3498f1;
+    box-shadow: 0 0 0 3px rgba(52, 152, 241, 0.14);
+}
+
+.admin-empresa-login small {
+    display: block;
+    margin-top: 5px;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 10px;
 }
 
 .senha-wrap input {
@@ -101,14 +135,14 @@ input:focus {
 }
 
 #togglePassword:hover {
-    background: rgba(238, 119, 34, 0.16);
-    color: #efda38;
+    background: rgba(52, 152, 241, 0.16);
+    color: #3498f1;
 }
 
 .caps-lock-aviso {
     display: none;
     margin: 2px 0 12px;
-    color: #ffd166;
+    color: #3498f1;
     font-size: 11px;
     font-weight: 700;
 }
@@ -131,7 +165,7 @@ input:focus {
     width: 14px;
     height: 14px;
     margin: 0;
-    accent-color: #ee7722;
+    accent-color: #2263ee;
 }
 
 .login-association-notice {
@@ -202,16 +236,16 @@ label {
     border: none;
     margin-top: 14px;
     border-radius: 8px;
-    background: linear-gradient(90deg, #ee7722, #efda38);
+    background: linear-gradient(90deg, #2263ee, #38daef);
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     font-weight: 800;
 }
 
 .botao-degrade:hover {
-    color: #101010;
+    color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 0 18px rgba(238, 119, 34, 0.28);
+    box-shadow: 0 0 18px rgba(34, 238, 228, 0.28);
 }
 
 
@@ -281,7 +315,7 @@ a:hover {
 }
 
 .login-weather-status i {
-    color: rgba(239, 218, 56, 0.76);
+    color: rgba(52, 152, 241, 0.76);
     font-size: 10px;
 }
 
@@ -307,20 +341,20 @@ a:hover {
 }
 
 .login-developer-credit strong {
-    color: #efda38;
+    color: #3498f1;
 }
 
 .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #ffd166;
-    box-shadow: 0 0 10px rgba(255, 209, 102, 0.4);
+    background: #3498f1;
+    box-shadow: 0 0 10px rgba(52, 152, 241, 0.4);
 }
 
 .status-dot.online {
     background: #38ef50;
-    box-shadow: 0 0 10px rgba(238, 119, 34, 0.42);
+    box-shadow: 0 0 10px rgba(52, 152, 241, 0.42);
 }
 
 .status-dot.offline {
@@ -452,7 +486,7 @@ a:hover {
 /* 🔹 Botão */
 .atualizacao-box button {
     margin-top: 18px;
-    background: linear-gradient(90deg, #ee7722, #efda38);
+    background: linear-gradient(90deg, #2574c5, #3498f1);
     border: none;
     padding: 12px 25px;
     color: #fff;
@@ -492,6 +526,24 @@ a:hover {
     overflow: hidden;
 }
 
+.login-electric-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    opacity: 0.9;
+    touch-action: none;
+    user-select: none;
+}
+
+.login-electric-canvas.is-weather-hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
 /* Painel fica acima da neve */
 .painel_login {
     position: relative;
@@ -527,7 +579,7 @@ a:hover {
 }
 
 .login_brand_text span {
-    color: #efda38;
+    color: #3498f1;
     font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
@@ -741,7 +793,7 @@ a:hover {
 
 .phrase-easter {
     font-size: 11px;
-    color: rgb(253, 253, 116);
+    color: #3498f1;
 
     text-shadow:
         0 0 6px rgba(255, 255, 255, 0.4),
@@ -749,6 +801,47 @@ a:hover {
 
     animation: easterGlow 2.5s ease-in-out infinite;
 
+}
+
+/* Paleta natalina ativada pelo initChristmasIcons */
+html[data-christmas-icons="active"] .painel_login {
+    border-color: rgba(255, 255, 255, .72);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, .58), 0 0 24px rgba(255, 255, 255, .12);
+}
+
+html[data-christmas-icons="active"] input:focus,
+html[data-christmas-icons="active"] .admin-empresa-login select:focus {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .18);
+}
+
+html[data-christmas-icons="active"] #togglePassword:hover {
+    background: rgba(255, 255, 255, .16);
+    color: #ffffff;
+}
+
+html[data-christmas-icons="active"] .botao-degrade,
+html[data-christmas-icons="active"] .atualizacao-box button {
+    background: linear-gradient(90deg, #e9eef2, #ffffff);
+    color: #161616;
+    box-shadow: 0 0 18px rgba(255, 255, 255, .22);
+}
+
+html[data-christmas-icons="active"] .caps-lock-aviso,
+html[data-christmas-icons="active"] .login-weather-status i,
+html[data-christmas-icons="active"] .login-developer-credit strong,
+html[data-christmas-icons="active"] .phrase-easter {
+    color: #ffffff;
+}
+
+html[data-christmas-icons="active"] .status-dot {
+    background: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, .42);
+}
+
+html[data-christmas-icons="active"] .status-dot.online {
+    background: #42d66a;
+    box-shadow: 0 0 10px rgba(255, 255, 255, .26);
 }
 
 @keyframes easterGlow {

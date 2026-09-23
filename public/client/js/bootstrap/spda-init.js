@@ -69,6 +69,7 @@ const SPDA_COMPONENTES_ELETRICOS = new Set(["entrada_luz", "transformador", "qgb
 const SPDA_MARGEM_EDICAO = 16;
 const SPDA_LIMITES_STORAGE_KEY = "spda_limites_medicao";
 const SPDA_TABELA_ENTER_SALVO = "spdaEnterSalvo";
+const SPDA_EXCEL_MIME = "application/vnd.ms-excel;charset=utf-8";
 function byId(id) {
   return document.getElementById(id);
 }
@@ -704,23 +705,8 @@ function calcularAvaliacaoMedicao(tipo, valor) {
   return numero > limite ? "Reprovado" : "Aprovado";
 }
 
-function renderTabelaPreenchimentoSpda() {
-  const painel = byId("spdaTabelaPainel");
-  const toggle = byId("spdaTabelaToggle");
-  const conteudo = byId("spdaTabelaConteudo");
-  if (!painel || !toggle || !conteudo) return;
-
-  painel.classList.toggle("aberto", estadoSpda.tabelaAberta);
-  toggle.classList.toggle("oculto", estadoSpda.tabelaAberta);
-  const config = byId("spdaTabelaConfig");
-  if (config) config.hidden = !estadoSpda.tabelaConfigAberta;
-  sincronizarCamposLimiteSpda();
-  document.querySelectorAll("[data-spda-tabela]").forEach(btn => {
-    btn.classList.toggle("ativo", btn.dataset.spdaTabela === estadoSpda.tabelaTipo);
-  });
-
+function obterDadosTabelaMedicaoSpda(tipo = estadoSpda.tabelaTipo) {
   const elementos = obterElementos();
-  const tipo = estadoSpda.tabelaTipo;
   const unidade = tipo === "aterramento" ? "Ω" : "mΩ";
   const tituloValor = tipo === "aterramento" ? "Aterramento dos pontos de descida" : "Continuidade malha de aterramento";
   const maiorPonto = elementos.pontos.reduce((maior, ponto) => Math.max(maior, Number(ponto.numero) || 0), 0);
@@ -752,6 +738,33 @@ function renderTabelaPreenchimentoSpda() {
     });
 
   linhas.sort((a, b) => a.ordem - b.ordem);
+  return { tipo, unidade, tituloValor, linhas };
+}
+
+function renderTabelaPreenchimentoSpda() {
+  const painel = byId("spdaTabelaPainel");
+  const toggle = byId("spdaTabelaToggle");
+  const conteudo = byId("spdaTabelaConteudo");
+  if (!painel || !toggle || !conteudo) return;
+
+  painel.classList.toggle("aberto", estadoSpda.tabelaAberta);
+  toggle.classList.toggle("oculto", estadoSpda.tabelaAberta);
+  const config = byId("spdaTabelaConfig");
+  if (config) config.hidden = !estadoSpda.tabelaConfigAberta;
+  sincronizarCamposLimiteSpda();
+  document.querySelectorAll("[data-spda-tabela]").forEach(btn => {
+    btn.classList.toggle("ativo", btn.dataset.spdaTabela === estadoSpda.tabelaTipo);
+  });
+  const exportarExcelBtn = byId("spdaTabelaExportarExcel");
+  if (exportarExcelBtn) {
+    const tipoExportacao = estadoSpda.tabelaTipo === "aterramento" ? "aterramento" : "continuidade";
+    exportarExcelBtn.dataset.spdaExportExcel = tipoExportacao;
+    exportarExcelBtn.title = tipoExportacao === "aterramento"
+      ? "Exportar aterramento em Excel"
+      : "Exportar continuidade em Excel";
+  }
+
+  const { tipo, unidade, tituloValor, linhas } = obterDadosTabelaMedicaoSpda();
 
   if (!linhas.length) {
     conteudo.innerHTML = `<div class="spda-fill-empty">Nenhuma medição de ${tipo === "aterramento" ? "aterramento" : "continuidade"} criada.</div>`;
@@ -787,6 +800,93 @@ function renderTabelaPreenchimentoSpda() {
       </tbody>
     </table>
   `;
+}
+
+function getExcelStatusStyle(avaliacao) {
+  const texto = String(avaliacao || "").toLowerCase();
+  if (texto.includes("aprovado")) return "background:#c6efce;color:#006100;";
+  if (texto.includes("reprovado")) return "background:#ffc7ce;color:#9c0006;";
+  if (texto.includes("equipotencial")) return "background:#cfeefa;color:#1f6e9a;";
+  if (texto.includes("impossibilitada")) return "background:#e7e6e6;color:#555;";
+  return "background:#fff2cc;color:#7a5b13;";
+}
+
+function montarHtmlExcelMedicoesSpda(tipo) {
+  const { unidade, tituloValor, linhas } = obterDadosTabelaMedicaoSpda(tipo);
+  const nomeTabela = tipo === "aterramento" ? "ATERRAMENTO" : "CONTINUIDADE";
+  const estrutura = estadoSpda.estruturaAtual || {};
+  const tituloEstrutura = estrutura.nome || "SPDA";
+  const osTexto = estrutura.os_descricao || estrutura.descricao_os || estrutura.os || "";
+
+  const linhasHtml = linhas.length
+    ? linhas.map(linha => `
+      <tr>
+        <td class="pontos" style='mso-number-format:"\\@";'>${escapeHtml(`\t${linha.pontos}`)}</td>
+        <td class="valor">${escapeHtml(linha.valor || "")}</td>
+        <td class="center status" style="text-align:center;${getExcelStatusStyle(linha.avaliacao)}">${escapeHtml(linha.avaliacao || "Aguardando")}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="3" class="empty">Nenhuma medição cadastrada.</td></tr>`;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; color: #111; }
+          table { border-collapse: collapse; width: 620px; }
+          th, td { border: 0.5pt solid #555; padding: 6px 8px; font-size: 12px; }
+          th { background: #4a4a4a; color: #fff; font-weight: bold; text-align: center; }
+          .titulo { font-size: 15px; font-weight: bold; text-align: center; background: #fff; color: #000; }
+          .subtitulo { font-size: 11px; background: #f3f3f3; color: #333; }
+          .center { text-align: center; }
+          .pontos { width: 80px; text-align: center; mso-number-format:"\\@"; }
+          .valor { width: 260px; text-align: center; mso-number-format:"\\@"; }
+          .status { width: 150px; text-align: center; font-weight: bold; }
+          .empty { text-align: center; color: #777; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr><td colspan="3" class="titulo">${escapeHtml(nomeTabela)}</td></tr>
+          <tr><td colspan="3" class="subtitulo">${escapeHtml(tituloEstrutura)}${osTexto ? ` - ${escapeHtml(osTexto)}` : ""}</td></tr>
+          <tr>
+            <th style="width:80px;">Pontos</th>
+            <th style="width:260px;">${escapeHtml(tituloValor)} (${escapeHtml(unidade)})</th>
+            <th style="width:150px;">Avaliação</th>
+          </tr>
+          ${linhasHtml}
+        </table>
+      </body>
+    </html>
+  `;
+}
+
+function normalizarNomeArquivoSpda(valor) {
+  return String(valor || "spda")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9_-]+/gi, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "")
+    .toLowerCase();
+}
+
+function exportarExcelMedicoesSpda(tipo) {
+  const tipoValido = tipo === "aterramento" ? "aterramento" : "continuidade";
+  const html = montarHtmlExcelMedicoesSpda(tipoValido);
+  const blob = new Blob(["\ufeff", html], { type: SPDA_EXCEL_MIME });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const estrutura = normalizarNomeArquivoSpda(estadoSpda.estruturaAtual?.nome || "spda");
+
+  link.href = url;
+  link.download = `spda_${tipoValido}_${estrutura}.xls`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function renderAnotacoesMarcacoesSpda() {
@@ -3237,6 +3337,11 @@ function bindSpda() {
   byId("spdaTabelaConfigToggle")?.addEventListener("click", () => {
     estadoSpda.tabelaConfigAberta = !estadoSpda.tabelaConfigAberta;
     renderTabelaPreenchimentoSpda();
+  });
+  document.querySelectorAll("[data-spda-export-excel]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      exportarExcelMedicoesSpda(btn.dataset.spdaExportExcel);
+    });
   });
   byId("spdaLimiteContinuidade")?.addEventListener("change", event => {
     const valor = Number(event.target.value);

@@ -90,21 +90,28 @@ Total: ${total}
       </div>
     </td>
   `;
+  const ehMaterialLivre = Number(item.material_livre || 0) === 1 || (!item.id_variacao && item.material_livre_descricao);
   const imgSrc = item.imagem 
         ? `${item.imagem}?v=${item.versao_foto || ""}` 
         : "/imagens/imagemmaterial.webp";
+  const imagemMaterial = ehMaterialLivre
+    ? `<span class="tb_imgMaterial material-livre-icone" title="Material específico sem cadastro">
+        <i class="fa-solid fa-file-circle-question"></i>
+      </span>`
+    : `<img class="tb_imgMaterial" src="${escapeHtml(imgSrc)}"></img>`;
+
   return `
-    <tr data-id="${item.id}">
+    <tr data-id="${item.id}" class="${ehMaterialLivre ? "material-livre-row" : ""}">
       <td class="col-id">${item.id}</td>
       <td>${escapeHtml(item.categoria || "-")}</td>
       <td class="col-material">
-          <img class="tb_imgMaterial"
-                  src="${escapeHtml(imgSrc)}">
-          </img>
+          ${imagemMaterial}
           <div>
-            <div> ${highlightTextoSeguro(item.nome, termoBusca)}</div>
+            <div> ${highlightTextoSeguro(item.nome || item.material_livre_descricao || "Material especifico", termoBusca)}</div>
             ${item.atributos
               ? `<div style="font-size: 11px; color: #aaa;">${escapeHtml(item.atributos)}</div>`
+              : ehMaterialLivre
+                ? `<div class="material-livre-label">Item específico da OS</div>`
               : ""
             }
         </div>

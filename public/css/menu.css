@@ -920,11 +920,6 @@ ul {
 
 
 
-:root[data-theme='light'] .menu_Perfil {
-  border-color: rgba(15, 23, 42, 0.10);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.12);
-}
 
 :root[data-theme='light'] .menu_Perfil.aberto {
   background: linear-gradient(145deg, #ffffff, #f3f4f6);

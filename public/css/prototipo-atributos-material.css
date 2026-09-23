@@ -1743,3 +1743,136 @@ svg.leader-line,
     height: 620px;
   }
 }
+
+:root[data-theme='light'] .proto-atributos {
+  color: #202020;
+  background:
+    radial-gradient(circle at top left, rgba(239, 218, 56, 0.18), transparent 34%),
+    linear-gradient(135deg, #f2f2ee, #deded9 72%);
+}
+
+:root[data-theme='light'] .proto-atributos-head,
+:root[data-theme='light'] .proto-stage-wrap,
+:root[data-theme='light'] .proto-panel,
+:root[data-theme='light'] .proto-material-modal-card {
+  border-color: rgba(25, 25, 25, 0.12);
+  background: linear-gradient(145deg, rgba(250, 250, 248, 0.98), rgba(226, 226, 222, 0.98));
+  box-shadow: 0 18px 38px rgba(20, 20, 20, 0.12);
+  color: #202020;
+}
+
+:root[data-theme='light'] .proto-atributos-head p,
+:root[data-theme='light'] .proto-stage-toolbar span,
+:root[data-theme='light'] .proto-panel-empty,
+:root[data-theme='light'] .proto-opcoes p,
+:root[data-theme='light'] .proto-material-preview-head span,
+:root[data-theme='light'] .proto-material-preview p,
+:root[data-theme='light'] .proto-material-empty,
+:root[data-theme='light'] .proto-simulator-options button small,
+:root[data-theme='light'] .proto-simulator-empty,
+:root[data-theme='light'] .proto-node-label,
+:root[data-theme='light'] .proto-node small,
+:root[data-theme='light'] .proto-image-info small,
+:root[data-theme='light'] .proto-block-rule small,
+:root[data-theme='light'] .proto-specific-rule small,
+:root[data-theme='light'] .proto-unique-rule small,
+:root[data-theme='light'] .proto-attr-drawer-head span {
+  color: rgba(32, 32, 32, 0.58);
+}
+
+:root[data-theme='light'] .proto-stage-toolbar,
+:root[data-theme='light'] .proto-panel-head,
+:root[data-theme='light'] .proto-material-modal-head {
+  border-color: rgba(20, 20, 20, 0.10);
+  background: rgba(244, 244, 240, 0.92);
+}
+
+:root[data-theme='light'] .proto-stage {
+  background-color: #f7f7f4;
+  background-image:
+    linear-gradient(rgba(25, 25, 25, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(25, 25, 25, 0.055) 1px, transparent 1px);
+}
+
+:root[data-theme='light'] .proto-node {
+  border-color: rgba(32, 32, 32, 0.20);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(224, 224, 220, 0.96));
+  box-shadow: 0 14px 24px rgba(20, 20, 20, 0.12);
+  color: #202020;
+}
+
+:root[data-theme='light'] .proto-node-main {
+  border-color: rgba(238, 119, 34, 0.46);
+  background: linear-gradient(145deg, #fff, #e8e8e4);
+}
+
+:root[data-theme='light'] .proto-image-card,
+:root[data-theme='light'] .proto-simulator,
+:root[data-theme='light'] .proto-attr-drawer {
+  border-color: rgba(238, 119, 34, 0.24);
+  background: rgba(250, 250, 248, 0.98);
+  box-shadow: 0 20px 42px rgba(20, 20, 20, 0.14);
+  color: #202020;
+}
+
+:root[data-theme='light'] .proto-image-preview,
+:root[data-theme='light'] .proto-material-preview,
+:root[data-theme='light'] .proto-sim-images {
+  border-color: rgba(20, 20, 20, 0.12);
+  background: rgba(255, 255, 255, 0.74);
+  color: rgba(32, 32, 32, 0.58);
+}
+
+:root[data-theme='light'] .proto-image-info strong,
+:root[data-theme='light'] .proto-simulator-options button span,
+:root[data-theme='light'] .proto-material-attrs span,
+:root[data-theme='light'] .proto-sim-chip,
+:root[data-theme='light'] .proto-option-tools button,
+:root[data-theme='light'] .proto-attr-list button,
+:root[data-theme='light'] .proto-material-suggestions button {
+  color: rgba(32, 32, 32, 0.86);
+}
+
+:root[data-theme='light'] .proto-material-field input,
+:root[data-theme='light'] #protoBuscaAtributo,
+:root[data-theme='light'] .proto-option-add input,
+:root[data-theme='light'] .proto-simulator-search input,
+:root[data-theme='light'] .proto-unique-rule select {
+  border-color: rgba(20, 20, 20, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  color: #202020;
+}
+
+:root[data-theme='light'] .proto-simulator-head button,
+:root[data-theme='light'] .proto-option-tools button,
+:root[data-theme='light'] .proto-attr-list button,
+:root[data-theme='light'] .proto-material-suggestions button,
+:root[data-theme='light'] .proto-simulator-options button,
+:root[data-theme='light'] .proto-specific-options label,
+:root[data-theme='light'] .proto-unique-edit-item {
+  border-color: rgba(20, 20, 20, 0.12);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+:root[data-theme='light'] .proto-simulator-options button:hover,
+:root[data-theme='light'] .proto-attr-list button:hover,
+:root[data-theme='light'] .proto-material-suggestions button:hover {
+  border-color: rgba(238, 119, 34, 0.38);
+  background: rgba(239, 218, 56, 0.22);
+  color: #8a4b00;
+}
+
+:root[data-theme='light'] .proto-block-rule {
+  background: #fff0f0;
+  box-shadow: 0 14px 30px rgba(140, 35, 35, 0.14);
+}
+
+:root[data-theme='light'] .proto-specific-rule {
+  background: #eef8ff;
+  box-shadow: 0 14px 30px rgba(35, 95, 140, 0.12);
+}
+
+:root[data-theme='light'] .proto-unique-rule {
+  background: #f7efff;
+  box-shadow: 0 14px 30px rgba(110, 55, 160, 0.13);
+}

@@ -94,6 +94,10 @@ async function listarListasConferencia() {
   return await MaterialOSModel.getListasConferencia();
 }
 
+async function listarListasSetorUsuario(usuario) {
+  return await MaterialOSModel.getListasPorSetorUsuario(usuario?.id || null);
+}
+
 async function criarListaOS(data, usuario) {
   return await MaterialOSModel.createLista({
     ...data,
@@ -347,6 +351,7 @@ module.exports = {
   listarListasOS,
   listarListasEstoque,
   listarListasConferencia,
+  listarListasSetorUsuario,
   getCustoTotalOS,
 
   criarMaterial,

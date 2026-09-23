@@ -5,7 +5,9 @@ const crypto = require('crypto');
 const emailService = require('../services/email.service');
 
 
-async function login(username, password) {
+const ID_ADMIN_GLOBAL = 999;
+
+async function login(username, password, options = {}) {
   const usuario = await AuthModel.buscarUsuarioPorUsername(username);
 
   if (!usuario) {
@@ -30,7 +32,20 @@ async function login(username, password) {
     return { sucesso: false, mensagem: 'Usuário ou senha incorretos' };
   }
 
-  const saas = await SaasService.buscarContextoUsuario(usuario.id);
+  const empresaSelecionadaId = Number(options.empresaSaasId || 0);
+  const isAdminGlobal = Number(usuario.id) === ID_ADMIN_GLOBAL;
+  const saas = isAdminGlobal && empresaSelecionadaId
+    ? await SaasService.buscarContextoEmpresaAdmin(empresaSelecionadaId)
+    : await SaasService.buscarContextoUsuario(usuario.id);
+
+  if (isAdminGlobal && !empresaSelecionadaId) {
+    return {
+      sucesso: false,
+      requerEmpresa: true,
+      mensagem: 'Selecione a empresa que deseja acessar.'
+    };
+  }
+
   if (!saas.modo_saas || !saas.empresa) {
     return {
       sucesso: false,

@@ -16,6 +16,7 @@ router.delete('/:id/cidades/:cidadeId', verificarAutenticacao, empresasControlle
 
 // Rotas CRUD (protegidas por autenticação)
 router.get('/', verificarAutenticacao, empresasController.getEmpresas);
+router.get('/:id/colaboradores', verificarAutenticacao, empresasController.getColaboradoresIntegrados);
 router.get('/:id', verificarAutenticacao, empresasController.getEmpresa);
 
 router.put('/editar/:id', verificarAutenticacao, empresasController.updateEmpresa);

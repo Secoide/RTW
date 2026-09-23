@@ -113,6 +113,16 @@ const MAPA_CONQUISTAS = {
         icone: '🔐',
         nome: 'Guardião da Qualidade',
         descricao: 'Reconhece profissionais que contribuem continuamente para a excelência dos serviços, mantendo elevados padrões de qualidade e confiabilidade.'
+    },
+    COMPRAS_ESTRATEGICAS: {
+        icone: '🪙',
+        nome: 'Compras Estratégicas',
+        descricao: 'Reconhece profissionais do setor de Compras que obtêm boas cotações e decisões de aquisição para a empresa.'
+    },
+    DOCUMENTADOR_TECNICO: {
+        icone: '🖊️',
+        nome: 'Documentador Técnico',
+        descricao: 'Reconhece profissionais que registram fotos, relatórios, medições e evidências completas nas plataformas solicitadas pela empresa.'
     }
 };
 
@@ -297,10 +307,10 @@ export function initaddConquistas() {
 
     $(document).off(
         'contextmenu.conquistas',
-        '.cardConquista'
+        '.cardConquista:not(.cardConquistaAutomatica)'
     ).on(
         'contextmenu.conquistas',
-        '.cardConquista',
+        '.cardConquista:not(.cardConquistaAutomatica)',
         function (event) {
             event.preventDefault();
 
@@ -416,6 +426,76 @@ export async function carregarConquistasColaborador(
 
     });
 
+    await carregarMedalhasAutomaticasColaborador(idColaborador);
+
 }
 
+export async function carregarMedalhasAutomaticasColaborador(idColaborador) {
+    const $lista = $('#listaMedalhasAutomaticas');
 
+    if (!$lista.length)
+        return;
+
+    $lista.html('<p class="estadoMedalhasAutomaticas">Carregando medalhas...</p>');
+
+    try {
+        const colaboradores = await $.get('/api/colaboradores/hall-experiencia');
+        const colaborador = (Array.isArray(colaboradores) ? colaboradores : [])
+            .find(item => String(item.id) === String(idColaborador));
+        const medalhas = Array.isArray(colaborador?.medalhas_automaticas)
+            ? colaborador.medalhas_automaticas
+            : [];
+
+        if (!medalhas.length) {
+            $lista.html('<p class="estadoMedalhasAutomaticas">Nenhuma medalha automática alcançada.</p>');
+            return;
+        }
+
+        $lista.html(medalhas.map(medalha => {
+            const titulo = escapeAttr(medalha?.titulo || 'Reconhecimento automático');
+            const icone = escapeAttr(medalha?.icone || '🏅');
+            const descricao = descreverMedalhaAutomatica(medalha?.titulo);
+            const tooltip = escapeAttr(`${medalha?.titulo || 'Reconhecimento automático'}\n${descricao}`);
+
+            return `
+                <article class="cardConquista cardConquistaAutomatica" title="${tooltip}">
+                    <div class="icone">${icone}</div>
+                    <div class="titulo">${titulo}</div>
+                    <div class="data">Reconhecimento automático</div>
+                </article>
+            `;
+        }).join(''));
+    } catch (error) {
+        console.error('Erro ao carregar medalhas automáticas:', error);
+        $lista.html('<p class="estadoMedalhasAutomaticas">Não foi possível carregar as medalhas automáticas.</p>');
+    }
+}
+
+function descreverMedalhaAutomatica(titulo) {
+    const tituloCompleto = String(titulo || '').trim();
+    const tituloBase = tituloCompleto.replace(/\s*\([^)]*\)\s*$/, '').trim();
+    const descricoes = {
+        'Guardião da Segurança': 'Conquistada quando o colaborador possui CIPA e Brigadista.',
+        'Rota Ampliada': 'Conquistada ao atuar em dois ou mais estados.',
+        'Desbravador': 'Conquistada ao atuar em 50 ou mais cidades diferentes.',
+        'Explorador': 'Conquistada ao atuar em 20 ou mais cidades diferentes.',
+        'Viajante': 'Conquistada ao atuar em 10 ou mais cidades diferentes.',
+        'Mestre Multifunção': 'Conquistada ao atender 100 ou mais clientes diferentes.',
+        'Especialista Multifunção': 'Conquistada ao atender 50 ou mais clientes diferentes.',
+        'Multifunção': 'Conquistada ao atender 10 ou mais clientes diferentes.',
+        'Mestre das OS': 'Conquistada ao participar de 1.000 ou mais Ordens de Serviço.',
+        'Veterano de Campo': 'Conquistada ao participar de 500 ou mais Ordens de Serviço.',
+        'Centurião': 'Conquistada ao participar de 100 ou mais Ordens de Serviço.',
+        'Operador': 'Conquistada ao participar de 50 ou mais Ordens de Serviço.',
+        'Iniciante de Campo': 'Conquistada ao participar de 10 ou mais Ordens de Serviço.',
+        'Mestre RTW': 'Conquistada após completar 5 anos de empresa.',
+        'Pilar da RTW': 'Conquistada após completar 10 anos de empresa.',
+        'Pilar RTW': 'Conquistada após completar 10 anos de empresa.',
+        'Fundação RTW': 'Conquistada após completar 20 anos de empresa.',
+        'Lenda RTW': 'Conquistada após completar 15 anos de empresa.',
+        'Patrimônio RTW': 'Conquistada após completar 25 anos de empresa.'
+    };
+
+    return descricoes[tituloBase]
+        || 'Conquista gerada automaticamente a partir dos indicadores do colaborador.';
+}

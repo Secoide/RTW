@@ -91,8 +91,8 @@
       width: 0%;
       height: 100%;
       border-radius: inherit;
-      background: linear-gradient(90deg, #ee7722, #efda38);
-      box-shadow: 0 0 18px rgba(238, 119, 34, 0.34);
+      background: linear-gradient(90deg, #2574c5, #3498f1);
+      box-shadow: 0 0 18px rgba(52, 152, 241, 0.34);
       transition: width 260ms ease;
     }
 
@@ -107,8 +107,17 @@
 
     .loadingProgress {
       margin-top: 10px;
-      color: rgba(239, 218, 56, 0.9);
+      color: rgba(52, 152, 241, 0.9);
       font-size: 12px;
+    }
+
+    html[data-christmas-icons="active"] .progressBar {
+      background: linear-gradient(90deg, #e9eef2, #ffffff);
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.34);
+    }
+
+    html[data-christmas-icons="active"] .loadingProgress {
+      color: rgba(255, 255, 255, 0.92);
     }
 
     @keyframes logoEntrada {
@@ -260,7 +269,7 @@
   <div id="rtwReveal"></div>
   <div id="particles"></div>
   <div id="loadingOverlay">
-    <img src="logo_teste.png" alt="Logo ConnectPear" class="logoLoading">
+    <img src="new_logo.png" alt="Logo ConnectPear" class="logoLoading">
     <div class="loadingText">Preparando seu ambiente</div>
     <div class="loadingMessage" id="loadingMessage">Conferindo a sessao e alinhando os paineis...</div>
 
@@ -278,6 +287,10 @@
 
   <script type="text/javascript" src="scripts/websocket/inatividade.js"></script>
   <script type="module" src="/client/js/main.js"></script>
+  <script type="module">
+    import { initChristmasIcons } from "/client/js/services/ui/special-icons.js";
+    initChristmasIcons();
+  </script>
 
   <script type="module">
     const mensagensRaras = [

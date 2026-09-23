@@ -6,6 +6,114 @@ const ESTAGIOS = [
   { chave: "finalizado", titulo: "Finalizado", icone: "fa-circle-check" }
 ];
 
+export function renderAtalhosSetorMaterial(resumo) {
+  const $wrap = $("#materialAtalhosSetor");
+  if (!$wrap.length) return;
+
+  const listas = Array.isArray(resumo?.listas) ? resumo.listas : [];
+  const estagios = Array.isArray(resumo?.estagios) ? resumo.estagios : [];
+
+  if (!listas.length || !estagios.length) {
+    $wrap.prop("hidden", true).empty();
+    return;
+  }
+
+  const titulo = estagios.length > 1
+    ? estagios.map(getTituloEstagio).join(" / ")
+    : getTituloEstagio(estagios[0]);
+
+  const itens = listas.map(item => {
+    const descricao = item.os_descricao || item.cliente_nome || "Lista de materiais";
+    const statusResumo = montarResumoEstagiosOS(item);
+    const progresso = calcularProgressoAtalhoSetor(item);
+    const barraProgresso = progresso
+      ? `<i class="material-atalho-progresso ${progresso.tipo}" style="width:${progresso.percentual}%; height:100%;"></i>`
+      : "";
+
+    return `
+      <button type="button" class="material-atalho-os ${progresso ? `tem-progresso is-${progresso.tipo}` : ""}" data-os="${escapeHtml(item.id_os)}" title="${escapeHtml(descricao)}">
+        ${barraProgresso}
+        <span>OS ${escapeHtml(item.id_os)}</span>
+        <small>${escapeHtml(statusResumo || "Pendente")}</small>
+      </button>
+    `;
+  }).join("");
+
+  $wrap
+    .prop("hidden", false)
+    .html(`
+      <div class="material-atalhos-head">
+        <i class="fa-solid fa-inbox"></i>
+        <span>Meu setor</span>
+        <small>${escapeHtml(titulo)}</small>
+      </div>
+      <div class="material-atalhos-lista">
+        ${itens}
+      </div>
+    `);
+}
+
+function calcularProgressoAtalhoSetor(item) {
+  const registros = String(item.progresso_listas || "")
+    .split(",")
+    .map(registro => {
+      const [status, separacao, compra] = registro.split(":");
+      return {
+        status,
+        separacao: Number(separacao || 0),
+        compra: Number(compra || 0)
+      };
+    })
+    .filter(registro => registro.status);
+
+  const compras = registros.filter(registro => registro.status === "compras");
+  if (compras.length) {
+    return {
+      tipo: "compras",
+      percentual: mediaPercentual(compras.map(registro => registro.compra))
+    };
+  }
+
+  const estoque = registros.filter(registro => registro.status === "estoque");
+  if (estoque.length) {
+    return {
+      tipo: "estoque",
+      percentual: mediaPercentual(estoque.map(registro => registro.separacao))
+    };
+  }
+
+  return null;
+}
+
+function mediaPercentual(valores) {
+  if (!valores.length) return 0;
+
+  const media = valores.reduce((total, valor) => total + valor, 0) / valores.length;
+  return Math.max(0, Math.min(100, Math.round(media)));
+}
+
+function montarResumoEstagiosOS(item) {
+  const origem = String(item.estagios_listas || item.estagios_os || item.status || "")
+    .split(",")
+    .map(status => status.trim())
+    .filter(Boolean);
+
+  if (!origem.length) return "";
+
+  const contagem = origem.reduce((acc, status) => {
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {});
+
+  return ESTAGIOS
+    .filter(estagio => contagem[estagio.chave])
+    .map(estagio => {
+      const total = contagem[estagio.chave];
+      return `${estagio.titulo}${total > 1 ? ` (x${total})` : ""}`;
+    })
+    .join(" / ");
+}
+
 export function renderKanbanMateriais(listas, idOS) {
   const $kanban = $("#materialKanbanView");
 

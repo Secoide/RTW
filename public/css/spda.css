@@ -528,6 +528,13 @@
   gap: 10px;
 }
 
+.spda-fill-head-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
 .spda-fill-config-toggle {
   display: grid;
   flex: 0 0 32px;
@@ -539,6 +546,11 @@
   color: #333;
   background: #f4f4f3;
   cursor: pointer;
+}
+
+.spda-fill-export-toggle {
+  color: #087144;
+  background: rgba(43, 205, 106, 0.12);
 }
 
 .spda-fill-config-toggle:hover {

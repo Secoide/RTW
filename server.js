@@ -1,4 +1,4 @@
-//nodemon server.js
+// nodemon server.js
 
 
 // server.js
@@ -21,10 +21,7 @@ function heartbeat() {
 }
 
 wss.on("connection", function (ws) {
-
   ws.isAlive = true;
-  
-  
   ws.on("pong", heartbeat);
 
   // 🔁 Protocolo JSON ping/pong

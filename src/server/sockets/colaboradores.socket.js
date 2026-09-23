@@ -25,6 +25,8 @@ function initColaboradoresSocket(wss) {
         return;
       }
 
+      if (!ACAO_COLABORADORES.has(data.acao)) return;
+
       switch (data.acao) {
         // ======================================================
         // 👷 COLABORADORES
@@ -79,6 +81,16 @@ function initColaboradoresSocket(wss) {
     });
   });
 }
+
+const ACAO_COLABORADORES = new Set([
+  "alocar_colaborador",
+  "remover_colaborador",
+  "confirmar_alocacao",
+  "excluir_colaboradorEmOS",
+  "atualizar_prioridade_os",
+  "transferir_colaboradores",
+  "mudar_statusProgDia"
+]);
 
 // ======================================================
 // 🧩 HANDLERS

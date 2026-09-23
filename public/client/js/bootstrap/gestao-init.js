@@ -3,12 +3,13 @@ import {
     preencherCbxCliente,
     preencherCbxResponsavel
 } from "../events/forms/populate-combobox.js";
+import { get_carregarPerfilUsuario } from "../events/click/handle-abrir-info-colab.js";
 
 let lastCols = [];
 
 export function initGestao() {
     // ========================== CONFIG ==========================
-    const ENTIDADES = ["EPI", "Exame", "Curso", "Empresa", "Supervisor", "Cidade", "OS", "Cargos", "Setor", "Fornecedor"];
+    const ENTIDADES = ["EPI", "Exame", "Curso", "Empresa", "Supervisor", "Cidade", "OS", "Cargos", "Setor", "Feriados", "Fornecedor"];
     const BASE_URL = "/api"; // 🔧 troque pelo endpoint real se necessário
 
     // ========================== ESTADO ==========================
@@ -23,6 +24,7 @@ export function initGestao() {
     const $btnNovo = $("#btnNovo");
     const $searchInput = $("#search");
     const $btnToggleChart = $("#btnToggleChart");
+    const $btnSugestoesFeriados = $("#btnSugestoesFeriados");
 
     // Ícones SVG preto e branco
     const iconeEditar = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="white" stroke-width="2"><path d="M2 12.5L3 8l5-5 3 3-5 5zM14 14H0"/></svg>`;
@@ -30,6 +32,7 @@ export function initGestao() {
     const iconeSalvar = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="white" stroke-width="2"><path d="M3 2h8l2 2v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM4 2v4h6V2"/></svg>`;
     const iconeCancelar = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="white" stroke-width="2"><path d="M2 2l10 10M12 2L2 12"/></svg>`;
     const iconeAdd = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" stroke="white" stroke-width="2"><path d="M7 1v12M1 7h12"/></svg>`;
+    const iconeIntegrantes = `<i class="fa-solid fa-users" aria-hidden="true"></i>`;
 
 
 
@@ -54,6 +57,7 @@ export function initGestao() {
         $searchInput.val("");
 
         $("#gestao").attr("data-entity", entidadeAtual);
+        $btnSugestoesFeriados.toggle(entidadeAtual === "Feriados");
 
         carregarTabela().then(() => {
             if (entidadeAtual === "Empresa") {
@@ -155,6 +159,7 @@ export function initGestao() {
                     id: e.idexame ?? null,
                     nome: e.nome ?? e.razao_social ?? "",
                     descricao: e.descricao ?? null,
+                    icone: e.icone ?? "",
                     vencimento: !!Number(e.vencimento ?? 1),
                 }));
             } else if (entidadeAtual === "Curso") {
@@ -309,6 +314,18 @@ export function initGestao() {
                     cargos: normList(e.cargos, e.cargo),
                     nivel: e.nivel_acesso
                 }));
+            } else if (entidadeAtual === "Feriados") {
+                const data = await $.ajax({
+                    url: `${BASE_URL}/feriados`,
+                    method: "GET",
+                    xhrFields: { withCredentials: true }
+                });
+
+                dados = (Array.isArray(data) ? data : []).map(e => ({
+                    id: e.id ?? e.id_feriado ?? null,
+                    nome: e.nome ?? "",
+                    data: e.data ?? e.data_feriado ?? ""
+                }));
             } else if (entidadeAtual === "Fornecedor") {
                 const data = await $.ajax({
                     url: `${BASE_URL}/fornecedor`,
@@ -329,6 +346,17 @@ export function initGestao() {
             }
 
             if (!Array.isArray(dados) || !dados.length) {
+                if (entidadeAtual === "Feriados") {
+                    lastCols = ["id", "nome", "data"];
+                    lastCols.concat("Ações").forEach(col => {
+                        const $th = $("<th>").text(col);
+                        if (col === "Ações") $th.addClass("col-acoes");
+                        $thead.append($th);
+                    });
+                    const $right = $(".toolbar .right");
+                    $right.find("#totalCount").remove();
+                    $right.prepend('<span id="totalCount">Total: 0</span>');
+                }
                 $empty.text("Nenhum dado encontrado.").show();
                 return;
             }
@@ -338,7 +366,7 @@ export function initGestao() {
             const cols = lastCols.concat("Ações");
             const $fragHead = $(document.createDocumentFragment());
             cols.forEach(col => {
-                const $th = $("<th>").text(col);
+                const $th = $("<th>").text(col === "icone" ? "Ícone" : col);
                 if (col === "Ações") $th.addClass("col-acoes");
                 $fragHead.append($th);
             });
@@ -488,6 +516,124 @@ export function initGestao() {
         return String(v);
     }
 
+    const iconesExames = [
+        ["fa-solid fa-ear-listen", "Audiometria"],
+        ["fa-solid fa-stethoscope", "Avaliação clínica"],
+        ["fa-solid fa-heart-pulse", "Cardiologia"],
+        ["fa-solid fa-lungs", "Pulmões"],
+        ["fa-solid fa-brain", "Neurologia"],
+        ["fa-solid fa-eye", "Oftalmologia"],
+        ["fa-solid fa-tooth", "Odontologia"],
+        ["fa-solid fa-bone", "Ortopedia"],
+        ["fa-solid fa-vial", "Análise laboratorial"],
+        ["fa-solid fa-vials", "Coleta laboratorial"],
+        ["fa-solid fa-microscope", "Microscopia"],
+        ["fa-solid fa-x-ray", "Raio X"],
+        ["fa-solid fa-syringe", "Vacinação"],
+        ["fa-solid fa-pills", "Medicação"],
+        ["fa-solid fa-thermometer", "Temperatura"],
+        ["fa-solid fa-mask-face", "Proteção respiratória"],
+        ["fa-solid fa-hospital", "Hospital"],
+        ["fa-solid fa-user-doctor", "Médico"],
+        ["fa-solid fa-file-medical", "Laudo médico"],
+        ["fa-solid fa-notes-medical", "Prontuário"],
+        ["fa-solid fa-circle-check", "Aprovado"]
+    ];
+
+    function normalizarClasseIcone(valor) {
+        const tokens = String(valor || "")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+        const familia = tokens.find(token => /^(fa-(solid|regular|brands|light|thin|duotone)|fas|far|fab|fal|fat|fad)$/i.test(token));
+        const nome = tokens.find(token => /^fa-[a-z0-9-]+$/i.test(token) && !/^fa-(solid|regular|brands|light|thin|duotone)$/i.test(token));
+        return nome ? `${familia || "fa-solid"} ${nome}` : "";
+    }
+
+    function renderIconeExame($td, valor) {
+        const classe = normalizarClasseIcone(valor);
+        $td.empty().attr("data-icone", classe).addClass("gestao-icone-cell");
+
+        if (!classe) {
+            $td.text("—");
+            return;
+        }
+
+        $("<i>")
+            .addClass(classe)
+            .attr({ title: classe, "aria-label": classe })
+            .appendTo($td);
+    }
+
+    function criarSeletorIcone(valor = "") {
+        const classeInicial = normalizarClasseIcone(valor);
+        const $wrap = $("<div>").addClass("gestao-icon-picker");
+        const $input = $("<input>").attr({
+            type: "hidden",
+            "data-field": "icone",
+            "data-editing": "true"
+        }).val(classeInicial);
+        const $button = $("<button>").attr({
+            type: "button",
+            title: "Escolher ícone",
+            "aria-label": "Escolher ícone"
+        }).addClass("gestao-icon-picker-toggle");
+        const $panel = $("<div>").addClass("gestao-icon-picker-panel").hide().appendTo(document.body);
+        const $preview = $("<i>").addClass(classeInicial || "fa-solid fa-stethoscope");
+        const $label = $("<span>").text(classeInicial ? "Ícone selecionado" : "Escolher ícone");
+
+        $button.append($preview, $label);
+
+        iconesExames.forEach(([classe, nome]) => {
+            const $option = $("<button>").attr({
+                type: "button",
+                title: `${nome} — ${classe}`,
+                "aria-label": nome
+            }).addClass("gestao-icon-option");
+            $("<i>").addClass(classe).appendTo($option);
+            $option.on("click", (event) => {
+                event.stopPropagation();
+                $input.val(classe);
+                $preview.attr("class", classe);
+                $label.text(nome);
+                $panel.hide();
+            });
+            $panel.append($option);
+        });
+
+        const $clear = $("<button>").attr({ type: "button", title: "Remover ícone" }).addClass("gestao-icon-clear").text("Sem ícone");
+        $clear.on("click", (event) => {
+            event.stopPropagation();
+            $input.val("");
+            $preview.attr("class", "fa-solid fa-stethoscope");
+            $label.text("Escolher ícone");
+            $panel.hide();
+        });
+        $panel.append($clear);
+
+        $button.on("click", (event) => {
+            event.stopPropagation();
+            $(".gestao-icon-picker-panel").not($panel).hide();
+            if ($panel.is(":visible")) {
+                $panel.hide();
+                return;
+            }
+
+            $panel.show();
+            const rect = $button[0].getBoundingClientRect();
+            const largura = $panel.outerWidth();
+            const altura = $panel.outerHeight();
+            const left = Math.min(rect.left, window.innerWidth - largura - 8);
+            const top = rect.bottom + 4 + altura <= window.innerHeight
+                ? rect.bottom + 4
+                : Math.max(8, rect.top - altura - 4);
+            $panel.css({ left: `${Math.max(8, left)}px`, top: `${top}px` });
+        });
+
+        $wrap.append($input, $button);
+        return $wrap;
+    }
+
 
     // ========================== DELEGAÇÃO TABELA ==========================
     $tbody.on("click", "button[data-action]", function (ev) {
@@ -499,6 +645,11 @@ export function initGestao() {
         // === EDITAR ===
         if (acao === "editar") {
             editar(id);
+            return;
+        }
+
+        if (acao === "integrantes" && entidadeAtual === "Empresa") {
+            abrirIntegrantesEmpresa(id);
             return;
         }
 
@@ -520,6 +671,145 @@ export function initGestao() {
             }
         }
     });
+
+    async function abrirIntegrantesEmpresa(idEmpresa) {
+        $(".gestao-integrantes-overlay").remove();
+
+        const empresa = dados.find(item => Number(item.id) === Number(idEmpresa));
+        const nomeEmpresa = empresa?.nome || "Empresa";
+        const $overlay = $("<div>").addClass("gestao-integrantes-overlay");
+        const $dialog = $("<section>")
+            .addClass("gestao-integrantes-dialog")
+            .attr({ role: "dialog", "aria-modal": "true", "aria-labelledby": "gestaoIntegrantesTitulo" });
+        const $header = $("<div>").addClass("gestao-integrantes-header");
+        const $titleWrap = $("<div>");
+        $("<strong>")
+            .attr("id", "gestaoIntegrantesTitulo")
+            .text(`Colaboradores integrados — ${nomeEmpresa}`)
+            .appendTo($titleWrap);
+        $("<span>").addClass("gestao-integrantes-count").text("Carregando...").appendTo($titleWrap);
+        const $close = $("<button>")
+            .attr({ type: "button", title: "Fechar", "aria-label": "Fechar" })
+            .addClass("gestao-integrantes-close")
+            .html("&times;");
+        $header.append($titleWrap, $close);
+
+        const $search = $("<input>")
+            .attr({ type: "search", placeholder: "Buscar por nome ou função...", "aria-label": "Buscar colaborador" })
+            .addClass("gestao-integrantes-search");
+        const $tableWrap = $("<div>").addClass("gestao-integrantes-table-wrap");
+        const $table = $("<table>");
+        const $thead = $("<thead>").append(
+            $("<tr>").append(
+                $("<th>").text("Nome completo"),
+                $("<th>").text("Função"),
+                $("<th>").text("Dias p/ vencer"),
+                $("<th>").addClass("gestao-integrantes-action-head").text("Perfil")
+            )
+        );
+        const $tbodyIntegrantes = $("<tbody>");
+        $table.append($thead, $tbodyIntegrantes);
+        $tableWrap.append($table);
+        $dialog.append($header, $search, $tableWrap);
+        $overlay.append($dialog).appendTo("body");
+
+        const fechar = () => {
+            $(document).off("keydown.gestaoIntegrantes");
+            $overlay.remove();
+        };
+
+        $close.on("click", fechar);
+        $overlay.on("click", event => {
+            if (event.target === $overlay[0]) fechar();
+        });
+        $(document).off("keydown.gestaoIntegrantes").on("keydown.gestaoIntegrantes", event => {
+            if (event.key === "Escape") fechar();
+        });
+
+        let colaboradores = [];
+
+        const renderColaboradores = () => {
+            const termo = String($search.val() || "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .trim();
+            const filtrados = colaboradores.filter(colaborador => {
+                const texto = `${colaborador.nome || ""} ${colaborador.funcao || ""}`
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase();
+                return !termo || texto.includes(termo);
+            });
+
+            $tbodyIntegrantes.empty();
+            $(".gestao-integrantes-count").text(
+                colaboradores.length === filtrados.length
+                    ? `${colaboradores.length} colaborador(es)`
+                    : `${filtrados.length} de ${colaboradores.length}`
+            );
+
+            if (!filtrados.length) {
+                $tbodyIntegrantes.append(
+                    $("<tr>").append(
+                        $("<td>").attr("colspan", 4).addClass("gestao-integrantes-empty").text(
+                            colaboradores.length ? "Nenhum colaborador encontrado." : "Nenhum colaborador integrado nesta empresa."
+                        )
+                    )
+                );
+                return;
+            }
+
+            filtrados.forEach(colaborador => {
+                const $perfil = $("<button>")
+                    .attr({
+                        type: "button",
+                        title: "Abrir perfil",
+                        "aria-label": `Abrir perfil de ${colaborador.nome || "colaborador"}`,
+                        "data-action": "abrir-perfil-integrante",
+                        "data-colaborador-id": colaborador.id
+                    })
+                    .addClass("gestao-integrante-profile")
+                    .html("<i class=\"fa-solid fa-user\" aria-hidden=\"true\"></i>");
+
+                $tbodyIntegrantes.append(
+                    $("<tr>").append(
+                        $("<td>").text(colaborador.nome || "Nome não informado"),
+                        $("<td>").text(colaborador.funcao || "Função não informada"),
+                        $("<td>").text(formatarDiasIntegracao(colaborador.dias_integracao)),
+                        $("<td>").addClass("gestao-integrantes-action").append($perfil)
+                    )
+                );
+            });
+        };
+
+        $search.on("input", renderColaboradores);
+        $tbodyIntegrantes.on("click", "[data-action='abrir-perfil-integrante']", async function () {
+            const idColaborador = Number($(this).data("colaborador-id"));
+            if (!idColaborador) return;
+            fechar();
+            await get_carregarPerfilUsuario(idColaborador);
+        });
+
+        try {
+            const resposta = await fetch(`${BASE_URL}/empresa/${encodeURIComponent(idEmpresa)}/colaboradores`, {
+                credentials: "include"
+            });
+            if (!resposta.ok) throw new Error("Falha ao buscar colaboradores integrados.");
+            const lista = await resposta.json();
+            colaboradores = Array.isArray(lista) ? lista : [];
+            renderColaboradores();
+            $search.trigger("focus");
+        } catch (error) {
+            console.error("Erro ao carregar colaboradores integrados:", error);
+            $(".gestao-integrantes-count").text("Não foi possível carregar");
+            $tbodyIntegrantes.empty().append(
+                $("<tr>").append(
+                    $("<td>").attr("colspan", 4).addClass("gestao-integrantes-empty").text("Erro ao carregar colaboradores integrados.")
+                )
+            );
+        }
+    }
 
 
     // ======== Adicionar item (inline select) ========
@@ -608,6 +898,11 @@ export function initGestao() {
             if (!colName) return;
 
             const $td = $(td);
+
+            if (colName === "icone") {
+                dadosOriginais[colName] = $td.attr("data-icone") || "";
+                return;
+            }
 
             // Se a célula contém um checkbox, captura o estado checked
             const $chk = $td.find("input[type='checkbox']");
@@ -741,7 +1036,10 @@ export function initGestao() {
             const $td = $linha.find("td").eq(i);
             const valor = dadosOriginais[col];
             let $input;
-            if (entidadeAtual === "EPI" && col === "obrigatorio") {
+            if (entidadeAtual === "Exame" && col === "icone") {
+                $td.empty().append(criarSeletorIcone(valor));
+                return;
+            } else if (entidadeAtual === "EPI" && col === "obrigatorio") {
                 $input = $("<select>").attr({ "data-field": col, "data-editing": "true" })
                     .css({
                         width: "100%",
@@ -755,6 +1053,23 @@ export function initGestao() {
                     .append(`<option value="1">Sim</option>`)
                     .append(`<option value="0">Não</option>`);
                 $input.val(valor === "SIM" ? "1" : "0");
+            } else if (entidadeAtual === "Feriados" && col === "data") {
+                $input = $("<input>")
+                    .attr({
+                        type: "date",
+                        "data-field": col,
+                        "data-editing": "true"
+                    })
+                    .val(String(valor || "").slice(0, 10))
+                    .css({
+                        width: "100%",
+                        padding: "4px 6px",
+                        background: "var(--input-bg)",
+                        color: "var(--texto-principal)",
+                        border: "1px solid #555",
+                        borderRadius: "4px",
+                        fontSize: "12px"
+                    });
             } else if (entidadeAtual === "OS" && col === "status") {
                 $input = $("<select>")
                     .attr({ "data-field": col, "data-editing": "true" })
@@ -963,6 +1278,10 @@ export function initGestao() {
             lastCols.forEach((col, i) => {
                 const $td = $linha.find("td").eq(i);
                 if (!col) return;
+                if (entidadeAtual === "Exame" && col === "icone") {
+                    renderIconeExame($td, dadosOriginais[col]);
+                    return;
+                }
                 // Se era checkbox, restaura checked/unchecked
                 if (["disponivel", "integracao", "liberacao", "seguranca", "vencimento"].includes(col)) {
                     // encontra checkbox nessa célula (se existir)
@@ -1116,6 +1435,9 @@ export function initGestao() {
             }
 
             // 🔒 Empresa: bloquear cidades e supervisores
+            else if (entidadeAtual === "Exame" && col === "icone") {
+                $td.append(criarSeletorIcone());
+            }
             else if (entidadeAtual === "Empresa" && (col === "cidades" || col === "supervisores")) {
                 $td.text("—").attr("title", "Disponível após salvar a Empresa");
             }
@@ -1127,6 +1449,21 @@ export function initGestao() {
             // 🔒 Cargo: bloquear disponivel
             else if (entidadeAtual === "Cargo" && ["disponivel"].includes(col)) {
                 $td.text("—").attr("title", "Disponível após salvar o Cargo");
+            } else if (entidadeAtual === "Feriados" && col === "data") {
+                const $input = $("<input>").attr({
+                    type: "date",
+                    "data-field": col,
+                    "data-editing": "true"
+                }).css({
+                    width: "100%",
+                    padding: "4px 6px",
+                    background: "var(--input-bg)",
+                    color: "var(--texto-principal)",
+                    border: "1px solid #555",
+                    borderRadius: "4px",
+                    fontSize: "12px"
+                });
+                $td.append($input);
             } else if (["Exame", "Curso"].includes(entidadeAtual) && col === "vencimento") {
                 const $input = $("<input>").attr({
                     type: "checkbox",
@@ -1227,7 +1564,11 @@ export function initGestao() {
 
 
             try {
-                await criarRegistro(entidadeAtual, novo);
+                const resultado = await criarRegistro(entidadeAtual, novo);
+                if (!resultado?.sucesso) {
+                    throw new Error(resultado?.erro || "Falha ao criar registro.");
+                }
+
                 Toast.fire({
                     icon: "success",
                     theme: 'dark',
@@ -1298,6 +1639,7 @@ export function initGestao() {
     // ========================== BOTÕES ==========================
     $btnReload.on("click", carregarTabela);
     $btnNovo.on("click", () => criarNovoRegistro());
+    $btnSugestoesFeriados.on("click", abrirSugestoesFeriados);
 
     $btnToggleChart.on("click", function () {
         const $chart = $("#osChartContainer");
@@ -1448,6 +1790,75 @@ export function initGestao() {
                 sucesso: false,
                 erro: mensagemErro
             };
+        }
+    }
+
+    function escaparHtmlGestao(valor) {
+        return String(valor ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    async function abrirSugestoesFeriados() {
+        const ano = new Date().getFullYear();
+
+        try {
+            const sugestoes = await $.ajax({
+                url: `${BASE_URL}/feriados/sugestoes?ano=${ano}`,
+                method: "GET",
+                xhrFields: { withCredentials: true }
+            });
+            const disponiveis = (Array.isArray(sugestoes) ? sugestoes : [])
+                .filter(item => !item.cadastrado);
+
+            if (!disponiveis.length) {
+                await Swal.fire({
+                    icon: "info",
+                    theme: "dark",
+                    title: `Nenhuma sugestao nova para ${ano}.`,
+                    text: "Os feriados sugeridos para este ano ja estao cadastrados."
+                });
+                return;
+            }
+
+            const lista = disponiveis.map((item, index) => `
+                <label class="feriado-sugestao-item">
+                    <input type="checkbox" name="feriadoSugestao" value="${index}" checked>
+                    <span>${escaparHtmlGestao(item.nome)}</span>
+                    <strong>${escaparHtmlGestao(item.data)}</strong>
+                </label>
+            `).join("");
+
+            const resultado = await Swal.fire({
+                title: `Sugestoes de ${ano}`,
+                html: `<div id="listaSugestoesFeriados">${lista}</div>`,
+                theme: "dark",
+                showCancelButton: true,
+                confirmButtonText: "Adicionar selecionados",
+                cancelButtonText: "Cancelar",
+                preConfirm: () => Array.from(
+                    Swal.getPopup().querySelectorAll("input[name='feriadoSugestao']:checked")
+                ).map(input => disponiveis[Number(input.value)])
+            });
+
+            if (!resultado.isConfirmed || !resultado.value?.length) return;
+
+            await Promise.all(resultado.value.map(item => $.ajax({
+                url: `${BASE_URL}/feriados/cadastrar`,
+                method: "POST",
+                xhrFields: { withCredentials: true },
+                contentType: "application/json",
+                data: JSON.stringify(item)
+            })));
+
+            Toast.fire({ icon: "success", theme: "dark", title: "Feriados adicionados!" });
+            await carregarTabela();
+        } catch (erro) {
+            console.error("Erro ao adicionar sugestoes de feriados:", erro);
+            Toast.fire({ icon: "error", theme: "dark", title: "Nao foi possivel adicionar as sugestoes." });
         }
     }
 
@@ -1943,6 +2354,7 @@ export function initGestao() {
 
 
     function renderLinhasTabela() {
+        $(".gestao-icon-picker-panel").remove();
         $tbody.empty();
         const $fragBody = $(document.createDocumentFragment());
 
@@ -2005,6 +2417,11 @@ export function initGestao() {
                     $td.append($sel);
                 }
 
+                // ======== Coluna de ícone (Exame) ========
+                if (entidadeAtual === "Exame" && c === "icone") {
+                    renderIconeExame($td, item[c]);
+                }
+
                 // ======== Colunas booleanas (checkbox Empresa) ========
                 else if (entidadeAtual === "Empresa" && ["integracao", "liberacao", "seguranca"].includes(c)) {
                     const $chk = $("<input>").attr({
@@ -2014,12 +2431,31 @@ export function initGestao() {
                         "data-entity": entidadeAtual
                     }).prop("checked", item[c] == 1);
 
+                    const criarBotaoIntegrantes = () => $("<button>")
+                        .html(iconeIntegrantes)
+                        .attr({
+                            type: "button",
+                            "data-action": "integrantes",
+                            "data-id": item.id,
+                            title: "Ver colaboradores integrados",
+                            "aria-label": "Ver colaboradores integrados"
+                        })
+                        .addClass("gestao-btn-integrantes");
+
                     $chk.on("change", async function () {
                         const id = $(this).data("id");
                         const field = $(this).data("field");
                         const valor = $(this).is(":checked") ? 1 : 0;
                         try {
                             await updateRegistro(entidadeAtual, id, { [field]: valor });
+                            if (field === "integracao") {
+                                const $botaoAtual = $td.find(".gestao-btn-integrantes");
+                                if (valor === 1 && !$botaoAtual.length) {
+                                    $td.append(criarBotaoIntegrantes());
+                                } else if (valor === 0) {
+                                    $botaoAtual.remove();
+                                }
+                            }
                             Toast.fire({ icon: "success", theme: 'dark', title: `${field} atualizado!` });
                         } catch {
                             Toast.fire({ icon: "error", theme: 'dark', title: `Falha ao atualizar ${field}` });
@@ -2027,6 +2463,9 @@ export function initGestao() {
                     });
 
                     $td.append($chk);
+                    if (c === "integracao" && $chk.is(":checked")) {
+                        $td.append(criarBotaoIntegrantes());
+                    }
                 }
 
                 // ======== Colunas booleanas (checkbox Empresa) ========
@@ -2123,6 +2562,19 @@ export function initGestao() {
             currency: "BRL"
         });
     }
+
+    function formatarDiasIntegracao(valor) {
+        if (valor == null || valor === "" || Number.isNaN(Number(valor))) return "—";
+
+        const dias = Number(valor);
+        if (dias === 0) return "Vence hoje";
+        if (dias < 0) {
+            const quantidade = Math.abs(dias);
+            return "Vencida há " + quantidade + " dia" + (quantidade === 1 ? "" : "s");
+        }
+        return dias + " dia" + (dias === 1 ? "" : "s");
+    }
+
 
     function moedaParaNumero(valor) {
         if (valor == null || valor === "") return null;

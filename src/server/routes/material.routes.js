@@ -10,6 +10,7 @@ router.get('/', verificarAutenticacao, controller.getMateriais);
 // 🔹 materiais por OS
 router.get('/listas/estoque/pendentes', verificarAutenticacao, controller.getListasEstoque);
 router.get('/listas/conferencia/finalizadas', verificarAutenticacao, controller.getListasConferencia);
+router.get('/listas/setor/pendentes', verificarAutenticacao, controller.getListasSetorUsuario);
 router.get('/listas/os/:idOS', verificarAutenticacao, controller.getListasOS);
 router.get('/listas/:id/historico', verificarAutenticacao, controller.getHistoricoListaOS);
 router.post('/listas', verificarAutenticacao, controller.createListaOS);

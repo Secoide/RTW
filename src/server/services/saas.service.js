@@ -35,7 +35,9 @@ async function buscarContextoUsuario(idUsuario) {
     };
   }
 
-  if (empresa.status !== "ativo" && empresa.status !== "teste") {
+  const statusEmpresa = String(empresa.status || "").trim().toLowerCase();
+
+  if (statusEmpresa !== "ativo" && statusEmpresa !== "teste") {
     return {
       modo_saas: true,
       bloqueado: true,
@@ -54,6 +56,57 @@ async function buscarContextoUsuario(idUsuario) {
     recursos,
     acesso_total: false
   };
+}
+
+async function montarContextoEmpresa(empresa, acessoTotal = false) {
+  if (!empresa) {
+    return {
+      modo_saas: false,
+      empresa: null,
+      recursos: [],
+      acesso_total: acessoTotal
+    };
+  }
+
+  const statusEmpresa = String(empresa.status || "").trim().toLowerCase();
+
+  if (statusEmpresa !== "ativo" && statusEmpresa !== "teste") {
+    return {
+      modo_saas: true,
+      bloqueado: true,
+      empresa,
+      recursos: [],
+      acesso_total: acessoTotal
+    };
+  }
+
+  const recursos = acessoTotal
+    ? (await SaasModel.listarRecursos()).filter(recurso => Number(recurso.ativo) === 1).map(recurso => recurso.chave)
+    : await SaasModel.listarRecursosEmpresa(empresa.id_empresa_saas);
+
+  return {
+    modo_saas: true,
+    bloqueado: false,
+    empresa,
+    recursos,
+    acesso_total: acessoTotal
+  };
+}
+
+async function buscarContextoEmpresaAdmin(idEmpresa) {
+  const empresa = await SaasModel.buscarEmpresaPorId(idEmpresa);
+  return montarContextoEmpresa(empresa, true);
+}
+
+async function listarEmpresasParaLoginAdmin() {
+  const empresas = await SaasModel.listarEmpresas();
+  return empresas
+    .map(empresa => ({
+      id_empresa_saas: empresa.id_empresa_saas,
+      codigo: empresa.codigo,
+      nome: empresa.nome,
+      status: empresa.status
+    }));
 }
 
 async function listarRecursos() {
@@ -125,6 +178,8 @@ async function buscarAvisoEmpresa(idEmpresa) {
 
 module.exports = {
   buscarContextoUsuario,
+  buscarContextoEmpresaAdmin,
+  listarEmpresasParaLoginAdmin,
   listarRecursos,
   sincronizarRecursosPadrao,
   listarEmpresas,

@@ -50,6 +50,8 @@ function ativar_FiltroFoco($btn) {
             }
         });
     }
+
+    atualizarPainel($painelDia);
 }
 
 function ativar_FiltroPrioridade($btn) {
@@ -78,6 +80,8 @@ function ativar_FiltroPrioridade($btn) {
             }
         });
     }
+
+    atualizarPainel($painelDia);
 }
 
 let ultimaOSClicada;

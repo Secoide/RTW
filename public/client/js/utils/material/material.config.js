@@ -248,7 +248,7 @@ export const ATRIBUTOS_POR_MATERIAL = {
         "Tamanho"
     ],
 
-    // 🧱 PAINÉIS
+    // 🔰 PAINÉIS
     "QUADRO": [
         "Dimensões",
         "Material",
@@ -330,7 +330,7 @@ export const CATEGORIA_POR_MATERIAL = {
     // 🔩 FIXAÇÃO
     "PARAFUSO": "Fixação",
 
-    // 🧱 PAINÉIS
+    // 🔰 PAINÉIS
     "QUADRO": "Painéis",
     "PAINEL": "Painéis",
     "BLOCO DE DISTRIBUIÇÃO": "Componente Painel",

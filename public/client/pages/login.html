@@ -20,9 +20,10 @@
 <body>
   <div id="fundo_img_id" class="fundo_img">
     <div id="snow-layer"></div>
+    <canvas id="loginElectricCanvas" class="login-electric-canvas" aria-hidden="true"></canvas>
     <div  id="form_login_id" class="painel_login centralizada glass">
       <aside class="login_brand">
-        <img src="logo_teste.png" alt="Logo ConnectPear" class="login_logo" style="padding-left: 80px;">
+        <img src="new_logo.png" alt="Logo ConnectPear" class="login_logo" style="padding-left: 80px;">
         <div class="login_brand_text">
           <span>ConnectPear</span>
           <h1>Estratégia, agilidade e pessoas conectadas.</h1>
@@ -36,6 +37,14 @@
         <form id="formLogin" method="POST" autocomplete="on">
           <label for="username">Usuário ou E-mail</label><br>
           <input id="username" type="text" name="username" autocomplete="username email" placeholder="Digite seu usuário ou e-mail" required>
+
+          <div id="adminEmpresaLoginWrap" class="admin-empresa-login" hidden>
+            <label for="adminEmpresaLogin">Empresa de acesso</label><br>
+            <select id="adminEmpresaLogin" name="empresaSaasId">
+              <option value="">Selecione a empresa...</option>
+            </select>
+            <small>Disponível apenas para o admin global.</small>
+          </div>
 
           <label for="password">Senha</label><br>
           <div class="senha-wrap">

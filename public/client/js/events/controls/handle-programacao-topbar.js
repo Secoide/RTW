@@ -1,5 +1,5 @@
 import { removerAcentos } from "../../utils/formatters/text-formatter.js";
-import { atualizarPainel } from "../../utils/dom/atualizar-painel.js";
+import { atualizarPainel, resetarPaginacaoOSProgramacao } from "../../utils/dom/atualizar-painel.js";
 
 const filtrosAtivos = new Set();
 
@@ -113,6 +113,9 @@ function limparFiltrosProgramacao() {
   $(".programacao-filter-btn[data-filtro]").removeClass("ativo");
   $("#programacaoBuscaGlobal").val("");
   $(".programacao-avancado-campo").val("");
+  $(".painelDia").each(function () {
+    resetarPaginacaoOSProgramacao($(this));
+  });
   aplicarFiltrosProgramacao();
 }
 
@@ -123,6 +126,9 @@ export function initProgramacaoTopbar() {
 
   $(document).on("click.programacaoTopbar", "#programacaoLimparBusca", function () {
     $("#programacaoBuscaGlobal").val("");
+    $(".painelDia").each(function () {
+      resetarPaginacaoOSProgramacao($(this));
+    });
     aplicarFiltrosProgramacao();
     $("#programacaoBuscaGlobal").trigger("focus");
   });

@@ -1,7 +1,7 @@
-import { carregarCusto, carregarListasMateriaisOS, carregarMateriais } from "../services/api/material.api.js";
+import { carregarCusto, carregarListasMateriaisOS, carregarListasSetorUsuario, carregarMateriais } from "../services/api/material.api.js";
 import { renderTabela } from "../utils/dom/material-render.js";
 import { atualizarResumo } from "../utils/dom/material-resumo.js";
-import { aplicarModoMaterial, calcularResumoMateriais, getTituloEstagio, renderKanbanMateriais } from "../utils/dom/material-kanban.render.js";
+import { aplicarModoMaterial, calcularResumoMateriais, getTituloEstagio, renderAtalhosSetorMaterial, renderKanbanMateriais } from "../utils/dom/material-kanban.render.js";
 import { materialState as state } from "../state/material.state.js";
 import { aplicarFiltros, atualizarFiltroCategoriasMaterial } from "../services/filter/material.filter.js";
 
@@ -12,6 +12,7 @@ export async function carregarMateriaisCompleto() {
   }
 
   const listas = await carregarListasMateriaisOS();
+  const listasSetor = await carregarListasSetorUsuario();
   const listaFoco = sessionStorage.getItem("material_focus_lista");
 
   if (listaFoco && listas.some(lista => Number(lista.id) === Number(listaFoco))) {
@@ -25,6 +26,7 @@ export async function carregarMateriaisCompleto() {
   }
 
   renderKanbanMateriais(listas, state.osSelecionada);
+  renderAtalhosSetorMaterial(listasSetor);
 
   const dados = await carregarMateriais();
 

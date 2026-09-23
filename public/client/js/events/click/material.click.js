@@ -14,8 +14,14 @@ import {
 } from "../../services/api/material.api.js";
 import { getFornecedoresMaterial } from "../../services/api/material.fornecedor.api.js";
 import { calcularValorRS } from "../../utils/material.utils.js";
+import { aplicarFiltros } from "../../services/filter/material.filter.js";
+import { renderTabela } from "../../utils/dom/material-render.js";
+import { atualizarResumo } from "../../utils/dom/material-resumo.js";
 
 export function initMaterialClicks() {
+  let radarCotacaoItens = new Map();
+  let modoSelecaoCotacao = false;
+  let itensSelecionadosCotacao = new Set();
 
   // 🔥 SALVAR (NOVO OU EXISTENTE)
   $(document).off("click.materialSalvarItem", "#listaMaterial .save")
@@ -550,6 +556,38 @@ export function initMaterialClicks() {
     });
 
   $(document)
+    .off("click.materialCotarFornecedor", "#btnCotarFornecedorLista")
+    .on("click.materialCotarFornecedor", "#btnCotarFornecedorLista", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (modoSelecaoCotacao && itensSelecionadosCotacao.size) {
+        exportarPDFCotacaoSelecionados();
+        return;
+      }
+
+      iniciarSelecaoCotacaoFornecedor();
+    });
+
+  $(document)
+    .off("click.materialCotarLinha", "#tableMaterial tbody tr[data-id]")
+    .on("click.materialCotarLinha", "#tableMaterial tbody tr[data-id]", function (event) {
+      if (!modoSelecaoCotacao) return;
+      if ($(event.target).closest("button, input, select, textarea, a, .fornecedor-box").length) return;
+
+      event.preventDefault();
+      alternarItemCotacao($(this));
+    });
+
+  $(document)
+    .off("click.materialCotarGerar", "#btnGerarPDFCotacaoFornecedor")
+    .on("click.materialCotarGerar", "#btnGerarPDFCotacaoFornecedor", exportarPDFCotacaoSelecionados);
+
+  $(document)
+    .off("click.materialCotarCancelar", "#btnCancelarCotacaoFornecedor")
+    .on("click.materialCotarCancelar", "#btnCancelarCotacaoFornecedor", finalizarSelecaoCotacaoFornecedor);
+
+  $(document)
     .off("click.materialExportPDFOpcao", "#menuExportarListaPDF [data-pdf-modo]")
     .on("click.materialExportPDFOpcao", "#menuExportarListaPDF [data-pdf-modo]", function (event) {
       event.preventDefault();
@@ -596,6 +634,88 @@ export function initMaterialClicks() {
       } finally {
         $btn.prop("disabled", false).removeClass("carregando");
       }
+    });
+
+  $(document)
+    .off("click.materialRadarCotacao", "#btnRadarCotacaoLista")
+    .on("click.materialRadarCotacao", "#btnRadarCotacaoLista", async function () {
+      const $btn = $(this);
+      const $painel = $("#radarCotacaoLista");
+
+      if (!$painel.prop("hidden") && $painel.hasClass("ativo")) {
+        fecharRadarCotacaoLista();
+        return;
+      }
+
+      $("#resumoFornecedoresSelecionados").removeClass("ativo").prop("hidden", true);
+      $("#btnInfoFornecedoresLista").removeClass("ativo");
+
+      try {
+        $btn.prop("disabled", true).addClass("carregando");
+        $painel
+          .html(`
+            <div class="material-radar-loading">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              <span>Analisando prioridades da lista...</span>
+            </div>
+          `)
+          .addClass("ativo")
+          .prop("hidden", false);
+
+        const radar = await montarDadosRadarCotacao();
+        renderRadarCotacaoLista(radar);
+        $btn.addClass("ativo");
+      } catch (err) {
+        console.error("Erro ao montar radar de cotacao:", err);
+        $painel
+          .html(`
+            <div class="material-radar-empty">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <strong>Radar indisponivel</strong>
+              <span>Nao foi possivel analisar os materiais agora.</span>
+            </div>
+          `)
+          .addClass("ativo")
+          .prop("hidden", false);
+      } finally {
+        $btn.prop("disabled", false).removeClass("carregando");
+      }
+    });
+
+  $(document)
+    .off("click.materialRadarCotacaoFechar", "#btnFecharRadarCotacao")
+    .on("click.materialRadarCotacaoFechar", "#btnFecharRadarCotacao", fecharRadarCotacaoLista);
+
+  $(document)
+    .off("click.materialRadarSelecionar", ".material-radar-ponto")
+    .on("click.materialRadarSelecionar", ".material-radar-ponto", async function () {
+      esconderTooltipRadarCotacao();
+      await selecionarItemRadarCotacao($(this).data("id"));
+    });
+
+  $(document)
+    .off("mouseenter.materialRadarTooltip", ".material-radar-ponto")
+    .on("mouseenter.materialRadarTooltip", ".material-radar-ponto", function (event) {
+      const item = radarCotacaoItens.get(String($(this).data("id")));
+      if (!item) return;
+      mostrarTooltipRadarCotacao(item, event);
+    });
+
+  $(document)
+    .off("mousemove.materialRadarTooltip", ".material-radar-ponto")
+    .on("mousemove.materialRadarTooltip", ".material-radar-ponto", posicionarTooltipRadarCotacao);
+
+  $(document)
+    .off("mouseleave.materialRadarTooltip", ".material-radar-ponto")
+    .on("mouseleave.materialRadarTooltip", ".material-radar-ponto", esconderTooltipRadarCotacao);
+
+  $(document)
+    .off("keydown.materialRadarSelecionar", ".material-radar-ponto")
+    .on("keydown.materialRadarSelecionar", ".material-radar-ponto", async function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      esconderTooltipRadarCotacao();
+      await selecionarItemRadarCotacao($(this).data("id"));
     });
 
   async function carregarResumoFornecedoresLista() {
@@ -653,6 +773,335 @@ export function initMaterialClicks() {
     return [...resumo.values()].sort((a, b) => b.total - a.total);
   }
 
+  function fecharRadarCotacaoLista() {
+    $("#radarCotacaoLista").removeClass("ativo").prop("hidden", true).empty();
+    $("#btnRadarCotacaoLista").removeClass("ativo");
+    esconderTooltipRadarCotacao();
+  }
+
+  async function selecionarItemRadarCotacao(idMaterial) {
+    if (!idMaterial) return;
+
+    let $linha = localizarLinhaMaterial(idMaterial);
+
+    if (!$linha.length) {
+      $("#searchMaterial").val("");
+      $("#filtroCategoriaMaterial").val("");
+      $(".filtros-status button").removeClass("active");
+      $(".filtros-status button[data-status='todos'], .filtros-status button:first").first().addClass("active");
+      state.filtroStatusAtual = "";
+      state.filtroCategoriaAtual = "";
+
+      const lista = aplicarFiltros();
+      await renderTabela(lista);
+      atualizarResumo(lista);
+      $linha = localizarLinhaMaterial(idMaterial);
+    }
+
+    if (!$linha.length) return;
+
+    $("#tableMaterial tbody tr").removeClass("material-radar-linha-destaque");
+    $linha.addClass("material-radar-linha-destaque");
+    $linha[0].scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+
+    setTimeout(() => {
+      $linha.removeClass("material-radar-linha-destaque");
+    }, 2600);
+  }
+
+  function mostrarTooltipRadarCotacao(item, event) {
+    const ehLivre = Boolean(item.especifico || item.materialLivre);
+    const imagem = item.imagem
+      ? `${item.imagem}?v=${item.versaoFoto || ""}`
+      : "/imagens/imagemmaterial.webp";
+    const foto = ehLivre
+      ? `<div class="material-radar-tooltip-img material-livre"><i class="fa-solid fa-file-circle-question"></i></div>`
+      : `<img class="material-radar-tooltip-img" src="${escapeHtmlLocal(imagem)}" alt="">`;
+    const descricao = item.atributos
+      ? `${item.nome} | ${item.atributos}`
+      : item.nome;
+
+    $("#materialRadarTooltipLista").remove();
+    $("body").append(`
+      <div id="materialRadarTooltipLista" class="material-radar-tooltip" role="tooltip">
+        ${foto}
+        <div>
+          <strong>${escapeHtmlLocal(descricao || "Material especifico")}</strong>
+          <span>Qtd.: ${escapeHtmlLocal(item.quantidade)} ${escapeHtmlLocal(item.unidade || "")}</span>
+          <span>Total: ${formatarMoedaPDF(item.total)}</span>
+        </div>
+      </div>
+    `);
+
+    posicionarTooltipRadarCotacao(event);
+  }
+
+  function posicionarTooltipRadarCotacao(event) {
+    const $tooltip = $("#materialRadarTooltipLista");
+    if (!$tooltip.length || !event) return;
+
+    const margem = 12;
+    const largura = $tooltip.outerWidth() || 260;
+    const altura = $tooltip.outerHeight() || 86;
+    let left = event.clientX + 14;
+    let top = event.clientY + 14;
+
+    if (left + largura + margem > window.innerWidth) {
+      left = event.clientX - largura - 14;
+    }
+
+    if (top + altura + margem > window.innerHeight) {
+      top = event.clientY - altura - 14;
+    }
+
+    $tooltip.css({
+      left: `${Math.max(margem, left)}px`,
+      top: `${Math.max(margem, top)}px`
+    });
+  }
+
+  function esconderTooltipRadarCotacao() {
+    $("#materialRadarTooltipLista").remove();
+  }
+
+  function localizarLinhaMaterial(idMaterial) {
+    return $("#tableMaterial tbody tr[data-id]").filter(function () {
+      return String($(this).data("id")) === String(idMaterial);
+    }).first();
+  }
+
+  async function montarDadosRadarCotacao() {
+    const itensBase = getItensRadarCotacao();
+
+    if (!itensBase.length) {
+      return {
+        itens: [],
+        resumo: { criticos: 0, semCotacao: 0, altoValor: 0, valorTotal: 0 }
+      };
+    }
+
+    const maiorTotal = Math.max(...itensBase.map(item => Number(item._radarTotal || 0)), 1);
+    const maiorQtd = Math.max(...itensBase.map(item => Number(item.quantidade || 0)), 1);
+
+    const preAnalise = itensBase.map(item => {
+      const total = Number(item._radarTotal || 0);
+      const qtd = Number(item.quantidade || 0);
+      const semCotacao = !Number(item.menor_valor || 0) && !Number(item.valor_escolhido || 0);
+      const semFornecedorSelecionado = !item.id_fornecedor;
+      const especifico = Number(item.material_livre || 0) === 1 || (!item.id_variacao && item.material_livre_descricao);
+      const faltante = Math.max(0, qtd - Number(item.quantidade_comprada || 0));
+      const score =
+        (total / maiorTotal) * 45 +
+        (qtd / maiorQtd) * 12 +
+        (semCotacao ? 22 : 0) +
+        (semFornecedorSelecionado ? 10 : 0) +
+        (especifico ? 9 : 0) +
+        (faltante > 0 ? 2 : 0);
+
+      return {
+        item,
+        total,
+        qtd,
+        semCotacao,
+        semFornecedorSelecionado,
+        especifico,
+        scoreBase: score
+      };
+    }).sort((a, b) => b.scoreBase - a.scoreBase);
+
+    const candidatos = preAnalise.slice(0, 30);
+    const fornecedoresPorItem = await Promise.all(
+      candidatos.map(async analise => {
+        try {
+          const fornecedores = await getFornecedoresMaterial(analise.item.id);
+          return { id: analise.item.id, fornecedores: fornecedores || [] };
+        } catch (err) {
+          console.warn("Nao foi possivel buscar cotacoes do material:", analise.item.id, err);
+          return { id: analise.item.id, fornecedores: [] };
+        }
+      })
+    );
+
+    const mapaFornecedores = new Map(fornecedoresPorItem.map(item => [String(item.id), item.fornecedores]));
+
+    const itens = preAnalise.map(analise => {
+      const fornecedores = mapaFornecedores.get(String(analise.item.id)) || [];
+      const cotacoes = fornecedores.length;
+      const cotacoesOk = fornecedores.filter(fornecedor => fornecedor.material_ok).length;
+      const faltaCotacao = cotacoes === 0 ? 20 : cotacoes === 1 ? 12 : cotacoes === 2 ? 6 : 0;
+      const score = Math.min(100, analise.scoreBase + faltaCotacao);
+      const impacto = Math.min(100, 18 + (analise.total / maiorTotal) * 72 + (analise.qtd / maiorQtd) * 10);
+      const urgencia = Math.min(100, 18 + faltaCotacao + (analise.semCotacao ? 26 : 0) + (analise.especifico ? 14 : 0) + (analise.semFornecedorSelecionado ? 12 : 0));
+
+      return {
+        id: analise.item.id,
+        nome: analise.item.nome || analise.item.material_livre_descricao || "Material especifico",
+        categoria: analise.item.categoria || "-",
+        quantidade: analise.qtd,
+        unidade: analise.item.unidade || "",
+        total: analise.total,
+        cotacoes,
+        cotacoesOk,
+        semCotacao: analise.semCotacao,
+        especifico: analise.especifico,
+        materialLivre: Number(analise.item.material_livre || 0) === 1,
+        imagem: analise.item.imagem || "",
+        versaoFoto: analise.item.versao_foto || "",
+        atributos: analise.item.atributos || "",
+        score,
+        impacto,
+        urgencia
+      };
+    }).sort((a, b) => b.score - a.score);
+
+    const selecionados = itens.slice(0, 8);
+    const valorTotal = itens.reduce((total, item) => total + Number(item.total || 0), 0);
+    const altoValor = itens.filter(item => item.total >= maiorTotal * 0.65 && item.total > 0).length;
+
+    return {
+      itens: selecionados,
+      resumo: {
+        criticos: itens.filter(item => item.score >= 70).length,
+        semCotacao: itens.filter(item => item.cotacoes === 0 || item.semCotacao).length,
+        altoValor,
+        valorTotal
+      }
+    };
+  }
+
+  function getItensRadarCotacao() {
+    const dados = state.listaSelecionada
+        ? (state.dados || []).filter(item => String(item.id_lista || "") === String(state.listaSelecionada || ""))
+        : (state.listaFiltrada?.length ? state.listaFiltrada : (state.dados || []));
+
+    return (dados || []).map(item => {
+      const quantidade = Number(item.quantidade || 0);
+      const valorUnitario = Number(item.valor_escolhido || item.menor_valor || item.valor_orcamento_atual || 0);
+
+      return {
+        ...item,
+        _radarTotal: valorUnitario * quantidade
+      };
+    });
+  }
+
+  function renderRadarCotacaoLista(radar) {
+    const $painel = $("#radarCotacaoLista");
+    const itens = radar.itens || [];
+    const resumo = radar.resumo || {};
+
+    if (!itens.length) {
+      radarCotacaoItens = new Map();
+      $painel.html(`
+        <div class="material-radar-topo">
+          <div>
+            <span>Radar de Cotacao</span>
+            <strong>Nenhum material</strong>
+          </div>
+          <button id="btnFecharRadarCotacao" type="button" title="Fechar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="material-radar-empty">
+          <i class="fa-solid fa-bullseye"></i>
+          <strong>Sem dados para analisar</strong>
+          <span>Adicione materiais ou remova filtros para montar o radar.</span>
+        </div>
+      `);
+      return;
+    }
+
+    const pontosRadar = distribuirPontosRadarCotacao(itens);
+    radarCotacaoItens = new Map(pontosRadar.map(item => [String(item.id), item]));
+    const pontos = pontosRadar.map((ponto, index) => montarPontoRadarCotacao(ponto, index)).join("");
+    const ranking = itens.slice(0, 6).map((item, index) => `
+      <li>
+        <b>${index + 1}</b>
+        <div>
+          <strong title="${escapeHtmlLocal(item.nome)}">${escapeHtmlLocal(item.nome)}</strong>
+          <span>${escapeHtmlLocal(item.categoria)} | ${item.quantidade} ${escapeHtmlLocal(item.unidade)} | ${item.cotacoes} cotacao(oes)</span>
+        </div>
+        <em>${Math.round(item.score)}</em>
+      </li>
+    `).join("");
+
+    $painel.html(`
+      <div class="material-radar-topo">
+        <div>
+          <span>Radar de Cotacao</span>
+          <strong>Itens com maior prioridade</strong>
+        </div>
+        <button id="btnFecharRadarCotacao" type="button" title="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="material-radar-kpis">
+        <div><span>Criticos</span><strong>${resumo.criticos || 0}</strong></div>
+        <div><span>Sem cotacao</span><strong>${resumo.semCotacao || 0}</strong></div>
+        <div><span>Alto valor</span><strong>${resumo.altoValor || 0}</strong></div>
+      </div>
+
+      <div class="material-radar-grafico">
+        <svg viewBox="0 0 320 260" role="img" aria-label="Radar de cotacao por urgencia e impacto">
+          <circle cx="160" cy="130" r="42"></circle>
+          <circle cx="160" cy="130" r="76"></circle>
+          <circle cx="160" cy="130" r="110"></circle>
+          <line x1="36" y1="130" x2="284" y2="130"></line>
+          <line x1="160" y1="20" x2="160" y2="240"></line>
+          <text x="160" y="14" text-anchor="middle">Urgencia</text>
+          <text x="292" y="134">Impacto</text>
+          <text x="28" y="124" text-anchor="start">Sem fornecedor</text>
+          <text x="160" y="254" text-anchor="middle">Preco acima da media</text>
+          ${pontos}
+        </svg>
+      </div>
+
+      <ol class="material-radar-ranking">
+        ${ranking}
+      </ol>
+
+      <div class="material-radar-nota">
+        Prioridade combina valor total, quantidade, falta de cotacao, item especifico e fornecedor ainda nao definido.
+      </div>
+    `);
+  }
+
+  function distribuirPontosRadarCotacao(itens) {
+    const ocupados = [];
+
+    return itens.map((item, index) => {
+      const xBase = 50 + (Number(item.impacto || 0) / 100) * 220;
+      const yBase = 228 - (Number(item.urgencia || 0) / 100) * 198;
+      let x = xBase;
+      let y = yBase;
+
+      for (let tentativa = 0; tentativa < 8; tentativa += 1) {
+        const sobreposto = ocupados.some(ponto => Math.hypot(ponto.x - x, ponto.y - y) < 18);
+        if (!sobreposto) break;
+
+        const direcao = tentativa % 2 === 0 ? 1 : -1;
+        x = Math.max(34, Math.min(286, xBase + direcao * (10 + tentativa * 3)));
+        y = Math.max(28, Math.min(232, yBase + (tentativa + 1) * 7));
+      }
+
+      ocupados.push({ x, y });
+      return { ...item, radarX: x, radarY: y, radarIndex: index };
+    });
+  }
+
+  function montarPontoRadarCotacao(item, index) {
+    const x = Number(item.radarX || 160);
+    const y = Number(item.radarY || 130);
+    const raio = 4 + (Number(item.score || 0) / 100) * 5;
+    const cor = item.score >= 75 ? "#ee7722" : item.score >= 55 ? "#efda38" : "#60a5fa";
+    return `
+      <g class="material-radar-ponto" data-id="${escapeHtmlLocal(item.id)}" style="--radar-cor:${cor}" role="button" tabindex="0" aria-label="${escapeHtmlLocal(item.nome || `Item ${index + 1}`)}">
+        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${raio.toFixed(1)}"></circle>
+      </g>
+    `;
+  }
+
   function renderInfoFornecedoresLista(fornecedores) {
     const $resumo = $("#resumoFornecedoresSelecionados");
     const cores = ["#ee7722", "#efda38", "#22c55e", "#60a5fa", "#a78bfa", "#94a3b8"];
@@ -677,7 +1126,7 @@ export function initMaterialClicks() {
           <strong>${formatarMoedaPDF(fornecedor.totalSelecionado)}</strong>
           <small>Selecionado: ${formatarMoedaPDF(fornecedor.totalSelecionado)} | Qtd. ${fornecedor.quantidadeSelecionada}</small>
           <small>Cotado: ${formatarMoedaPDF(fornecedor.total)} | Qtd. ${fornecedor.quantidade}</small>
-          <small>${fornecedor.itens} cotacao(oes) | Qtd. ${fornecedor.quantidade}</small>
+          <small>${fornecedor.itens} cotação(ões) | Qtd. ${fornecedor.quantidade}</small>
           <small>${fornecedor.selecionados} selecionado(s) | ${fornecedor.ok} OK</small>
           <em>${percentual.toFixed(0)}%</em>
         </div>
@@ -686,11 +1135,11 @@ export function initMaterialClicks() {
 
     $resumo.html(`
       <div class="materiais-fornecedores-total">
-        <div class="materiais-fornecedores-pizza" style="${pizza}" title="Participacao por valor cotado"></div>
+        <div class="materiais-fornecedores-pizza" style="${pizza}" title="Participação por valor cotado"></div>
         <div>
           <span>Total cotado por fornecedores</span>
           <strong>${formatarMoedaPDF(totalGeral)}</strong>
-          <small>${fornecedores.length} fornecedor(es) | ${itensGeral} cotacao(oes) | Qtd. ${quantidadeGeral}</small>
+          <small>${fornecedores.length} fornecedor(es) | ${itensGeral} cotação(ões) | Qtd. ${quantidadeGeral}</small>
           <small>Selecionado: ${formatarMoedaPDF(totalSelecionadoGeral)} | Qtd. ${quantidadeSelecionadaGeral}</small>
         </div>
       </div>
@@ -701,14 +1150,14 @@ export function initMaterialClicks() {
           <small>${fornecedorPrincipal.total ? formatarMoedaPDF(fornecedorPrincipal.total) : "R$ 0,00"}</small>
         </div>
         <div>
-          <span>Ticket medio por cotacao</span>
+          <span>Ticket medio por cotação</span>
           <strong>${formatarMoedaPDF(ticketMedio)}</strong>
-          <small>Ajuda a comparar concentracao por fornecedor</small>
+          <small>Ajuda a comparar cotação por fornecedor</small>
         </div>
         <div>
           <span>Materiais validados</span>
           <strong>${materiaisOk}/${itensGeral}</strong>
-          <small>Marcacoes OK nas cotacoes</small>
+          <small>Marcacoes OK nas cotações</small>
         </div>
       </div>
       <div class="materiais-fornecedores-cards">
@@ -812,6 +1261,90 @@ export function initMaterialClicks() {
 
   function fecharMenuPDFMaterial() {
     $("#menuExportarListaPDF").remove();
+  }
+
+  function iniciarSelecaoCotacaoFornecedor() {
+    const itens = state.dados || [];
+
+    if (!state.osSelecionada || !itens.length) {
+      alert("Selecione uma OS com materiais antes de montar a cotacao.");
+      return;
+    }
+
+    modoSelecaoCotacao = true;
+    itensSelecionadosCotacao = new Set();
+    $("#listaMaterial").addClass("material-cotacao-selecao-mode");
+    $("#btnCotarFornecedorLista").addClass("ativo");
+    $("#tableMaterial tbody tr").removeClass("material-cotacao-selecionado");
+    renderBarraSelecaoCotacaoFornecedor();
+  }
+
+  function finalizarSelecaoCotacaoFornecedor() {
+    modoSelecaoCotacao = false;
+    itensSelecionadosCotacao = new Set();
+    $("#listaMaterial").removeClass("material-cotacao-selecao-mode");
+    $("#btnCotarFornecedorLista").removeClass("ativo");
+    $("#tableMaterial tbody tr").removeClass("material-cotacao-selecionado");
+    $("#materialCotacaoSelecaoBar").remove();
+  }
+
+  function alternarItemCotacao($linha) {
+    const id = String($linha.data("id") || "");
+    if (!id) return;
+
+    if (itensSelecionadosCotacao.has(id)) {
+      itensSelecionadosCotacao.delete(id);
+      $linha.removeClass("material-cotacao-selecionado");
+    } else {
+      itensSelecionadosCotacao.add(id);
+      $linha.addClass("material-cotacao-selecionado");
+    }
+
+    renderBarraSelecaoCotacaoFornecedor();
+  }
+
+  function renderBarraSelecaoCotacaoFornecedor() {
+    const total = itensSelecionadosCotacao.size;
+    const texto = total
+      ? `${total} material(is) selecionado(s)`
+      : "Clique nos materiais que deseja enviar para cotacao";
+
+    $("#materialCotacaoSelecaoBar").remove();
+    $("#listaMaterial .material-detalhe-view").prepend(`
+      <div id="materialCotacaoSelecaoBar" class="material-cotacao-selecao-bar">
+        <span><i class="fa-solid fa-file-signature"></i> ${escapeHtmlLocal(texto)}</span>
+        <div>
+          <button id="btnGerarPDFCotacaoFornecedor" class="bt_padrao bt_atualizar" type="button" ${total ? "" : "disabled"}>
+            <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+          </button>
+          <button id="btnCancelarCotacaoFornecedor" class="bt_padrao" type="button">
+            <i class="fa-solid fa-xmark"></i> Cancelar
+          </button>
+        </div>
+      </div>
+    `);
+  }
+
+  function exportarPDFCotacaoSelecionados() {
+    const ids = [...itensSelecionadosCotacao].map(String);
+    const itens = (state.dados || []).filter(item => ids.includes(String(item.id)));
+
+    if (!itens.length) {
+      alert("Selecione pelo menos um material para gerar a cotacao.");
+      return;
+    }
+
+    const janela = window.open("", "_blank", "width=1000,height=900");
+
+    if (!janela) {
+      alert("O navegador bloqueou a janela do PDF. Libere pop-ups para gerar o relatório.");
+      return;
+    }
+
+    janela.document.open();
+    janela.document.write(montarHtmlPDFMateriaisFornecedor(itens));
+    janela.document.close();
+    finalizarSelecaoCotacaoFornecedor();
   }
 
   function exportarPDF(modo = "completo") {
@@ -1225,6 +1758,213 @@ export function initMaterialClicks() {
         <td class="col-material">
           <div class="material-nome">${escapeHtmlLocal(item.nome || "-")}</div>
           <div class="material-attr">${escapeHtmlLocal(item.atributos || "-")}</div>
+        </td>
+        <td class="col-codigo">${escapeHtmlLocal(item.codigo || "-")}</td>
+        <td class="col-fabricante">${escapeHtmlLocal(item.fabricante || "-")}</td>
+        <td class="col-obs">${escapeHtmlLocal(item.observacao || "-")}</td>
+        <td class="col-qtd">${quantidade}</td>
+        <td class="col-und">${escapeHtmlLocal(item.unidade || "-")}</td>
+      </tr>
+    `;
+  }
+
+  function montarHtmlPDFMateriaisFornecedor(itens) {
+    const optionOS = $("#cbxOS option:selected").text().trim();
+    const listaAtual = state.listasOS.find(lista => Number(lista.id) === Number(state.listaSelecionada));
+    const tituloLista = listaAtual?.titulo || $("#materialDetalheTitulo").text().trim() || "Lista de materiais";
+    const dataExportacao = new Date().toLocaleString("pt-BR");
+    const linhas = itens.map(renderLinhaPDFMaterialFornecedor).join("");
+    const totalQuantidade = itens.reduce((total, item) => total + Number(item.quantidade || 0), 0);
+
+    return `
+      <!doctype html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="utf-8">
+        <title>Cotacao de Materiais - OS ${escapeHtmlLocal(state.osSelecionada)}</title>
+        <style>
+          @page { size: A4 portrait; margin: 10mm; }
+          * { box-sizing: border-box; }
+          body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #171717;
+            background: #fff;
+            font-size: 10px;
+          }
+          .pdf-head {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #202020;
+          }
+          .pdf-head h1 {
+            margin: 0 0 4px;
+            font-size: 17px;
+            letter-spacing: 0;
+          }
+          .pdf-head strong,
+          .pdf-head span,
+          .pdf-card span,
+          .pdf-card strong {
+            display: block;
+          }
+          .pdf-head span,
+          .pdf-meta span {
+            color: #555;
+            line-height: 1.35;
+          }
+          .pdf-meta {
+            text-align: right;
+          }
+          .pdf-resumo {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin: 10px 0;
+          }
+          .pdf-card {
+            border: 1px solid #d8d8d8;
+            border-radius: 4px;
+            padding: 6px;
+            background: #f7f7f7;
+          }
+          .pdf-card span {
+            color: #666;
+            font-size: 8px;
+            text-transform: uppercase;
+          }
+          .pdf-card strong {
+            margin-top: 2px;
+            font-size: 12px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 8px;
+          }
+          th {
+            background: #242424;
+            color: #fff;
+            font-size: 8px;
+            text-transform: uppercase;
+          }
+          th,
+          td {
+            border: 1px solid #d5d5d5;
+            padding: 5px;
+            vertical-align: middle;
+            overflow-wrap: anywhere;
+          }
+          tbody tr:nth-child(even) {
+            background: #f4f4f4;
+          }
+          .col-img { width: 48px; text-align: center; }
+          .col-material { width: 34%; }
+          .col-codigo { width: 10%; }
+          .col-fabricante { width: 13%; }
+          .col-qtd,
+          .col-und { width: 48px; text-align: center; }
+          .col-obs { width: 25%; }
+          .material-img {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #d0d0d0;
+            background: #eee;
+          }
+          .material-nome {
+            font-weight: 700;
+            font-size: 10px;
+          }
+          .material-attr {
+            margin-top: 2px;
+            color: #555;
+            font-size: 8px;
+          }
+          .pdf-foot {
+            margin-top: 8px;
+            color: #555;
+            font-size: 8px;
+            line-height: 1.4;
+          }
+          @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          }
+        </style>
+      </head>
+      <body>
+        <header class="pdf-head">
+          <div>
+            <h1>Solicitacao de cotacao</h1>
+            <strong>${escapeHtmlLocal(optionOS || `OS ${state.osSelecionada}`)}</strong>
+            <span>${escapeHtmlLocal(tituloLista)}</span>
+          </div>
+          <div class="pdf-meta">
+            <strong>Lista para fornecedor</strong>
+            <span>Exportado em ${escapeHtmlLocal(dataExportacao)}</span>
+            <span>OS: ${escapeHtmlLocal(state.osSelecionada)}</span>
+            <span>Lista: ${escapeHtmlLocal(state.listaSelecionada || "-")}</span>
+          </div>
+        </header>
+
+        <section class="pdf-resumo">
+          <div class="pdf-card"><span>Materiais selecionados</span><strong>${itens.length}</strong></div>
+          <div class="pdf-card"><span>Quantidade total</span><strong>${totalQuantidade}</strong></div>
+        </section>
+
+        <table>
+          <thead>
+            <tr>
+              <th class="col-img">Foto</th>
+              <th class="col-material">Descricao</th>
+              <th class="col-codigo">Codigo</th>
+              <th class="col-fabricante">Fabricante</th>
+              <th class="col-obs">Observacao</th>
+              <th class="col-qtd">Qtde</th>
+              <th class="col-und">Unidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${linhas}
+          </tbody>
+        </table>
+
+        <div class="pdf-foot">
+          Por favor, retornar cotacao com valor unitario, prazo de entrega, condicao de pagamento e validade da proposta.
+        </div>
+
+        <script>
+          window.addEventListener("load", function () {
+            setTimeout(function () {
+              window.print();
+            }, 700);
+          });
+        </script>
+      </body>
+      </html>
+    `;
+  }
+
+  function renderLinhaPDFMaterialFornecedor(item) {
+    const quantidade = Number(item.quantidade || 0);
+    const imgSrc = item.imagem
+      ? `${item.imagem}?v=${item.versao_foto || ""}`
+      : "/imagens/imagemmaterial.webp";
+    const nome = item.nome || item.material_livre_descricao || "Material especifico";
+    const atributos = item.atributos || (item.material_livre_descricao ? "Item especifico da OS" : "-");
+
+    return `
+      <tr>
+        <td class="col-img">
+          <img class="material-img" src="${escapeHtmlLocal(imgSrc)}" crossorigin="anonymous" alt="">
+        </td>
+        <td class="col-material">
+          <div class="material-nome">${escapeHtmlLocal(nome)}</div>
+          <div class="material-attr">${escapeHtmlLocal(atributos)}</div>
         </td>
         <td class="col-codigo">${escapeHtmlLocal(item.codigo || "-")}</td>
         <td class="col-fabricante">${escapeHtmlLocal(item.fabricante || "-")}</td>

@@ -9,6 +9,8 @@ function estaNaTelaCarregamento() {
   return window.location.pathname.includes("carregamento");
 }
 
+let teveTentativaReconexao = false;
+
 export function analisarConexao() {
   const nomeUsuario = getNomeUsuario();
   conectarSocket(nomeUsuario);
@@ -38,7 +40,7 @@ document.addEventListener("ws:connected", () => {
 
   Swal.close();
 
-  if (!estaNaTelaCarregamento()) {
+  if (teveTentativaReconexao && !estaNaTelaCarregamento()) {
     Toast.fire({
       icon: "success",
       title: "Conectado ao servidor",
@@ -49,6 +51,7 @@ document.addEventListener("ws:connected", () => {
         },
     });
   }
+  teveTentativaReconexao = false;
 
   const nomeUsuario = getNomeUsuario();
 
@@ -59,6 +62,7 @@ document.addEventListener("ws:connected", () => {
 
 
 document.addEventListener("ws:disconnected", () => {
+  teveTentativaReconexao = true;
 
   Toast.fire({
     icon: "error",
@@ -69,6 +73,7 @@ document.addEventListener("ws:disconnected", () => {
 
 
 document.addEventListener("ws:reconnecting", (event) => {
+  teveTentativaReconexao = true;
 
   const tentativa = event.detail.tentativa;
 

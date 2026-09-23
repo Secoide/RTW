@@ -677,7 +677,8 @@ async function gerarNumeroSeriePainel() {
 
   input.value = "Gerando...";
   try {
-    const data = await requestJson(`${API_PAINEIS}/proximo-numero?ano=${encodeURIComponent(normalizarAnoPainel())}`);
+    const mes = String(byId("painelData")?.value || "").slice(5, 7);
+    const data = await requestJson(`${API_PAINEIS}/proximo-numero?ano=${encodeURIComponent(normalizarAnoPainel())}&mes=${encodeURIComponent(mes)}`);
     input.value = data.numero_serie || "";
   } catch (err) {
     input.value = "";

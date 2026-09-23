@@ -375,15 +375,15 @@ export function preencherTabelaColaboradoresRH() {
                             data-contrato="${colab.contrato || ''}"
                             data-exames="${colab.exames || ''}"
                             data-epi="${(colab.status_epi || '').replace(/<[^>]*>/g, ' ').replace(/"/g, '&quot;')}">
-                            <td  style="color: #bbbbbb;">${colab.idFunc}</td>
+                            <td>${colab.idFunc}</td>
                            <td>
                             <img class="tb_fotoColab"
                                     src="${colab.fotoperfil}?v=${colab.versao_foto}"
                                     onerror="this.src='/imagens/user-default.webp'">
                             </img>${colab.nome}</td>
-                            <td style="color: #bbbbbb;">${colab.nascimento_idade}</td>
-                            <td style="color: #bbbbbb;;">${colab.cargo}</td>
-                            <td style="color: #bbbbbb;">${colab.categoria}</td>
+                            <td>${colab.nascimento_idade}</td>
+                            <td>${colab.cargo}</td>
+                            <td>${colab.categoria}</td>
                             <td></td>
                             <td><div id="integracoes_${colab.idFunc}" class="rh_integracao"></div></td>
                             <td><div id="exames_${colab.idFunc}" class="rh_exames"></div></td>

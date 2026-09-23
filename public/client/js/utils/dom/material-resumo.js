@@ -89,6 +89,8 @@ function limparResumo() {
 
   $("#btnInfoFornecedoresLista").removeClass("ativo");
   $("#resumoFornecedoresSelecionados").removeClass("ativo").prop("hidden", true).empty();
+  $("#btnRadarCotacaoLista").removeClass("ativo");
+  $("#radarCotacaoLista").removeClass("ativo").prop("hidden", true).empty();
 }
 
 function renderResumoFornecedoresSelecionados(fornecedores) {

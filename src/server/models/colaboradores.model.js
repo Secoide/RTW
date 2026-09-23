@@ -1,7 +1,35 @@
 const connection = require('../config/db');
+const FeriadosModel = require('./feriados.model');
 
 let enderecoColumnReadyPromise = null;
 let enderecoColumnAvailable = null;
+let anexoAtestadoColumnReadyPromise = null;
+
+async function garantirColunaAnexoAtestado() {
+  if (anexoAtestadoColumnReadyPromise) return anexoAtestadoColumnReadyPromise;
+
+  anexoAtestadoColumnReadyPromise = (async () => {
+    try {
+      const [colunas] = await connection.query(`
+        SHOW COLUMNS FROM tb_func_interrupto LIKE 'anexo_pdf'
+      `);
+
+      if (!colunas?.length) {
+        await connection.query(`
+          ALTER TABLE tb_func_interrupto
+            ADD COLUMN anexo_pdf VARCHAR(255) NULL
+        `);
+      }
+
+      return true;
+    } catch (err) {
+      anexoAtestadoColumnReadyPromise = null;
+      throw err;
+    }
+  })();
+
+  return anexoAtestadoColumnReadyPromise;
+}
 
 async function garantirColunaEndereco() {
   if (enderecoColumnAvailable === true) return true;
@@ -63,6 +91,7 @@ async function getColaboradorById(id) {
        c.id          AS cargo,
        c.cargo       AS nomeCargo,
        c.idsetor  AS setor,
+       nv.categoria AS nomeSetor,
        f.empresaContrato,
        f.cpf,
        f.rg,
@@ -83,6 +112,7 @@ async function getColaboradorById(id) {
             LEFT JOIN tb_func_interrupto fi
                   ON f.id = fi.id_func
                   AND CURRENT_DATE BETWEEN fi.datainicio AND fi.datafinal
+                  AND fi.status = 'aprovado'
               WHERE f.id = ?
                 ORDER BY fi.datainicio DESC
                   LIMIT 1;`,
@@ -305,18 +335,27 @@ async function buscarColaboradoresDisponiveis(dataDia) {
       f.nome,
       CONCAT(SUBSTRING_INDEX(f.nome, ' ', 1), ' ', LEFT(SUBSTRING_INDEX(f.nome, ' ', -1), 1), '.') AS nome_formatado,
       IFNULL(fi.motivo, '') AS motivo,
+      EXISTS (
+        SELECT 1
+        FROM tb_func_interrupto fip
+        WHERE fip.id_func = f.id
+          AND fip.datainicio = (SELECT ref_date FROM params)
+          AND fip.datafinal = (SELECT ref_date FROM params)
+          AND fip.motivo = 'Falta Indevida'
+          AND fip.status = 'avaliar'
+      ) AS falta_indevida_pendente,
       CASE 
         WHEN exf.data_demissional IS NOT NULL THEN 'desligado'
         ELSE ''
       END AS contrato,
       IF(DATE_FORMAT(f.nascimento, '%m-%d') = DATE_FORMAT((SELECT ref_date FROM params), '%m-%d'), 'aniver', '') AS aniver,
       CASE
-		  WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
-		  WHEN c.idsetor IN (5, 6, 10) THEN 'lider'
-		  WHEN c.idsetor = 1 AND f.cargo NOT IN (12, 13, 31, 32) THEN 'producao'
-		  WHEN c.idsetor = 12 THEN 'terceiro'
-		  ELSE ''
-		END AS funcao,
+        WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
+        WHEN c.idsetor IN (5, 6, 10) THEN 'lider'
+        WHEN c.idsetor = 1 AND f.cargo NOT IN (12, 13, 31, 32) THEN 'producao'
+        WHEN c.idsetor = 12 THEN 'terceiro'
+        ELSE ''
+		  END AS funcao,
       CASE
         WHEN spf.status_score IS NULL THEN 'falta'
         WHEN spf.status_score = 3 THEN 'agendado'
@@ -329,7 +368,10 @@ async function buscarColaboradoresDisponiveis(dataDia) {
     LEFT JOIN tb_cargos c ON f.cargo = c.id 
     LEFT JOIN tb_setores nv ON c.idsetor = nv.id_catnvl
     LEFT JOIN params p ON 1=1
-    LEFT JOIN tb_func_interrupto fi ON f.id = fi.id_func AND p.ref_date BETWEEN fi.datainicio AND fi.datafinal
+    LEFT JOIN tb_func_interrupto fi
+      ON f.id = fi.id_func
+     AND p.ref_date BETWEEN fi.datainicio AND fi.datafinal
+     AND fi.status = 'aprovado'
     LEFT JOIN entrada_func exf ON f.id = exf.idfuncionario
     LEFT JOIN score_por_func spf ON f.id = spf.idfuncionario
     WHERE 
@@ -354,7 +396,16 @@ async function buscarColaboradoresDisponiveis(dataDia) {
 }
 
 // Buscar por Data
-async function buscarColaboradoresEmOS(dataDia) {
+async function buscarColaboradoresEmOS(dataDia, opcoes = {}) {
+  const limite = Number.isFinite(Number(opcoes.limit)) && Number(opcoes.limit) > 0
+    ? Math.min(Number(opcoes.limit), 100)
+    : 1000000;
+  const offset = Number.isFinite(Number(opcoes.offset)) && Number(opcoes.offset) >= 0
+    ? Number(opcoes.offset)
+    : 0;
+  const busca = String(opcoes.busca || "").trim();
+  const buscaLike = `%${busca}%`;
+
   const sql = `
   WITH params AS (
     SELECT DATE(?) AS ref_date
@@ -435,11 +486,53 @@ async function buscarColaboradoresEmOS(dataDia) {
         FROM funcionarios_contem_integracao f2
         GROUP BY f2.idfuncionario, f2.idempresa
     )
+  ),
+
+  os_filtradas AS (
+    SELECT
+        o.id_OSs,
+        COUNT(DISTINCT fno.id) AS total_colaboradores_dia
+    FROM tb_obras o
+    JOIN tb_empresa e           ON e.id_empresas = o.id_empresa
+    LEFT JOIN tb_cidades c      ON c.id_cidades = o.id_cidade
+    LEFT JOIN funcionarios resp ON resp.id = o.id_responsavel
+    LEFT JOIN funcionario_na_os fno
+           ON fno.id_OS = o.id_OSs
+          AND fno.data = (SELECT ref_date FROM params)
+    LEFT JOIN funcionarios f    ON fno.idfuncionario = f.id
+    WHERE
+      (
+           ( (SELECT ref_date FROM params) < CURDATE() AND fno.id IS NOT NULL )
+        OR ( (SELECT ref_date FROM params) >= CURDATE() AND o.statuss <> 4 )
+      )
+      AND (
+        ? = ''
+        OR CAST(o.id_OSs AS CHAR) LIKE ?
+        OR IFNULL(o.descricao, '') LIKE ?
+        OR IFNULL(e.nome, '') LIKE ?
+        OR IFNULL(c.nome, '') LIKE ?
+        OR IFNULL(resp.nome, '') LIKE ?
+        OR IFNULL(f.nome, '') LIKE ?
+      )
+    GROUP BY o.id_OSs
+  ),
+
+  os_paginadas AS (
+    SELECT
+      id_OSs,
+      total_colaboradores_dia,
+      COUNT(*) OVER() AS total_os_filtradas
+    FROM os_filtradas
+    ORDER BY
+      CASE WHEN total_colaboradores_dia > 0 THEN 0 ELSE 1 END,
+      id_OSs DESC
+    LIMIT ? OFFSET ?
   )
 
   SELECT 
       ANY_VALUE(fno.id) AS idNaOS, 
       o.id_OSs,
+      ANY_VALUE(op.total_os_filtradas) AS total_os_filtradas,
       ANY_VALUE(CASE o.statuss 
           WHEN 0 THEN 'Sem responsavel' 
           WHEN 1 THEN 'Aguardando' 
@@ -465,17 +558,14 @@ async function buscarColaboradoresEmOS(dataDia) {
         IF(DATE_FORMAT(f.nascimento,'%M %D') = DATE_FORMAT((SELECT ref_date FROM params),'%M %D'), 'aniver', '')
       ) AS aniver,
       ANY_VALUE(IFNULL(f.nome, '')) AS nome, 
-
-      ANY_VALUE(
-        CASE nv.id_catnvl 
-          WHEN 10 THEN 'encarregado' 
-          WHEN 5  THEN 'lider' 
-          WHEN 6  THEN 'lider' 
-          WHEN 1  THEN 'producao' 
-          WHEN 12 THEN 'terceiro' 
-          ELSE '' 
-        END
-      ) AS funcao, 
+  
+      CASE
+        WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
+        WHEN cc.idsetor IN (5, 6, 10) THEN 'lider'
+        WHEN cc.idsetor = 1 AND f.cargo NOT IN (12, 13, 31, 32) THEN 'producao'
+        WHEN cc.idsetor = 12 THEN 'terceiro'
+        ELSE ''
+		  END AS funcao, 
 
       ANY_VALUE(
         CASE fno.supervisor 
@@ -503,9 +593,20 @@ async function buscarColaboradoresEmOS(dataDia) {
         END
       ) AS status_integracao,
 
+      ANY_VALUE(EXISTS (
+        SELECT 1
+        FROM tb_func_interrupto fip
+        WHERE fip.id_func = f.id
+          AND fip.datainicio = (SELECT ref_date FROM params)
+          AND fip.datafinal = (SELECT ref_date FROM params)
+          AND fip.motivo = 'Falta Indevida'
+          AND fip.status = 'avaliar'
+      )) AS falta_indevida_pendente,
+
       COUNT(fno2.id) AS total_colaboradores
 
-  FROM tb_obras o 
+  FROM os_paginadas op
+  JOIN tb_obras o              ON o.id_OSs = op.id_OSs
   JOIN tb_empresa e           ON e.id_empresas = o.id_empresa 
   LEFT JOIN tb_cidades c      ON c.id_cidades = o.id_cidade 
   LEFT JOIN funcionarios resp  ON resp.id = o.id_responsavel
@@ -513,15 +614,12 @@ async function buscarColaboradoresEmOS(dataDia) {
   LEFT JOIN funcionario_na_os fno 
          ON fno.id_OS = o.id_OSs 
         AND fno.data  = (SELECT ref_date FROM params)
-  LEFT JOIN funcionarios f     ON fno.idfuncionario = f.id 
+  LEFT JOIN funcionarios f ON fno.idfuncionario = f.id 
   LEFT JOIN tb_setores nv ON f.idnvlacesso = nv.id_catnvl
+  LEFT JOIN tb_cargos cc ON f.cargo = cc.id 
   LEFT JOIN exame_critico ec   ON ec.idfuncionario = f.id
   LEFT JOIN ultima_integracao ui ON ui.idfuncionario = f.id AND ui.idempresa = e.id_empresas
   LEFT JOIN funcionario_na_os fno2 ON fno2.id_OS = o.id_OSs AND fno2.data = (SELECT ref_date FROM params)
-
-  WHERE 
-        ( (SELECT ref_date FROM params) <  CURDATE() AND fno.id IS NOT NULL )
-     OR ( (SELECT ref_date FROM params) >= CURDATE() AND o.statuss <> 4 )
 
   GROUP BY 
       o.id_OSs, f.id
@@ -532,8 +630,30 @@ async function buscarColaboradoresEmOS(dataDia) {
       f.nome;
   `;
 
-  const [rows] = await connection.query(sql, [dataDia]);
-  return rows;
+  const [rows] = await connection.query(sql, [
+    dataDia,
+    busca,
+    buscaLike,
+    buscaLike,
+    buscaLike,
+    buscaLike,
+    buscaLike,
+    buscaLike,
+    limite,
+    offset
+  ]);
+
+  const ids = new Set(rows.map(row => row.id_OSs).filter(Boolean));
+  const total = Number(rows?.[0]?.total_os_filtradas || 0);
+
+  return {
+    dados: rows,
+    total,
+    limit: limite,
+    offset,
+    quantidade: ids.size,
+    busca
+  };
 }
 
 // Listar todos colaboradores responsavel de OSs
@@ -1117,31 +1237,166 @@ async function removerSupervisorAtual(osID, dataDia) {
   return result.affectedRows;
 }
 
-async function inserirAtestado(periodoinicial, periodofinal, atestado, descricaoatest, idColab) {
+async function inserirAtestado(periodoinicial, periodofinal, atestado, descricaoatest, idColab, anexoPdf = null) {
+  await garantirColunaAnexoAtestado();
+
   const insertSql = `
     INSERT INTO tb_func_interrupto
-    (datainicio, datafinal, motivo, descricao, id_func, status)
-    VALUES (?, ?, ?, ?, ?, 'aprovado')
+    (datainicio, datafinal, motivo, descricao, id_func, status, anexo_pdf)
+    VALUES (?, ?, ?, ?, ?, 'aprovado', ?)
   `;
 
   return connection.query(insertSql, [
-    periodoinicial, periodofinal, atestado, descricaoatest, idColab
+    periodoinicial, periodofinal, atestado, descricaoatest, idColab, anexoPdf
   ]);
 }
 
+async function buscarInterrupcoesSobrepostas(dataInicio, dataFinal, idColab) {
+  await garantirColunaAnexoAtestado();
+
+  const [rows] = await connection.query(`
+    SELECT id_funcInterrups, motivo, datainicio, datafinal, status
+    FROM tb_func_interrupto
+    WHERE id_func = ?
+      AND COALESCE(status, '') <> 'reprovado'
+      AND datainicio <= ?
+      AND datafinal >= ?
+    ORDER BY datainicio ASC, id_funcInterrups ASC
+    LIMIT 1
+  `, [idColab, dataFinal, dataInicio]);
+
+  return rows[0] || null;
+}
+
+async function inserirFaltaPendente(data, idColab) {
+  await garantirColunaAnexoAtestado();
+
+  const [result] = await connection.query(`
+    INSERT INTO tb_func_interrupto
+      (datainicio, datafinal, motivo, descricao, id_func, status, anexo_pdf)
+    VALUES (?, ?, 'Falta Indevida', 'Aguardando análise do RH', ?, 'avaliar', NULL)
+  `, [data, data, idColab]);
+
+  return result.insertId;
+}
+
+async function buscarFaltaIndevidaPendente(data, idColab) {
+  await garantirColunaAnexoAtestado();
+
+  const [rows] = await connection.query(`
+    SELECT id_funcInterrups, datainicio, datafinal
+    FROM tb_func_interrupto
+    WHERE id_func = ?
+      AND datainicio = ?
+      AND datafinal = ?
+      AND motivo = 'Falta Indevida'
+      AND status = 'avaliar'
+    ORDER BY id_funcInterrups DESC
+    LIMIT 1
+  `, [idColab, data, data]);
+
+  return rows[0] || null;
+}
+
 async function getHistoricoAtestar(id) {
+  await garantirColunaAnexoAtestado();
+
   const [rows] = await connection.execute(
     `SELECT 
       id_funcInterrups, 
       motivo, 
       datainicio, 
       datafinal, 
-      IFNULL(descricao, '') AS descricao 
+      IFNULL(descricao, '') AS descricao,
+      IFNULL(anexo_pdf, '') AS anexo_pdf,
+      IFNULL(status, 'aprovado') AS status,
+      (
+        SELECT a.id_aprovacao
+        FROM sistema_aprovacoes a
+        WHERE a.entidade_tabela = 'tb_func_interrupto'
+          AND a.entidade_id = tb_func_interrupto.id_funcInterrups
+          AND a.tipo = 'falta_indevida'
+          AND a.status = 'pendente'
+        ORDER BY a.id_aprovacao DESC
+        LIMIT 1
+      ) AS id_aprovacao
         FROM tb_func_interrupto 
-          WHERE id_func = ? AND status = 'aprovado'`,
+          WHERE id_func = ?
+            AND status IN ('aprovado', 'avaliar', 'reprovado')
+          ORDER BY datainicio DESC, id_funcInterrups DESC`,
     [id]
   );
   return rows;
+}
+
+async function getAnexoAtestado(id) {
+  await garantirColunaAnexoAtestado();
+
+  const [rows] = await connection.execute(
+    `SELECT id_funcInterrups, anexo_pdf
+       FROM tb_func_interrupto
+      WHERE id_funcInterrups = ?
+      LIMIT 1`,
+    [id]
+  );
+
+  return rows[0] || null;
+}
+
+async function atualizarFaltaPendente(idInterrupcao, { motivo, descricao, status, anexoPdf = null }) {
+  await garantirColunaAnexoAtestado();
+
+  const [result] = await connection.query(`
+    UPDATE tb_func_interrupto
+       SET motivo = ?,
+           descricao = ?,
+           status = ?,
+           anexo_pdf = ?
+     WHERE id_funcInterrups = ?
+       AND status = 'avaliar'
+  `, [motivo, descricao, status, anexoPdf, idInterrupcao]);
+
+  return result.affectedRows > 0;
+}
+
+async function getResumoAnualColaborador(id, ano = new Date().getFullYear()) {
+  await FeriadosModel.garantirTabela();
+  const inicioAno = `${ano}-01-01`;
+  const inicioProximoAno = `${ano + 1}-01-01`;
+
+  const [trabalhados, interrupcoes, feriados] = await Promise.all([
+    connection.execute(
+      `SELECT DISTINCT DATE_FORMAT(fno.data, '%Y-%m-%d') AS dia
+         FROM funcionario_na_os fno
+        WHERE fno.idfuncionario = ?
+          AND fno.data >= ?
+          AND fno.data < ?
+        ORDER BY dia ASC`,
+      [id, inicioAno, inicioProximoAno]
+    ),
+    connection.execute(
+      `SELECT
+          DATE_FORMAT(datainicio, '%Y-%m-%d') AS inicio,
+          DATE_FORMAT(datafinal, '%Y-%m-%d') AS fim,
+          LOWER(TRIM(motivo)) AS motivo,
+          IFNULL(descricao, '') AS descricao
+         FROM tb_func_interrupto
+        WHERE id_func = ?
+          AND status = 'aprovado'
+          AND datainicio < ?
+          AND datafinal >= ?
+        ORDER BY datainicio ASC`,
+      [id, inicioProximoAno, inicioAno]
+    ),
+    FeriadosModel.listarFeriados(ano)
+  ]);
+
+  return {
+    ano,
+    trabalhados: trabalhados[0].map(row => row.dia),
+    interrupcoes: interrupcoes[0],
+    feriados
+  };
 }
 
 async function getExportarDados(dataDia, osID) {
@@ -1239,10 +1494,14 @@ async function getHallExperienciaConnectPear() {
         )
         SEPARATOR ','
       ) AS conquistas,
-    IFNULL(
-      viagem.cidades,
-      0
+IFNULL(
+    viagem.cidades,
+    0
   ) AS cidades_atendidas,
+   IFNULL(
+    estados.estados,
+    0
+) AS estados_atendidos,
    IFNULL(
     multi.clientes,
     0
@@ -1313,6 +1572,23 @@ IFNULL(
     ) viagem
 
         ON viagem.idfuncionario = f.id
+    LEFT JOIN (
+
+        SELECT
+            fno.idfuncionario,
+            COUNT(
+                DISTINCT NULLIF(UPPER(TRIM(c.estado)), '')
+            ) AS estados
+        FROM funcionario_na_os fno
+        INNER JOIN tb_obras o
+            ON o.id_OSs = fno.id_OS
+        INNER JOIN tb_cidades c
+            ON c.id_cidades = o.id_cidade
+        GROUP BY fno.idfuncionario
+
+    ) estados
+
+        ON estados.idfuncionario = f.id
     WHERE
 
       f.id <> 999
@@ -1464,8 +1740,14 @@ module.exports = {
   definirSupervisor,
   removerSupervisorAtual,
   getHistoricoAtestar,
+  getAnexoAtestado,
+  atualizarFaltaPendente,
+  getResumoAnualColaborador,
   getExportarDados,
   inserirAtestado,
+  buscarInterrupcoesSobrepostas,
+  inserirFaltaPendente,
+  buscarFaltaIndevidaPendente,
   getHistoricoColabPorEmpresa,
   atualizarFotoPerfil,
   incrementarVersaoFoto,

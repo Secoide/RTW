@@ -23,6 +23,25 @@
                 <div class="resumoDados">
                     <span id="nomeCompletoResumo" class="nomeCompleto"></span>
                     <span id="cargoResumo" class="cargo"></span>
+                    <div id="resumoAnualColab" class="resumoAnualColab" data-roles="99" hidden>
+                        <div class="resumoAnualCabecalho">
+                            <span>
+                                <span id="resumoAnualAno">Resumo anual</span>
+                                <button id="btnGuiaResumoAnual" class="resumoAnualAjuda" type="button"
+                                    title="Entender o resumo anual" aria-label="Entender o resumo anual">?</button>
+                            </span>
+                            <strong id="resumoAnualPercentual">0,00%</strong>
+                        </div>
+                        <div id="resumoAnualBarra" class="resumoAnualBarra" role="img"></div>
+                        <div class="resumoAnualRodape">
+                            <span id="resumoAnualContagem">0/365 dias | 0 avaliados | 0 positivos | 0 a apurar</span>
+                            <span class="resumoAnualNota">amarelos fora do calculo</span>
+                        </div>
+                        <div id="resumoAnualAlerta" class="resumoAnualAlerta" hidden>
+                            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                            Percentual abaixo do normal: avaliar desempenho e contexto dos registros.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,65 +287,104 @@
                         </div>
                     </div>
                     <div class="painel_atestar">
-                        <p>Atestar Colaborador</p>
-                        <form id="form_atestar" method="POST">
-                            <div class="div_atestar">
-                                <select id="motivo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
-                                    name="atestado" required="required">
-                                    <option value="" disabled selected hidden>Selecione o Atestado...</option>
-                                    <option value="Ferias">Férias</option>
-                                    <option value="Saude">Atestado Saúde</option>
-                                    <option value="Paternidade">Licença Paternidade</option>
-                                    <option value="Maternidade">Licença Maternidade</option>
-                                    <option value="Afastamento">Afastamento</option>
-                                </select>
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; gap:10px;">
-                                    <div>
-                                        <label for="datainicio">Data Inicial</label>
-                                        <input id="datainicio" class="tbx_teste glass" type="date" name="periodoinicial"
-                                            title="" style="width: 120px;">
-                                    </div>
-                                    <div>
-                                        <label for="datafinal">Data Final</label>
-                                        <input id="datafinal" class="tbx_teste glass" type="date" name="periodofinal"
-                                            title="" style="width: 120px;">
-                                    </div>
-                                </div>
+                        <div class="atestar-cabecalho">
+                            <div>
+                                <span class="atestar-kicker"><i class="fa-solid fa-calendar-check"></i> CONTROLE DE AUSÊNCIAS</span>
+                                <h3>Atestados, licenças e férias</h3>
+                                <p>Registre um período por vez. Períodos sobrepostos são bloqueados automaticamente.</p>
                             </div>
-                            <textarea id="descricao" class="tbx_teste glass" name="descricaoatest"
-                                placeholder="Descreva algo, se necessário"
-                                style="width: auto; padding: 4px; resize: none;"></textarea>
-                            <div class="p_acoes p_padrao linha_padrao">
+                            <i class="fa-solid fa-shield-heart atestar-cabecalho-icone" aria-hidden="true"></i>
+                        </div>
+
+                        <form id="form_atestar" class="atestar-form" method="POST" novalidate>
+                            <div class="div_atestar">
+                                <label class="atestar-campo atestar-campo-motivo" for="motivo">
+                                    <span>Tipo de registro</span>
+                                    <select id="motivo" class="cbx_teste glass info_padrao opcoes input_obrigatorio"
+                                        name="atestado" required="required">
+                                        <option value="" disabled selected hidden>Selecione o tipo...</option>
+                                        <option value="Ferias">Férias</option>
+                                        <option value="Saude">Atestado Saúde</option>
+                                        <option value="Paternidade">Licença Paternidade</option>
+                                        <option value="Maternidade">Licença Maternidade</option>
+                                        <option value="Afastamento">Afastamento</option>
+                                    </select>
+                                </label>
+                                <label class="atestar-campo" for="datainicio">
+                                    <span>Data inicial</span>
+                                    <input id="datainicio" class="tbx_teste glass" type="date" name="periodoinicial" required>
+                                </label>
+                                <label class="atestar-campo" for="datafinal">
+                                    <span>Data final</span>
+                                    <input id="datafinal" class="tbx_teste glass" type="date" name="periodofinal" required>
+                                </label>
+                            </div>
+                            <label class="atestar-campo atestar-campo-descricao" for="descricao">
+                                <span>Descrição <small>(opcional)</small></span>
+                                <textarea id="descricao" class="tbx_teste glass" name="descricaoatest"
+                                    maxlength="100" placeholder="Inclua uma observação curta, se necessário"></textarea>
+                            </label>
+                            <div class="atestar-form-acoes">
+                                <span id="atestar-form-status" role="status" aria-live="polite"></span>
                                 <input class="bt_teste glass" data-roles="4,6,7,99" type="submit" name="salvarAtestado"
-                                    value="Salvar">
+                                    value="Salvar registro">
                             </div>
                             <input id="id" type="hidden" name="idColab" value="">
                         </form>
-                        <h4>Historico de Licenças</h4>
-                        <div class="tb_padraoGeral">
-                            <table id="tb_historico_atestar" class="linha_padrao tb_zebrada">
-                                <thead class="tb_padrao_conteudo">
-                                    <tr class="rh_tb_lin_colob">
-                                        <th style="display:none;">ID</th>
-                                        <th>Motivo</th>
-                                        <th>Data Inicio</th>
-                                        <th>Data Final</th>
-                                        <th>Descrição</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody class="tb_padrao_conteudo">
-                                    <!-- Linhas serão adicionadas via JS -->
-                                </tbody>
-                            </table>
-                        </div>
+
+                        <section class="atestar-secao atestar-secao-pendentes" id="atestar-pendentes-secao" hidden>
+                            <div class="atestar-secao-cabecalho">
+                                <div>
+                                    <span class="atestar-kicker atestar-kicker-alerta"><i class="fa-solid fa-hourglass-half"></i> AGUARDANDO ANÁLISE</span>
+                                    <h4>Pendências</h4>
+                                </div>
+                                <span id="atestar-pendentes-count" class="atestar-contador">0</span>
+                            </div>
+                            <div class="tb_padraoGeral atestar-tabela-wrap">
+                                <table id="tb_pendentes_atestar" class="tb_zebrada">
+                                    <thead>
+                                        <tr>
+                                            <th>Motivo</th>
+                                            <th>Início</th>
+                                            <th>Final</th>
+                                            <th>Descrição</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section class="atestar-secao">
+                            <div class="atestar-secao-cabecalho">
+                                <div>
+                                    <span class="atestar-kicker"><i class="fa-solid fa-clock-rotate-left"></i> REGISTROS SALVOS</span>
+                                    <h4>Histórico de licenças</h4>
+                                </div>
+                                <span id="atestar-historico-count" class="atestar-contador">0</span>
+                            </div>
+                            <div class="tb_padraoGeral atestar-tabela-wrap">
+                                <table id="tb_historico_atestar" class="tb_zebrada">
+                                    <thead>
+                                        <tr>
+                                            <th>Motivo</th>
+                                            <th>Início</th>
+                                            <th>Final</th>
+                                            <th>Descrição</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
-                    <div class="painel_conquistas" data-roles="6, 99">
+                    <div class="painel_conquistas">
 
                         <p>Conquistas e Medalhas</p>
 
-                        <div class="painel_addConquista" data-roles="99">
+                        <div class="painel_addConquista" data-roles="6,7,99">
 
                             <select id="cbxConquista" class="cbx_teste glass info_padrao opcoes">
 
@@ -437,6 +495,16 @@
 
                                 </optgroup>
 
+                                <optgroup label="Especialidades">
+                                    <option value="COMPRAS_ESTRATEGICAS">
+                                        🪙 Compras Estratégicas
+                                    </option>
+
+                                    <option value="DOCUMENTADOR_TECNICO">
+                                        🖊️ Documentador Técnico
+                                    </option>
+                                </optgroup>
+
                             </select>
 
                             <label class="campoDataConquista" for="dataConquista">
@@ -454,6 +522,16 @@
 
                         <div id="listaConquistasColaborador" class="painel_conquistasGrid">
                         </div>
+
+                        <section class="painel_conquistasAutomaticas" aria-labelledby="tituloMedalhasAutomaticas">
+                            <div class="cabecalhoConquistasAutomaticas">
+                                <p id="tituloMedalhasAutomaticas">Medalhas automáticas</p>
+                                <span>Atualizadas conforme os dados do colaborador</span>
+                            </div>
+
+                            <div id="listaMedalhasAutomaticas" class="painel_conquistasGrid painel_conquistasGridAutomaticas">
+                            </div>
+                        </section>
 
                     </div>
                     <div class="painel_estatistica">

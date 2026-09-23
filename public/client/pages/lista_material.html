@@ -6,12 +6,7 @@
                 <option value="">Selecione uma OS</option>
             </select>
 
-            <button id="btnNovoMaterial" class="bt_padrao bt_cad material-detalhe-action">+ Novo Material</button>
-            <button id="btnReloadMaterial" class="bt_padrao bt_atualizar material-detalhe-action">Atualizar</button>
-            <button id="btnExportarLista" class="bt_padrao bt_atualizar material-detalhe-action">Exportar</button>
-            <button id="btnExportarListaPDF" class="bt_padrao bt_atualizar material-detalhe-action">
-                <i class="fa-solid fa-file-pdf"></i> PDF
-            </button>
+            <div id="materialAtalhosSetor" class="material-atalhos-setor" hidden></div>
         </div>
 
         <div class="right-painel">
@@ -58,6 +53,19 @@
 
         <div class="toolbar-busca">
             <input type="search" id="searchMaterial" placeholder="Buscar material...">
+            <div class="material-top-actions">
+                <button id="btnNovoMaterial" class="bt_padrao bt_cad material-detalhe-action">+ Novo Material</button>
+                <button id="btnReloadMaterial" class="bt_padrao bt_atualizar material-detalhe-action">Atualizar</button>
+                <button id="btnExportarListaPDF" class="bt_padrao bt_atualizar material-detalhe-action material-icon-action" title="Exportar PDF">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </button>
+                <button id="btnCotarFornecedorLista" class="bt_padrao bt_atualizar material-detalhe-action material-icon-action" title="Cotar materiais selecionados">
+                    <i class="fa-solid fa-file-signature"></i>
+                </button>
+                <button id="btnExportarLista" class="bt_padrao bt_atualizar material-detalhe-action material-icon-action" title="Exportar tabela">
+                    <i class="fa-solid fa-table"></i>
+                </button>
+            </div>
             <select id="filtroCategoriaMaterial" title="Filtrar por categoria">
                 <option value="">Todas categorias</option>
             </select>
@@ -69,18 +77,22 @@
                 <span class="info">Separado: <b id="qtdSeparada">0</b></span>
                 <span class="danger">Faltante: <b id="qtdFaltante">0</b></span>
             </div>
-            <div class="bt_submenu">
-                <label style="font-size: 11px; width: 150px;">
+            <div class="bt_submenu material-lista-opcoes">
+                <label class="material-toggle-imagens">
                     <input type="checkbox" id="chkMostrarImagemMaterial">
                     Mostrar imagens
                 </label>
                 <button id="btnInfoFornecedoresLista" class="bt_padrao bt_atualizar" type="button" title="Resumo dos fornecedores cotados">
                     <i class="fa-solid fa-circle-info"></i> Fornecedores
                 </button>
+                <button id="btnRadarCotacaoLista" class="bt_padrao bt_atualizar material-radar-toggle" type="button" title="Radar de cota&ccedil;&atilde;o">
+                    <i class="fa-solid fa-bullseye"></i>
+                </button>
             </div>
         </div>
 
         <div id="resumoFornecedoresSelecionados" class="materiais-fornecedores-resumo" hidden></div>
+        <aside id="radarCotacaoLista" class="material-radar-panel" hidden></aside>
 
         <div class="table-container table-padrao">
             <table id="tableMaterial">

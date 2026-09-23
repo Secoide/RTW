@@ -10,6 +10,7 @@ export const materialState = {
   listaFornecedores: [],
   listaResponsaveis: [],
   listaOSDisponiveis: [],
+  listasSetorUsuario: { estagios: [], listas: [] },
   listasOS: [],
   listaSelecionada: null,
   filtroStatusAtual: "",

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo_GS.png">
+  <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
+  <title>ConnectPear Engenharia a Campo</title>
+  <link rel="stylesheet" type="text/css" href="/css/diagramas.css">
+  <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="eng-campo-app">
+  <aside class="eng-campo-menu" aria-label="Menu Engenharia a Campo">
+    <a class="eng-campo-menu-item active" href="#dimensionamento" title="Dimensionamento" aria-label="Dimensionamento">
+      <i class="fa-solid fa-calculator"></i>
+    </a>
+    <a class="eng-campo-menu-item" href="#spda" title="SPDA" aria-label="SPDA">
+      <i class="fa-solid fa-shield-halved"></i>
+    </a>
+    <a class="eng-campo-menu-item" href="#diagrama" title="Diagrama" aria-label="Diagrama">
+      <i class="fa-solid fa-diagram-project"></i>
+    </a>
+  </aside>
+
+  <main class="eng-campo-page" aria-label="Engenharia a Campo">
+    <section id="dimensionamento" class="eng-campo-section active" aria-label="Dimensionamento">
+      <nav class="eng-campo-submenu" aria-label="Ferramentas de dimensionamento">
+        <button id="btnReferenciaServico" class="eng-campo-submenu-btn" type="button" title="Referencia de servico" aria-label="Referencia de servico">
+          <i class="fa-solid fa-file-circle-plus"></i>
+        </button>
+        <button id="btnCriarPainel" class="eng-campo-submenu-btn" type="button" title="Criar painel" aria-label="Criar painel" hidden>
+          <i class="fa-regular fa-square"></i>
+        </button>
+        <button id="btnCriarAlimentador" class="eng-campo-submenu-btn" type="button" title="Adicionar alimentador" aria-label="Adicionar alimentador" hidden>
+          <i class="fa-solid fa-code-branch"></i>
+        </button>
+        <button id="btnCriarRede" class="eng-campo-submenu-btn" type="button" title="Adicionar rede" aria-label="Adicionar rede" hidden>
+          <i class="fa-solid fa-network-wired"></i>
+        </button>
+        <button id="btnCriarEmergencia" class="eng-campo-submenu-btn" type="button" title="Adicionar luz de emergencia" aria-label="Adicionar luz de emergencia" hidden>
+          <i class="fa-solid fa-lightbulb"></i>
+        </button>
+      </nav>
+
+      <div id="engCampoCanvas" class="eng-campo-canvas">
+        <svg id="engCampoLinhas" class="eng-campo-linhas" aria-hidden="true"></svg>
+        <article id="referenciaServicoResumo" class="referencia-servico-resumo" hidden></article>
+        <div id="engCampoCursor" class="eng-campo-cursor" hidden>
+          <i class="fa-regular fa-square"></i>
+        </div>
+        <div id="painelContextMenu" class="eng-context-menu" hidden>
+          <button type="button" id="btnRemoverPainelContext">
+            <i class="fa-solid fa-trash"></i>
+            Remover
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="referenciaServicoDialog" class="eng-campo-dialog">
+    <form id="referenciaServicoForm" method="dialog">
+      <header>
+        <strong>Referencia de servico</strong>
+        <button type="button" id="btnFecharReferenciaServico" title="Fechar" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <div class="referencia-servico-grid">
+        <label>
+          Nome do servico
+          <input name="nomeServico" type="text" placeholder="Ex: QDF-TI / SPDA predial">
+        </label>
+        <label>
+          Cliente / local
+          <input name="local" type="text" placeholder="Ex: Sala tecnica">
+        </label>
+        <label>
+          Entrada principal
+          <select name="entradaPrincipal">
+            <option value="380/220V - 3F+N+T">380/220V - 3F+N+T</option>
+            <option value="220V - 2F+T">220V - 2F+T</option>
+            <option value="127V - F+N+T">127V - F+N+T</option>
+            <option value="Personalizada">Personalizada</option>
+          </select>
+        </label>
+        <label>
+          Tensao fase-fase (V)
+          <input name="tensaoFF" type="number" min="0" step="1" value="380">
+        </label>
+        <label>
+          Tensao fase-neutro (V)
+          <input name="tensaoFN" type="number" min="0" step="1" value="220">
+        </label>
+        <label>
+          Frequencia (Hz)
+          <input name="frequencia" type="number" min="0" step="1" value="60">
+        </label>
+        <label>
+          Fator de potencia
+          <input name="fatorPotencia" type="number" min="0.01" max="1" step="0.01" value="0.92">
+        </label>
+        <label>
+          Temperatura ambiente (°C)
+          <input name="temperatura" type="number" step="1" value="30">
+        </label>
+        <label>
+          Metodo de instalacao
+          <input name="metodoInstalacao" type="text" placeholder="Ex: eletrocalha / eletroduto / calha">
+        </label>
+        <label>
+          Queda maxima (%)
+          <input name="quedaMaxima" type="number" min="0" step="0.01" value="5">
+        </label>
+        <label>
+          Norma base
+          <select name="normaBase">
+            <option value="NBR 5410">NBR 5410</option>
+            <option value="NBR 5419">NBR 5419</option>
+            <option value="Referencia interna">Referencia interna</option>
+          </select>
+        </label>
+        <label>
+          Responsavel
+          <input name="responsavel" type="text" placeholder="Projetista / tecnico">
+        </label>
+      </div>
+
+      <footer>
+        <button type="button" id="btnLimparReferenciaServico">Limpar</button>
+        <button type="submit">Salvar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="painelServicoDialog" class="eng-campo-dialog eng-campo-dialog-sm">
+    <form id="painelServicoForm" method="dialog">
+      <header>
+        <strong id="painelServicoTitulo">Novo painel</strong>
+        <button type="button" id="btnFecharPainelServico" title="Fechar" aria-label="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <div class="referencia-servico-grid painel-servico-grid">
+        <label>
+          Tipo
+          <select name="tipo">
+            <option value="ENTRADA">Entrada/Alimentacao</option>
+            <option value="QGBT">QGBT</option>
+            <option value="QDFL">QDFL</option>
+            <option value="QDF">QDF</option>
+            <option value="QD">QD</option>
+            <option value="CD">CD</option>
+            <option value="QDC">QDC</option>
+            <option value="QTA">QTA</option>
+            <option value="RACK">RACK</option>
+            <option value="NOBREAK">NOBREAK</option>
+            <option value="CENTRAL_ALARME_INCENDIO">Central Alarme Incendio</option>
+            <option value="CENTRAL_LUZ_EMERGENCIA">Central Luz Emergencia</option>
+          </select>
+        </label>
+        <label>
+          Nome / tag
+          <input name="tag" type="text" placeholder="Ex: QGBT / QDF-01" required>
+        </label>
+      </div>
+
+      <footer>
+        <button type="submit">Criar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script type="module" src="/client/js/main-eng-campo.js"></script>
+</body>
+
+</html>

@@ -23,7 +23,7 @@ async function listar(req, res) {
 
 async function proximoNumeroSerie(req, res) {
   try {
-    const result = await PaineisService.gerarProximoNumeroSerie(req.query.ano);
+    const result = await PaineisService.gerarProximoNumeroSerie(req.query.ano, req.query.mes);
     res.json(result);
   } catch (err) {
     tratarErro(res, err);

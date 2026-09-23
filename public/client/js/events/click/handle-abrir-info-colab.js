@@ -10,9 +10,25 @@ import {
     preencherCbxCargo
 } from "../forms/populate-combobox.js";
 import { carregarConquistasColaborador, initaddConquistas} from "./handle-conquistas.js"
+import { carregarResumoAnualColaborador } from "../../utils/dom/preencher-resumo-anual-colab.js";
 
 function erroDeSessaoExpirada(error) {
     return error?.status === 401 || /401|sessao|session|nao autorizado|nÃ£o autorizado/i.test(error?.message || "");
+}
+
+function normalizarStatusResumo(status) {
+    const texto = String(status || 'ativo')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+    if (texto.includes('desligado')) return 'desligado';
+    if (texto.includes('ferias')) return 'ferias';
+    if (texto.includes('maternidade')) return 'maternidade';
+    if (texto.includes('paternidade')) return 'paternidade';
+    if (texto.includes('afast') || texto.includes('saude') || texto.includes('atestado')) return 'afastado';
+    if (texto.includes('avaliar')) return 'avaliar';
+    return 'ativo';
 }
 
 export function initAbrirInfoColabClick() {
@@ -128,7 +144,7 @@ export async function get_carregarPerfilUsuario(funcId) {
         $('.bt_menu[data-target=".painel_atestar"]').show();
 
         // ðŸ”¹ 5 - Resumo perfil
-        const statusPerfil = dados.motivo?.toLowerCase() || "ativo";
+        const statusPerfil = normalizarStatusResumo(dados.motivo);
 
         $('#nomeCompletoResumo').text(dados.nome);
         $('#cargoResumo').text(dados.nomeCargo);
@@ -138,7 +154,7 @@ export async function get_carregarPerfilUsuario(funcId) {
             .addClass(`statusIcon ${statusPerfil}`);
 
         $('.painel_resumoColab .painel_foto')
-            .removeClass('ativo inativo afastado')
+            .removeClass('ativo inativo avaliar ferias afastado paternidade maternidade desligado')
             .addClass(statusPerfil);
 
         // ðŸ”¹ 6 - Foto
@@ -172,6 +188,7 @@ export async function get_carregarPerfilUsuario(funcId) {
 
         initMaleta();
         preencherTabelaAtestar(dados.id);
+        await carregarResumoAnualColaborador(dados.id, dados.data_experiencia, dados.nomeSetor);
         await carregarConquistasColaborador(
             dados.id
         );

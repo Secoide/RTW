@@ -70,6 +70,32 @@ async function getEmpresaById(id) {
   return rows[0] || null;
 }
 
+// Listar colaboradores que possuem integração registrada na empresa
+async function getColaboradoresIntegradosByEmpresa(idEmpresa) {
+  const [rows] = await connection.query(`
+    SELECT
+      f.id AS id,
+      f.nome AS nome,
+      COALESCE(c.cargo, 'Função não informada') AS funcao,
+      DATEDIFF(
+        DATE_ADD(fci.datarealizado, INTERVAL fci.vencimento MONTH),
+        CURDATE()
+      ) AS dias_integracao
+    FROM funcionarios_contem_integracao fci
+    INNER JOIN (
+      SELECT MAX(id) AS id
+      FROM funcionarios_contem_integracao
+      GROUP BY idfuncionario, idempresa
+    ) ultima ON ultima.id = fci.id
+    JOIN funcionarios f ON f.id = fci.idfuncionario
+    LEFT JOIN tb_cargos c ON c.id = f.cargo
+    WHERE fci.idempresa = ?
+    ORDER BY f.nome ASC
+  `, [idEmpresa]);
+
+  return rows;
+}
+
 // Criar nova emrpesa
 async function createEmpresa(data) {
   const sql = `
@@ -185,6 +211,7 @@ async function removeCidadeFromEmpresa(idEmpresa, idCidade) {
 module.exports = {
   getEmpresa,
   getEmpresaById,
+  getColaboradoresIntegradosByEmpresa,
   createEmpresa,
   updateEmpresa,
   deleteEmpresa,

@@ -294,18 +294,28 @@ function preencherFormulario(preferencias) {
 }
 
 function lerFormulario() {
+  const preferenciasAtuais = carregarPreferencias();
+  const getValor = (id, fallback) => document.getElementById(id)?.value ?? fallback;
+  const getMarcado = (id, fallback) => document.getElementById(id)?.checked ?? fallback;
+  const getNumero = (id, fallback) => {
+    const valor = document.getElementById(id)?.value;
+    if (valor === undefined || valor === null || valor === "") return fallback;
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : fallback;
+  };
+
   return {
-    tema: document.getElementById("prefTema").value,
-    densidade: document.getElementById("prefDensidade").value,
-    animacoes: document.getElementById("prefAnimacoes").checked,
-    notificacoesOnline: document.getElementById("prefNotificacoesOnline").checked,
-    notificacoesProgramacao: document.getElementById("prefNotifProgramacao").checked,
-    notificacoesChat: document.getElementById("prefNotifChat").checked,
-    notificacoesAlertas: document.getElementById("prefNotifAlertas").checked,
-    notificacoesGerais: document.getElementById("prefNotifGerais").checked,
-    abrirChatOnline: document.getElementById("prefAbrirChatOnline").checked,
-    historicoChatDias: Number(document.getElementById("prefHistoricoChatDias").value || 10),
-    silenciarChatGlobal: document.getElementById("prefSilenciarChatGlobal").checked
+    tema: getValor("prefTema", preferenciasAtuais.tema),
+    densidade: getValor("prefDensidade", preferenciasAtuais.densidade),
+    animacoes: getMarcado("prefAnimacoes", preferenciasAtuais.animacoes),
+    notificacoesOnline: getMarcado("prefNotificacoesOnline", preferenciasAtuais.notificacoesOnline),
+    notificacoesProgramacao: getMarcado("prefNotifProgramacao", preferenciasAtuais.notificacoesProgramacao),
+    notificacoesChat: getMarcado("prefNotifChat", preferenciasAtuais.notificacoesChat),
+    notificacoesAlertas: getMarcado("prefNotifAlertas", preferenciasAtuais.notificacoesAlertas),
+    notificacoesGerais: getMarcado("prefNotifGerais", preferenciasAtuais.notificacoesGerais),
+    abrirChatOnline: getMarcado("prefAbrirChatOnline", preferenciasAtuais.abrirChatOnline),
+    historicoChatDias: getNumero("prefHistoricoChatDias", preferenciasAtuais.historicoChatDias),
+    silenciarChatGlobal: getMarcado("prefSilenciarChatGlobal", preferenciasAtuais.silenciarChatGlobal)
   };
 }
 

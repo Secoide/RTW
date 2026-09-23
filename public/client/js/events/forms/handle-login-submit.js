@@ -1,4 +1,4 @@
-import { login } from "../../services/api/auth-service.js";
+import { login, listarEmpresasAdminLogin } from "../../services/api/auth-service.js";
 import { salvarSessao } from "../../state/session.js";
 
 const LOGIN_LEMBRADO_KEY = "connectpear_login_lembrado";
@@ -23,6 +23,7 @@ export function initLoginForm() {
 
   initLoginHelpers();
   initAssociationNotice();
+  initAdminEmpresaLogin();
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -30,6 +31,7 @@ export function initLoginForm() {
 
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
+    const empresaSaasId = document.getElementById("adminEmpresaLogin")?.value || null;
 
     if (!username || !password) {
       Toast.fire({
@@ -41,18 +43,28 @@ export function initLoginForm() {
     }
 
     try {
-      const res = await login(username, password);
+      const res = await login(username, password, empresaSaasId);
 
       if (res.sucesso) {
         salvarLoginLembrado(username);
         salvarSessao(res.usuario);
         limparUltimaPaginaAposLogin();
-        window.location.href = "/carregamento";
+        window.location.href = form.dataset.redirect || "/carregamento";
         return;
       }
 
       if (isErroSemEmpresa(res.mensagem)) {
         mostrarAssociationNotice();
+        return;
+      }
+
+      if (res.requerEmpresa) {
+        await mostrarAdminEmpresaLogin(true);
+        Toast.fire({
+          icon: "warning",
+          theme: "dark",
+          title: res.mensagem || "Selecione a empresa."
+        });
         return;
       }
 
@@ -87,6 +99,70 @@ export function initLoginForm() {
       confirmButtonText: "OK"
     });
   });
+}
+
+function isAdminGlobalDigitado() {
+  const username = document.getElementById("username")?.value.trim();
+  return username === "999";
+}
+
+function escapeHtml(valor = "") {
+  return String(valor)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function initAdminEmpresaLogin() {
+  const username = document.getElementById("username");
+  if (!username) return;
+
+  username.addEventListener("input", () => {
+    mostrarAdminEmpresaLogin(isAdminGlobalDigitado());
+  });
+
+  username.addEventListener("blur", () => {
+    if (isAdminGlobalDigitado()) mostrarAdminEmpresaLogin(true, { recarregar: true });
+  });
+
+  mostrarAdminEmpresaLogin(isAdminGlobalDigitado());
+}
+
+async function mostrarAdminEmpresaLogin(mostrar, opcoes = {}) {
+  const wrap = document.getElementById("adminEmpresaLoginWrap");
+  const select = document.getElementById("adminEmpresaLogin");
+  if (!wrap || !select) return;
+
+  wrap.hidden = !mostrar;
+  wrap.classList.toggle("show", mostrar);
+
+  if (!mostrar) {
+    select.value = "";
+    return;
+  }
+
+  if (!opcoes.recarregar && select.dataset.carregado === "1") return;
+
+  select.innerHTML = `<option value="">Carregando empresas...</option>`;
+
+  try {
+    const resposta = await listarEmpresasAdminLogin();
+    const empresas = Array.isArray(resposta.empresas) ? resposta.empresas : [];
+    select.dataset.carregado = "1";
+    select.innerHTML = `
+      <option value="">Selecione a empresa...</option>
+      ${empresas.map(empresa => `
+        <option value="${empresa.id_empresa_saas}">
+          ${empresa.codigo ? `${escapeHtml(empresa.codigo)} - ` : ""}${escapeHtml(empresa.nome)}${empresa.status ? ` (${escapeHtml(empresa.status)})` : ""}
+        </option>
+      `).join("")}
+    `;
+  } catch (err) {
+    console.error("Erro ao carregar empresas para admin:", err);
+    select.innerHTML = `<option value="">Não foi possível carregar empresas</option>`;
+  }
 }
 
 function isErroSemEmpresa(mensagem = "") {

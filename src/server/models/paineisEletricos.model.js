@@ -84,6 +84,18 @@ async function buscarUltimoNumeroSeriePorAno(prefixoAno) {
   return rows[0]?.numero_serie || null;
 }
 
+async function buscarUltimoNumeroSeriePorAnoMes(prefixoAnoMes) {
+  const [rows] = await connection.query(`
+    SELECT numero_serie
+    FROM paineis_eletricos
+    WHERE numero_serie LIKE ?
+    ORDER BY CAST(SUBSTRING_INDEX(numero_serie, '-', -1) AS UNSIGNED) DESC
+    LIMIT 1
+  `, [`${prefixoAnoMes}-%`]);
+
+  return rows[0]?.numero_serie || null;
+}
+
 async function criarPainel(data) {
   const [result] = await connection.query(`
     INSERT INTO paineis_eletricos (
@@ -219,6 +231,7 @@ module.exports = {
   buscarImagemPainel,
   deletarImagemPainel,
   buscarUltimoNumeroSeriePorAno,
+  buscarUltimoNumeroSeriePorAnoMes,
   criarPainel,
   atualizarPainel,
   atualizarChecklist,

@@ -86,10 +86,51 @@ async function reprovar(req, res) {
   }
 }
 
+async function decidirFaltaNaoJustificada(req, res) {
+  try {
+    const resultado = await AprovacoesModel.decidirFaltaIndevida({
+      idAprovacao: req.params.id,
+      justificada: false,
+      aprovadorId: req.user.id,
+      aprovadorRole: req.user.role
+    });
+
+    return res.json(resultado);
+  } catch (err) {
+    console.error("Erro ao analisar falta não justificada:", err);
+    return res.status(err.status || 500).json({
+      sucesso: false,
+      mensagem: err.message || "Erro ao analisar falta."
+    });
+  }
+}
+
+async function decidirFaltaJustificada(req, res) {
+  try {
+    const resultado = await AprovacoesModel.decidirFaltaIndevida({
+      idAprovacao: req.params.id,
+      justificada: true,
+      aprovadorId: req.user.id,
+      aprovadorRole: req.user.role,
+      file: req.file
+    });
+
+    return res.json(resultado);
+  } catch (err) {
+    console.error("Erro ao analisar falta justificada:", err);
+    return res.status(err.status || 500).json({
+      sucesso: false,
+      mensagem: err.message || "Erro ao analisar falta."
+    });
+  }
+}
+
 module.exports = {
   listar,
   marcarLida,
   marcarTodasLidas,
   aprovar,
-  reprovar
+  reprovar,
+  decidirFaltaNaoJustificada,
+  decidirFaltaJustificada
 };

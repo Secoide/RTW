@@ -1,3 +1,5 @@
+import { setElectricLoginBackgroundVisible } from "./electric-login-background.js";
+
 /* =========================================================
    WEATHER EFFECTS ENGINE
    - Tudo em um único arquivo
@@ -56,6 +58,8 @@ export function startWeatherEffects(mode = "auto") {
 let lightningRunning = false;
 
 function rainEffect() {
+
+    setElectricLoginBackgroundVisible(false);
 
     const container = createLayer("rain-layer");
 
@@ -340,6 +344,8 @@ function createGlassDrop() {
 
 function fogEffect() {
 
+    setElectricLoginBackgroundVisible(true);
+
     const fog = createLayer("fog-layer");
 
     Object.assign(fog.style, {
@@ -354,6 +360,8 @@ function fogEffect() {
 ========================================================= */
 
 function starsEffect() {
+
+    setElectricLoginBackgroundVisible(false);
     
     const formlogin = document.getElementById("form_login_id");
     formlogin.classList.add("noite");
@@ -553,6 +561,8 @@ function createMoonGradient() {
 
 function sunEffect() {
 
+    setElectricLoginBackgroundVisible(true);
+
     const glow = document.createElement("div");
 
     Object.assign(glow.style, {
@@ -571,7 +581,7 @@ function sunEffect() {
 }
 
 /* =========================================================
-   🧱 CRIAR CAMADA
+   🔰 CRIAR CAMADA
 ========================================================= */
 
 function createLayer(id) {

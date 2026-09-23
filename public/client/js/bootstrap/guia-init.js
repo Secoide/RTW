@@ -295,7 +295,7 @@ function getIntroducao() {
 
 <div class="guiaSubtitulo">
 
-    📚 Como utilizar este guia
+    � Como utilizar este guia
 
 </div>
 
@@ -343,14 +343,15 @@ function getMateriais() {
 
 <div class="guiaCard">
 <p>
-A &aacute;rea de materiais foi dividida em tr&ecirc;s rotinas principais:
-<b>Controle de Fluxo</b>, <b>Estoque</b> e <b>Materiais</b>.
+A &aacute;rea de materiais foi dividida em quatro rotinas principais:
+<b>Controle de Fluxo</b>, <b>Estoque</b>, <b>Materiais</b> e <b>Prot&oacute;tipo de Atributos</b>.
 </p>
 
 <ul>
 <li><b>Controle de Fluxo:</b> acompanha listas de materiais por OS, est&aacute;gios, separa&ccedil;&atilde;o, compras, fornecedores, cota&ccedil;&otilde;es e custos.</li>
 <li><b>Estoque:</b> recebe listas liberadas para separa&ccedil;&atilde;o e tamb&eacute;m listas finalizadas que precisam de confer&ecirc;ncia.</li>
 <li><b>Materiais:</b> concentra o cadastro geral dos materiais, fotos, categorias, varia&ccedil;&otilde;es, valores de or&ccedil;amento e m&eacute;dia de fornecedores.</li>
+<li><b>Prot&oacute;tipo de Atributos:</b> permite simular rela&ccedil;&otilde;es entre material, atributos, bloqueios e combina&ccedil;&otilde;es antes de gravar regras definitivas.</li>
 </ul>
 </div>
 
@@ -368,10 +369,12 @@ Tudo que aparece na lista pertence &agrave; OS selecionada e &agrave; lista atua
 <ul>
 <li>Use o campo <b>Selecione uma OS</b> para carregar o fluxo e as listas de materiais daquela ordem de servi&ccedil;o.</li>
 <li>O bot&atilde;o <b>Atualizar</b> recarrega os dados da OS selecionada.</li>
-<li>O bot&atilde;o <b>Exportar</b> gera uma planilha da tabela atual.</li>
-<li>O bot&atilde;o <b>PDF</b> abre um submenu com duas op&ccedil;&otilde;es: <b>Dados completo</b> e <b>Somente lista cliente</b>.</li>
+<li>O bot&atilde;o de <b>tabela</b> gera uma planilha da tabela atual.</li>
+<li>O bot&atilde;o de <b>PDF</b> abre um submenu com duas op&ccedil;&otilde;es: <b>Dados completo</b> e <b>Somente lista cliente</b>.</li>
+<li>O bot&atilde;o <b>Cotar</b> ativa a sele&ccedil;&atilde;o manual de materiais e gera um PDF espec&iacute;fico para fornecedor.</li>
 <li><b>Dados completo:</b> exporta OS, lista, resumo financeiro, foto, material, categoria, quantidade, observa&ccedil;&atilde;o, fornecedor, pre&ccedil;o, total e OC.</li>
 <li><b>Somente lista cliente:</b> exporta uma vers&atilde;o limpa com foto, descri&ccedil;&atilde;o, c&oacute;digo, fabricante, observa&ccedil;&atilde;o, quantidade e unidade.</li>
+<li><b>Lista para fornecedor:</b> exporta somente os itens selecionados, sem valores internos, para solicitar cota&ccedil;&atilde;o de itens espec&iacute;ficos.</li>
 </ul>
 </div>
 
@@ -423,6 +426,7 @@ O Controle de Fluxo organiza cada lista em est&aacute;gios, permitindo que cada 
 <li><b>Separa&ccedil;&atilde;o:</b> barra visual de separado, comprado e faltante.</li>
 <li><b>Fornecedor:</b> fornecedor selecionado ou bot&atilde;o para abrir cota&ccedil;&otilde;es.</li>
 <li><b>Pre&ccedil;o, Total R$ e OC:</b> aparecem nas etapas de compra/finaliza&ccedil;&atilde;o, conforme o est&aacute;gio da lista.</li>
+<li><b>Material espec&iacute;fico:</b> itens criados somente para uma OS aparecem com &iacute;cone pr&oacute;prio, sem depender do cadastro geral.</li>
 </ul>
 </div>
 
@@ -440,6 +444,7 @@ Em <b>Compras</b> e <b>Finalizado</b>, aparecem fornecedor, pre&ccedil;os, total
 <li><b>Editar:</b> altera quantidade e observa&ccedil;&atilde;o do item j&aacute; lan&ccedil;ado.</li>
 <li><b>Separar item:</b> abre controles de diminuir, aumentar, total, salvar e cancelar.</li>
 <li><b>Apagar:</b> remove o material da lista.</li>
+<li><b>Cotar:</b> coloca a tabela em modo de sele&ccedil;&atilde;o para gerar PDF de cota&ccedil;&atilde;o apenas com os materiais escolhidos.</li>
 <li>Durante a separa&ccedil;&atilde;o, os bot&otilde;es de editar e apagar ficam ocultos para evitar conflito.</li>
 </ul>
 </div>
@@ -476,6 +481,18 @@ O bot&atilde;o <b>Fornecedores</b>, acima da tabela de materiais, abre um painel
 <li>Mostra gr&aacute;fico de participa&ccedil;&atilde;o por fornecedor.</li>
 <li>Indica maior volume cotado, ticket m&eacute;dio por cota&ccedil;&atilde;o, materiais marcados como OK e trata empate quando dois fornecedores possuem o mesmo total.</li>
 <li>Ajuda Compras a enxergar concentra&ccedil;&atilde;o de valores, total selecionado e validar se falta selecionar fornecedor.</li>
+</ul>
+</div>
+
+<div class="guiaCard">
+<h4>Radar de cota&ccedil;&atilde;o</h4>
+<p>
+O bot&atilde;o de radar abre uma janela lateral para ajudar Compras a escolher onde concentrar novas cota&ccedil;&otilde;es.
+</p>
+<ul>
+<li>Prioriza materiais por <b>valor total</b>, <b>quantidade</b>, <b>falta de cota&ccedil;&atilde;o</b>, <b>item espec&iacute;fico</b> e <b>fornecedor n&atilde;o definido</b>.</li>
+<li>Os pontos do gr&aacute;fico mostram uma ficha ao passar o mouse, com foto, descri&ccedil;&atilde;o, quantidade e valor total.</li>
+<li>Ao clicar em um ponto, o sistema seleciona e destaca o material correspondente na tabela.</li>
 </ul>
 </div>
 
@@ -550,7 +567,9 @@ A tela <b>Materiais</b> &eacute; o cadastro geral usado por Or&ccedil;amento e C
 <ul>
 <li>A tabela carrega at&eacute; 50 materiais por p&aacute;gina e possui pagina&ccedil;&atilde;o.</li>
 <li>A busca carrega materiais conforme o usu&aacute;rio digita.</li>
+<li>A busca inteligente tamb&eacute;m considera detalhes t&eacute;cnicos, atributos, medidas, fabricante e c&oacute;digo.</li>
 <li>As colunas mostram ID, categoria, foto, descri&ccedil;&atilde;o, c&oacute;digo, fabricante, unidade, valor de or&ccedil;amento atual e m&eacute;dia dos &uacute;ltimos fornecedores.</li>
+<li>Na coluna <b>Valor atual</b>, &eacute; poss&iacute;vel usar a m&eacute;dia dos &uacute;ltimos or&ccedil;amentos e aplicar percentual de acr&eacute;scimo.</li>
 <li>O bot&atilde;o <b>Cadastrar Material</b> abre o cadastro para criar novo material.</li>
 <li>O bot&atilde;o de abrir no cadastro permite editar ou aproveitar dados de um material existente.</li>
 <li>&Eacute; poss&iacute;vel apagar material quando permitido pelo sistema.</li>
@@ -585,6 +604,23 @@ A tela <b>Materiais</b> &eacute; o cadastro geral usado por Or&ccedil;amento e C
 </ul>
 </div>
 
+<div id="mat-prototipo-atributos" class="guiaSubtitulo">
+🧩 Prot&oacute;tipo de Atributos
+</div>
+
+<div class="guiaCard">
+<p>
+A tela de prot&oacute;tipo permite desenhar e testar combina&ccedil;&otilde;es de atributos de materiais antes de aplicar regras definitivas no cadastro.
+</p>
+<ul>
+<li><b>Material principal:</b> ponto inicial usado para simular varia&ccedil;&otilde;es.</li>
+<li><b>Atributos:</b> blocos como cor, bitola, material construtivo e tipo podem ser conectados visualmente.</li>
+<li><b>Simulador:</b> testa escolhas e mostra quais combina&ccedil;&otilde;es permanecem v&aacute;lidas.</li>
+<li><b>Regras:</b> bloqueios, rela&ccedil;&otilde;es espec&iacute;ficas e combina&ccedil;&otilde;es &uacute;nicas ajudam a evitar varia&ccedil;&otilde;es inv&aacute;lidas.</li>
+<li><b>JSON:</b> exporta a configura&ccedil;&atilde;o para confer&ecirc;ncia ou reaproveitamento t&eacute;cnico.</li>
+</ul>
+</div>
+
 <div id="mat-boas-praticas" class="guiaSubtitulo">
 🚀 Boas Pr&aacute;ticas
 </div>
@@ -598,13 +634,14 @@ A tela <b>Materiais</b> &eacute; o cadastro geral usado por Or&ccedil;amento e C
 <li>Registre cota&ccedil;&otilde;es com valor, prazo, observa&ccedil;&atilde;o e fornecedor correto.</li>
 <li>Selecione o fornecedor escolhido antes de lan&ccedil;ar OC ou finalizar compra.</li>
 <li>Use o painel de fornecedores para conferir concentra&ccedil;&atilde;o de compras e totais por fornecedor.</li>
-<li>Exporte PDF completo para confer&ecirc;ncia interna e PDF cliente para compartilhamento simplificado.</li>
+<li>Use o radar para focar primeiro em materiais de maior impacto financeiro ou com poucas cota&ccedil;&otilde;es.</li>
+<li>Use o PDF de cota&ccedil;&atilde;o quando precisar enviar somente alguns materiais para um fornecedor espec&iacute;fico.</li>
 </ul>
 </div>
 
 <div class="guiaCard guiaInfo">
 📦 <b>Resumo:</b><br>
-O Controle de Fluxo acompanha a jornada dos materiais da OS; Estoque separa e confere; Materiais mant&eacute;m o cadastro t&eacute;cnico e financeiro que alimenta todo o processo.
+O Controle de Fluxo acompanha a jornada dos materiais da OS; Estoque separa e confere; Materiais mant&eacute;m o cadastro t&eacute;cnico e financeiro; e o Prot&oacute;tipo de Atributos ajuda a validar combina&ccedil;&otilde;es antes de padronizar o cadastro.
 </div>
 
 `;
@@ -1182,21 +1219,73 @@ Controle dos afastamentos e situações especiais dos colaboradores.
 
 <p>
 
-Cada registro pode conter:
+Além de férias, licenças e afastamentos, o RH pode registrar faltas diretamente a partir da tabela
+de colaboradores. Para isso, clique com o <b>botão direito</b> sobre o colaborador e abra o submenu
+<b>Marcar falta</b>.
 
 </p>
 
 <ul>
 
-<li>Data inicial</li>
+<li><b>Falta não justificada:</b> informe somente o dia da ausência. O registro fica identificado como falta sem justificativa apresentada.</li>
 
-<li>Data final</li>
+<li><b>Atestado apresentado:</b> informe a data da falta e anexe o PDF do atestado ou documento comprobatório.</li>
 
-<li>Motivo</li>
+<li>O registro justificado aparece no histórico do colaborador com a descrição <b>Falta Justificada</b>.</li>
 
-<li>Observações</li>
+<li>A data e o período são validados para evitar duplicidade com férias, atestados ou outros afastamentos já cadastrados.</li>
 
 </ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+📎 <b>Anexo do atestado:</b><br>
+
+O PDF deve ser anexado na opção <b>Atestado apresentado</b>. A opção <b>Falta não justificada</b>
+não solicita arquivo, porque registra a ausência sem documento de justificativa.
+
+</div>
+
+<div class="guiaCard">
+
+<h4>Fluxo de análise de falta indevida</h4>
+
+<p>
+
+Quando a ocorrência é identificada na Programação OS, ela passa por análise do RH antes de ser
+definitivamente classificada.
+
+</p>
+
+<ol>
+
+<li>O gestor da <b>Programação OS</b> clica com o botão direito sobre o colaborador e escolhe <b>Registrar falta indevida</b>.</li>
+
+<li>O sistema grava a ocorrência como <b>Falta Pendente</b>, sem concluir automaticamente se ela é justificada ou não.</li>
+
+<li>Uma notificação é enviada ao setor de <b>RH</b> para avaliação.</li>
+
+<li>Enquanto não houver decisão, a pendência permanece visível no histórico e a notificação não deve ser descartada como resolvida.</li>
+
+<li>O RH escolhe uma das decisões: <b>Não justificada</b> ou <b>Com atestado</b>.</li>
+
+<li>Ao escolher <b>Não justificada</b>, a falta é encerrada sem anexo.</li>
+
+<li>Ao escolher <b>Com atestado</b>, o RH anexa o PDF e conclui o registro como falta justificada.</li>
+
+</ol>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+⚠️ <b>Responsabilidades:</b><br>
+
+A Programação OS registra a ocorrência; o RH analisa a justificativa e define o resultado final.
+Esse fluxo evita que uma alteração de escala, troca de folga ou ausência identificada na operação
+seja classificada automaticamente sem conferência.
 
 </div>
 
@@ -1207,7 +1296,6 @@ Cada registro pode conter:
 `;
 
 }
-
 function getProgramacao() {
 
     return `
@@ -3113,6 +3201,10 @@ Através da tela RH é possível:
 
 <li>📋 Registrar / Anexar documentos</li>
 
+<li>🚫 Registrar falta não justificada ou atestado apresentado pelo menu do botão direito</li>
+
+<li>🔔 Acompanhar e responder faltas indevidas pendentes enviadas pela Programação OS</li>
+
 <li>🔄 Atualizar a tabela</li>
 
 <li>👤 Abrir perfil completo do colaborador</li>
@@ -3612,7 +3704,7 @@ mais precisas serão as respostas fornecidas.
 
 }
 
-function getConquistas() {
+function getConquistasLegado() {
 
     return `
 
@@ -4251,7 +4343,7 @@ Não é necessário cadastrá-las manualmente.
 
 <div class="guiaMedalha">
 
-    <div class="guiaMedalhaIcone">🚁</div>
+    <div class="guiaMedalhaIcone">🧳</div>
 
     <div>
 
@@ -4573,6 +4665,143 @@ Não é necessário cadastrá-las manualmente.
 
 }
 
+function getConquistas() {
+  return `
+<div id="med-topo" class="guiaTitulo">🏅 Medalhas e Conquistas</div>
+
+<div id="med-visualizacao" class="guiaSubtitulo">👀 Onde aparecem</div>
+<div class="guiaCard">
+  <p>As medalhas e conquistas podem aparecer em três áreas:</p>
+  <ul>
+    <li>Na aba <b>Conquistas</b> do perfil do colaborador.</li>
+    <li>No <b>Hall da Experiência</b>, junto ao ranking.</li>
+    <li>No painel <b>Reconhecimento</b> da home, que alterna colaboradores e conquistas automaticamente.</li>
+  </ul>
+  <p>O painel de reconhecimento seleciona um colaborador aleatoriamente e troca o destaque a cada 30 segundos. Ao atualizar a página, o sistema evita repetir imediatamente o último colaborador exibido.</p>
+</div>
+
+<div id="med-card" class="guiaSubtitulo">⭕ Entendendo o card</div>
+<div class="guiaCard">
+  <p>O card do Hall resume a trajetória do colaborador e é atualizado com os dados registrados no sistema.</p>
+  <ul>
+    <li><b>Foto e progresso:</b> indicam a evolução do tempo de empresa.</li>
+    <li><b>Tempo:</b> mostra anos, meses e dias desde a admissão.</li>
+    <li><b>Título:</b> evolui conforme o tempo de empresa.</li>
+    <li><b>Posição:</b> aparece no canto superior direito como <b>1º</b>, <b>2º</b>, <b>3º</b> e assim por diante.</li>
+    <li><b>Ícones inferiores:</b> representam as medalhas recebidas.</li>
+  </ul>
+</div>
+<img src="/imagens/guias/guia_card_colab.png" alt="Entendendo o Card do Colaborador" class="guiaImagem" />
+
+<div id="med-adicionar" class="guiaSubtitulo">➕ Conquistas manuais</div>
+<div class="guiaCard">
+  <p>São concedidas por usuários autorizados quando existe um reconhecimento específico para o colaborador.</p>
+  <ol>
+    <li>Acesse o perfil do colaborador.</li>
+    <li>Abra a aba <b>Conquistas</b>.</li>
+    <li>Selecione a conquista.</li>
+    <li>Clique em <b>Adicionar</b>.</li>
+  </ol>
+  <p>A data da concessão é registrada junto à conquista e pode ser removida posteriormente por um usuário autorizado.</p>
+</div>
+
+<div id="med-manuais" class="guiaSubtitulo">🏆 Catálogo de conquistas manuais</div>
+<div class="guiaCard">
+  <ul>
+    <li>💡 <b>Inovador RTW:</b> melhorias, automações ou processos com resultado positivo.</li>
+    <li>🤝 <b>Espírito de Equipe:</b> colaboração, respeito e apoio aos colegas.</li>
+    <li>🚨 <b>Herói da Segurança:</b> atitudes relevantes de prevenção e segurança.</li>
+    <li>🎓 <b>Mentor RTW:</b> compartilhamento de conhecimento e desenvolvimento de pessoas.</li>
+    <li>🌎 <b>Embaixador RTW:</b> representação exemplar da empresa.</li>
+    <li>💬 <b>Elogiado pelo Cliente:</b> reconhecimento formal recebido de clientes.</li>
+    <li>🧩 <b>Resolve Tudo:</b> solução de desafios complexos.</li>
+    <li>👔 <b>Liderança Inspiradora:</b> influência positiva pelo exemplo.</li>
+    <li>🏔️ <b>Superação:</b> superação de desafios importantes.</li>
+    <li>❤️ <b>Orgulho RTW:</b> uma das maiores honrarias da empresa.</li>
+    <li>🧠 <b>Solução Inteligente:</b> soluções criativas e eficientes.</li>
+    <li>🦉 <b>Coruja RTW:</b> dedicação em atividades noturnas ou fora do horário convencional.</li>
+    <li>🎯 <b>Precisão RTW:</b> qualidade, atenção aos detalhes e baixo retrabalho.</li>
+    <li>📋 <b>Organização Exemplar:</b> organização de documentos, materiais e informações.</li>
+    <li>⚡ <b>Resposta Rápida:</b> agilidade em urgências e situações críticas.</li>
+    <li>📡 <b>Comunicador RTW:</b> comunicação clara e eficiente.</li>
+    <li>🦾 <b>Alta Performance:</b> desempenho acima da média e entregas consistentes.</li>
+    <li>⏱️ <b>Pontualidade de Ouro:</b> compromisso com horários, prazos e compromissos.</li>
+    <li>🔐 <b>Guardião da Qualidade:</b> contribuição contínua para a excelência dos serviços.</li>
+    <li>🪙 <b>Compras Estratégicas:</b> reconhecimento manual para profissionais do setor de Compras.</li>
+    <li>🖊️ <b>Documentador Técnico:</b> reconhecimento manual por registrar fotos, relatórios, medições e evidências completas nas plataformas solicitadas.</li>
+    <li>🏅 <b>Destaque do Mês:</b> reconhecimento mensal por desempenho ou contribuição.</li>
+    <li>🏆 <b>Destaque do Ano:</b> reconhecimento anual por contribuição de alto impacto.</li>
+  </ul>
+</div>
+
+<div id="med-seguranca" class="guiaSubtitulo">🦺 Função e segurança</div>
+<div class="guiaCard">
+  <ul>
+    <li>♻️ <b>Membro da CIPA:</b> participação na Comissão Interna de Prevenção de Acidentes.</li>
+    <li>⛑️ <b>Brigadista:</b> integrante da Brigada de Emergência.</li>
+    <li>🛡️ <b>Guardião da Segurança:</b> gerada automaticamente quando o colaborador possui CIPA e Brigadista.</li>
+  </ul>
+</div>
+
+<div id="med-automaticas" class="guiaSubtitulo">⚙️ Medalhas automáticas</div>
+<div class="guiaCard guiaInfo">
+  <p>O sistema calcula estas medalhas a partir dos dados operacionais. Elas não precisam ser cadastradas manualmente e são atualizadas quando os indicadores mudam.</p>
+  <p>Em cada grupo de faixa, é exibida a maior conquista atingida:</p>
+  <ul>
+    <li>🧭 <b>Rota Ampliada:</b> atuação registrada em dois ou mais estados.</li>
+    <li>🌎 <b>Viajante:</b> atuação em 10 ou mais cidades.</li>
+    <li>✈️ <b>Explorador:</b> atuação em 20 ou mais cidades.</li>
+    <li>🚀 <b>Desbravador:</b> atuação em 50 ou mais cidades.</li>
+    <li>🏗️ <b>Multifunção:</b> atendimento de 10 ou mais clientes.</li>
+    <li>🏭 <b>Especialista Multifunção:</b> atendimento de 50 ou mais clientes.</li>
+    <li>🏢 <b>Mestre Multifunção:</b> atendimento de 100 ou mais clientes.</li>
+    <li>✂️ <b>Iniciante de Campo:</b> participação em 10 ou mais OSs.</li>
+    <li>🪚 <b>Operador:</b> participação em 50 ou mais OSs.</li>
+    <li>🔧 <b>Centurião:</b> participação em 100 ou mais OSs.</li>
+    <li>🛠️ <b>Veterano de Campo:</b> participação em 500 ou mais OSs.</li>
+    <li>🧰 <b>Mestre das OS:</b> participação em 1.000 ou mais OSs.</li>
+  </ul>
+  <p>Nas faixas de cidades, clientes e OSs, o sistema mantém a maior faixa alcançada, não todas ao mesmo tempo.</p>
+</div>
+
+<div id="med-tempo-casa" class="guiaSubtitulo">⏳ Tempo de empresa</div>
+<div class="guiaCard">
+  <p>As medalhas de tempo são cumulativas e aparecem conforme o colaborador completa cada marco:</p>
+  <ul>
+    <li>💎 <b>Mestre RTW:</b> 5 anos.</li>
+    <li>⭐ <b>Pilar RTW:</b> 10 anos.</li>
+    <li>👑 <b>Lenda RTW:</b> 15 anos.</li>
+    <li>🏛️ <b>Fundação RTW:</b> 20 anos.</li>
+    <li>🏰 <b>Patrimônio RTW:</b> 25 anos.</li>
+  </ul>
+</div>
+
+<div id="med-titulos" class="guiaSubtitulo">📈 Títulos automáticos do card</div>
+<div class="guiaCard">
+  <p>Além das medalhas, o card recebe um título de experiência conforme o tempo de empresa:</p>
+  <ul>
+    <li>🌰 Origem RTW: até completar 2 meses.</li>
+    <li>🌱 Aprendiz RTW: de 2 meses até completar 6 meses.</li>
+    <li>🌳 Crescimento RTW: de 6 meses até completar 1 ano.</li>
+    <li>⚡ Parceiro RTW: a partir de 1 ano.</li>
+    <li>🔰 Veterano RTW: a partir de 2 anos.</li>
+    <li>♟️ Especialista RTW: a partir de 3 anos.</li>
+    <li>⚜️ Referência RTW: a partir de 4 anos.</li>
+    <li>💎 Mestre RTW: a partir de 5 anos.</li>
+    <li>⭐ Pilar RTW: a partir de 10 anos.</li>
+    <li>👑 Lenda RTW: a partir de 15 anos.</li>
+    <li>🏛️ Fundação RTW: a partir de 20 anos.</li>
+    <li>🏰 Patrimônio RTW: a partir de 25 anos.</li>
+  </ul>
+</div>
+
+<div class="guiaCard guiaInfo">
+  💡 <b>Importante:</b><br>
+  Medalhas automáticas dependem dos dados cadastrados e dos indicadores calculados pelo sistema. Se uma medalha não aparecer, confira o cadastro do colaborador, o histórico de OSs, clientes, cidades e a data de admissão.
+</div>
+`;
+}
+
 function getFerramentas() {
 
     return `
@@ -4679,7 +4908,7 @@ Esses registros também podem ser vinculados em uma OS pela aba Complementos.
 
 <li><b>Cliente:</b> selecionado a partir dos clientes cadastrados.</li>
 <li><b>Atuação do painel:</b> descreve onde ou para qual finalidade o painel será usado.</li>
-<li><b>Nº de série:</b> gerado seguindo o padrão do ano e o próximo número disponível, como 26.123.</li>
+<li><b>Nº de série:</b> gerado automaticamente no padrão <b>AA.MM-NNN</b>, com sequência reiniciada a cada mês, como 26.09-001.</li>
 <li><b>Tensão:</b> selecionada em combo, com opções como 12V, 24V, 110V, 220V, 380V e combinações.</li>
 <li><b>Frequência:</b> selecionada entre 50Hz e 60Hz.</li>
 <li><b>Tamanho:</b> selecionado pela lista de dimensões, com opção de dimensão personalizada.</li>
@@ -4912,7 +5141,7 @@ correspondentes.
 <tr>
 <td><b>Empresa</b></td>
 <td>Manter empresas/clientes usados na programação e cadastros.</td>
-<td>Nome, cidades vinculadas, supervisores vinculados e flags de integração/liberação/segurança.</td>
+<td>Nome, cidades, supervisores, flags de integração/liberação/segurança e consulta dos colaboradores integrados.</td>
 </tr>
 <tr>
 <td><b>Supervisor</b></td>
@@ -4937,7 +5166,7 @@ correspondentes.
 <tr>
 <td><b>Exame</b></td>
 <td>Cadastrar tipos de exames ocupacionais.</td>
-<td>Nome, descrição e controle de vencimento.</td>
+<td>Nome, descrição, ícone Font Awesome e controle de vencimento.</td>
 </tr>
 <tr>
 <td><b>Curso</b></td>
@@ -4954,8 +5183,59 @@ correspondentes.
 <td>Manter fornecedores usados em materiais/cotações.</td>
 <td>Nome, email, telefone e ICMS.</td>
 </tr>
+<tr>
+<td><b>Feriados</b></td>
+<td>Cadastrar feriados, festejos e outras datas sem expediente.</td>
+<td>Nome, data e sugestões de datas conforme o ano.</td>
+</tr>
 </tbody>
 </table>
+
+</div>
+
+<div id="gestao-empresa-colaboradores"
+     class="guiaSubtitulo">
+
+👥 Empresa e Colaboradores Integrados
+
+</div>
+
+<div class="guiaCard">
+
+<p>
+
+Na aba <b>Empresa</b>, o checkbox <b>Integração</b> indica que a empresa exige ou utiliza o controle
+de integração dos colaboradores. Quando ele está ativo, aparece um botão de colaboradores na mesma
+célula do checkbox.
+
+</p>
+
+<ul>
+
+<li>O botão só aparece quando a integração da empresa está marcada.</li>
+
+<li>Ao clicar, o sistema abre uma janela com os colaboradores que possuem integração registrada naquela empresa.</li>
+
+<li>A tabela mostra <b>nome completo</b>, <b>função</b> e <b>dias para vencer</b> da integração individual.</li>
+
+<li>O prazo considera a integração mais recente de cada colaborador naquela empresa.</li>
+
+<li><b>Vence hoje</b> identifica prazo igual a zero; <b>Vencida há X dias</b> identifica prazo expirado.</li>
+
+<li>A busca filtra os colaboradores por nome ou função.</li>
+
+<li>O botão de perfil abre o cadastro completo do colaborador para consulta ou edição conforme a permissão do usuário.</li>
+
+</ul>
+
+</div>
+
+<div class="guiaCard guiaInfo">
+
+🔎 <b>Leitura do prazo:</b><br>
+
+O prazo é individual. Uma empresa pode ter colaboradores com vencimentos diferentes, por isso a
+janela apresenta os dias de cada pessoa, em vez de um único número para toda a empresa.
 
 </div>
 
@@ -5020,6 +5300,8 @@ A barra de ferramentas fica acima da tabela e concentra as ações rápidas da t
 
 <li><b>Buscar em qualquer coluna:</b> filtra as linhas da tabela pelo texto digitado.</li>
 
+<li><b>Sugerir datas:</b> disponível na aba <b>Feriados</b> para preencher rapidamente datas comuns do ano antes de salvar.</li>
+
 </ul>
 
 </div>
@@ -5045,6 +5327,8 @@ A barra de ferramentas fica acima da tabela e concentra as ações rápidas da t
 <li><b>X</b> indica cancelar edição ou remover vínculo de chip.</li>
 
 <li><b>Checkbox</b> indica campos booleanos, como obrigatório, disponível, integração, liberação, segurança e vencimento.</li>
+
+<li><b>Usuários</b> na coluna Integração abre os colaboradores integrados da empresa.</li>
 
 </ul>
 

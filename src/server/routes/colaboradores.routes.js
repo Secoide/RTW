@@ -3,6 +3,7 @@ const router = express.Router();
 const verificarAutenticacao = require('../middlewares/auth.middleware');
 const colaboradoresController = require('../controllers/colaboradores.controller');
 const upload = require('../middlewares/uploudfotos.middleware');
+const uploadAtestadoPDF = require('../middlewares/uploadExame.middleware');
 
 // Rotas específicas
 router.get("/disponiveis", verificarAutenticacao, colaboradoresController.getColaboradoresDisp);
@@ -12,8 +13,13 @@ router.put('/setar-supervisor/:idFno', verificarAutenticacao, colaboradoresContr
 router.delete('/remover-supervisor/:osID/:dataDia', verificarAutenticacao, colaboradoresController.removerSupervisorAtual);
 router.get("/responsavel/cbx", verificarAutenticacao, colaboradoresController.getColaboradorResponsavelOS);
 router.get("/historico-atestar/:id", verificarAutenticacao, colaboradoresController.getHistoricoAtestar);
+router.get("/atestado-anexo/:id", verificarAutenticacao, colaboradoresController.downloadAnexoAtestado);
+router.get("/resumo-anual/:id", verificarAutenticacao, colaboradoresController.getResumoAnualColaborador);
 router.get("/dadosCPFRG/:osID/:dataDia", verificarAutenticacao, colaboradoresController.getDadosCPFRG);
 router.post('/atestar', verificarAutenticacao, colaboradoresController.cadastrarAtestado);
+router.delete('/atestar-pendente/:id', verificarAutenticacao, colaboradoresController.excluirFaltaPendente);
+router.post('/falta-indevida', verificarAutenticacao, colaboradoresController.solicitarFaltaIndevida);
+router.post('/falta-justificada', verificarAutenticacao, uploadAtestadoPDF.single('documento'), colaboradoresController.cadastrarFaltaJustificada);
 router.get("/historico-empresas/:idFuncionario", verificarAutenticacao, colaboradoresController.getHistoricoColabPorEmpresas);
 router.get("/cbx", verificarAutenticacao, colaboradoresController.getColaboradorCBX);
 router.get("/aniversariantes", verificarAutenticacao, colaboradoresController.getColaboradoresAniversariantes);

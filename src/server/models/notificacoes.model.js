@@ -131,6 +131,7 @@ async function marcarTodasLidas(idUsuario) {
     FROM sistema_notificacoes
     WHERE ativo = 1
       AND (id_destinatario IS NULL OR id_destinatario = ?)
+      AND tipo NOT IN ('aprovacao_responsavel_os', 'aprovacao_falta_indevida')
   `, [idUsuario, idUsuario]);
 }
 

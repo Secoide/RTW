@@ -5,10 +5,13 @@ export function initChristmasIcons() {
     const now = new Date();
     const month = now.getMonth(); // 11 = dezembro
     const day = now.getDate();
-    if (month !== 11 || day > 26) return;
+    if (month !== 11 || day > 26) return false;
+
+    document.documentElement.dataset.christmasIcons = "active";
 
     initSnow();
     initSantaHatsWrap();
+    return true;
 }
 
 function initSnow() {
@@ -66,7 +69,7 @@ function initSantaHatsWrap() {
 
     Object.assign(tocaFundo.style, {
         position: "absolute",
-        top: "calc(50% - 295px)",
+        top: "calc(50% - 290px)",
         left: "calc(50% - 484px)",
         width: "190px",
         transform: "rotate(-22deg)",
@@ -82,7 +85,7 @@ function initSantaHatsWrap() {
 
     Object.assign(tocaFrente.style, {
         position: "absolute",
-        top: "calc(50% - 297px)",
+        top: "calc(50% - 290px)",
         left: "calc(50% - 484px)",
         width: "190px",
         transform: "rotate(-22deg)",
@@ -108,6 +111,7 @@ export function initNewYearFireworks() {
         (month === 0 && day <= 10);
 
     if (!isNewYear) return;
+    document.documentElement.dataset.newYearFireworks = "active";
 
     /* 🔒 CONTROLE DE EXECUÇÃO */
     let fireworksRunning = true;
@@ -168,6 +172,216 @@ export function initNewYearFireworks() {
 
                 const isCascade = Math.random() < 0.2;
                 explode(startX, peakY, isCascade);
+            }
+        }
+
+        requestAnimationFrame(animateRocket);
+    }
+
+    function launchRotatingFirework() {
+        const startX = Math.random() * window.innerWidth;
+        const startY = window.innerHeight + 10;
+        const peakY = 120 + Math.random() * 190;
+        const tilt = (Math.random() - 0.5) * 120;
+        const duration = 1250;
+        const spiralDirection = Math.random() < 0.5 ? -1 : 1;
+        const spiralPhase = Math.random() * Math.PI * 2;
+
+        const rocket = document.createElement("div");
+        rocket.style.position = "fixed";
+        rocket.innerText = "🚀";
+        rocket.style.fontSize = "5px";
+        rocket.style.lineHeight = "1";
+        rocket.style.left = startX + "px";
+        rocket.style.top = startY + "px";
+        rocket.style.zIndex = "9999";
+        rocket.style.pointerEvents = "none";
+        rocket.style.transformOrigin = "center center";
+
+        document.body.appendChild(rocket);
+
+        let startTime = null;
+        let finished = false;
+
+        function animateRocket(time) {
+            if (!fireworksRunning) {
+                rocket.remove();
+                return;
+            }
+
+            if (!startTime) startTime = time;
+
+            const progress = Math.min((time - startTime) / duration, 1);
+            const baseX = startX + tilt * progress;
+            const baseY = startY + (peakY - startY) * progress;
+            const spiralAngle = spiralPhase + spiralDirection * progress * Math.PI * 10;
+            const spiralRadius = Math.sin(progress * Math.PI) * 30;
+            const currentX = baseX + Math.cos(spiralAngle) * spiralRadius;
+            const currentY = baseY + Math.sin(spiralAngle) * spiralRadius * 0.45;
+            const rotation = progress * 900 + spiralAngle * 180 / Math.PI;
+
+            rocket.style.transform =
+                `translate(${currentX - startX}px, ${currentY - startY}px) rotate(${rotation}deg)`;
+
+            if (!finished && Math.random() < 0.88) {
+                const spark = document.createElement("span");
+                spark.innerText = Math.random() < 0.7 ? "✦" : "·";
+                spark.style.position = "fixed";
+                spark.style.left = currentX + (Math.random() - 0.5) * 5 + "px";
+                spark.style.top = currentY + 5 + (Math.random() - 0.5) * 4 + "px";
+                spark.style.fontSize = Math.random() < 0.7 ? "3px" : "5px";
+                spark.style.color = "#ffd700";
+                spark.style.opacity = "0.82";
+                spark.style.zIndex = "9998";
+                spark.style.pointerEvents = "none";
+                spark.style.transition = "opacity 1000ms linear, transform 1000ms ease-out";
+
+                document.body.appendChild(spark);
+                requestAnimationFrame(() => {
+                    spark.style.opacity = "0";
+                    spark.style.transform = `translate(${(Math.random() - 0.5) * 18}px, ${16 + Math.random() * 26}px)`;
+                });
+                setTimeout(() => spark.remove(), 1050);
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animateRocket);
+            } else if (!finished) {
+                finished = true;
+                rocket.remove();
+                //explode(currentX, currentY, Math.random() < 0.25);
+            }
+        }
+
+        requestAnimationFrame(animateRocket);
+    }
+
+    function launchRotatingFireworkGroup() {
+        const amount = 4 + Math.floor(Math.random() * 5);
+
+        for (let i = 0; i < amount; i++) {
+            setTimeout(() => {
+                if (fireworksRunning) launchRotatingFirework();
+            }, i * 45 + Math.random() * 80);
+        }
+    }
+
+    function explodeMiniTwelveShot(x, y, shotIndex) {
+        const particles = 6;
+        const grupoAleatorio = colors[Math.floor(Math.random() * colors.length)];
+        const startAngle = (Math.PI * 2 / particles) * (shotIndex % particles);
+
+        for (let i = 0; i < particles; i++) {
+            const angle = startAngle + (Math.PI * 2 / particles) * i;
+            const spark = document.createElement("span");
+
+            spark.innerText = "✦";
+            spark.style.position = "fixed";
+            spark.style.left = x + "px";
+            spark.style.top = y + "px";
+            spark.style.fontSize = "5px";
+            spark.style.color = "yellow";
+            spark.style.opacity = "0.80";
+            spark.style.zIndex = "9999";
+            spark.style.pointerEvents = "none";
+            spark.style.transition = "transform 700ms ease-out, opacity 700ms linear";
+
+            document.body.appendChild(spark);
+
+            const distance = 18 + Math.random() * 24;
+            requestAnimationFrame(() => {
+                spark.style.transform =
+                    `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+                spark.style.opacity = "0";
+            });
+
+            setTimeout(() => spark.remove(), 760);
+        }
+    }
+
+    function launchTwelveByOneFirework() {
+        const startX = Math.random() * window.innerWidth;
+        const startY = window.innerHeight + 10;
+        const peakY = 115 + Math.random() * 175;
+        const tilt = (Math.random() - 0.5) * 100;
+        const duration = 1150;
+
+        const rocket = document.createElement("div");
+        rocket.style.position = "fixed";
+        rocket.innerText = "|";
+        rocket.style.fontSize = "12px";
+        rocket.style.fontWeight = "800";
+        rocket.style.color = '#f3e353a6';
+        rocket.style.lineHeight = "1";
+        rocket.style.left = startX + "px";
+        rocket.style.top = startY + "px";
+        rocket.style.zIndex = "9999";
+        rocket.style.pointerEvents = "none";
+
+        document.body.appendChild(rocket);
+
+        let startTime = null;
+        let finished = false;
+
+        function animateRocket(time) {
+            if (!fireworksRunning) {
+                rocket.remove();
+                return;
+            }
+
+            if (!startTime) startTime = time;
+
+            const progress = Math.min((time - startTime) / duration, 1);
+            const currentX = startX + tilt * progress;
+            const currentY = startY + (peakY - startY) * progress;
+
+            rocket.style.transform =
+                `translate(${currentX - startX}px, ${currentY - startY}px)`;
+
+            if (!finished && Math.random() < 0.92) {
+                const spark = document.createElement("span");
+                spark.innerText = "·";
+                spark.style.position = "fixed";
+                spark.style.left = currentX + (Math.random() - 0.5) * 4 + "px";
+                spark.style.top = currentY + 5 + "px";
+                spark.style.fontSize = "7px";
+                spark.style.color = "#f0cb45da";
+                spark.style.opacity = "0.9";
+                spark.style.zIndex = "9998";
+                spark.style.pointerEvents = "none";
+                spark.style.transition = "transform 900ms ease-out, opacity 900ms linear";
+
+                document.body.appendChild(spark);
+                requestAnimationFrame(() => {
+                    spark.style.transform = `translate(${(Math.random() - 0.5) * 10}px, ${18 + Math.random() * 22}px)`;
+                    spark.style.opacity = "0";
+                });
+                setTimeout(() => spark.remove(), 950);
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animateRocket);
+            } else if (!finished) {
+                finished = true;
+                rocket.remove();
+
+                const shotDelay = 135;
+                for (let shotIndex = 0; shotIndex < 12; shotIndex++) {
+                    setTimeout(() => {
+                        if (!fireworksRunning) return;
+
+                        const angle = (Math.PI * 2 / 15) * shotIndex;
+                        const distance = 15 + Math.random() * 42;
+                        const shotX = currentX + Math.cos(angle) * distance + Math.random()+1;
+                        const shotY = currentY + Math.sin(angle) * distance * 0.55 + Math.random() +1;
+
+                        explodeMiniTwelveShot(shotX, shotY, shotIndex);
+                    }, shotIndex * shotDelay);
+                }
+
+                setTimeout(() => {
+                    if (fireworksRunning) explode(currentX, currentY, false, true);
+                }, 15 * shotDelay + 160);
             }
         }
 
@@ -333,7 +547,7 @@ export function initNewYearFireworks() {
         requestAnimationFrame(animateRocket);
     }
 
-    function explode(x, y, cascade = false) {
+    function explode(x, y, cascade = false, amarelo = false) {
         const particles = cascade ? 20 : 10;
 
         // 1️⃣ escolhe um grupo de cores aleatório
@@ -354,6 +568,9 @@ export function initNewYearFireworks() {
             spark.style.fontSize = "11px";
             // 3️⃣ aplica a cor
             spark.style.color = corAleatoria;
+            if (amarelo) {
+                spark.style.color = "yellow"
+            }
             spark.style.zIndex = "9999";
             spark.style.pointerEvents = "none";
 
@@ -620,8 +837,10 @@ export function initNewYearFireworks() {
     function loop() {
         if (!fireworksRunning) return;
         const r = Math.random();
-        if (r < 0.01){
-            //launchArcoiresFirework();
+        if (r < 0.001){
+            launchArcoiresFirework();
+        } else if (r < 0.08) {
+            launchRotatingFireworkGroup();
         }else if (r < 0.2) {
             launchPeacockFirework();
             if (Math.random() < 0.03) {
@@ -637,7 +856,9 @@ export function initNewYearFireworks() {
                     launchPeacockFirework();
                 }, 200);
             }
-        } else {
+        } else if (r < 0.6) {
+            launchTwelveByOneFirework();
+         } else {
             launchNormalFirework();
         }
 
@@ -645,6 +866,8 @@ export function initNewYearFireworks() {
     }
 
     loop();
+
+    return true;
 }
 
 

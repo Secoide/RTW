@@ -244,16 +244,21 @@ async function listarColaboradoresDisponiveis(dataDia) {
 
 async function listarColaboradoresEmOS(
   dataDia,
-  osID,
-  nomeColaborador
+  opcoes = {}
 ) {
   try {
+    const usarRespostaPaginada = opcoes && typeof opcoes === "object" && (
+      Object.prototype.hasOwnProperty.call(opcoes, "limit") ||
+      Object.prototype.hasOwnProperty.call(opcoes, "offset") ||
+      Object.prototype.hasOwnProperty.call(opcoes, "busca")
+    );
+
     const colaboradores = await ColabModel.buscarColaboradoresEmOS(
       dataDia,
-      osID,
-      nomeColaborador
+      usarRespostaPaginada ? opcoes : {}
     );
-    return colaboradores;
+
+    return usarRespostaPaginada ? colaboradores : colaboradores.dados;
   } catch (err) {
     console.error("❌ Erro no service listarColaboradoresEmOS:", err.message);
     throw err;
@@ -400,6 +405,19 @@ async function setarSupervisor(idFno, osID, dataDia) {
   return { idFno, osID, dataDia };
 }
 
+function formatarDataConflito(valor) {
+  if (valor instanceof Date && !Number.isNaN(valor.getTime())) {
+    return valor.toISOString().slice(0, 10).split('-').reverse().join('/');
+  }
+
+  const data = String(valor || '').slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(data)) {
+    return data.split('-').reverse().join('/');
+  }
+
+  return String(valor || 'período informado');
+}
+
 async function removerSupervisorAtual(osID, dataDia) {
   return await ColabModel.removerSupervisorAtual(osID, dataDia);
 }
@@ -409,14 +427,133 @@ async function cadastrarAtestado({ periodoinicial, periodofinal, atestado, descr
     throw new Error('Campos obrigatórios não preenchidos.');
   }
 
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(periodoinicial)) || !/^\d{4}-\d{2}-\d{2}$/.test(String(periodofinal))) {
+    const erro = new Error('Informe datas válidas para o período.');
+    erro.statusCode = 400;
+    throw erro;
+  }
+
+  if (String(periodofinal) < String(periodoinicial)) {
+    const erro = new Error('A data final não pode ser anterior à data inicial.');
+    erro.statusCode = 400;
+    throw erro;
+  }
+
+  const conflito = await ColabModel.buscarInterrupcoesSobrepostas(
+    periodoinicial,
+    periodofinal,
+    idColab
+  );
+
+  if (conflito) {
+    const erro = new Error(
+      `Já existe ${conflito.motivo || 'um registro'} entre ${formatarDataConflito(conflito.datainicio)} e ${formatarDataConflito(conflito.datafinal)} para este colaborador.`
+    );
+    erro.statusCode = 409;
+    throw erro;
+  }
+
   await ColabModel.inserirAtestado(periodoinicial, periodofinal, atestado, descricaoatest, idColab);
 
   return { sucesso: true };
 }
 
+async function cadastrarFaltaJustificada({ data, idColab, file }) {
+  if (!data || !idColab) {
+    throw new Error('Data e colaborador são obrigatórios.');
+  }
+
+  let anexoPdf = null;
+
+  if (file?.buffer) {
+    anexoPdf = `atestados/${idColab}_${String(data).replace(/[^0-9-]/g, '')}_${Date.now()}.pdf`;
+
+    const { error } = await supabase.storage
+      .from('exames')
+      .upload(anexoPdf, file.buffer, {
+        contentType: 'application/pdf',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Erro ao enviar atestado:', error);
+      throw new Error('Erro ao enviar o PDF do atestado.');
+    }
+  }
+
+  const resultado = await ColabModel.inserirAtestado(
+    data,
+    data,
+    'Falta Justificada',
+    'Falta Justificada',
+    idColab,
+    anexoPdf
+  );
+
+  return {
+    sucesso: true,
+    id: resultado?.[0]?.insertId || null,
+    anexo_pdf: anexoPdf
+  };
+}
+
+async function solicitarFaltaIndevida({ data, idColab, solicitadoPor }) {
+  if (!data || !idColab || !solicitadoPor) {
+    throw new Error('Data, colaborador e usuário solicitante são obrigatórios.');
+  }
+
+  const faltaPendente = await ColabModel.buscarFaltaIndevidaPendente(data, idColab);
+  const idInterrupcao = faltaPendente?.id_funcInterrups
+    || await ColabModel.inserirFaltaPendente(data, idColab);
+
+  return AprovacoesModel.solicitarFaltaIndevida({
+    idInterrupcao,
+    idFuncionario: idColab,
+    data,
+    solicitadoPor
+  });
+}
+
+async function excluirFaltaPendente(idInterrupcao, { id, role }) {
+  return AprovacoesModel.excluirFaltaPendente({
+    idInterrupcao,
+    aprovadorId: id,
+    aprovadorRole: role
+  });
+}
+
 // Buscar hitorico atestar
 async function buscarHistoricoAtestar(id) {
   return await ColabModel.getHistoricoAtestar(id);
+}
+
+async function baixarAnexoAtestado(id) {
+  const registro = await ColabModel.getAnexoAtestado(id);
+
+  if (!registro) {
+    throw new Error('Registro de atestado não encontrado.');
+  }
+
+  if (!registro.anexo_pdf) {
+    throw new Error('Nenhum PDF anexado a este registro.');
+  }
+
+  const { data, error } = await supabase.storage
+    .from('exames')
+    .download(registro.anexo_pdf);
+
+  if (error || !data) {
+    throw new Error('Arquivo do atestado não encontrado.');
+  }
+
+  return {
+    buffer: Buffer.from(await data.arrayBuffer()),
+    nomeArquivo: registro.anexo_pdf.split('/').pop()
+  };
+}
+
+async function buscarResumoAnualColaborador(id, ano) {
+  return await ColabModel.getResumoAnualColaborador(id, ano);
 }
 
 // Buscar dados CPF e RG
@@ -520,8 +657,13 @@ module.exports = {
   setarSupervisor,
   removerSupervisorAtual,
   buscarHistoricoAtestar,
+  baixarAnexoAtestado,
+  buscarResumoAnualColaborador,
   buscarDadosCPFRG,
   cadastrarAtestado,
+  cadastrarFaltaJustificada,
+  solicitarFaltaIndevida,
+  excluirFaltaPendente,
   buscarHistoricoColabPorEmpresa,
   salvarFotoPerfil,
   getHallExperienciaConnectPear,

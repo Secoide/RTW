@@ -97,6 +97,27 @@ async function listarFeriasColaborador(idFunc, ignorarId = null) {
   return rows;
 }
 
+async function listarInterrupcoesColaborador(idFunc, ignorarId = null) {
+  const params = [idFunc];
+  let filtroIgnorar = '';
+
+  if (ignorarId) {
+    filtroIgnorar = 'AND id_funcInterrups <> ?';
+    params.push(ignorarId);
+  }
+
+  const [rows] = await connection.query(`
+    SELECT id_funcInterrups AS id, datainicio, datafinal, motivo, status
+    FROM tb_func_interrupto
+    WHERE id_func = ?
+      AND COALESCE(status, '') <> 'reprovado'
+      ${filtroIgnorar}
+    ORDER BY datainicio ASC, id_funcInterrups ASC
+  `, params);
+
+  return rows;
+}
+
 /* =====================================================
    CRIAR NOVO PERÍODO DE FÉRIAS
 ===================================================== */
@@ -170,6 +191,7 @@ module.exports = {
   buscarFeriasPorId,
   existeColaborador,
   listarFeriasColaborador,
+  listarInterrupcoesColaborador,
   criarFerias,
   atualizarFerias,
   atualizarStatus,

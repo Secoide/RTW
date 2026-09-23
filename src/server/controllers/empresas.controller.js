@@ -20,6 +20,16 @@ async function getEmpresa(req, res) {
     }
 }
 
+async function getColaboradoresIntegrados(req, res) {
+    try {
+        const colaboradores = await EmpresaService.listarColaboradoresIntegrados(req.params.id);
+        res.json(colaboradores);
+    } catch (err) {
+        console.error('Erro ao listar colaboradores integrados da empresa:', err);
+        res.status(500).json({ erro: 'Erro ao listar colaboradores integrados' });
+    }
+}
+
 // POST /api/empresas
 async function createEmpresa(req, res) {
     try {
@@ -108,6 +118,7 @@ async function removeCidade(req, res) {
 module.exports = {
     getEmpresas,
     getEmpresa,
+    getColaboradoresIntegrados,
     createEmpresa,
     createEmpresaPorGestao,
     updateEmpresa,

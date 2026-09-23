@@ -10,6 +10,10 @@ async function buscarEmpresa(id) {
   return await EmpresaModel.getEmpresaById(id);
 }
 
+async function listarColaboradoresIntegrados(idEmpresa) {
+  return await EmpresaModel.getColaboradoresIntegradosByEmpresa(idEmpresa);
+}
+
 // Criar
 async function criarEmpresa(data) {
   if (!data.nome) {
@@ -55,6 +59,7 @@ async function removeCidade(idEmpresa, idCidade) {
 module.exports = {
   listarEmpresas,
   buscarEmpresa,
+  listarColaboradoresIntegrados,
   criarEmpresa,
   atualizarEmpresa,
   deletarEmpresa,

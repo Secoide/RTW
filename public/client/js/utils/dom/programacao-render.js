@@ -20,6 +20,7 @@ export function renderColaboradoresDisponiveis(colaboradores, container = ".p_co
     const cargo = colab.funcao?.toLowerCase() || "";
     const idFunc = colab.idFunc;
     const aniver = colab.aniver;
+    const faltaIndevidaPendente = Number(colab.falta_indevida_pendente) === 1;
 
     const display = classeMotivo === "" ? "visible;" : "hidden;";
     const iconeClass = "exame_" + colab.status_alerta;
@@ -45,6 +46,7 @@ export function renderColaboradoresDisponiveis(colaboradores, container = ".p_co
       <div class="colaborador ${classeMotivo} ${aniver} areaRestrita"
            draggable="true"
            data-status="${classeMotivo}"
+           data-falta-indevida-pendente="${faltaIndevidaPendente ? 1 : 0}"
            data-id="${idFunc}"
            data-nome="${nome}">
         <i class="${iconeClass} fa-solid fa-circle areaRestrita"
@@ -65,10 +67,11 @@ export function renderColaboradoresDisponiveis(colaboradores, container = ".p_co
  * @param {Array} ordens - lista vinda do service (cada item é 1 colaborador em uma OS)
  * @param {HTMLElement|string} container - elemento ou seletor CSS
  */
-export function renderOSComColaboradores(ordens, container = ".painelDia") {
+export function renderOSComColaboradores(ordens, container = ".painelDia", opcoes = {}) {
   const painel = typeof container === "string"
     ? document.querySelector(container)
     : container;
+  const anexar = opcoes.append === true;
 
   if (!painel) {
     console.warn("⚠️ Container de OS não encontrado:", container);
@@ -76,13 +79,20 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
   }
 
   if (!Array.isArray(ordens) || ordens.length === 0) {
-    painel.innerHTML = "<p style='text-align:center; font-size:12px;'>Nenhuma OS disponível</p>";
+    if (!anexar) {
+      painel.innerHTML = "<p style='text-align:center; font-size:12px;'>Nenhuma OS disponível</p>";
+    }
     return;
   }
+
+  const idsExistentes = anexar
+    ? new Set([...painel.querySelectorAll(".painel_OS .p_infoOS[data-os]")].map(el => String(el.dataset.os)))
+    : new Set();
 
   // 🔹 Agrupa colaboradores por ID de OS
   const agrupadas = ordens.reduce((acc, colab) => {
     const id = colab?.id_OSs;
+    if (idsExistentes.has(String(id))) return acc;
     if (!id) return acc;
     (acc[id] ||= []).push(colab);
     return acc;
@@ -137,7 +147,8 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
           aniver = "",
           idNaOS = "",
           status_alerta = "ok",
-          status_integracao = ""
+          status_integracao = "",
+          falta_indevida_pendente = 0
         } = colab;
 
         const iconeClass = `exame_${status_alerta}`;
@@ -153,7 +164,8 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
         return `
           <div class="colaborador ${aniver} areaRestrita ${supervisor} status-integracao-${(status_integracao || "").toString().toLowerCase()}"
                draggable="true"
-               data-id="${idFunc}" data-nome="${nome}" data-idnaos="${idNaOS}">
+               data-id="${idFunc}" data-nome="${nome}" data-idnaos="${idNaOS}"
+               data-falta-indevida-pendente="${Number(falta_indevida_pendente) === 1 ? 1 : 0}">
             <i class="${iconeClass} fa-solid fa-circle areaRestrita" title="${statusExame}"></i>
             <p class="nome ${cargo} areaRestrita" title="${nomeCompleto}">${nome}</p>
             <i class="bt_tirarColab fa-solid fa-x areaRestrita"></i>
@@ -194,7 +206,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
 
   // 🔹 Botão de reativar OS
   const htmlReativarOS = `
-    <div class="painel_OS os_semColab">
+    <div class="painel_OS os_semColab programacao-reativar-os">
       <div class="p_infoOS" style="height:25px; text-align:center;"> 
         <p class="lbl_mostrarOS" title="Reativar/Mostrar OS" 
            style="width:100%; font-size:12px; cursor:pointer;">
@@ -205,13 +217,19 @@ export function renderOSComColaboradores(ordens, container = ".painelDia") {
   `;
 
   // 🔹 Insere tudo no painel
-  painel.innerHTML = htmlOS + htmlReativarOS;
+  if (anexar) {
+    painel.querySelector(".programacao-carregar-mais-os")?.remove();
+    painel.querySelector(".programacao-reativar-os")?.remove();
+    painel.insertAdjacentHTML("beforeend", htmlOS + htmlReativarOS);
+  } else {
+    painel.innerHTML = htmlOS + htmlReativarOS;
+  }
 }
 
 
 
-export function renderColoboradorEmOS() {
-  $('.painelDia').each(function () {
+export function renderColoboradorEmOS(escopo = document) {
+  $(escopo).find('.painelDia').addBack('.painelDia').each(function () {
     const $painelDia = $(this);
     const dia = $painelDia.attr('data-dia');
 

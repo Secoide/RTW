@@ -57,6 +57,18 @@ export async function carregarListasMateriaisOS() {
   return state.listasOS;
 }
 
+export async function carregarListasSetorUsuario() {
+  try {
+    const res = await $.get(`${state.BASE_URL}/materiais/listas/setor/pendentes`);
+    state.listasSetorUsuario = res || { estagios: [], listas: [] };
+  } catch (err) {
+    console.warn("Nao foi possivel carregar listas do setor.", err);
+    state.listasSetorUsuario = { estagios: [], listas: [] };
+  }
+
+  return state.listasSetorUsuario;
+}
+
 export async function carregarMateriais() {
   if (!state.osSelecionada) return null;
 

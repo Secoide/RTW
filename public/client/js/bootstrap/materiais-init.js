@@ -19,6 +19,7 @@ const estadoMateriais = {
   categorias: [],
   linhas: [],
   editando: null,
+  ajustesValor: {},
   timerBusca: null,
   ordenacao: {
     coluna: null,
@@ -58,7 +59,14 @@ function escapeHtml(valor) {
 
 function parseValor(valor) {
   if (typeof valor === "number") return valor;
-  const texto = String(valor || "").replace(/\./g, "").replace(",", ".");
+  let texto = String(valor || "").trim().replace("%", "");
+
+  if (texto.includes(",") && texto.includes(".")) {
+    texto = texto.replace(/\./g, "").replace(",", ".");
+  } else if (texto.includes(",")) {
+    texto = texto.replace(",", ".");
+  }
+
   const numero = Number(texto);
   return Number.isFinite(numero) ? numero : 0;
 }
@@ -66,6 +74,12 @@ function parseValor(valor) {
 function formatarValor(valor) {
   const numero = Number(valor);
   return Number.isFinite(numero) && numero > 0 ? moedaBR.format(numero) : "-";
+}
+
+function formatarPercentual(valor) {
+  const numero = parseValor(valor);
+  if (!Number.isFinite(numero)) return "";
+  return Number.isInteger(numero) ? String(numero) : String(numero).replace(".", ",");
 }
 
 function montarSrcImagemMaterial(item) {
@@ -135,10 +149,27 @@ export async function initMateriais() {
 
     const id = Number(botao.dataset.id);
     if (botao.dataset.acao === "editar") editarLinha(id);
+    if (botao.dataset.acao === "toggle-media-valor") toggleUsarMediaValor(id);
     if (botao.dataset.acao === "abrir-cadastro") abrirCadastroMaterial(id);
     if (botao.dataset.acao === "apagar") apagarMaterial(id);
     if (botao.dataset.acao === "cancelar") cancelarEdicao();
     if (botao.dataset.acao === "salvar") salvarLinha(id);
+  });
+
+  el("materiaisCatalogoTabela")?.addEventListener("input", event => {
+    const input = event.target.closest("[data-campo]");
+    const linha = event.target.closest("tr[data-id]");
+    if (!input || !linha) return;
+
+    const id = Number(linha.dataset.id);
+    estadoMateriais.ajustesValor[id] = {
+      ...estadoMateriais.ajustesValor[id],
+      [input.dataset.campo]: input.value
+    };
+
+    if (input.dataset.campo === "valor_orcamento_atual" || input.dataset.campo === "percentual_valor") {
+      atualizarPreviewValorCatalogo(id);
+    }
   });
 
   el("materiaisCatalogoPaginacao")?.addEventListener("click", event => {
@@ -218,7 +249,7 @@ function renderTabela() {
         <td>${escapeHtml(item.codigo || "-")}</td>
         <td>${escapeHtml(item.fabricante || "-")}</td>
         <td>${editando ? `<input class="materiais-catalogo-input" data-campo="unidade" value="${escapeHtml(item.unidade || "")}" placeholder="Ex: un, m, kg">` : escapeHtml(item.unidade || "-")}</td>
-        <td>${editando ? `<input class="materiais-catalogo-input" data-campo="valor_orcamento_atual" value="${escapeHtml(item.valor_orcamento_atual || "")}" inputmode="decimal" placeholder="0,00">` : `<strong class="materiais-catalogo-valor">${formatarValor(item.valor_orcamento_atual)}</strong>`}</td>
+        <td>${editando ? renderEditorValorAtual(item) : renderValorAtualCatalogo(item)}</td>
         <td>${renderMediaFornecedores(item)}</td>
         <td class="col-acoes">
           ${editando ? `
@@ -243,6 +274,113 @@ function renderTabela() {
       </tr>
     `;
   }).join("");
+}
+
+function renderValorAtualCatalogo(item) {
+  const percentual = item.usar_media_orcamento ? formatarPercentual(item.percentual_orcamento) : "";
+
+  return `
+    <div class="materiais-catalogo-valor-box">
+      <strong class="materiais-catalogo-valor">${formatarValor(item.valor_orcamento_atual)}</strong>
+      ${percentual ? `
+        <small class="materiais-catalogo-valor-tag" title="Valor atualizado com base na média + ${escapeHtml(percentual)}%">
+          <i class="fa-solid fa-chart-line"></i> +${escapeHtml(percentual)}%
+        </small>
+      ` : ""}
+    </div>
+  `;
+}
+
+function renderEditorValorAtual(item) {
+  const id = Number(item.id);
+  const ajuste = estadoMateriais.ajustesValor[id] || {};
+  const media = Number(item.media_fornecedor_ultimos5);
+  const temMedia = Number.isFinite(media) && media > 0;
+  const usarMedia = Boolean(ajuste.usarMedia) && temMedia;
+  const valorAtual = ajuste.valor_orcamento_atual ?? item.valor_orcamento_atual ?? "";
+  const percentual = ajuste.percentual_valor ?? "";
+  return `
+    <div class="materiais-catalogo-valor-editor">
+      <input class="materiais-catalogo-input valor-base"
+        data-campo="valor_orcamento_atual"
+        value="${escapeHtml(valorAtual)}"
+        inputmode="decimal"
+        placeholder="0,00"
+        title="Valor atual manual">
+      <div class="materiais-catalogo-valor-acoes">
+        <button type="button"
+          class="materiais-catalogo-toggle-media ${usarMedia ? "ativo" : ""}"
+          data-acao="toggle-media-valor"
+          data-id="${id}"
+          ${temMedia ? "" : "disabled"}
+          title="${temMedia ? "Usar média dos 5 últimos orçamentos como referência" : "Sem média disponível para este material"}">
+          <i class="fa-solid fa-chart-line"></i>
+        </button>
+        <input class="materiais-catalogo-input percentual"
+          data-campo="percentual_valor"
+          value="${escapeHtml(percentual)}"
+          inputmode="decimal"
+          placeholder="%"
+          title="Percentual adicional">
+      </div>
+    </div>
+  `;
+}
+
+function toggleUsarMediaValor(id) {
+  const item = estadoMateriais.linhas.find(linha => Number(linha.id) === Number(id));
+  if (!item) return;
+
+  const media = Number(item.media_fornecedor_ultimos5);
+  if (!Number.isFinite(media) || media <= 0) return;
+
+  const linha = el("materiaisCatalogoTabela")?.querySelector(`tr[data-id="${id}"]`);
+  const botao = linha?.querySelector('[data-acao="toggle-media-valor"]');
+  const ativo = !botao?.classList.contains("ativo");
+
+  estadoMateriais.ajustesValor[id] = {
+    ...estadoMateriais.ajustesValor[id],
+    usarMedia: ativo,
+    valor_orcamento_atual: linha?.querySelector('[data-campo="valor_orcamento_atual"]')?.value ?? item.valor_orcamento_atual ?? "",
+    percentual_valor: linha?.querySelector('[data-campo="percentual_valor"]')?.value ?? ""
+  };
+
+  botao?.classList.toggle("ativo", ativo);
+  atualizarPreviewValorCatalogo(id);
+}
+
+function calcularValorAtualizadoCatalogo(item, valores = {}) {
+  const ajuste = estadoMateriais.ajustesValor[Number(item.id)] || {};
+  const usarMedia = Boolean(valores.usarMedia ?? ajuste.usarMedia);
+  const percentualTexto = valores.percentual_valor ?? ajuste.percentual_valor ?? "";
+  const percentual = parseValor(percentualTexto);
+  const temPercentual = String(percentualTexto || "").trim() !== "";
+  const valorManualTexto = valores.valor_orcamento_atual ?? ajuste.valor_orcamento_atual ?? item.valor_orcamento_atual ?? "";
+  const valorManual = parseValor(valorManualTexto);
+  const media = Number(item.media_fornecedor_ultimos5);
+  const base = usarMedia && Number.isFinite(media) && media > 0 ? media : valorManual;
+
+  if (!usarMedia && !temPercentual && String(valorManualTexto || "").trim() === "") return null;
+  if (!Number.isFinite(base) || base <= 0) return temPercentual ? 0 : null;
+  if (!temPercentual) return base;
+
+  return Number((base * (1 + (percentual / 100))).toFixed(2));
+}
+
+function atualizarPreviewValorCatalogo(id) {
+  const item = estadoMateriais.linhas.find(linha => Number(linha.id) === Number(id));
+  const linha = el("materiaisCatalogoTabela")?.querySelector(`tr[data-id="${id}"]`);
+  if (!item || !linha) return;
+
+  const usarMedia = linha.querySelector('[data-acao="toggle-media-valor"]')?.classList.contains("ativo") || false;
+  const valorPreview = calcularValorAtualizadoCatalogo(item, {
+    usarMedia,
+    valor_orcamento_atual: linha.querySelector('[data-campo="valor_orcamento_atual"]')?.value,
+    percentual_valor: linha.querySelector('[data-campo="percentual_valor"]')?.value
+  });
+
+  const preview = linha.querySelector(`[data-preview-valor="${id}"]`);
+  if (preview) preview.textContent = formatarValor(valorPreview);
 }
 
 function ordenarCatalogo(th) {
@@ -352,10 +490,17 @@ function renderMediaFornecedores(item) {
 
 function editarLinha(id) {
   estadoMateriais.editando = id;
+  const item = estadoMateriais.linhas.find(linha => Number(linha.id) === Number(id));
+  estadoMateriais.ajustesValor[id] = {
+    usarMedia: Boolean(Number(item?.usar_media_orcamento || 0)),
+    percentual_valor: item?.percentual_orcamento ?? "",
+    valor_orcamento_atual: item?.valor_orcamento_atual ?? ""
+  };
   renderTabela();
 }
 
 function cancelarEdicao() {
+  if (estadoMateriais.editando) delete estadoMateriais.ajustesValor[estadoMateriais.editando];
   estadoMateriais.editando = null;
   renderTabela();
 }
@@ -431,19 +576,29 @@ async function salvarLinha(id) {
   const linha = el("materiaisCatalogoTabela")?.querySelector(`tr[data-id="${id}"]`);
   if (!linha) return;
 
+  const item = estadoMateriais.linhas.find(linhaItem => Number(linhaItem.id) === Number(id));
   const unidade = linha.querySelector('[data-campo="unidade"]')?.value.trim() || "";
-  const valor = parseValor(linha.querySelector('[data-campo="valor_orcamento_atual"]')?.value);
+  const usarMedia = linha.querySelector('[data-acao="toggle-media-valor"]')?.classList.contains("ativo") || false;
+  const percentualValor = linha.querySelector('[data-campo="percentual_valor"]')?.value || "";
+  const valor = calcularValorAtualizadoCatalogo(item || { id }, {
+    usarMedia,
+    valor_orcamento_atual: linha.querySelector('[data-campo="valor_orcamento_atual"]')?.value,
+    percentual_valor: percentualValor
+  });
 
   try {
     await apiCatalogo(`/api/materiais/catalogo/${id}`, {
       method: "PUT",
       body: JSON.stringify({
         unidade,
-        valor_orcamento_atual: valor
+        valor_orcamento_atual: valor,
+        usar_media_orcamento: usarMedia,
+        percentual_orcamento: usarMedia ? percentualValor : null
       })
     });
 
     estadoMateriais.editando = null;
+    delete estadoMateriais.ajustesValor[id];
     await carregarMateriaisCatalogo();
     Swal?.fire?.({
       toast: true,

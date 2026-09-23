@@ -517,7 +517,11 @@ function renderConferenciaAtual() {
     return;
   }
 
+  const ehMaterialLivre = Number(item.material_livre || 0) === 1 || (!item.id_variacao && item.material_livre_descricao);
   const imgSrc = item.imagem ? `${item.imagem}?v=${item.versao_foto || ""}` : "/imagens/imagemmaterial.webp";
+  const fotoHtml = ehMaterialLivre
+    ? `<div class="estoque-material-livre-icone" title="Material específico sem cadastro"><i class="fa-solid fa-file-circle-question"></i></div>`
+    : `<img src="${escapeHtml(imgSrc)}" alt="">`;
   const statusLabel = getStatusConferenciaLabel(item);
   const faltando = Number(item.conferencia_faltando || 0);
 
@@ -526,7 +530,7 @@ function renderConferenciaAtual() {
 
   $("#conferenciaMaterialAtual").html(`
     <div class="estoque-conferencia-foto">
-      <img src="${escapeHtml(imgSrc)}" alt="">
+      ${fotoHtml}
     </div>
     <div class="estoque-conferencia-info">
       <span class="estoque-conferencia-categoria">${escapeHtml(item.categoria || "-")}</span>
@@ -662,14 +666,18 @@ function renderTabelaEstoque(materiais) {
     const total = Number(item.quantidade_estoque || 0);
     const separado = Number(item.quantidade_separada_estoque || 0);
     const percentual = total ? (separado / total) * 100 : 0;
+    const ehMaterialLivre = Number(item.material_livre || 0) === 1 || (!item.id_variacao && item.material_livre_descricao);
     const imgSrc = item.imagem ? `${item.imagem}?v=${item.versao_foto || ""}` : "/imagens/imagemmaterial.webp";
+    const fotoHtml = ehMaterialLivre
+      ? `<div class="estoque-material-livre-icone" title="Material específico sem cadastro"><i class="fa-solid fa-file-circle-question"></i></div>`
+      : `<img class="estoque-material-img" src="${escapeHtml(imgSrc)}" alt="">`;
     const observacao = item.observacao || item.obs || "";
 
     return `
       <tr data-id="${item.id}">
         <td>${escapeHtml(item.categoria || "-")}</td>
         <td>
-          <img class="estoque-material-img" src="${escapeHtml(imgSrc)}" alt="">
+          ${fotoHtml}
         </td>
         <td class="estoque-material-desc">
           <strong>${escapeHtml(item.nome || "-")}</strong>
@@ -787,6 +795,7 @@ function montarHtmlPDFEstoque(materiais) {
           th, td { border: 1px solid #bbb; padding: 4px; font-size: 8px; vertical-align: middle; overflow-wrap: anywhere; }
           th { background: #2f2f2f; color: #fff; text-transform: uppercase; }
           td img { width: 34px; height: 34px; object-fit: contain; display: block; margin: auto; }
+          .pdf-material-livre { width: 34px; height: 34px; margin: auto; display: grid; place-items: center; border: 1px dashed #c9821e; color: #9a5b08; font-weight: 700; }
           .descricao strong { display: block; font-size: 9px; }
           .descricao span { color: #555; }
           .campo-manual { height: 24px; border: 1px dashed #111; border-radius: 3px; background: #fff; }
@@ -844,13 +853,17 @@ function montarHtmlPDFEstoque(materiais) {
 }
 
 function renderLinhaPDFEstoque(item) {
+  const ehMaterialLivre = Number(item.material_livre || 0) === 1 || (!item.id_variacao && item.material_livre_descricao);
   const imgSrc = item.imagem ? `${item.imagem}?v=${item.versao_foto || ""}` : "/imagens/imagemmaterial.webp";
+  const fotoHtml = ehMaterialLivre
+    ? `<div class="pdf-material-livre">?</div>`
+    : `<img src="${escapeHtml(imgSrc)}" alt="">`;
   const observacao = item.observacao || item.obs || "";
 
   return `
     <tr>
       <td>${escapeHtml(item.categoria || "-")}</td>
-      <td><img src="${escapeHtml(imgSrc)}" alt=""></td>
+      <td>${fotoHtml}</td>
       <td class="descricao">
         <strong>${escapeHtml(item.nome || "-")}</strong>
         <span>${escapeHtml(item.atributos || "")}</span>

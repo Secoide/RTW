@@ -57,6 +57,8 @@ app.use("/api/comunicados", comunicadosRoutes);
 app.use("/api/notificacoes", require("./routes/notificacoes.routes"));
 
 app.use('/api/ferias', require('./routes/ferias.routes'));
+app.use('/api/feriados', require('./routes/feriados.routes'));
+app.use('/api/atualizacoes', require('./routes/atualizacoes.routes'));
 app.use('/api/cargo', require('./routes/cargo.routes'));
 app.use('/api/setor', require('./routes/setor.routes'));
 

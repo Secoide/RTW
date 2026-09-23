@@ -4,13 +4,18 @@ import { transferirColaboradores } from "../../services/sockets/colaboradores-so
 let fp; // instância global do flatpickr
 
 function initCalendario() {
-    if (fp) return;
-
     const el = document.getElementById("datasMultiHidden");
     if (!el) {
         console.warn("#datasMultiHidden não encontrado.");
         return;
     }
+
+    if (fp) {
+        if (fp.input === el && document.body.contains(fp.calendarContainer)) return;
+        fp.destroy();
+        fp = null;
+    }
+
     if (typeof window.flatpickr !== "function") {
         console.warn("Flatpickr não carregado.");
         return;

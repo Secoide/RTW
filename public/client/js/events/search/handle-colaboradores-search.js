@@ -25,6 +25,8 @@ function fecharSugestoes($input) {
  */
 export function initColaboradoresSearch(socket) {
     $(document).off(".colabSearch");
+    OS_FOCUS = null;
+    indiceSelecionado2 = -1;
 
     // Dentro de initColaboradoresSearch(socket)
     $(document).on("input.colabSearch", ".buscarColab input", function () {
@@ -246,13 +248,6 @@ $(document).on("mouseenter.colabSearch", ".itemSugestao", function () {
     const $li = $(this);
     $li.addClass("selecionado").siblings().removeClass("selecionado");
     indiceSelecionado2 = $li.index();
-});
-
-// Clique em uma sugestão
-$(document).on("click.colabSearch", ".itemSugestao", function () {
-    const $input = $(this).closest(".buscarColab").find("input");
-    fecharSugestoes($input);
-    $input.focus(); // <-- foco volta para o input após clique
 });
 
 }

@@ -440,6 +440,121 @@
     line-height: 1.1;
 }
 
+.hall-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.hall-cabecalho h5 {
+    margin: 0;
+}
+
+.hall-card-ajuda {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--texto-principal);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.hall-card-ajuda:hover,
+.hall-card-ajuda:focus-visible {
+    border-color: var(--cor-destaque);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--cor-destaque);
+    outline: none;
+}
+
+.hall-card-tour .driver-popover-title {
+    font-size: 14px;
+}
+
+.hall-card-tour .driver-popover-description {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.driver-popover.hall-card-tour {
+    max-width: 320px;
+    padding: 14px;
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    background-color: #1c1c1c;
+    color: #f4f4f4;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.48);
+}
+
+.driver-popover.hall-card-tour .driver-popover-title {
+    color: #ffffff;
+}
+
+.driver-popover.hall-card-tour .driver-popover-description {
+    color: #d0d0d0;
+}
+
+.driver-popover.hall-card-tour .driver-popover-progress-text {
+    color: #9e9e9e;
+    font-size: 11px;
+}
+
+.driver-popover.hall-card-tour button {
+    border: 1px solid #555555;
+    border-radius: 4px;
+    background: #2b2b2b;
+    color: #f4f4f4;
+    font-size: 12px;
+    text-shadow: none;
+}
+
+.driver-popover.hall-card-tour button:hover {
+    background: #3a3a3a;
+    color: #ffffff;
+}
+
+.driver-popover.hall-card-tour .driver-popover-next-btn {
+    border-color: #c9ae2f;
+    background: #c9ae2f;
+    color: #161616;
+}
+
+.driver-popover.hall-card-tour .driver-popover-next-btn:hover {
+    background: #dfc64a;
+    color: #161616;
+}
+
+.driver-popover.hall-card-tour .driver-popover-close-btn {
+    color: #aaaaaa;
+}
+
+.driver-popover.hall-card-tour .driver-popover-close-btn:hover {
+    color: #ffffff;
+}
+
+.driver-popover.hall-card-tour .driver-popover-arrow-side-left.driver-popover-arrow {
+    border-left-color: #1c1c1c;
+}
+
+.driver-popover.hall-card-tour .driver-popover-arrow-side-right.driver-popover-arrow {
+    border-right-color: #1c1c1c;
+}
+
+.driver-popover.hall-card-tour .driver-popover-arrow-side-top.driver-popover-arrow {
+    border-top-color: #1c1c1c;
+}
+
+.driver-popover.hall-card-tour .driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-bottom-color: #1c1c1c;
+}
+
 #hall-experiencia {
     grid-area: experiencia;
     display: flex;
@@ -449,6 +564,89 @@
 
 #painel-aniversarios {
     grid-area: auto;
+}
+
+.home-atualizacao-galeria[hidden] {
+    display: none;
+}
+
+.home-atualizacao-carousel {
+    display: grid;
+    grid-template-columns: 30px minmax(70px, .7fr) minmax(180px, 2fr) minmax(70px, .7fr) 30px;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 4px;
+}
+
+.home-atualizacao-preview,
+.home-atualizacao-imagem-principal {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid rgba(31, 31, 31, .16);
+    background: #e8e8e8;
+}
+
+.home-atualizacao-preview {
+    opacity: .58;
+    cursor: pointer;
+}
+
+.home-atualizacao-preview img,
+.home-atualizacao-imagem-principal img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.home-atualizacao-imagem-principal {
+    border-color: rgba(238, 119, 34, .48);
+}
+
+.home-atualizacao-carousel-button {
+    display: inline-grid !important;
+    place-items: center;
+    width: 30px !important;
+    height: 30px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #b7b7b7 !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    color: #3b3b3b !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    transform: none !important;
+    scale: 1 !important;
+}
+
+.home-atualizacao-carousel-button:hover:not(:disabled) {
+    border-color: #ee7722 !important;
+    background: #fff7ef !important;
+    color: #ee7722 !important;
+}
+
+.home-atualizacao-carousel-button:disabled {
+    cursor: default;
+    opacity: .45;
+}
+
+.home-atualizacao-indicadores {
+    color: #6b6b6b;
+    font-size: 10px;
+    text-align: center;
+}
+
+@media (max-width: 620px) {
+    .home-atualizacao-carousel {
+        grid-template-columns: 30px minmax(0, 1fr) 30px;
+    }
+
+    .home-atualizacao-preview {
+        display: none;
+    }
 }
 
 #painel-funcionario-mes {
@@ -2761,6 +2959,8 @@ LOCK
 
     height: 215px;
 
+    position: relative;
+
     background: var(--bg-card);
 
     border-radius: 12px;
@@ -2773,6 +2973,18 @@ LOCK
 
     border: 1px solid rgba(255, 255, 255, .05);
 
+    box-sizing: border-box;
+    min-width: 0;
+
+}
+
+.hall-bandeira-alvo {
+    position: absolute;
+    top: 0;
+    left: 7px;
+    width: 42px;
+    height: 58px;
+    pointer-events: none;
 }
 
 .card-experiencia:hover {
@@ -3024,7 +3236,7 @@ LOCK
 }
 
 #hall-experiencia.hall-em-desenvolvimento::after {
-    content: "Em desenvolvimento... 70%";
+    content: "Em desenvolvimento...99%";
     position: absolute;
     left: 50%;
     top: 50%;
@@ -3080,7 +3292,44 @@ LOCK
 }
 
 .card-experiencia .medalha {
-    color: gray;
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    color: #363636;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.hall-card-sequencial {
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: opacity .32s ease, transform .32s ease;
+}
+
+.hall-card-sequencial .hall-card-info {
+    opacity: 0;
+    transform: translateY(7px);
+    visibility: hidden;
+    transition: opacity .3s ease, transform .3s ease, visibility 0s linear .3s;
+}
+
+.hall-card-sequencial.hall-card-rank-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.hall-card-sequencial.hall-card-info-visible .hall-card-info {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hall-card-sequencial,
+    .hall-card-sequencial .hall-card-info {
+        transition: none;
+    }
 }
 
 .card-experiencia .dias {
@@ -3109,6 +3358,60 @@ LOCK
     align-items: center;
     gap: 8px;
     min-height: 30px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+#hall-experiencia #hall-ranking .card-experiencia {
+    flex: 0 0 202px;
+    width: 202px;
+    min-width: 202px;
+    max-width: 202px;
+}
+
+.medalhas-rolando {
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+.medalhas-trilho {
+    display: flex;
+    flex: 0 0 auto;
+    width: max-content;
+    will-change: transform;
+}
+
+.medalhas-rolando .medalhas-trilho {
+    animation: medalhasPassagem 26s linear infinite;
+    animation-play-state: running;
+}
+
+.medalhas-rolando.medalhas-pausada .medalhas-trilho {
+    animation-play-state: paused;
+}
+
+.medalhas:not(.medalhas-rolando) .medalhas-grupo {
+    padding-right: 0;
+}
+
+.medalhas-grupo {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    padding-right: 24px;
+}
+
+@keyframes medalhasPassagem {
+    from {
+        transform: translateX(-50%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
 
 .medalha-item {
@@ -3120,6 +3423,10 @@ LOCK
 
 .medalha-item:hover {
     transform: scale(1.15);
+}
+
+.medalhas-rolando .medalha-item:hover {
+    transform: scale(1.1);
 }
 
 .medalha-item::after {

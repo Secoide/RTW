@@ -96,25 +96,50 @@ function getPrefixoAno(ano = new Date().getFullYear()) {
   return anoTexto.slice(-2).padStart(2, "0");
 }
 
-async function gerarProximoNumeroSerie(ano) {
-  const prefixo = getPrefixoAno(ano);
-  const ultimo = await PaineisModel.buscarUltimoNumeroSeriePorAno(prefixo);
-  const ultimoSequencial = Number(String(ultimo || "").split(".").pop() || 0);
+function getPrefixoMes(mes = new Date().getMonth() + 1) {
+  const mesNumero = Number.parseInt(String(mes).replace(/\D/g, ""), 10);
+  const mesValido = mesNumero >= 1 && mesNumero <= 12 ? mesNumero : new Date().getMonth() + 1;
+  return String(mesValido).padStart(2, "0");
+}
+
+function getMesRegistro(dataRegistro) {
+  const mes = String(dataRegistro || "").match(/^\d{4}-(\d{2})/);
+  return mes ? mes[1] : getPrefixoMes();
+}
+
+async function gerarProximoNumeroSerie(ano, mes) {
+  const prefixoAno = getPrefixoAno(ano);
+  const prefixoMes = getPrefixoMes(mes);
+  const prefixo = `${prefixoAno}.${prefixoMes}`;
+  const ultimo = await PaineisModel.buscarUltimoNumeroSeriePorAnoMes(prefixo);
+  const ultimoSequencial = Number(String(ultimo || "").split("-").pop() || 0);
   const proximoSequencial = Number.isFinite(ultimoSequencial) ? ultimoSequencial + 1 : 1;
 
   return {
-    ano_prefixo: prefixo,
-    numero_serie: `${prefixo}.${String(proximoSequencial).padStart(3, "0")}`
+    ano_prefixo: prefixoAno,
+    mes_prefixo: prefixoMes,
+    numero_serie: `${prefixo}-${String(proximoSequencial).padStart(3, "0")}`
   };
 }
 
 async function criarPainel(payload) {
   const data = normalizarPainel(payload);
-  const proximoNumero = await gerarProximoNumeroSerie(data.ano);
-  data.numero_serie = proximoNumero.numero_serie;
-  validarPainel(data);
+  let result;
+  const mesRegistro = getMesRegistro(data.data_registro);
 
-  const result = await PaineisModel.criarPainel(data);
+  for (let tentativa = 0; tentativa < 3; tentativa += 1) {
+    const proximoNumero = await gerarProximoNumeroSerie(data.ano, mesRegistro);
+    data.numero_serie = proximoNumero.numero_serie;
+    validarPainel(data);
+
+    try {
+      result = await PaineisModel.criarPainel(data);
+      break;
+    } catch (err) {
+      if (err?.code !== "ER_DUP_ENTRY" || tentativa === 2) throw err;
+    }
+  }
+
   const painel = await buscarPainelCompleto(result.insertId);
 
   return {

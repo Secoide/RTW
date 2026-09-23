@@ -104,6 +104,16 @@ async function getListasConferencia(req, res) {
   }
 }
 
+async function getListasSetorUsuario(req, res) {
+  try {
+    const dados = await MaterialService.listarListasSetorUsuario(req.user);
+    res.json(dados);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao listar listas do setor' });
+  }
+}
+
 async function getHistoricoListaOS(req, res) {
   try {
     const dados = await MaterialService.listarHistoricoListaOS(req.params.id);
@@ -151,8 +161,9 @@ async function createMaterialOS(req, res) {
   try {
     const novo = await MaterialService.criarMaterialOS(req.body);
     res.status(201).json(novo);
-  } catch {
-    res.status(400).json({ erro: 'Erro ao criar material' });
+  } catch (err) {
+    console.error("Erro ao criar material na OS:", err);
+    res.status(400).json({ erro: err.message || 'Erro ao criar material' });
   }
 }
 
@@ -457,6 +468,7 @@ module.exports = {
   getListasOS,
   getListasEstoque,
   getListasConferencia,
+  getListasSetorUsuario,
   getHistoricoListaOS,
   getCustoOS,
 

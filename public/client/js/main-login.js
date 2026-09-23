@@ -4,11 +4,15 @@ import { initChristmasIcons, initNewYearFireworks } from "./services/ui/special-
 import { startWeatherEffects } from "./services/ui/clima-tempo-login.js";
 import { startMotivationalPhrases } from "./services/ui/motivational-phrases.js";
 import { initWorldCupDecorations } from "./services/ui/world-cup-decorations.js";
+import { startElectricLoginBackground } from "./services/ui/electric-login-background.js";
 
 $(document).ready(function () {
   if ($("#formLogin").length) {
-    initChristmasIcons();  // natal
-    initNewYearFireworks();   // ano novo
+    const christmasActive = initChristmasIcons();  // natal
+    const newYearActive = initNewYearFireworks();   // ano novo
+    if (!christmasActive && !newYearActive) {
+      startElectricLoginBackground();
+    }
     detectarClima();
     startMotivationalPhrases();
     initWorldCupDecorations();

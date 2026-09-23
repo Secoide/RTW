@@ -23,6 +23,24 @@
         <div class="atualizacao-box home-atualizacao-box">
             <h2>🚀 Nova atualização lançada!</h2>
             <p><strong>Versão:</strong> <span id="homeVersaoAtual">2.0.0</span></p>
+            <section id="homeAtualizacaoGaleria" class="home-atualizacao-galeria" hidden aria-label="Imagens da atualizacao">
+                <div class="home-atualizacao-carousel">
+                    <button type="button" class="home-atualizacao-carousel-button" data-home-galeria="anterior"
+                        aria-label="Imagem anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div class="home-atualizacao-preview home-atualizacao-preview-esquerda">
+                        <img id="homeAtualizacaoImagemAnterior" alt="Imagem anterior da atualizacao">
+                    </div>
+                    <figure class="home-atualizacao-imagem-principal">
+                        <img id="homeAtualizacaoImagemPrincipal" alt="Imagem principal da atualizacao">
+                    </figure>
+                    <div class="home-atualizacao-preview home-atualizacao-preview-direita">
+                        <img id="homeAtualizacaoImagemProxima" alt="Proxima imagem da atualizacao">
+                    </div>
+                    <button type="button" class="home-atualizacao-carousel-button" data-home-galeria="proxima"
+                        aria-label="Proxima imagem"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div id="homeAtualizacaoIndicadores" class="home-atualizacao-indicadores" aria-hidden="true"></div>
+            </section>
             <label class="home-versao-selector" for="homeVersaoSelect">
                 <span>Consultar outra versão</span>
                 <select id="homeVersaoSelect" aria-label="Selecionar versao do changelog">
@@ -153,7 +171,12 @@
     </div>
 
     <div id="hall-experiencia" class="hall-em-desenvolvimento">
-        <h5>Tempo de empresa e Reconhecimentos</h5>
+        <div class="hall-cabecalho">
+            <h5>Tempo de empresa e Reconhecimentos</h5>
+            <button id="btnGuiaCardHall" class="hall-card-ajuda" type="button" title="Entender este card" aria-label="Entender este card">
+                <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+            </button>
+        </div>
         <div id="hall-ranking"></div>
     </div>
 

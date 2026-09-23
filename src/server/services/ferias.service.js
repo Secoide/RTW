@@ -336,6 +336,7 @@ async function validarFerias(payload, idIgnorado = null) {
     }
 
     const feriasExistentes = await FeriasModel.listarFeriasColaborador(idFunc, idIgnorado);
+    const interrupcoesExistentes = await FeriasModel.listarInterrupcoesColaborador(idFunc, idIgnorado);
     const sobrepoe = feriasExistentes.some((f) => {
         const existenteInicio = criarDataLocal(f.datainicio);
         const existenteFim = criarDataLocal(f.datafinal);
@@ -344,6 +345,18 @@ async function validarFerias(payload, idIgnorado = null) {
 
     if (sobrepoe) {
         const err = new Error('Ja existe ferias cadastrada nesse periodo para o colaborador.');
+        err.statusCode = 409;
+        throw err;
+    }
+
+    const sobrepoeOutroRegistro = interrupcoesExistentes.some((registro) => {
+        const existenteInicio = criarDataLocal(registro.datainicio);
+        const existenteFim = criarDataLocal(registro.datafinal);
+        return inicio <= existenteFim && fim >= existenteInicio;
+    });
+
+    if (sobrepoeOutroRegistro) {
+        const err = new Error('Ja existe atestado, afastamento ou outro registro nesse periodo para o colaborador.');
         err.statusCode = 409;
         throw err;
     }

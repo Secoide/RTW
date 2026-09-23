@@ -7,12 +7,13 @@ import { materialState as state } from "../../state/material.state.js";
 export async function salvarNovoMaterial($tr) {
 
   const id_variacao = $tr.find("[data-field='id_variacao']").val();
+  const descricaoLivre = $tr.find(".autocomplete-material").val()?.trim() || "";
   const quantidade = Number($tr.find("[data-field='quantidade']").val());
   const observacao = $tr.find("[data-field='observacao']").val()?.trim() || null;
 
-  if (!id_variacao) {
-    alert("Selecione um material");
-    throw new Error("Material não selecionado");
+  if (!id_variacao && !descricaoLivre) {
+    alert("Selecione um material ou informe uma descrição específica");
+    throw new Error("Material nao informado");
   }
 
   if (!quantidade || quantidade <= 0) {
@@ -28,10 +29,16 @@ export async function salvarNovoMaterial($tr) {
   const payload = {
     id_os: state.osSelecionada,
     id_lista: state.listaSelecionada,
-    id_variacao,
     quantidade,
     observacao
   };
+
+  if (id_variacao) {
+    payload.id_variacao = id_variacao;
+  } else {
+    payload.material_livre = 1;
+    payload.material_livre_descricao = descricaoLivre;
+  }
 
   return await $.post("/api/materiais/os/cadastrar", payload);
 }

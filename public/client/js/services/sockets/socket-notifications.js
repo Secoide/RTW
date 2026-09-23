@@ -19,6 +19,10 @@ function salvarLocal() {
   localStorage.setItem(notifKey, JSON.stringify(notificacoes));
 }
 
+function notificacaoExigeResposta(item) {
+  return montarAcoesAprovacao(item).trim().length > 0;
+}
+
 function formatarData(dataIso) {
   if (!dataIso) return "";
   const [ano, mes, dia] = String(dataIso).split("-");
@@ -57,6 +61,7 @@ function renderizarNotificacoes() {
   const notificacoesVisiveis = notificacoes.filter(notificacaoPermitida);
   const count = notificacoesVisiveis.length;
   const countLabel = count > 99 ? "99+" : String(count);
+  const existeRespostaPendente = notificacoesVisiveis.some(notificacaoExigeResposta);
 
   $(".menu_Perfil").toggleClass("tem-notificacao", count > 0);
   $("#notification-count, #perfil-notification-badge")
@@ -78,7 +83,10 @@ function renderizarNotificacoes() {
   $("<button>")
     .attr("type", "button")
     .attr("id", "notification-clear")
-    .prop("disabled", count === 0)
+    .prop("disabled", count === 0 || existeRespostaPendente)
+    .attr("title", existeRespostaPendente
+      ? "Responda as solicitações pendentes antes de limpar"
+      : "Marcar notificações como lidas")
     .html(`<i class="fa-solid fa-check-double"></i> Limpar`)
     .appendTo($header);
 
@@ -170,6 +178,22 @@ function obterIdAprovacao(item) {
 }
 
 function montarAcoesAprovacao(item) {
+  if (String(item.tipo || "").toLowerCase() === "aprovacao_falta_indevida") {
+    const idAprovacao = obterIdAprovacao(item);
+    if (!idAprovacao) return "";
+
+    return `
+      <div class="notification-actions notification-actions-falta">
+        <button type="button" class="notification-action-cancel" data-aprovacao-id="${escapeHtml(idAprovacao)}" data-aprovacao-acao="falta-nao-justificada">
+          <i class="fa-solid fa-circle-xmark"></i> Não justificada
+        </button>
+        <button type="button" class="notification-action-ok" data-aprovacao-id="${escapeHtml(idAprovacao)}" data-aprovacao-acao="falta-justificada">
+          <i class="fa-solid fa-file-circle-check"></i> Justificada + PDF
+        </button>
+      </div>
+    `;
+  }
+
   if (String(item.tipo || "").toLowerCase() !== "aprovacao_responsavel_os") {
     return "";
   }
@@ -187,6 +211,109 @@ function montarAcoesAprovacao(item) {
       </button>
     </div>
   `;
+}
+
+function removerNotificacaoAprovacao(idAprovacao) {
+  const referencia = `aprovacao:${idAprovacao}`;
+  notificacoes = notificacoes.filter((item) => item.referencia !== referencia);
+  renderizarNotificacoes();
+}
+
+export async function decidirFaltaNaoJustificada(idAprovacao) {
+  const res = await fetch(`/api/notificacoes/aprovacoes/${idAprovacao}/falta-nao-justificada`, {
+    method: "POST",
+    credentials: "include"
+  });
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || data.sucesso === false) {
+    throw new Error(data.mensagem || "Não foi possível concluir a análise.");
+  }
+
+  removerNotificacaoAprovacao(idAprovacao);
+  return data;
+}
+
+export function abrirModalJustificarFalta(idAprovacao, onSuccess) {
+  $("#modalDecisaoFalta").remove();
+
+  $("body").append(`
+    <div id="modalDecisaoFalta" class="modal-anexo-documento modal-registro-falta">
+      <div class="modal-anexo-backdrop">
+        <div class="painel_dadosAnexo painel-anexo-documento">
+          <form id="formDecisaoFalta" enctype="multipart/form-data">
+            <div class="modal-anexo-header">
+              <div>
+                <h3>Confirmar falta justificada</h3>
+                <p>Anexe o atestado em PDF para concluir a análise do RH.</p>
+              </div>
+              <button type="button" class="modal-anexo-close bt-fechar-decisao-falta" title="Fechar" aria-label="Fechar">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="modal-anexo-body">
+              <label class="modal-anexo-upload span-2" for="documentoDecisaoFalta">
+                <input type="file" id="documentoDecisaoFalta" accept="application/pdf" required>
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>
+                  <b>Anexar atestado em PDF</b>
+                  <small class="modal-decisao-file-name">Selecione o arquivo obrigatório.</small>
+                </span>
+              </label>
+            </div>
+            <div class="modal-anexo-footer">
+              <input type="submit" class="bt_teste" value="Marcar como justificada">
+              <input type="reset" class="bt_teste bt-fechar-decisao-falta" value="Cancelar">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `);
+
+  $("#modalDecisaoFalta").on("click", ".bt-fechar-decisao-falta", () => {
+    $("#modalDecisaoFalta").remove();
+  });
+
+  $("#documentoDecisaoFalta").on("change", function () {
+    const nome = this.files?.[0]?.name || "Selecione o arquivo obrigatório.";
+    $(this).closest(".modal-anexo-upload").find(".modal-decisao-file-name").text(nome);
+  });
+
+  $("#formDecisaoFalta").on("submit", async function (event) {
+    event.preventDefault();
+
+    const file = $("#documentoDecisaoFalta")[0]?.files?.[0];
+    if (!file || !file.name.toLowerCase().endsWith(".pdf")) {
+      alert("Anexe um arquivo PDF para marcar a falta como justificada.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("documento", file);
+    const $submit = $(this).find('[type="submit"]').prop("disabled", true);
+
+    try {
+      const res = await fetch(`/api/notificacoes/aprovacoes/${idAprovacao}/falta-justificada`, {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data.sucesso === false) {
+        throw new Error(data.mensagem || "Não foi possível concluir a análise.");
+      }
+
+      $("#modalDecisaoFalta").remove();
+      removerNotificacaoAprovacao(idAprovacao);
+      if (typeof onSuccess === "function") onSuccess(data);
+      Swal.fire({ icon: "success", title: "Falta justificada", text: data.mensagem, timer: 2200, showConfirmButton: false });
+    } catch (err) {
+      $submit.prop("disabled", false);
+      alert(err.message || "Não foi possível concluir a análise.");
+    }
+  });
 }
 
 function getPreferenciasNotificacoes() {
@@ -259,7 +386,24 @@ async function carregarNotificacoesServidor() {
     if (!res.ok) return;
 
     const data = await res.json();
-    (data.notificacoes || []).forEach((item) => {
+    const notificacoesServidor = Array.isArray(data.notificacoes)
+      ? data.notificacoes
+      : [];
+    const referenciasServidor = new Set(
+      notificacoesServidor
+        .map((item) => item?.referencia)
+        .filter(Boolean)
+    );
+
+    // Remove aprovações antigas que foram excluídas no servidor, sem tocar
+    // nas notificações locais de outros tipos.
+    notificacoes = notificacoes.filter((item) => {
+      const tipo = String(item?.tipo || "").toLowerCase();
+      const eAprovacaoServidor = item?.origem === "servidor" && tipo.includes("aprovacao");
+      return !eAprovacaoServidor || referenciasServidor.has(item.referencia);
+    });
+
+    notificacoesServidor.forEach((item) => {
       adicionarNotificacao({
         id_notificacao: item.id_notificacao,
         tipo: item.tipo,
@@ -365,6 +509,17 @@ $(document).on("click", "#notification-clear", async function (e) {
   e.preventDefault();
   e.stopPropagation();
 
+  if (notificacoes.some(notificacaoExigeResposta)) {
+    if (typeof Swal !== "undefined") {
+      Swal.fire({
+        icon: "info",
+        title: "Há uma solicitação pendente",
+        text: "Responda as solicitações pendentes antes de limpar as notificações."
+      });
+    }
+    return;
+  }
+
   notificacoes = [];
   salvarLocal();
   $("#notification-count, #perfil-notification-badge").hide();
@@ -380,24 +535,31 @@ $(document).on("click", "[data-aprovacao-acao]", async function (e) {
   const acao = this.dataset.aprovacaoAcao;
   if (!idAprovacao || !acao) return;
 
+  if (acao === "falta-justificada") {
+    abrirModalJustificarFalta(idAprovacao);
+    return;
+  }
+
   const $botao = $(this);
   $botao.prop("disabled", true);
 
   try {
-    const res = await fetch(`/api/notificacoes/aprovacoes/${idAprovacao}/${acao}`, {
-      method: "POST",
-      credentials: "include"
-    });
-    const data = await res.json().catch(() => ({}));
+    const data = acao === "falta-nao-justificada"
+      ? await decidirFaltaNaoJustificada(idAprovacao)
+      : await (async () => {
+        const res = await fetch(`/api/notificacoes/aprovacoes/${idAprovacao}/${acao}`, {
+          method: "POST",
+          credentials: "include"
+        });
+        const resposta = await res.json().catch(() => ({}));
 
-    if (!res.ok || data.sucesso === false) {
-      throw new Error(data.mensagem || "Não foi possível concluir a aprovação.");
-    }
+        if (!res.ok || resposta.sucesso === false) {
+          throw new Error(resposta.mensagem || "Não foi possível concluir a aprovação.");
+        }
 
-    const referencia = `aprovacao:${idAprovacao}`;
-    notificacoes = notificacoes.filter((item) => item.referencia !== referencia);
-    salvarLocal();
-    renderizarNotificacoes();
+        removerNotificacaoAprovacao(idAprovacao);
+        return resposta;
+      })();
 
     if (typeof Swal !== "undefined") {
       Swal.fire({
