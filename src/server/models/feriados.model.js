@@ -1,4 +1,4 @@
-const connection = require('../config/railway');
+const connection = require('../config/db');
 
 let tabelaGarantida = false;
 
