@@ -65,6 +65,7 @@ app.use('/api/setor', require('./routes/setor.routes'));
 app.use('/api/materiais', require('./routes/material.routes'));
 app.use("/api/paineis-eletricos", require("./routes/paineisEletricos.routes"));
 app.use("/api/spda", require("./routes/spda.routes"));
+app.use("/api/projetos", require("./routes/projetos.routes"));
 app.use("/api/feedback", require("./routes/feedback.routes"));
 
 app.use("/api/fornecedor", require('./routes/fornecedor.routes'));
@@ -83,6 +84,7 @@ const integracaoRoutes = require("./routes/integracoes.routes");
 app.use("/api/integracao", integracaoRoutes);
 const epiRoutes = require("./routes/epi.routes");
 app.use("/api/epi", epiRoutes);
+app.use("/api/permissoes", require("./routes/permissoes.routes"));
 
 // ---------------------------
 // Rotas de páginas

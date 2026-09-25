@@ -6,7 +6,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
+
+
 ----- VERSÕES FUTURAS
+
+## [2.7.0] - 2026-05-20
+## Nome: 📦 Materiais
+### Adicionado
+- Adicionado tour guiado completo para cadastro de estruturas e utilização da Planta baixa no SPDA.
+
 ## [2.6.0] - 2026-05-20
 ## Nome: 📦 Materiais
 ### Adicionado
@@ -96,6 +104,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Clique com o direito em medalhas manuais do colaborador (no perfil) para mostrar opção para remover medalha;
 - Adicionado resumo anual de desempenho no perfil do colaborador, com status, legenda, percentual e alerta gerencial. Restrito somente para o setor da Produção;
 - Criada a aba 'Feriados' na tela de Gestão, integrada sua utilização ao resumo anual no perfil do colaborador;
+- Criado nova tela 'Permissões', um sistema visual de permissões por usuário e cargo, com vínculos entre telas e ações configuráveis.
 
 ### Alterado
 - Reestruturação visual da pagina Home com novo Hall da Experiência;

@@ -98,7 +98,7 @@ async function logoutOwner() {
 
 async function carregarRecursos() {
   state.recursos = (await api("/api/owner/recursos")).filter(recurso => recurso.chave !== "menu.relatos");
-  const recursosObrigatorios = ["menu.prototipo_atributos", "menu.spda"];
+  const recursosObrigatorios = ["menu.prototipo_atributos", "menu.spda", "menu.permissoes"];
   if (recursosObrigatorios.some(chave => !state.recursos.some(recurso => recurso.chave === chave))) {
     state.recursos = (await api("/api/owner/recursos/sincronizar", { method: "POST" }))
       .filter(recurso => recurso.chave !== "menu.relatos");

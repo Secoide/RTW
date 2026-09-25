@@ -95,7 +95,10 @@ async function montarContextoEmpresa(empresa, acessoTotal = false) {
 
 async function buscarContextoEmpresaAdmin(idEmpresa) {
   const empresa = await SaasModel.buscarEmpresaPorId(idEmpresa);
-  return montarContextoEmpresa(empresa, true);
+  // O administrador global entra no ambiente da empresa selecionada.
+  // Nesse contexto, a interface deve respeitar os recursos contratados;
+  // o painel do dono continua usando suas próprias rotas administrativas.
+  return montarContextoEmpresa(empresa, false);
 }
 
 async function listarEmpresasParaLoginAdmin() {

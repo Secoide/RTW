@@ -11,6 +11,8 @@ import { initFerramentas } from "../../bootstrap/ferramentas-init.js";
 import { initSpda } from "../../bootstrap/spda-init.js";
 import { initRelatos } from "../../bootstrap/relatos-init.js";
 import { initPrototipoAtributosMaterial, limparPrototipoAtributosMaterial } from "../../bootstrap/prototipo-atributos-material-init.js";
+import { initPermissoes } from "../../bootstrap/permissoes-init.js";
+import { initProjetos } from "../../bootstrap/projetos-init.js";
 
 const STORAGE_ULTIMA_PAGINA_MENU = "connectpear_ultima_pagina_menu";
 const PAGINA_INICIO = "/client/pages/inicio.html";
@@ -74,6 +76,12 @@ export function carregarPagina(pagina, opcoes = {}) {
         }
         if (pagina.includes('prototipo-atributos-material')) {
           initPrototipoAtributosMaterial();
+        }
+        if (pagina.includes('permissoes')) {
+          initPermissoes();
+        }
+        if (pagina.includes('projetos')) {
+          initProjetos();
         }
       })
       .catch(err => {

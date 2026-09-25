@@ -1,0 +1,189 @@
+<main id="projetosPage" class="projetos-page">
+  <header class="projetos-header">
+    <div>
+      <span class="projetos-eyebrow"><i class="fa-solid fa-briefcase"></i> Acompanhamento operacional</span>
+      <h1>Projetos</h1>
+      <p>Visão financeira e operacional das ordens de serviço.</p>
+    </div>
+    <button type="button" class="bt_padrao projetos-atualizar" id="btnAtualizarProjetos" title="Atualizar painel">
+      <i class="fa-solid fa-rotate"></i><span>Atualizar</span>
+    </button>
+  </header>
+
+  <section class="projetos-filtros glass" aria-label="Filtros dos projetos">
+    <label>
+      <span>Mês de acompanhamento</span>
+      <input type="month" id="projetosMes">
+    </label>
+    <label>
+      <span>Responsável</span>
+      <select id="projetosResponsavel">
+        <option value="todos">Todos os responsáveis</option>
+      </select>
+    </label>
+    <label class="projetos-busca">
+      <span>Pesquisar OS</span>
+      <input type="search" id="projetosBusca" placeholder="Número, descrição, cliente..." autocomplete="off">
+    </label>
+  </section>
+
+  <div class="projetos-mensagem" id="projetosMensagem" role="status" aria-live="polite"></div>
+
+  <section class="projetos-indicadores" aria-label="Resumo dos projetos">
+    <article class="projetos-indicador glass">
+      <span><i class="fa-solid fa-list-check"></i> OS acompanhadas</span>
+      <strong id="projetosTotalOS">0</strong>
+      <small>No período selecionado</small>
+    </article>
+    <article class="projetos-indicador glass">
+      <span><i class="fa-solid fa-file-invoice-dollar"></i> Total orçado</span>
+      <strong id="projetosTotalOrcado">R$ 0,00</strong>
+      <small>Valor previsto das OS</small>
+    </article>
+    <article class="projetos-indicador glass">
+      <span><i class="fa-solid fa-money-bill-trend-up"></i> Total faturado</span>
+      <strong id="projetosTotalFaturado">R$ 0,00</strong>
+      <small>Parcelas registradas</small>
+    </article>
+    <article class="projetos-indicador glass">
+      <span><i class="fa-solid fa-chart-line"></i> Progresso do orçamento</span>
+      <strong id="projetosPercentualOrcado">0%</strong>
+      <small>Faturado sobre o orçado</small>
+    </article>
+  </section>
+
+  <section class="projetos-painel-superior">
+    <article class="projetos-geral glass">
+      <div class="projetos-geral-titulo">Progresso das Metas</div>
+      <div class="projetos-geral-canvas" aria-label="Progresso da meta geral">
+        <section class="projetos-meta-solo">
+          <div class="projetos-meta-solo-topo">
+            <i class="fa-solid fa-flag"></i>
+            <div>
+              <strong id="projetosGeralFaturado">R$ 0,00</strong>
+              <b id="projetosGeralPercentual">0%</b>
+            </div>
+          </div>
+          <div class="projetos-meta-solo-dados">
+            <span>META SOLO</span>
+            <strong id="projetosGeralMeta">R$ 0,00</strong>
+            <span>EXPECTATIVA</span>
+            <strong id="projetosGeralExpectativa">R$ 0,00</strong>
+          </div>
+        </section>
+
+        <section class="projetos-proximo-nivel">
+          <div>
+            <strong id="projetosGeralProximoValor">R$ 0,00</strong>
+            <b id="projetosGeralProximoPercentual">0%</b>
+          </div>
+          <i class="fa-solid fa-star"></i>
+          <span>PRÓXIMO NÍVEL</span>
+        </section>
+
+        <div class="projetos-foguete-trilha">
+          <div class="projetos-foguete-barra" id="projetosGeralBarra"></div>
+          <div class="projetos-foguete-marcador" id="projetosGeralFoguete">
+            <strong id="projetosGeralFaturadoTrilha">R$ 0,00</strong>
+            <span class="projetos-foguete-icone">
+              <i class="fa-solid fa-bolt projetos-foguete-raio raio1"></i>
+              <i class="fa-solid fa-bolt projetos-foguete-raio raio2"></i>
+              <i class="fa-solid fa-bolt projetos-foguete-raio raio3"></i>
+              <i class="fa-solid fa-rocket"></i>
+            </span>
+            <b id="projetosGeralPercentualTrilha">0%</b>
+          </div>
+        </div>
+
+        <div class="projetos-marcos">
+          <article class="projetos-marco-card" data-marco="meta">
+            <div class="projetos-marco-topo"><span>1,00%</span><i class="fa-solid fa-lock" id="projetosCadeadoMeta"></i></div>
+            <div class="projetos-marco-conteudo">
+              <small>META</small>
+              <strong id="projetosMarcoMeta">R$ 0,00</strong>
+              <span class="projetos-marco-meta-referencia" id="projetosMarcoMetaComissaoMeta">R$ 0,00</span>
+              <span class="projetos-marco-comissao"><span class="projetos-marco-estrelas"><i class="fa-solid fa-star"></i></span><i class="fa-solid fa-trophy"></i><b id="projetosComissaoMeta">R$ 0,00</b></span>
+            </div>
+          </article>
+          <article class="projetos-marco-card" data-marco="super">
+            <div class="projetos-marco-topo"><span>1,25%</span><i class="fa-solid fa-lock" id="projetosCadeadoSuper"></i></div>
+            <div class="projetos-marco-conteudo">
+              <small>SUPER META</small>
+              <strong id="projetosMarcoSuper">R$ 0,00</strong>
+              <span class="projetos-marco-comissao"><span class="projetos-marco-estrelas"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span><i class="fa-solid fa-trophy"></i><b id="projetosComissaoSuper">R$ 0,00</b></span>
+            </div>
+          </article>
+          <article class="projetos-marco-card" data-marco="mega">
+            <div class="projetos-marco-topo"><span>1,50%</span><i class="fa-solid fa-lock" id="projetosCadeadoMega"></i></div>
+            <div class="projetos-marco-conteudo">
+              <small>MEGA META</small>
+              <strong id="projetosMarcoMega">R$ 0,00</strong>
+              <span class="projetos-marco-comissao"><span class="projetos-marco-estrelas"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span><i class="fa-solid fa-trophy"></i><b id="projetosComissaoMega">R$ 0,00</b></span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </article>
+
+    <article class="projetos-metas glass">
+      <div class="projetos-secao-cabecalho">
+        <div>
+          <span class="projetos-kicker">Acompanhamento individual</span>
+          <h2>Metas dos responsáveis</h2>
+        </div>
+        <i class="fa-solid fa-users-rays projetos-secao-icone"></i>
+      </div>
+      <div id="projetosMetasLista" class="projetos-metas-lista">
+        <div class="projetos-vazio">Carregando metas...</div>
+      </div>
+    </article>
+  </section>
+
+  <section class="projetos-tabela-painel glass">
+    <div class="projetos-secao-cabecalho">
+      <div>
+        <span class="projetos-kicker">Detalhamento</span>
+        <h2>Ordens de serviço</h2>
+      </div>
+      <span class="projetos-tabela-contador" id="projetosTabelaContador">0 registros</span>
+    </div>
+    <div class="projetos-tabela-scroll">
+      <table class="projetos-tabela" id="projetosTabelaOS">
+        <thead>
+          <tr>
+            <th>OS</th>
+            <th>Descrição</th>
+            <th>Cliente</th>
+            <th>Orçamento</th>
+            <th>Previsão</th>
+            <th>Restante</th>
+            <th>Responsável</th>
+            <th>Status</th>
+            <th aria-label="Ações"></th>
+          </tr>
+        </thead>
+        <tbody id="projetosTabelaOSBody">
+          <tr><td colspan="9" class="projetos-tabela-vazio">Carregando ordens de serviço...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="projetos-modal" id="projetosDetalheModal" hidden>
+    <div class="projetos-modal-backdrop" data-projetos-fechar-detalhe></div>
+    <section class="projetos-modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="projetosDetalheTitulo">
+      <header class="projetos-modal-cabecalho">
+        <div>
+          <span class="projetos-kicker">Detalhes do orçamento</span>
+          <h2 id="projetosDetalheTitulo">OS</h2>
+        </div>
+        <button type="button" class="projetos-modal-fechar" data-projetos-fechar-detalhe title="Fechar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+      <div id="projetosDetalheConteudo" class="projetos-modal-corpo">
+        <div class="projetos-vazio">Carregando detalhes...</div>
+      </div>
+    </section>
+  </div>
+</main>

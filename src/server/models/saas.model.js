@@ -17,6 +17,7 @@ const RECURSOS_PADRAO = [
   { chave: "menu.assinar", nome: "Assinar", tipo: "menu", rota: "/client/pages/ass_epi.html", ordem: 100 },
   { chave: "menu.guia", nome: "Guia Geral", tipo: "menu", rota: "/client/pages/guia.html", ordem: 110 },
   { chave: "menu.ia", nome: "IA 2.0", tipo: "menu", rota: "/client/pages/ia2.html", ordem: 120 },
+  { chave: "menu.permissoes", nome: "Permissões", tipo: "menu", rota: "/client/pages/permissoes.html", ordem: 125 },
   { chave: "tool.numdocs", nome: "Numeração Documentos", tipo: "ferramenta", rota: "ferramentas:numdocs", ordem: 210 },
   { chave: "tool.paineis", nome: "Registros Painel Elétrico", tipo: "ferramenta", rota: "ferramentas:paineis", ordem: 220 }
 ];

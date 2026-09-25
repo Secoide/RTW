@@ -1,5 +1,5 @@
 <main id="spdaPage" class="spda-page">
-  <section class="spda-topbar">
+  <section class="spda-topbar" data-tour="spda-cabecalho">
     <div class="spda-title">
       <span>Controle técnico</span>
       <h2>SPDA</h2>
@@ -15,11 +15,14 @@
     <button type="button" id="spdaRecarregar" class="spda-icon-button" title="Atualizar">
       <i class="fa-solid fa-rotate"></i>
     </button>
+    <button type="button" id="spdaAbrirTour" class="spda-icon-button" title="Como usar o SPDA" aria-label="Abrir tour do SPDA">
+      <i class="fa-solid fa-circle-question"></i>
+    </button>
   </section>
 
   <section class="spda-shell">
     <aside class="spda-sidebar">
-      <form id="spdaFormEstrutura" class="spda-form">
+      <form id="spdaFormEstrutura" class="spda-form" data-tour="spda-cadastro">
         <div class="spda-panel-title">
           <span>Cadastro</span>
           <strong>Estrutura / Prédio</strong>
@@ -67,7 +70,7 @@
         </div>
       </form>
 
-      <div class="spda-estrutura-list-wrap">
+      <div class="spda-estrutura-list-wrap" data-tour="spda-estruturas">
         <div class="spda-panel-title">
           <span>Estruturas</span>
           <strong>Prédios cadastrados</strong>
@@ -78,14 +81,14 @@
       </div>
     </aside>
 
-    <section class="spda-editor">
+    <section class="spda-editor" data-tour="spda-planta-editor">
       <div class="spda-editor-head">
         <div>
           <span id="spdaEditorKicker">Planta baixa</span>
           <strong id="spdaEditorTitulo">Nenhuma estrutura selecionada</strong>
         </div>
 
-        <div class="spda-tools">
+        <div class="spda-tools" data-tour="spda-ferramentas">
           <button type="button" class="spda-element-btn spda-element-eletrica" data-spda-componente="entrada_luz"
             title="Entrada de Luz">
             <i class="fa-solid fa-plug-circle-bolt"></i>
@@ -155,7 +158,7 @@
             title="Mostrar ou ocultar ações não selecionadas">
             <i class="fa-solid fa-eye"></i>
           </button>|
-          <label class="spda-upload-button" title="Anexar planta baixa">
+          <label class="spda-upload-button" data-tour="spda-anexar-planta" title="Anexar planta baixa">
             <input id="spdaInputPlanta" type="file" accept="application/pdf,image/png,image/jpeg,image/jpg,image/webp">
             <i class="fa-solid fa-paperclip"></i>
           </label>
@@ -185,7 +188,7 @@
         Selecione uma OS e cadastre um prédio para anexar a planta baixa.
       </div>
 
-      <div id="spdaCanvasWrap" class="spda-canvas-wrap">
+      <div id="spdaCanvasWrap" class="spda-canvas-wrap" data-tour="spda-canvas">
         <aside class="spda-icon-legend" aria-label="Legenda dos defeitos SPDA">
           <strong>Legenda</strong>
           <div id="spdaIconLegendList"></div>

@@ -160,6 +160,121 @@ function setHint(texto) {
   if (hint) hint.textContent = texto;
 }
 
+function iniciarTourSpda() {
+  const botao = byId("spdaAbrirTour");
+  if (!botao || botao.dataset.tourBound === "true") return;
+  botao.dataset.tourBound = "true";
+
+  botao.addEventListener("click", () => {
+    const driverFactory = window.driver?.js?.driver || window.driver?.driver;
+    if (typeof driverFactory !== "function") {
+      setHint("O tour do SPDA está temporariamente indisponível.");
+      return;
+    }
+
+    const tour = driverFactory({
+      showProgress: true,
+      animate: true,
+      allowClose: true,
+      overlayColor: "#000000",
+      overlayOpacity: 0.78,
+      nextBtnText: "Próximo",
+      prevBtnText: "Voltar",
+      doneBtnText: "Concluir",
+      progressText: "{{current}} de {{total}}",
+      popoverClass: "spda-tour",
+      steps: [
+        {
+          element: '[data-tour="spda-cabecalho"]',
+          popover: {
+            title: "Tela SPDA",
+            description: "A tela é dividida em cadastro da estrutura, lista de prédios e planta baixa com as marcações técnicas da inspeção."
+          }
+        },
+        {
+          element: "#spdaSelectOS",
+          popover: {
+            title: "1. Selecione a Ordem de Serviço",
+            description: "Escolha a OS antes de cadastrar ou consultar prédios. As estruturas e plantas ficam vinculadas à OS selecionada."
+          }
+        },
+        {
+          element: '[data-tour="spda-cadastro"]',
+          popover: {
+            title: "2. Cadastre a estrutura",
+            description: "Informe o nome do prédio, as características dos subsistemas, a descrição do SPDA e o tipo de estrutura."
+          }
+        },
+        {
+          element: "#spdaFormEstrutura .spda-form-actions",
+          popover: {
+            title: "Salve ou inicie um novo cadastro",
+            description: "Use Salvar para criar ou atualizar o prédio. O botão Novo limpa o formulário para cadastrar outra estrutura na mesma OS."
+          }
+        },
+        {
+          element: '[data-tour="spda-estruturas"]',
+          popover: {
+            title: "3. Escolha o prédio",
+            description: "Os prédios cadastrados aparecem aqui. Clique em um deles para abrir seus dados, planta e marcações salvas."
+          }
+        },
+        {
+          element: '[data-tour="spda-planta-editor"]',
+          popover: {
+            title: "4. Editor da planta baixa",
+            description: "Depois de selecionar uma estrutura, esta área passa a ser o espaço de inspeção e registro visual do SPDA."
+          }
+        },
+        {
+          element: '[data-tour="spda-anexar-planta"]',
+          popover: {
+            title: "Anexe a planta baixa",
+            description: "Anexe um PDF ou uma imagem da planta. O arquivo será vinculado ao prédio selecionado e ficará como base das marcações."
+          }
+        },
+        {
+          element: '[data-tour="spda-ferramentas"]',
+          popover: {
+            title: "5. Ferramentas de inspeção",
+            description: "Use os botões para inserir componentes elétricos, rede, incêndio, captor, cabos, marcações, numeração e medições. Cada ferramenta informa na tela onde clicar."
+          }
+        },
+        {
+          element: '[data-tour="spda-canvas"]',
+          popover: {
+            title: "6. Marque a planta",
+            description: "Após selecionar uma ferramenta, clique na planta para posicionar o item. Use o botão central do mouse para navegar e a roda para aproximar ou afastar."
+          }
+        },
+        {
+          element: "#spdaTabelaToggle",
+          popover: {
+            title: "Tabela de medições",
+            description: "Abra a tabela para preencher continuidade e aterramento. Os limites de aprovação podem ser ajustados no botão de configurações."
+          }
+        },
+        {
+          element: "#spdaSalvarElementos",
+          popover: {
+            title: "7. Salve as marcações",
+            description: "Depois de posicionar ou alterar elementos, clique em Salvar marcações para registrar o trabalho da inspeção na estrutura."
+          }
+        },
+        {
+          element: "#spdaAbrirTour",
+          popover: {
+            title: "Consulte novamente quando precisar",
+            description: "Este botão ? permanece no topo da tela para reabrir o tour completo do cadastro e da planta baixa."
+          }
+        }
+      ].filter(step => document.querySelector(step.element))
+    });
+
+    tour.drive();
+  });
+}
+
 function obterEnquadramentoPlanta() {
   const enquadramento = obterElementos().enquadramento;
   if (!enquadramento) return null;
@@ -3279,6 +3394,7 @@ function bindSpda() {
 
   byId("spdaSelectOS")?.addEventListener("change", carregarEstruturas);
   byId("spdaRecarregar")?.addEventListener("click", carregarEstruturas);
+  iniciarTourSpda();
   byId("spdaFormEstrutura")?.addEventListener("submit", salvarEstrutura);
   byId("spdaNovoCadastro")?.addEventListener("click", () => {
     estadoSpda.estruturaAtual = null;

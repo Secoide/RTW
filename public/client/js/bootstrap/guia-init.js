@@ -1,9 +1,73 @@
-export function initGuia() {
+import { carregarPermissoesDinamicas } from "../state/role.js";
+
+const GUIA_RECURSOS_PUBLICOS = new Set(['menu.inicio', 'menu.versao', 'menu.guia']);
+
+function obterContextoSaas() {
+    try {
+        return JSON.parse(sessionStorage.getItem('saas_contexto') || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function usuarioAdministrador() {
+    return Number(sessionStorage.getItem('id_usuario')) === 999
+        || Number(sessionStorage.getItem('nivel_acesso')) === 99
+        || Number(localStorage.getItem('nivel_acesso')) === 99;
+}
+
+function recursoSaasDisponivel(chave, contexto) {
+    if (usuarioAdministrador()) return true;
+    if (GUIA_RECURSOS_PUBLICOS.has(chave)) return true;
+    if (!contexto.modo_saas || contexto.acesso_total) return true;
+    return Array.isArray(contexto.recursos) && contexto.recursos.includes(chave);
+}
+
+function recursoPermissaoDisponivel(chave, permissoes) {
+    const dinamica = permissoes?.[chave];
+    if (dinamica?.configurado) return Boolean(dinamica.visualizar);
+
+    const itemMenu = document.querySelector(`.bt_menuP[data-feature="${chave}"]`);
+    if (!itemMenu) return false;
+    return !itemMenu.classList.contains('role-hidden')
+        && itemMenu.getAttribute('aria-hidden') !== 'true'
+        && itemMenu.style.display !== 'none';
+}
+
+async function filtrarGuiasDisponiveis() {
+    const [permissoes] = await Promise.all([
+        carregarPermissoesDinamicas(),
+        Promise.resolve()
+    ]);
+    const contexto = obterContextoSaas();
+
+    document.querySelectorAll('.itemGuia[data-guia]').forEach(item => {
+        const recursos = String(item.dataset.guiaRecursos || '')
+            .split(',')
+            .map(recurso => recurso.trim())
+            .filter(Boolean);
+        const disponivel = !recursos.length || recursos.some(recurso =>
+            recursoSaasDisponivel(recurso, contexto) && recursoPermissaoDisponivel(recurso, permissoes)
+        );
+        item.hidden = !disponivel;
+        item.setAttribute('aria-hidden', String(!disponivel));
+
+        const submenu = document.querySelector(`.submenuGuia[data-menu="${item.dataset.guia}"]`);
+        if (submenu) submenu.hidden = !disponivel;
+    });
+}
+
+export async function initGuia() {
+
+    await filtrarGuiasDisponiveis();
 
     const guiaInicial = obterGuiaInicial();
 
+    const itemInicial = document.querySelector(`.itemGuia[data-guia="${guiaInicial}"]:not([hidden])`);
+    const guiaAtiva = itemInicial ? guiaInicial : 'introducao';
+
     carregarGuia(
-        guiaInicial
+        guiaAtiva
     );
 
     $('.itemGuia')
@@ -11,7 +75,7 @@ export function initGuia() {
             'ativo'
         );
 
-    $(`.itemGuia[data-guia="${guiaInicial}"]`)
+    $(`.itemGuia[data-guia="${guiaAtiva}"]`)
         .addClass(
             'ativo'
         );
@@ -21,7 +85,7 @@ export function initGuia() {
             'aberto'
         );
 
-    $(`.submenuGuia[data-menu="${guiaInicial}"]`)
+    $(`.submenuGuia[data-menu="${guiaAtiva}"]`)
         .addClass(
             'aberto'
         );
@@ -112,6 +176,11 @@ export function initGuia() {
 
         }
     );
+
+    if (!document.body.dataset.guiaPermissoesObservadas) {
+        window.addEventListener('permissoes:atualizadas', () => filtrarGuiasDisponiveis());
+        document.body.dataset.guiaPermissoesObservadas = 'true';
+    }
 
     $(document).off(
         'click',

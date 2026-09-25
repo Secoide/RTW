@@ -1,0 +1,85 @@
+<section class="permissoes-page" id="permissoesPage">
+  <header class="permissoes-header">
+    <div>
+      <span class="permissoes-eyebrow"><i class="fa-solid fa-shield-halved"></i> Administração</span>
+      <h1><i class="fa-solid fa-key"></i> Permissões de acesso</h1>
+      <p>Vincule um usuário, cargo ou setor a uma tela e escolha quais ações ele poderá executar.</p>
+    </div>
+    <div class="permissoes-header-acoes">
+      <button type="button" class="bt_padrao permissoes-tour-btn" id="btnTourPermissoes" title="Como usar esta tela" aria-label="Abrir tour de permissões">
+        <i class="fa-solid fa-circle-question"></i>
+      </button>
+      <button type="button" class="bt_padrao" id="btnAtualizarPermissoes" title="Atualizar permissões">
+        <i class="fa-solid fa-rotate"></i> Atualizar
+      </button>
+    </div>
+  </header>
+
+  <div class="permissoes-alerta" id="permissoesMensagem" role="status" aria-live="polite"></div>
+
+  <div class="permissoes-layout" id="permissoesLayout">
+    <svg class="permissoes-linhas" id="permissoesLinhas" aria-hidden="true">
+      <g id="permissoesLinhasGrupo"></g>
+    </svg>
+
+    <aside class="permissoes-alvos glass" data-tour="permissoes-origens">
+      <div class="permissoes-panel-title">
+        <div>
+          <span class="permissoes-kicker">Origem</span>
+        <h2>Usuários, cargos e setores</h2>
+        </div>
+        <span class="permissoes-contador" id="permissoesAlvosContador">0</span>
+      </div>
+      <input type="search" id="permissoesBuscaAlvo" data-tour="permissoes-busca" placeholder="Buscar por nome, ID ou cargo..." autocomplete="off">
+      <div class="permissoes-filtros" role="tablist" aria-label="Tipo de origem">
+        <button type="button" class="ativo" data-filtro-alvo="todos">Todos</button>
+        <button type="button" data-filtro-alvo="usuario">Usuários</button>
+        <button type="button" data-filtro-alvo="cargo">Cargos</button>
+        <button type="button" data-filtro-alvo="setor">Setores</button>
+      </div>
+      <div class="permissoes-lista-alvos" id="permissoesListaAlvos" data-tour="permissoes-lista-alvos">
+        <div class="permissoes-vazio">Carregando usuários e cargos...</div>
+      </div>
+      <div class="permissoes-dica">
+        <i class="fa-solid fa-hand-pointer"></i>
+        Clique em um usuário, cargo ou setor para visualizar seus vínculos.
+      </div>
+    </aside>
+
+    <section class="permissoes-mapa glass" data-tour="permissoes-telas" aria-label="Telas do sistema">
+      <div class="permissoes-panel-title">
+        <div>
+          <span class="permissoes-kicker">Destino</span>
+          <h2>Telas do sistema</h2>
+        </div>
+        <span class="permissoes-legenda" data-tour="permissoes-legenda" aria-label="Legenda das origens das permissões">
+          <span class="permissoes-legenda-item"><i class="permissoes-legenda-linha usuario"></i> Usuário</span>
+          <span class="permissoes-legenda-item"><i class="permissoes-legenda-linha cargo"></i> Cargo</span>
+          <span class="permissoes-legenda-item"><i class="permissoes-legenda-linha setor"></i> Setor</span>
+        </span>
+      </div>
+      <input type="search" id="permissoesBuscaRecurso" class="permissoes-busca-recurso"
+             data-tour="permissoes-busca-telas" placeholder="Buscar tela por nome..." autocomplete="off">
+      <div class="permissoes-telas" id="permissoesTelas" data-tour="permissoes-cartoes">
+        <div class="permissoes-vazio">Carregando telas...</div>
+      </div>
+    </section>
+
+    <aside class="permissoes-editor glass" id="permissoesEditor" data-tour="permissoes-editor">
+      <div class="permissoes-panel-title">
+        <div>
+          <span class="permissoes-kicker">Configuração</span>
+          <h2>Permissões</h2>
+        </div>
+        <i class="fa-solid fa-sliders"></i>
+      </div>
+      <div id="permissoesEditorConteudo" class="permissoes-editor-conteudo">
+        <div class="permissoes-editor-vazio">
+          <i class="fa-solid fa-arrow-left"></i>
+          <strong>Selecione uma origem</strong>
+          <span>Depois clique ou arraste até uma tela.</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>

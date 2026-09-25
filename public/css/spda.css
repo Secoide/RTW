@@ -1974,6 +1974,45 @@
   color: #ff5b19;
 }
 
+.driver-popover.spda-tour {
+  max-width: 350px;
+  border: 1px solid #3e4649;
+  border-radius: 4px;
+  background: #202325;
+  color: #ececec;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .38);
+}
+
+.driver-popover.spda-tour .driver-popover-title,
+.driver-popover.spda-tour .driver-popover-description,
+.driver-popover.spda-tour .driver-popover-progress-text {
+  color: #ececec;
+}
+
+.driver-popover.spda-tour .driver-popover-description {
+  color: #bfc5c7;
+}
+
+.driver-popover.spda-tour button {
+  appearance: none;
+  box-shadow: none;
+  filter: none;
+  opacity: 1;
+  border: 1px solid #4b5558;
+  border-radius: 3px;
+  background: #2b3032;
+  color: #e8e8e8;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: none;
+}
+
+.driver-popover.spda-tour button:hover {
+  background: #384144;
+}
+
 @media (max-width: 1120px) {
   .spda-shell {
     grid-template-columns: 1fr;

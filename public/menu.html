@@ -8,67 +8,70 @@
 
 <div class="menu glass" id="menuMobile">
   <div class="menuSuperior">
-    <a class="bt_menuP ativo" data-roles="*" data-feature="menu.inicio" data-pagina="/client/pages/inicio.html">
+    <a class="bt_menuP ativo" data-feature="menu.inicio" data-pagina="/client/pages/inicio.html">
       <i class="fa-solid fa-house"></i><span class="menu-text">Início</span>
     </a>
-    <a class="bt_menuP" data-roles="4,6,7,99" data-feature="menu.rh" data-pagina="/client/pages/rh.html">
+    <a class="bt_menuP" data-feature="menu.rh" data-pagina="/client/pages/rh.html">
       <i class="fa-solid fa-stethoscope"></i><span class="menu-text">RH</span>
     </a>
-    <a class="bt_menuP" data-roles="6,7,99" data-feature="menu.programacao" data-pagina="/client/pages/programacaoOS.html">
+    <a class="bt_menuP" data-feature="menu.programacao" data-pagina="/client/pages/programacaoOS.html">
       <i class="fa-solid fa-clock"></i><span class="menu-text">Programação OS</span>
     </a>
-    <a class="bt_menuP" data-roles="" data-feature="menu.projetos" data-pagina="/client/pages/projetos.html">
+    <a class="bt_menuP" data-feature="menu.projetos" data-pagina="/client/pages/projetos.html">
       <i class="fa-solid fa-briefcase"></i><span class="menu-text">Projetos</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-feature="menu.spda" data-pagina="/client/pages/spda.html">
+    <a class="bt_menuP"  data-feature="menu.spda" data-pagina="/client/pages/spda.html">
       <i class="fa-solid fa-cloud-bolt"></i><span class="menu-text">SPDA</span>
     </a>
-    <button type="button" class="bt_menuP menu-parent" data-roles="3,99" data-submenu="materiais">
+    <button type="button" class="bt_menuP menu-parent" data-submenu="materiais">
       <i class="fa-solid fa-boxes-stacked"></i>
       <span class="menu-text">Materiais</span>
       <i class="fa-solid fa-chevron-down menu-submenu-arrow"></i>
     </button>
     <div class="menu-submenu" data-submenu-content="materiais">
-      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.materiais" data-pagina="/client/pages/lista_material.html">
+      <a class="bt_menuP menu-subitem"  data-feature="menu.materiais" data-pagina="/client/pages/lista_material.html">
         <i class="fa-solid fa-diagram-project"></i><span class="menu-text">Controle de fluxo</span>
       </a>
-      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.estoque" data-pagina="/client/pages/estoque.html">
+      <a class="bt_menuP menu-subitem" data-feature="menu.estoque" data-pagina="/client/pages/estoque.html">
         <i class="fa-solid fa-warehouse"></i><span class="menu-text">Estoque</span>
       </a>
-      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.catalogo_materiais" data-pagina="/client/pages/materiais.html">
+      <a class="bt_menuP menu-subitem" data-feature="menu.catalogo_materiais" data-pagina="/client/pages/materiais.html">
         <i class="fa-solid fa-layer-group"></i><span class="menu-text">Acervo de Materiais</span>
       </a>
-      <a class="bt_menuP menu-subitem" data-roles="3,99" data-feature="menu.prototipo_atributos" data-pagina="/client/pages/prototipo-atributos-material.html">
+      <a class="bt_menuP menu-subitem" data-feature="menu.prototipo_atributos" data-pagina="/client/pages/prototipo-atributos-material.html">
         <i class="fa-solid fa-share-nodes"></i><span class="menu-text">Protótipo Atributos</span>
       </a>
     </div>
-    <a class="bt_menuP" data-roles="99" data-feature="menu.ferramentas" data-pagina="/client/pages/ferramentas.html">
+    <a class="bt_menuP" data-feature="menu.ferramentas" data-pagina="/client/pages/ferramentas.html">
       <i class="fa-solid fa-screwdriver-wrench"></i><span class="menu-text">Ferramentas</span>
     </a>
-    <a class="bt_menuP" data-roles="6,7,99" data-feature="menu.gestao" data-pagina="/client/pages/gestao.html">
+    <a class="bt_menuP" data-roles="99" data-feature="menu.permissoes" data-pagina="/client/pages/permissoes.html">
+      <i class="fa-solid fa-key"></i><span class="menu-text">Permissões</span>
+    </a>
+    <a class="bt_menuP" data-feature="menu.gestao" data-pagina="/client/pages/gestao.html">
       <i class="fa-solid fa-book"></i><span class="menu-text">Gestão</span>
     </a>
-    <a class="bt_menuP" data-roles="99" data-feature="menu.ferias" data-pagina="/client/pages/ferias.html">
+    <a class="bt_menuP" data-feature="menu.ferias" data-pagina="/client/pages/ferias.html">
       <i class="fa-solid fa-calendar"></i><span class="menu-text">Férias</span>
     </a>
-    <a class="bt_menuP" data-roles="" data-feature="menu.admin" data-pagina="/client/pages/admin.html">
+    <a class="bt_menuP" data-feature="menu.admin" data-pagina="/client/pages/admin.html">
       <i class="fa-solid fa-user-gear"></i><span class="menu-text">Admin</span>
     </a>
-    <a class="bt_menuP" data-roles="" data-feature="menu.assinar" data-pagina="/client/pages/ass_epi.html">
+    <a class="bt_menuP" data-feature="menu.assinar" data-pagina="/client/pages/ass_epi.html">
       <i class="fa-solid fa-pen"></i><span class="menu-text">Assinar</span>
     </a>
-    <a class="bt_menuP" data-roles="*" data-feature="menu.guia" data-pagina="/client/pages/guia.html">
-      <i class="fa-solid fa-book-open"></i><span class="menu-text">Guia Geral</span>
-    </a>
-    <a class="bt_menuP" data-roles="" data-feature="menu.ia" data-pagina="/client/pages/ia2.html">
+    <a class="bt_menuP" data-feature="menu.ia" data-pagina="/client/pages/ia2.html">
       <i class="fa-solid fa-brain"></i><span class="menu-text">IA 2.0</span>
     </a>
   </div>
   <div class="menuInferiorEsq">
-    <a class="bt_menuP" data-roles="*" data-pagina="/client/pages/relatos.html" title="Relatar erros, problemas, dicas ou melhorias">
+    <a class="bt_menuP" data-feature="menu.guia" data-pagina="/client/pages/guia.html">
+      <i class="fa-solid fa-book-open"></i><span class="menu-text">Guia Geral</span>
+    </a>
+    <a class="bt_menuP" data-pagina="/client/pages/relatos.html" title="Relatar erros, problemas, dicas ou melhorias">
       <i class="fa-solid fa-comment-dots"></i><span class="menu-text">Relatar</span>
     </a>
-    <a id="menuVersaoBtn" class="menu-version-link" title="Consultar versão do sistema">
+    <a id="menuVersaoBtn" class="menu-version-link" data-feature="menu.versao" title="Consultar versão do sistema">
       <i class="fa-solid fa-circle-info"></i><span class="menu-text">Versão</span>
     </a>
   </div>

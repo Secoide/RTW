@@ -1,7 +1,27 @@
 import { carregarPagina } from "../../services/ui/page-loader.js";
 
+const RECURSOS_PUBLICOS_MENU = new Set(['menu.inicio', 'menu.versao', 'menu.guia']);
+
+function usuarioAdministrador() {
+  return Number(sessionStorage.getItem('id_usuario')) === 999
+    || Number(sessionStorage.getItem('nivel_acesso')) === 99
+    || Number(localStorage.getItem('nivel_acesso')) === 99;
+}
+
 export function initMenuClick() {
   aplicarPermissoesSaasMenu();
+
+  const menuContainer = document.getElementById('menu');
+  if (menuContainer && !menuContainer.dataset.saasObserverBound) {
+    const observer = new MutationObserver(() => aplicarPermissoesSaasMenu());
+    observer.observe(menuContainer, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'aria-hidden', 'style']
+    });
+    menuContainer.dataset.saasObserverBound = 'true';
+  }
 
   document.addEventListener("click", (e) => {
     const el = e.target.closest(".bt_menuP");
@@ -47,6 +67,8 @@ function getSaasContexto() {
 
 function podeUsarRecurso(chave) {
   if (!chave) return true;
+  if (usuarioAdministrador()) return true;
+  if (RECURSOS_PUBLICOS_MENU.has(chave)) return true;
 
   const contexto = getSaasContexto();
   if (!contexto.modo_saas || contexto.acesso_total) return true;
@@ -56,27 +78,34 @@ function podeUsarRecurso(chave) {
 
 function aplicarPermissoesSaasMenu() {
   const contexto = getSaasContexto();
-  if (!contexto.modo_saas || contexto.acesso_total) return;
 
   document.querySelectorAll(".bt_menuP[data-feature]").forEach(item => {
     const chave = item.dataset.feature;
-    if (chave === "menu.ferramentas") return;
+    const bloqueadoSaas = contexto.modo_saas
+      && !contexto.acesso_total
+      && chave !== "menu.ferramentas"
+      && !podeUsarRecurso(chave);
 
-    if (!podeUsarRecurso(chave)) {
-      item.style.display = "none";
-    }
+    const display = bloqueadoSaas ? "none" : "";
+    if (item.style.display !== display) item.style.display = display;
   });
 
   document.querySelectorAll(".menu-parent[data-submenu]").forEach(parent => {
     const submenu = document.querySelector(`.menu-submenu[data-submenu-content="${parent.dataset.submenu}"]`);
     if (!submenu) return;
 
-    const possuiRecursoLiberado = [...submenu.querySelectorAll(".bt_menuP[data-feature]")]
-      .some(item => podeUsarRecurso(item.dataset.feature));
+    const possuiTelaDisponivel = [...submenu.querySelectorAll(".bt_menuP[data-feature]")]
+      .some(item => {
+        const escondidoPorPermissao = item.classList.contains('role-hidden')
+          || item.getAttribute('aria-hidden') === 'true';
+        const escondidoPorSaas = item.style.display === 'none';
+        return !escondidoPorPermissao && !escondidoPorSaas && podeUsarRecurso(item.dataset.feature);
+      });
 
-    if (!possuiRecursoLiberado) {
-      parent.style.display = "none";
-      submenu.style.display = "none";
-    }
+    const display = possuiTelaDisponivel ? "" : "none";
+    const ariaHidden = String(!possuiTelaDisponivel);
+    if (parent.style.display !== display) parent.style.display = display;
+    if (submenu.style.display !== display) submenu.style.display = display;
+    if (parent.getAttribute('aria-hidden') !== ariaHidden) parent.setAttribute('aria-hidden', ariaHidden);
   });
 }
