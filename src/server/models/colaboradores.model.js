@@ -656,6 +656,28 @@ async function buscarColaboradoresEmOS(dataDia, opcoes = {}) {
   };
 }
 
+// Busca a ocupação completa do dia, sem paginação ou filtro de OS.
+// A lista é usada pelo painel de disponíveis para manter o vínculo do colaborador
+// mesmo quando a pesquisa exibe apenas parte das ordens.
+async function buscarOcupacoesColaboradoresEmOS(dataDia) {
+  const sql = `
+    SELECT
+      fno.idfuncionario,
+      fno.id_OS AS idOS,
+      o.id_OSs AS osID,
+      IFNULL(o.descricao, '') AS descricao,
+      IFNULL(e.nome, '') AS nomeEmpresa
+    FROM funcionario_na_os fno
+    INNER JOIN tb_obras o ON o.id_OSs = fno.id_OS
+    LEFT JOIN tb_empresa e ON e.id_empresas = o.id_empresa
+    WHERE fno.data = DATE(?)
+    ORDER BY fno.idfuncionario, o.id_OSs;
+  `;
+
+  const [rows] = await connection.query(sql, [dataDia]);
+  return rows;
+}
+
 // Listar todos colaboradores responsavel de OSs
 async function getColaboradoresResponsavelOS() {
   const [rows] = await connection.query(`
@@ -1731,6 +1753,7 @@ module.exports = {
   deleteColaborador,
   buscarColaboradoresDisponiveis,
   buscarColaboradoresEmOS,
+  buscarOcupacoesColaboradoresEmOS,
   getColaboradoresResponsavelOS,
   getColaboradoresCBX,
   getColaboradoresAniversariantes,

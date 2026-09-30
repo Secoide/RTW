@@ -5,6 +5,9 @@
       <h1>Projetos</h1>
       <p>Visão financeira e operacional das ordens de serviço.</p>
     </div>
+    <button type="button" class="bt_padrao" id="btnMetasProjetos" title="Gerenciar metas gerais">
+      <i class="fa-solid fa-bullseye"></i> Metas gerais
+    </button>
     <button type="button" class="bt_padrao projetos-atualizar" id="btnAtualizarProjetos" title="Atualizar painel">
       <i class="fa-solid fa-rotate"></i><span>Atualizar</span>
     </button>
@@ -186,4 +189,37 @@
       </div>
     </section>
   </div>
+  <dialog id="frm_cadastrarMetaGeral" class="projetos-metas-dialog">
+    <header><h2>Metas gerais</h2><button type="button" data-fechar-metas title="Fechar" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></header>
+    <div class="projetos-metas-toolbar">
+      <button type="button" id="projetosNovaMeta" data-permission="menu.projetos" data-permission-action="adicionar"><i class="fa-solid fa-plus"></i> Nova meta</button>
+      <label>Mês <input type="month" id="projetosMetasMes" required></label>
+    </div>
+    <div id="projetosMetasConteudo" aria-live="polite"></div>
+    <footer><button type="button" data-fechar-metas>Fechar</button></footer>
+  </dialog>
+  <dialog id="projetosMetaEditor" class="projetos-metas-dialog projetos-meta-editor">
+    <form id="projetosMetaForm">
+      <header><h2 id="projetosMetaEditorTitulo">Cadastrar meta geral</h2></header>
+      <label>Mês <input type="month" name="mes" required></label>
+      <div class="projetos-meta-campos">
+        <label>Meta (R$)<input name="meta" inputmode="decimal" placeholder="0,00" required></label>
+        <label>Super Meta (R$)<input name="superMeta" inputmode="decimal" placeholder="0,00" required></label>
+        <label>Mega Meta (R$)<input name="megaMeta" inputmode="decimal" placeholder="0,00" required></label>
+      </div>
+      <p id="projetosMetaErro" role="alert"></p>
+      <footer><button type="submit"><i class="fa-solid fa-floppy-disk"></i> <span id="projetosMetaSalvarTexto">Cadastrar</span></button><button type="button" id="projetosMetaCancelar">Cancelar</button></footer>
+    </form>
+  </dialog>
+  <dialog id="projetosExpectativaEditor" class="projetos-metas-dialog projetos-meta-editor">
+    <form id="projetosExpectativaForm">
+      <header><h2>Expectativa de fatura</h2></header>
+      <div class="projetos-expectativa-campos">
+        <label>Mês<input type="month" name="mes" required></label>
+        <label>Faturar (R$)<input name="expectativa" inputmode="decimal" placeholder="0,00" required></label>
+      </div>
+      <p id="projetosExpectativaErro" role="alert"></p>
+      <footer><button type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar</button><button type="button" id="projetosExpectativaCancelar">Cancelar</button></footer>
+    </form>
+  </dialog>
 </main>

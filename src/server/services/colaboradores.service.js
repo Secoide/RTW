@@ -265,6 +265,15 @@ async function listarColaboradoresEmOS(
   }
 }
 
+async function listarOcupacoesColaboradoresEmOS(dataDia) {
+  try {
+    return await ColabModel.buscarOcupacoesColaboradoresEmOS(dataDia);
+  } catch (err) {
+    console.error("❌ Erro no service listarOcupacoesColaboradoresEmOS:", err.message);
+    throw err;
+  }
+}
+
 
 // ============================================================
 // BUSCAR COLABORADORES IA
@@ -649,6 +658,7 @@ module.exports = {
   deletarColaborador,
   listarColaboradoresDisponiveis,
   listarColaboradoresEmOS,
+  listarOcupacoesColaboradoresEmOS,
   excluirColaboradorEmOS,
   alocarColaboradores,
   listarColaboradoresResponsavelOS,

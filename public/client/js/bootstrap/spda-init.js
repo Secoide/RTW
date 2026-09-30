@@ -1286,6 +1286,8 @@ function selecionarFerramenta(ferramenta) {
   }
 
   estadoSpda.ferramenta = ferramenta;
+  estadoSpda.reorganizacaoDraft = [];
+  estadoSpda.reorganizacaoFechada = false;
   estadoSpda.continuidadeOrigem = null;
   estadoSpda.componenteSelecionado = null;
   estadoSpda.caboOrigem = null;
@@ -1303,6 +1305,7 @@ function selecionarFerramenta(ferramenta) {
   });
 
   const mensagens = {
+    reorganizar: "Selecione os pontos na ordem desejada. Clique novamente em um ponto selecionado para fechar a área (mínimo de 3 pontos).",
     numero: `Clique na planta para posicionar o ponto ${normalizarNumero(estadoSpda.proximoNumero)}.`,
     continuidade: "Selecione o primeiro ponto numerado para medir continuidade.",
     aterramento: "Selecione um ponto numerado para informar a medição de aterramento.",
@@ -1818,6 +1821,13 @@ function pontoTemMedicoesAssociadas(pontoId) {
     elementos.aterramentos.some(item => item.ponto === pontoId);
 }
 
+function renumerarPontosDescida(pontos) {
+  // Preserve IDs and array order: measurements reference IDs, and undo uses array order.
+  [...pontos]
+    .sort((a, b) => Number(a.numero) - Number(b.numero))
+    .forEach((ponto, indice) => { ponto.numero = indice + 1; });
+}
+
 async function removerPonto(pontoId) {
   if (pontoTemMedicoesAssociadas(pontoId)) {
     setHint("Remova as medições associadas antes de apagar este ponto.");
@@ -1826,6 +1836,7 @@ async function removerPonto(pontoId) {
 
   const elementos = obterElementos();
   elementos.pontos = elementos.pontos.filter(ponto => ponto.id !== pontoId);
+  renumerarPontosDescida(elementos.pontos);
   recalcularProximoNumero();
   await salvarElementos({ silencioso: true });
   renderElementos();
@@ -2608,6 +2619,83 @@ function criarMarcacaoAreaPdfSpda() {
   return marcador;
 }
 
+function ordenarPontosPorAreasSpda(elementos) {
+  const porId = new Map(elementos.pontos.map(ponto => [ponto.id, ponto]));
+  const ordem = new Set();
+  (elementos.areas_reorganizacao || []).forEach(area => {
+    area.pontos.forEach(id => { if (porId.has(id)) ordem.add(id); });
+  });
+  [...elementos.pontos].sort((a, b) => Number(a.numero) - Number(b.numero))
+    .forEach(ponto => ordem.add(ponto.id));
+  [...ordem].forEach((id, indice) => { porId.get(id).numero = indice + 1; });
+}
+
+async function selecionarPontoReorganizacaoSpda(ponto) {
+  if (estadoSpda.reorganizacaoConfirmando) return;
+  const elementos = obterElementos();
+  const areas = elementos.areas_reorganizacao || [];
+  if (areas.some(area => area.pontos.includes(ponto.id))) {
+    setHint("Este ponto já pertence a uma área organizada. Selecione os pontos do próximo prédio.");
+    return;
+  }
+  const selecionados = estadoSpda.reorganizacaoDraft ||= [];
+  if (!selecionados.includes(ponto.id)) {
+    selecionados.push(ponto.id);
+    renderElementos();
+    return;
+  }
+  if (selecionados.length < 3) {
+    setHint("Selecione pelo menos 3 pontos para fechar a área.");
+    return;
+  }
+  estadoSpda.reorganizacaoFechada = true;
+  estadoSpda.reorganizacaoConfirmando = true;
+  renderElementos();
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  try {
+    if (!window.confirm("Reorganizar a numeração agora, seguindo a ordem dos pontos selecionados? As áreas anteriores serão preservadas e os demais pontos seguirão a sequência.")) return;
+    const numerosAnteriores = elementos.pontos.map(p => [p, p.numero]);
+    elementos.areas_reorganizacao = [...areas, { pontos: [...selecionados] }];
+    ordenarPontosPorAreasSpda(elementos);
+    try {
+      await salvarElementos({ silencioso: true });
+    } catch (erro) {
+      elementos.areas_reorganizacao = areas;
+      numerosAnteriores.forEach(([p, numero]) => { p.numero = numero; });
+      setHint("Não foi possível salvar a reorganização. Tente novamente.");
+      return;
+    }
+    recalcularProximoNumero();
+    renderTabelaPreenchimentoSpda();
+    setHint("Pontos reorganizados. Selecione o próximo prédio ou cancele a ferramenta para ocultar as áreas.");
+  } finally {
+    estadoSpda.reorganizacaoDraft = [];
+    estadoSpda.reorganizacaoFechada = false;
+    estadoSpda.reorganizacaoConfirmando = false;
+    renderElementos();
+  }
+}
+
+function renderAreasReorganizacaoSpda(svg, elementos, largura, altura) {
+  if (estadoSpda.ferramenta !== "reorganizar") return;
+  const desenhar = (ids, fechada) => {
+    const pontos = ids.map(id => elementos.pontos.find(p => p.id === id)).filter(Boolean);
+    if (!pontos.length) return;
+    const forma = document.createElementNS("http://www.w3.org/2000/svg", fechada ? "polygon" : "polyline");
+    forma.setAttribute("points", pontos.map(p => `${Number(p.x) * largura / 100},${Number(p.y) * altura / 100}`).join(" "));
+    forma.setAttribute("class", "spda-reorganization-area");
+    forma.setAttribute("fill", fechada ? "rgba(196, 160, 232, 0.16)" : "none");
+    forma.setAttribute("stroke", "#582780");
+    forma.setAttribute("stroke-width", "1.4");
+    forma.setAttribute("stroke-dasharray", "6 4");
+    forma.setAttribute("vector-effect", "non-scaling-stroke");
+    forma.setAttribute("pointer-events", "none");
+    svg.appendChild(forma);
+  };
+  (elementos.areas_reorganizacao || []).forEach(area => desenhar(area.pontos, true));
+  desenhar(estadoSpda.reorganizacaoDraft || [], estadoSpda.reorganizacaoFechada);
+}
+
 function renderElementos() {
   const overlay = byId("spdaOverlayLayer");
   const svg = byId("spdaSvgLayer");
@@ -2620,6 +2708,7 @@ function renderElementos() {
   svg.setAttribute("viewBox", `0 0 ${largura} ${altura}`);
 
   const elementos = obterElementos();
+  renderAreasReorganizacaoSpda(svg, elementos, largura, altura);
   const marcadorAreaPdf = criarMarcacaoAreaPdfSpda();
   if (marcadorAreaPdf) overlay.appendChild(marcadorAreaPdf);
 
@@ -2700,6 +2789,38 @@ function renderElementos() {
   elementos.continuidades.forEach(item => {
     const curva = calcularCurvaContinuidade(item, elementos.pontos);
     if (!curva) return;
+    const obterContinuidadeAtual = () => obterElementos().continuidades.find(continuidade => {
+      if (item.id && continuidade.id) return continuidade.id === item.id;
+      return continuidade.de === item.de && continuidade.para === item.para;
+    });
+    let campoEstrutural;
+    if (item.valorEstrutural != null) {
+      campoEstrutural = criarCampoMedicao({
+        classe: "spda-continuity-editor is-structural",
+        left: curva.labelX,
+        top: curva.labelY,
+        valor: item.valorEstrutural,
+        placeholder: "0,00",
+        unidade: "mΩ",
+        onCommit: async valor => {
+          const atual = obterContinuidadeAtual();
+          if (!atual) return;
+          atual.valorEstrutural = valor;
+          await salvarElementos({ silencioso: true });
+        },
+        onRemove: async () => {
+          const atual = obterContinuidadeAtual();
+          if (!atual) return;
+          delete atual.valorEstrutural;
+          await salvarElementos({ silencioso: true });
+          renderElementos();
+          setHint("Medição estrutural removida.");
+        }
+      });
+      campoEstrutural.title = "Medição estrutural: ligação da estrutura com captação ou descida natural entre descidas.";
+      campoEstrutural.querySelector("input").setAttribute("aria-label", "Medição estrutural em miliohms");
+      overlay.appendChild(campoEstrutural);
+    }
     overlay.appendChild(criarControleCurva(item, curva));
     overlay.appendChild(criarCampoMedicao({
       classe: `spda-continuity-editor ${item.tipo === "equipotencializacao" ? "is-equipotential" : ""}`,
@@ -2734,20 +2855,38 @@ function renderElementos() {
       },
       contextMenuItems: [
         {
+          label: "Medição estrutural",
+          icone: "fa-building",
+          onClick: async () => {
+            const atual = obterContinuidadeAtual();
+            if (!atual) return;
+            if (atual.valorEstrutural != null) {
+              campoEstrutural?.querySelector("input").focus();
+              return;
+            }
+            atual.valorEstrutural = "";
+            await salvarElementos({ silencioso: true });
+            renderElementos();
+            setHint("Medição estrutural adicionada. Preencha o campo cinza acima da continuidade.");
+          }
+        },
+        {
           label: item.tipo === "equipotencializacao" ? "Remover equipotencializacao" : "Equipotencializacao",
           icone: "fa-link",
           onClick: async () => {
-            if (item.tipo === "equipotencializacao") {
-              delete item.tipo;
-              item.avaliacao = calcularAvaliacaoMedicao("continuidade", item.valor);
+            const atual = obterContinuidadeAtual();
+            if (!atual) return;
+            if (atual.tipo === "equipotencializacao") {
+              delete atual.tipo;
+              atual.avaliacao = calcularAvaliacaoMedicao("continuidade", atual.valor);
             } else {
-              item.tipo = "equipotencializacao";
-              item.avaliacao = "Equipotencializacao";
+              atual.tipo = "equipotencializacao";
+              atual.avaliacao = "Equipotencializacao";
             }
             await salvarElementos({ silencioso: true });
             renderElementos();
             renderTabelaPreenchimentoSpda();
-            setHint(item.tipo === "equipotencializacao"
+            setHint(atual.tipo === "equipotencializacao"
               ? "Medicao marcada como equipotencializacao."
               : "Medicao voltou ao padrao de continuidade.");
           }
@@ -2831,6 +2970,10 @@ async function salvarElementos({ silencioso = false } = {}) {
 
 async function acionarPonto(ponto) {
   const elementos = obterElementos();
+  if (estadoSpda.ferramenta === "reorganizar") {
+    await selecionarPontoReorganizacaoSpda(ponto);
+    return;
+  }
 
   if (!estadoSpda.ferramenta) {
     let alterou = false;
@@ -3163,7 +3306,10 @@ async function desfazerUltimo() {
   else if (elementos.componentes.length) elementos.componentes.pop();
   else if (elementos.aterramentos.length) elementos.aterramentos.pop();
   else if (elementos.continuidades.length) elementos.continuidades.pop();
-  else if (elementos.pontos.length) elementos.pontos.pop();
+  else if (elementos.pontos.length) {
+    elementos.pontos.pop();
+    renumerarPontosDescida(elementos.pontos);
+  }
   recalcularProximoNumero();
   renderElementos();
   await salvarElementos({ silencioso: true });
@@ -3173,6 +3319,7 @@ async function desfazerUltimo() {
 function prepararCloneCanvasExportacaoSpda(canvas) {
   const clone = canvas.cloneNode(true);
   clone.id = "spdaCanvasExportado";
+  clone.querySelectorAll(".spda-reorganization-area").forEach(area => area.remove());
 
   clone.querySelectorAll("input").forEach(input => {
     input.setAttribute("value", input.value || "");

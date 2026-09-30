@@ -23,6 +23,7 @@ let avisoEditandoId = null;
 let nomeUsuario = sessionStorage.getItem("nome_usuario");
 let changelogHomeCarregado = false;
 let versoesChangelogHomeCarregadas = false;
+let versoesChangelogHome = [];
 let galeriaAtualizacaoHome = { versao: "", imagens: [], indice: 0 };
 let reconhecimentoSlideTimer = null;
 let conquistasSlideHome = [];
@@ -366,7 +367,7 @@ document.addEventListener("click", (ev) => {
     return;
   }
 
-  if (ev.target.id === "homeBtnPopupOk" || ev.target.id === "homePopupAtualizacao") {
+  if (ev.target.closest("#homeBtnPopupOk, .release-close") || ev.target.id === "homePopupAtualizacao") {
     fecharDetalhesVersaoHome();
     return;
   }
@@ -460,12 +461,14 @@ async function carregarOpcoesVersaoHome() {
 
   try {
     const versoes = await carregarVersoesChangelog(VERSAO_SISTEMA);
+    versoesChangelogHome = versoes;
     select.innerHTML = versoes.map(item => {
       const nome = item.nome ? ` - ${item.nome}` : "";
       const data = item.data ? ` (${item.data})` : "";
       return `<option value="${item.versao}">v${item.versao}${data}${nome}</option>`;
     }).join("");
     select.value = VERSAO_SISTEMA;
+    atualizarCabecalhoVersaoHome(VERSAO_SISTEMA);
     versoesChangelogHomeCarregadas = true;
   } catch (err) {
     console.error("Erro ao carregar versoes do changelog:", err);
@@ -483,6 +486,7 @@ async function carregarDetalhesVersaoHome(versao = VERSAO_SISTEMA, forcar = fals
   if (!forcar && changelogHomeCarregado && versao === VERSAO_SISTEMA) return;
 
   if (textoVersao) textoVersao.textContent = versao;
+  atualizarCabecalhoVersaoHome(versao);
   if (select && select.value !== versao) select.value = versao;
   container.innerHTML = "<p class=\"home-changelog-loading\">Carregando detalhes...</p>";
   const [changelog, imagens] = await Promise.all([
@@ -490,7 +494,17 @@ async function carregarDetalhesVersaoHome(versao = VERSAO_SISTEMA, forcar = fals
     carregarImagensAtualizacaoHome(versao)
   ]);
   container.innerHTML = changelog;
+  const primeiraSecao = container.querySelector("details");
+  if (primeiraSecao) primeiraSecao.open = true;
   changelogHomeCarregado = versao === VERSAO_SISTEMA;
+}
+
+function atualizarCabecalhoVersaoHome(versao) {
+  const nomeElemento = document.getElementById("homeNomeVersao");
+  if (!nomeElemento) return;
+
+  const nome = versoesChangelogHome.find(item => item.versao === versao)?.nome?.trim();
+  nomeElemento.textContent = nome || "Novidades do sistema";
 }
 
 async function carregarImagensAtualizacaoHome(versao) {
@@ -537,6 +551,7 @@ function renderizarGaleriaAtualizacaoHome() {
   const $previewDireita = $(".home-atualizacao-preview-direita");
 
   $principal.attr("src", principal).attr("alt", `Imagem ${indice + 1} da atualizacao`);
+  $principal.closest("a").attr("href", principal);
   $anterior.attr("src", anterior);
   $proxima.attr("src", proxima);
   $previewEsquerda.toggle(total > 1);
@@ -548,6 +563,8 @@ function renderizarGaleriaAtualizacaoHome() {
 
 function alterarGaleriaAtualizacaoHome(direcao) {
   if (galeriaAtualizacaoHome.imagens.length < 2) return;
+  const principal = document.getElementById("homeAtualizacaoImagemPrincipal");
+  if (principal) principal.dataset.direcao = direcao > 0 ? "1" : "-1";
   galeriaAtualizacaoHome.indice += direcao;
   renderizarGaleriaAtualizacaoHome();
 }
@@ -562,6 +579,7 @@ function garantirPopupVersaoHome() {
   const popupExistente = document.getElementById("homePopupAtualizacao");
   if (popupExistente) {
     garantirEstruturaSeletorVersaoHome(popupExistente);
+    prepararVisualAtualizacao(popupExistente);
     return;
   }
 
@@ -569,7 +587,7 @@ function garantirPopupVersaoHome() {
     <div id="homePopupAtualizacao" class="atualizacao-overlay home-atualizacao-overlay">
       <div class="atualizacao-box home-atualizacao-box">
         <h2>&#128640; Nova atualização lançada!</h2>
-        <p><strong>Versão:</strong> <span id="homeVersaoAtual">${VERSAO_SISTEMA}</span></p>
+        <p class="home-atualizacao-meta"><span class="home-atualizacao-meta-label">Versão</span><span id="homeVersaoAtual">${VERSAO_SISTEMA}</span><span id="homeNomeVersao"></span></p>
         <section id="homeAtualizacaoGaleria" class="home-atualizacao-galeria" hidden aria-label="Imagens da atualizacao">
           <div class="home-atualizacao-carousel">
             <button type="button" class="home-atualizacao-carousel-button" data-home-galeria="anterior" aria-label="Imagem anterior"><i class="fa-solid fa-chevron-left"></i></button>
@@ -591,6 +609,54 @@ function garantirPopupVersaoHome() {
       </div>
     </div>
   `);
+  prepararVisualAtualizacao(document.getElementById("homePopupAtualizacao"));
+}
+
+function prepararVisualAtualizacao(popup) {
+  const box = popup?.querySelector(".home-atualizacao-box");
+  if (!box || box.dataset.releaseReady) return;
+  box.dataset.releaseReady = "true";
+  box.setAttribute("role", "dialog");
+  box.setAttribute("aria-modal", "true");
+  box.setAttribute("aria-label", "Novidades da versao");
+  box.insertAdjacentHTML("afterbegin", `<div class="release-particles" aria-hidden="true">${Array.from({ length: 12 }, (_, i) => `<i style="--x:${8 + (i * 37) % 86}%;--delay:-${i * 1.7}s;--duration:${12 + i % 5}s"></i>`).join("")}</div><button type="button" class="release-close" aria-label="Fechar novidades" title="Fechar"><i class="fa-solid fa-xmark"></i></button>`);
+  const principal = box.querySelector("#homeAtualizacaoImagemPrincipal");
+  if (principal) {
+    const original = document.createElement("a");
+    original.className = "release-original";
+    original.target = "_blank";
+    original.rel = "noopener";
+    original.title = "Abrir imagem original em tamanho maior";
+    original.setAttribute("aria-label", "Abrir imagem original em nova aba");
+    principal.before(original);
+    original.append(principal);
+  }
+  principal?.addEventListener("load", () => {
+    const quadro = principal.closest("figure");
+    if (!quadro) return;
+    quadro.getAnimations().forEach(animacao => animacao.cancel());
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || document.body.classList.contains("pref-sem-animacao")) return;
+    const direcao = Number(principal.dataset.direcao) || 1;
+    quadro.animate([
+      { opacity: .2, transform: `translateX(${direcao * 32}px) scale(.84)` },
+      { opacity: 1, transform: "translateX(0) scale(1)" }
+    ], { duration: 560, easing: "cubic-bezier(.16, 1, .3, 1)" });
+  });
+  box.querySelectorAll(".home-atualizacao-preview").forEach((preview, index) => {
+    preview.setAttribute("role", "button");
+    preview.tabIndex = 0;
+    preview.setAttribute("aria-label", index ? "Proxima imagem" : "Imagem anterior");
+    preview.addEventListener("click", () => alterarGaleriaAtualizacaoHome(index ? 1 : -1));
+    preview.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        alterarGaleriaAtualizacaoHome(index ? 1 : -1);
+      }
+    });
+  });
+  popup.addEventListener("keydown", event => {
+    if (event.key === "Escape") fecharDetalhesVersaoHome();
+  });
 }
 
 function garantirEstruturaSeletorVersaoHome(popup) {

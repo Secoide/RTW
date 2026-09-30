@@ -1974,6 +1974,22 @@
   color: #ff5b19;
 }
 
+.spda-continuity-editor.is-structural {
+  transform: translate(-50%, calc(-150% - 5px));
+  border-color: #999;
+  background: rgba(240, 240, 240, 0.92);
+  box-shadow: 0 2px 8px rgba(90, 90, 90, 0.12);
+}
+
+.spda-continuity-editor.is-structural input,
+.spda-continuity-editor.is-structural .spda-medicao-unidade {
+  color: #666;
+}
+
+.spda-continuity-editor.is-structural input::placeholder {
+  color: #888;
+}
+
 .driver-popover.spda-tour {
   max-width: 350px;
   border: 1px solid #3e4649;

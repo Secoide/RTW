@@ -181,6 +181,12 @@ async function getColaboradoresDisp(req, res) {
 async function getColaboradoresEmOS(req, res) {
   try {
     const dataDia = req.query.dataDia;
+
+    if (req.query.ocupacao === "1") {
+      const ocupacoes = await ColabService.listarOcupacoesColaboradoresEmOS(dataDia);
+      return res.json(ocupacoes);
+    }
+
     const limit = Number(req.query.limit);
     const offset = Number(req.query.offset);
     const busca = String(req.query.busca || "").trim();

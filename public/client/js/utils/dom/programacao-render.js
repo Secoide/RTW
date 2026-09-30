@@ -228,7 +228,7 @@ export function renderOSComColaboradores(ordens, container = ".painelDia", opcoe
 
 
 
-export function renderColoboradorEmOS(escopo = document) {
+export function renderColoboradorEmOS(escopo = document, ocupacoes = null) {
   $(escopo).find('.painelDia').addBack('.painelDia').each(function () {
     const $painelDia = $(this);
     const dia = $painelDia.attr('data-dia');
@@ -237,43 +237,56 @@ export function renderColoboradorEmOS(escopo = document) {
     $colabsBase.find('.ocupadoEmOS').each(function () {
       const $colab = $(this);
       $colab.closest('.colaborador').removeClass('colaboradorEmOS');
-      // Remove a div correspondente a esta OS
       $colab.find('div').remove();
     });
-    $painelDia.find('.painel_OS').each(function () {
-      const $os = $(this);
-      const osID = $os.find('.lbl_OS').text().trim();
-      const descOS = $os.find('.lbl_descricaoOS').text();
-      const cliente = $os.find('.lbl_clienteOS').text();
 
-      const $colabsNaOS = $os.find('.p_colabs .colaborador');
+    const ocupacoesDoPainel = Array.isArray(ocupacoes)
+      ? ocupacoes
+        .filter(item => !item.dataDia || item.dataDia === dia)
+        .map(item => ({
+          id: item.idfuncionario ?? item.idFunc ?? item.id,
+          osID: item.osID ?? item.idOS ?? item.id_OSs,
+          descricao: item.descricao || '',
+          cliente: item.nomeEmpresa || item.empresa || ''
+        }))
+      : $painelDia.find('.painel_OS').map(function () {
+        const $os = $(this);
+        const osID = $os.find('.lbl_OS').text().trim();
+        const descOS = $os.find('.lbl_descricaoOS').text();
+        const cliente = $os.find('.lbl_clienteOS').text();
 
-      $colabsNaOS.each(function () {
-        const id = $(this).data('id');
+        return $os.find('.p_colabs .colaborador').map(function () {
+          return {
+            id: $(this).data('id'),
+            osID,
+            descricao: descOS,
+            cliente
+          };
+        }).get();
+      }).get().flat();
 
-        const $colabNaBase = $colabsBase.filter(function () {
-          return $(this).data('id') == id;
-        }).first();
+    ocupacoesDoPainel.forEach(({ id, osID, descricao, cliente }) => {
+      if (id == null || osID == null) return;
 
-        if ($colabNaBase.length > 0) {
-          const $ocupadoBox = $colabNaBase.find('.ocupadoEmOS');
+      const $colabNaBase = $colabsBase.filter(function () {
+        return $(this).data('id') == id;
+      }).first();
 
-          const $existing = $ocupadoBox.find('div').filter(function () {
-            return $(this).text().trim() == osID;
-          });
+      if ($colabNaBase.length === 0) return;
 
-          if ($existing.length) {
-            // já existe → atualiza o title
-            $existing.attr('title', descOS);
-            $existing.text(osID);
-          } else {
-            // não existe ainda → adiciona
-            $ocupadoBox.append(`<div title="${descOS} - ${cliente}">${osID}</div>`);
-          }
-
-          $colabNaBase.addClass('colaboradorEmOS');
-        }
+      const $ocupadoBox = $colabNaBase.find('.ocupadoEmOS');
+      const $existing = $ocupadoBox.find('div').filter(function () {
+        return $(this).text().trim() == osID;
       });
+
+      const titulo = [descricao, cliente].filter(Boolean).join(' - ');
+      if ($existing.length) {
+        $existing.attr('title', titulo);
+      } else {
+        $('<div>', { title: titulo, text: String(osID) }).appendTo($ocupadoBox);
+      }
+
+      $colabNaBase.addClass('colaboradorEmOS');
     });
   });
 }

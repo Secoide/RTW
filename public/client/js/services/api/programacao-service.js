@@ -41,6 +41,22 @@ function montarUrlOSProgramacao(dia, { limit = LIMITE_OS_PROGRAMACAO, offset = 0
   return `/api/colaboradores/emOS?${params.toString()}`;
 }
 
+async function carregarOcupacoesColaboradores(dia) {
+  try {
+    const res = await fetch(`/api/colaboradores/emOS?dataDia=${encodeURIComponent(dia)}&ocupacao=1`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (!res.ok) return null;
+    const dados = await res.json();
+    return Array.isArray(dados) ? dados : null;
+  } catch (err) {
+    console.warn("Não foi possível atualizar as ocupações dos colaboradores:", err);
+    return null;
+  }
+}
+
 function normalizarRespostaOS(resposta) {
   if (Array.isArray(resposta)) {
     return {
@@ -81,16 +97,18 @@ export async function carregarOSComColaboradores(painel, opcoes = {}) {
       offset,
       busca
     });
+    const ocupacoesPromise = carregarOcupacoesColaboradores(dia);
     const res = await fetch(url, { method: "GET", credentials: "include" });
     if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
 
     const resposta = normalizarRespostaOS(await res.json());
+    const ocupacoes = await ocupacoesPromise;
     if (painelDia?.getAttribute("data-dia") !== dia) return [];
 
     // 👇 container dentro do painel
     const container = painel.querySelector(".painel_dasOS");
     renderOSComColaboradores(resposta.dados, container, { append });
-    renderColoboradorEmOS(painelDia);
+    renderColoboradorEmOS(painelDia, ocupacoes);
 
     const totalCarregado = $(container)
       .find(".painel_OS .p_infoOS[data-os]")

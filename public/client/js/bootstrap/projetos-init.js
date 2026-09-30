@@ -236,9 +236,13 @@ function renderizarTabela(os = []) {
         <td class="projetos-descricao" title="${escapeHtml(item.descricao || '')}">${escapeHtml(item.descricao || 'Sem descrição')}</td>
         <td title="${escapeHtml(item.nomeEmpresa || '')}">${escapeHtml(item.nomeEmpresa || '-')}</td>
         <td class="projetos-orcamento-celula">
-          <div class="projetos-orcamento-valores"><strong>${formatarMoeda(item.totalFaturado)}</strong><span>${formatarMoeda(item.orcado)}</span></div>
-          <div class="projetos-orcamento-barra"><span style="width:${percentual}%"></span></div>
-          <small>${formatarPercentual(percentual)} faturado</small>
+          <div class="projetos-orcamento-faixa" style="--progresso:${percentual}%;--cor-progresso:rgb(${percentual <= 50 ? 255 : Math.round(141 + 228 * (1 - percentual / 100))},${percentual <= 50 ? Math.round(141 + 228 * percentual / 100) : 255},141)">
+            <span title="Expectativa do mês">${formatarMoeda(item.expectativaMes)}</span>
+            <span title="Faturado no mês">${formatarMoeda(item.faturadoMes)}</span>
+            <span title="Porcentagem geral">${formatarPercentual(Number(item.orcado) > 0 ? Number(item.totalFaturado || 0) / Number(item.orcado) * 100 : 0)}</span>
+            <span title="Total faturado">${formatarMoeda(item.totalFaturado)}</span>
+            <span title="Valor total">${formatarMoeda(item.orcado)}</span>
+          </div>
         </td>
         <td>${formatarData(item.dataConclusao)}</td>
         <td class="${dias !== null && dias < 0 ? 'atrasado' : ''}">${escapeHtml(restante)}</td>
@@ -342,7 +346,7 @@ function renderizarDetalhe(dados) {
     .join('');
   conteudo.innerHTML = `
     <div class="projetos-detalhe-acoes">
-      <button type="button" class="projetos-detalhe-nova-meta"><i class="fa-solid fa-plus"></i> Nova Meta</button>
+      <button type="button" class="projetos-detalhe-nova-meta" data-os-expectativa="${escapeHtml(os.id_OSs)}" data-permission="menu.projetos" data-permission-action="adicionar"><i class="fa-solid fa-plus"></i> Nova Meta</button>
       <span>${escapeHtml(os.nomeEmpresa || '-')} · ${escapeHtml(os.lider || 'Sem responsável')}</span>
     </div>
     <div class="projetos-detalhe-progresso">
@@ -410,10 +414,175 @@ async function abrirDetalhe(id) {
   }
 }
 
+let metasJanela = null;
+let metaEdicao = null;
+let metasConsulta = 0;
+let metaSalvando = false;
+
+async function carregarJanelaMetas() {
+  const consulta = ++metasConsulta;
+  const mes = byId('projetosMetasMes').value;
+  const conteudo = byId('projetosMetasConteudo');
+  metasJanela = null;
+  conteudo.textContent = 'Carregando metas...';
+  byId('projetosNovaMeta').disabled = true;
+  try {
+    const dados = await buscarJson(`/api/projetos/metas?mes=${encodeURIComponent(mes)}`);
+    if (consulta !== metasConsulta) return;
+    metasJanela = dados;
+    byId('projetosNovaMeta').disabled = false;
+    const geral = dados.geral || {};
+    const cadastro = dados.cadastro;
+    const faturado = Number(geral.faturado || 0);
+    const metas = (dados.metas || []).filter(item => state.responsavel === 'todos' || String(item.id) === String(state.responsavel));
+    const niveis = [['Meta', 'meta', .01], ['Super Meta', 'superMeta', .0125], ['Mega Meta', 'megaMeta', .015]];
+    conteudo.innerHTML = cadastro ? `
+      <div class="projetos-metas-resumo">
+        ${niveis.map(([nome, chave, taxa], index) => {
+          const valor = Number(cadastro[chave]);
+          const atingida = valor > 0 && faturado >= valor;
+          const proximoValor = index < niveis.length - 1 ? Number(cadastro[niveis[index + 1][1]]) : Infinity;
+          const faturadoNivel = atingida ? (faturado >= proximoValor ? valor : faturado) : 0;
+          const comissao = atingida ? metas.reduce((total, item) => total + (Number(item.meta) > 0 && Number(item.faturado) >= Number(item.meta) ? Number(item.faturado) * taxa : 0), 0) : 0;
+          return `<div class="projetos-metas-nivel"><span><i class="fa-solid ${atingida ? 'fa-lock-open' : 'fa-lock'}"></i> ${nome}</span>
+            <strong>${formatarMoeda(valor)}</strong><small>Faturado</small><strong>${formatarMoeda(faturadoNivel)}</strong>
+            <div class="projetos-metas-premio" title="${formatarPercentual(taxa * 100)} sobre o faturamento dos responsáveis que atingiram a meta individual">
+            ${'<i class="fa-solid fa-star"></i>'.repeat(index + 1)}<br><i class="fa-solid fa-trophy"></i> ${formatarMoeda(comissao)}</div></div>`;
+        }).join('')}
+        <div class="projetos-metas-total"><i class="fa-solid fa-rocket"></i><span>${formatarPercentual(Number(cadastro.meta) > 0 ? faturado / Number(cadastro.meta) * 100 : 0)}</span>
+        <strong>${formatarMoeda(faturado)}</strong><button type="button" data-editar-meta-geral data-permission="menu.projetos" data-permission-action="editar"><i class="fa-solid fa-pen"></i> Editar</button></div>
+      </div>
+      <div class="projetos-metas-tabela-wrap"><table class="projetos-metas-tabela"><thead><tr><th>Responsável</th><th>Metas</th><th>Ações</th></tr></thead><tbody>
+      ${metas.map(item => `<tr><td>${escapeHtml(item.nome)}</td><td><div class="projetos-metas-barra" style="--progresso:${calcularPercentual(item.faturado, item.meta)}%">
+        <span>${formatarMoeda(item.faturado)}</span><span>${formatarPercentual(Number(item.meta) > 0 ? Number(item.faturado) / Number(item.meta) * 100 : 0)}</span><span>${formatarMoeda(item.meta)}</span></div></td>
+        <td><button type="button" data-limpar-meta="${escapeHtml(item.id)}" data-permission="menu.projetos" data-permission-action="editar" title="Zerar meta individual" aria-label="Zerar meta individual"><i class="fa-solid fa-eraser"></i></button>
+        <button type="button" data-editar-meta-solo="${escapeHtml(item.id)}" data-permission="menu.projetos" data-permission-action="editar" title="Editar meta individual" aria-label="Editar meta individual"><i class="fa-solid fa-pen"></i></button></td></tr>`).join('') || '<tr><td colspan="3">Nenhuma meta individual neste mês.</td></tr>'}
+      </tbody></table></div>` : '<div class="projetos-vazio">Nenhuma meta geral cadastrada neste mês.</div>';
+  } catch (err) {
+    if (consulta === metasConsulta) conteudo.textContent = err.message;
+  }
+}
+
+function abrirEditorMeta(tipo, id) {
+  if (!metasJanela) return;
+  const item = tipo === 'solo' ? metasJanela.metas.find(meta => String(meta.id) === String(id)) : metasJanela.cadastro;
+  if (tipo !== 'novo' && !item) return;
+  metaEdicao = { tipo, id, mes: metasJanela.mes };
+  const form = byId('projetosMetaForm');
+  form.reset();
+  form.elements.mes.value = metasJanela.mes;
+  form.elements.mes.disabled = tipo !== 'novo';
+  ['meta', 'superMeta', 'megaMeta'].forEach(chave => {
+    const campo = form.elements[chave];
+    campo.disabled = tipo === 'solo' && chave !== 'meta';
+    campo.closest('label').hidden = campo.disabled;
+    campo.value = tipo === 'novo' || campo.disabled ? '' : Number(item[chave] || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  });
+  byId('projetosMetaEditorTitulo').textContent = tipo === 'solo' ? `Meta individual: ${item.nome}` : tipo === 'novo' ? 'Cadastrar meta geral' : 'Editar metas gerais';
+  byId('projetosMetaSalvarTexto').textContent = tipo === 'novo' ? 'Cadastrar' : 'Salvar';
+  byId('projetosMetaErro').textContent = '';
+  byId('projetosMetaEditor').showModal();
+}
+
+function lerValorMeta(texto) {
+  const valor = String(texto).trim().replace(/^R\$\s*/, '');
+  if (!/^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(valor)) throw new Error('Use valores em reais, como 500.000,00.');
+  return Number(valor.replace(/\./g, '').replace(',', '.'));
+}
+
+async function enviarMeta(url, method, dados) {
+  const resposta = await fetch(url, { method, credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) });
+  const resultado = await resposta.json().catch(() => ({}));
+  if (!resposta.ok) throw new Error(resultado.mensagem || 'Não foi possível salvar a meta.');
+}
+
+async function salvarFormularioMeta(event) {
+  event.preventDefault();
+  if (metaSalvando) return;
+  const form = event.currentTarget;
+  const botao = form.querySelector('[type="submit"]');
+  try {
+    const dados = { mes: metaEdicao.tipo === 'novo' ? form.elements.mes.value : metaEdicao.mes, meta: lerValorMeta(form.elements.meta.value) };
+    if (metaEdicao.tipo !== 'solo') {
+      dados.superMeta = lerValorMeta(form.elements.superMeta.value);
+      dados.megaMeta = lerValorMeta(form.elements.megaMeta.value);
+    }
+    metaSalvando = true;
+    botao.disabled = true;
+    byId('projetosMetaCancelar').disabled = true;
+    await enviarMeta(metaEdicao.tipo === 'solo' ? `/api/projetos/metas/responsaveis/${encodeURIComponent(metaEdicao.id)}` : '/api/projetos/metas', metaEdicao.tipo === 'novo' ? 'POST' : 'PUT', dados);
+    byId('projetosMetaEditor').close();
+    byId('projetosMetasMes').value = dados.mes;
+    await carregarJanelaMetas();
+    await carregarPainel();
+  } catch (err) { byId('projetosMetaErro').textContent = err.message; }
+  finally { metaSalvando = false; botao.disabled = false; byId('projetosMetaCancelar').disabled = false; }
+}
+
+let expectativaOS = null;
+let expectativaSalvando = false;
+
+async function salvarExpectativa(event) {
+  event.preventDefault();
+  if (expectativaSalvando) return;
+  const form = event.currentTarget;
+  const botao = form.querySelector('[type="submit"]');
+  try {
+    const dados = { mes: form.elements.mes.value, expectativa: lerValorMeta(form.elements.expectativa.value) };
+    if (dados.expectativa <= 0) throw new Error('Informe uma expectativa maior que zero.');
+    expectativaSalvando = true;
+    botao.disabled = true;
+    byId('projetosExpectativaCancelar').disabled = true;
+    await enviarMeta(`/api/projetos/os/${encodeURIComponent(expectativaOS)}/expectativas`, 'POST', dados);
+    byId('projetosExpectativaEditor').close();
+    await abrirDetalhe(expectativaOS);
+    await carregarPainel();
+  } catch (err) { byId('projetosExpectativaErro').textContent = err.message; }
+  finally { expectativaSalvando = false; botao.disabled = false; byId('projetosExpectativaCancelar').disabled = false; }
+}
+
 function iniciarEventos() {
   const page = byId('projetosPage');
   if (!page || page.dataset.eventosProjetos === 'true') return;
   page.dataset.eventosProjetos = 'true';
+  byId('projetosDetalheConteudo').addEventListener('click', event => {
+    const botao = event.target.closest('[data-os-expectativa]');
+    if (!botao) return;
+    expectativaOS = botao.dataset.osExpectativa;
+    const form = byId('projetosExpectativaForm');
+    form.reset();
+    form.elements.mes.value = state.mes;
+    byId('projetosExpectativaErro').textContent = '';
+    byId('projetosExpectativaEditor').showModal();
+  });
+  byId('projetosExpectativaForm').addEventListener('submit', salvarExpectativa);
+  byId('projetosExpectativaCancelar').addEventListener('click', () => byId('projetosExpectativaEditor').close());
+  byId('projetosExpectativaEditor').addEventListener('cancel', event => { if (expectativaSalvando) event.preventDefault(); });
+  byId('btnMetasProjetos').addEventListener('click', () => {
+    byId('projetosMetasMes').value = state.mes;
+    byId('frm_cadastrarMetaGeral').showModal();
+    carregarJanelaMetas();
+  });
+  page.querySelectorAll('[data-fechar-metas]').forEach(botao => botao.addEventListener('click', () => byId('frm_cadastrarMetaGeral').close()));
+  byId('projetosMetasMes').addEventListener('change', carregarJanelaMetas);
+  byId('projetosNovaMeta').addEventListener('click', () => abrirEditorMeta('novo'));
+  byId('projetosMetaCancelar').addEventListener('click', () => byId('projetosMetaEditor').close());
+  byId('projetosMetaEditor').addEventListener('cancel', event => { if (metaSalvando) event.preventDefault(); });
+  byId('projetosMetaForm').addEventListener('submit', salvarFormularioMeta);
+  byId('projetosMetasConteudo').addEventListener('click', async event => {
+    const botao = event.target.closest('button');
+    if (!botao || !metasJanela) return;
+    if (botao.hasAttribute('data-editar-meta-geral')) abrirEditorMeta('editar');
+    if (botao.dataset.editarMetaSolo) abrirEditorMeta('solo', botao.dataset.editarMetaSolo);
+    if (botao.dataset.limparMeta && window.confirm('Zerar somente a meta individual deste responsável? O faturamento será mantido.')) {
+      botao.disabled = true;
+      try {
+        await enviarMeta(`/api/projetos/metas/responsaveis/${encodeURIComponent(botao.dataset.limparMeta)}`, 'PUT', { mes: metasJanela.mes, meta: 0 });
+        await carregarJanelaMetas();
+        await carregarPainel();
+      } catch (err) { window.alert(err.message); botao.disabled = false; }
+    }
+  });
 
   byId('projetosMes').addEventListener('change', event => {
     state.mes = event.target.value;
@@ -437,7 +606,7 @@ function iniciarEventos() {
     elemento.addEventListener('click', fecharModalDetalhe);
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !byId('projetosDetalheModal').hidden) fecharModalDetalhe();
+    if (event.key === 'Escape' && !byId('projetosExpectativaEditor').open && !byId('projetosDetalheModal').hidden) fecharModalDetalhe();
   }, { once: false });
 }
 

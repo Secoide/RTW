@@ -452,7 +452,7 @@ export async function carregarMedalhasAutomaticasColaborador(idColaborador) {
         }
 
         $lista.html(medalhas.map(medalha => {
-            const titulo = escapeAttr(medalha?.titulo || 'Reconhecimento automático');
+            const titulo = escapeAttr(String(medalha?.titulo || 'Medalha').replace(/\s*\([^)]*\)\s*$/, '').trim());
             const icone = escapeAttr(medalha?.icone || '🏅');
             const descricao = descreverMedalhaAutomatica(medalha?.titulo);
             const tooltip = escapeAttr(`${medalha?.titulo || 'Reconhecimento automático'}\n${descricao}`);
@@ -461,7 +461,6 @@ export async function carregarMedalhasAutomaticasColaborador(idColaborador) {
                 <article class="cardConquista cardConquistaAutomatica" title="${tooltip}">
                     <div class="icone">${icone}</div>
                     <div class="titulo">${titulo}</div>
-                    <div class="data">Reconhecimento automático</div>
                 </article>
             `;
         }).join(''));

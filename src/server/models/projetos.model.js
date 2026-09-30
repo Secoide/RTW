@@ -305,7 +305,100 @@ async function listarPainel(opcoes = {}) {
   return { mes: mes.mes, os, geral, metas, responsaveis };
 }
 
+function validarMesMeta(mes) {
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(String(mes)) || Number(String(mes).slice(0, 4)) < 1900) {
+    throw Object.assign(new Error('Informe um mês válido.'), { status: 400 });
+  }
+  return intervaloMes(mes);
+}
+
+function validarValorMeta(valor, permitirZero = false) {
+  if (typeof valor !== 'number' || !Number.isFinite(valor) || valor < (permitirZero ? 0 : 0.01) || valor > 999999999.99) {
+    throw Object.assign(new Error('Informe valores monetários válidos.'), { status: 400 });
+  }
+  return Math.round(valor * 100) / 100;
+}
+
+async function consultarMetas(mesTexto) {
+  const mes = validarMesMeta(mesTexto);
+  const [rows] = await connection.query(`SELECT id_metasGerals AS id, metaOSGeral AS meta,
+    metaExtra1 AS superMeta, metaExtra2 AS megaMeta FROM tb_infometasgeral
+    WHERE anoMes >= ? AND anoMes < ? ORDER BY id_metasGerals DESC LIMIT 1`, [mes.inicio, mes.fim]);
+  const geral = await listarResumoGeral(mes);
+  return { mes: mes.mes, cadastro: rows[0] || null, geral, metas: await listarMetasResponsaveis(mes) };
+}
+
+async function gravarMetas(dados, editar = false, idResponsavel = null) {
+  const mes = validarMesMeta(dados.mes);
+  const meta = validarValorMeta(dados.meta, idResponsavel !== null);
+  const superMeta = idResponsavel === null ? validarValorMeta(dados.superMeta) : null;
+  const megaMeta = idResponsavel === null ? validarValorMeta(dados.megaMeta) : null;
+  if (idResponsavel === null && !(meta < superMeta && superMeta < megaMeta)) {
+    throw Object.assign(new Error('A Super Meta deve superar a Meta, e a Mega Meta deve superar a Super Meta.'), { status: 400 });
+  }
+  if (idResponsavel !== null && (!Number.isSafeInteger(idResponsavel) || idResponsavel <= 0 || idResponsavel === 999)) {
+    throw Object.assign(new Error('Responsável inválido.'), { status: 400 });
+  }
+  const conn = await connection.getConnection();
+  let lock;
+  try {
+    // Serialize monthly creation and edits, including installations without a unique month index.
+    const [locks] = await conn.query("SELECT GET_LOCK(CONCAT(DATABASE(), ':metas:', ?), 10) AS adquirido", [mes.mes]);
+    lock = Number(locks[0].adquirido) === 1;
+    if (!lock) throw Object.assign(new Error('O mês está sendo atualizado. Tente novamente.'), { status: 409 });
+    await conn.beginTransaction();
+    const [existentes] = await conn.query('SELECT id_metasGerals FROM tb_infometasgeral WHERE anoMes >= ? AND anoMes < ? FOR UPDATE', [mes.inicio, mes.fim]);
+    if (!editar && existentes.length) throw Object.assign(new Error('Já existe uma meta geral neste mês. Utilize Editar.'), { status: 409 });
+    if (editar && existentes.length !== 1) throw Object.assign(new Error('O mês deve possuir exatamente uma meta geral para ser editado.'), { status: 409 });
+    if (idResponsavel !== null) {
+      const [responsaveis] = await conn.query('SELECT id FROM funcionarios WHERE id = ? AND responsavelOSs = 1', [idResponsavel]);
+      if (!responsaveis.length) throw Object.assign(new Error('Responsável não encontrado.'), { status: 404 });
+      const [individuais] = await conn.query('SELECT id_responsaveisOS FROM tb_responsavelos WHERE id_funcionario = ? AND mes >= ? AND mes < ? FOR UPDATE', [idResponsavel, mes.inicio, mes.fim]);
+      if (individuais.length !== 1) throw Object.assign(new Error('Meta individual ausente ou duplicada neste mês.'), { status: 409 });
+      await conn.query('UPDATE tb_responsavelos SET meta_estipulada = ? WHERE id_responsaveisOS = ?', [meta, individuais[0].id_responsaveisOS]);
+    } else if (editar) {
+      await conn.query('UPDATE tb_infometasgeral SET metaOSGeral = ?, metaExtra1 = ?, metaExtra2 = ? WHERE id_metasGerals = ?', [meta, superMeta, megaMeta, existentes[0].id_metasGerals]);
+    } else {
+      await conn.query('INSERT INTO tb_infometasgeral (metaOSGeral, anoMes, metaExtra1, metaExtra2) VALUES (?, ?, ?, ?)', [meta, mes.inicio, superMeta, megaMeta]);
+      await conn.query(`INSERT INTO tb_responsavelos (mes, meta_estipulada, id_funcionario)
+        SELECT ?, 0, f.id FROM funcionarios f WHERE f.responsavelOSs = 1 AND f.id <> 999
+        AND NOT EXISTS (SELECT 1 FROM tb_responsavelos r WHERE r.id_funcionario = f.id AND r.mes >= ? AND r.mes < ?)`, [mes.inicio, mes.inicio, mes.fim]);
+    }
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    try {
+      if (lock) await conn.query("SELECT RELEASE_LOCK(CONCAT(DATABASE(), ':metas:', ?))", [mes.mes]);
+    } finally { conn.release(); }
+  }
+}
+
+async function cadastrarExpectativa(idOS, dados) {
+  const id = Number(idOS);
+  if (!Number.isSafeInteger(id) || id <= 0) throw Object.assign(new Error('OS inválida.'), { status: 400 });
+  const mes = validarMesMeta(dados.mes);
+  const expectativa = validarValorMeta(dados.expectativa);
+  const conn = await connection.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [obras] = await conn.query('SELECT id_OSs FROM tb_obras WHERE id_OSs = ? FOR UPDATE', [id]);
+    if (!obras.length) throw Object.assign(new Error('OS não encontrada.'), { status: 404 });
+    const [existentes] = await conn.query('SELECT id_metaOSs FROM tb_metasos WHERE id_obra = ? AND mes >= ? AND mes < ? FOR UPDATE', [id, mes.inicio, mes.fim]);
+    if (existentes.length) throw Object.assign(new Error('Esta OS já possui uma expectativa cadastrada neste mês.'), { status: 409 });
+    await conn.query('INSERT INTO tb_metasos (mes, expectativa, faturado, objetivoOK, id_obra) VALUES (?, ?, 0, 0, ?)', [mes.inicio, expectativa, id]);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally { conn.release(); }
+}
+
 module.exports = {
+  cadastrarExpectativa,
+  consultarMetas,
+  gravarMetas,
   listarPainel,
   buscarDetalheOS,
   listarResponsaveis

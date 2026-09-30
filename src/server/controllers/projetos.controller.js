@@ -34,4 +34,33 @@ async function listarResponsaveis(req, res) {
   }
 }
 
-module.exports = { listarPainel, buscarDetalheOS, listarResponsaveis };
+async function consultarMetas(req, res) {
+  try {
+    res.json({ sucesso: true, ...await ProjetosModel.consultarMetas(req.query.mes) });
+  } catch (err) {
+    console.error('Erro ao consultar metas:', err);
+    res.status(err.status || 500).json({ sucesso: false, mensagem: err.status ? err.message : 'Não foi possível consultar as metas.' });
+  }
+}
+
+async function gravarMetas(req, res) {
+  try {
+    await ProjetosModel.gravarMetas(req.body, req.method === 'PUT', req.params.id ? Number(req.params.id) : null);
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error('Erro ao salvar metas:', err);
+    res.status(err.status || 500).json({ sucesso: false, mensagem: err.status ? err.message : 'Não foi possível salvar as metas.' });
+  }
+}
+
+async function cadastrarExpectativa(req, res) {
+  try {
+    await ProjetosModel.cadastrarExpectativa(req.params.id, req.body);
+    res.status(201).json({ sucesso: true });
+  } catch (err) {
+    console.error('Erro ao cadastrar expectativa:', err);
+    res.status(err.status || 500).json({ sucesso: false, mensagem: err.status ? err.message : 'Não foi possível salvar a expectativa.' });
+  }
+}
+
+module.exports = { listarPainel, buscarDetalheOS, listarResponsaveis, consultarMetas, gravarMetas, cadastrarExpectativa };
