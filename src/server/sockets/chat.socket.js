@@ -1,5 +1,7 @@
 // src/server/sockets/chat.socket.js
 const WebSocket = require("ws");
+const { randomUUID } = require("crypto");
+const REACOES_CHAT = new Set(["👍", "✅", "👀", ""]);
 
 function enviar(cliente, payload) {
   if (cliente?.readyState === WebSocket.OPEN) {
@@ -20,6 +22,28 @@ function initChatSocket(wss) {
         return;
       }
 
+      if (!data || typeof data !== "object") return;
+
+      if (data.acao === "reacao_chat") {
+        if (typeof data.mensagemId !== "string" || data.mensagemId.length > 100
+          || !REACOES_CHAT.has(data.reacao) || !ws.usuario) return;
+
+        const privado = data.tipo === "privado";
+        if (privado && ws.usuario !== data.usuario && ws.usuario !== data.destinatario) return;
+
+        const reacao = {
+          acao: "reacao_chat",
+          mensagemId: data.mensagemId,
+          reacao: data.reacao
+        };
+        wss.clients.forEach((cliente) => {
+          if (!privado || cliente.usuario === data.usuario || cliente.usuario === data.destinatario) {
+            enviar(cliente, reacao);
+          }
+        });
+        return;
+      }
+
       if (data.acao !== "mensagem_chat") return;
 
       const texto = String(data.texto || "").trim();
@@ -31,6 +55,8 @@ function initChatSocket(wss) {
 
       const payload = {
         acao: "mensagem_chat",
+        mensagemId: randomUUID(),
+        criadoEm: Date.now(),
         tipo,
         usuario,
         destinatario: tipo === "privado" ? destinatario : "",

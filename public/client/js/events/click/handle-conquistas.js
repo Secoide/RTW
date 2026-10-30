@@ -1,4 +1,4 @@
-const MAPA_CONQUISTAS = {
+export const MAPA_CONQUISTAS = {
     CIPA: {
         icone: '♻️',
         nome: 'Membro da CIPA',

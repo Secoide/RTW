@@ -33,18 +33,10 @@
 
       <div class="form_login">
         <p class="tituloLogin">Faça seu login.</p>
-        <p class="subtituloLogin">Entre com seu usuário da empresa cadastrada.</p>
+        <p class="subtituloLogin">Entre com seu usuário e senha da RTW.</p>
         <form id="formLogin" method="POST" autocomplete="on">
           <label for="username">Usuário ou E-mail</label><br>
           <input id="username" type="text" name="username" autocomplete="username email" placeholder="Digite seu usuário ou e-mail" required>
-
-          <div id="adminEmpresaLoginWrap" class="admin-empresa-login" hidden>
-            <label for="adminEmpresaLogin">Empresa de acesso</label><br>
-            <select id="adminEmpresaLogin" name="empresaSaasId">
-              <option value="">Selecione a empresa...</option>
-            </select>
-            <small>Disponível apenas para o admin global.</small>
-          </div>
 
           <label for="password">Senha</label><br>
           <div class="senha-wrap">

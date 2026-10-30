@@ -1,9 +1,13 @@
 const NotificacoesModel = require("../models/notificacoes.model");
+const CalibracaoAlertas = require("../services/calibracoesAlertas.service");
 const AprovacoesModel = require("../models/aprovacoes.model");
 
 async function listar(req, res) {
   try {
-    const notificacoes = await NotificacoesModel.listarNaoLidas(req.user.id);
+    let escopoCalibracao=null;
+    try { escopoCalibracao=await CalibracaoAlertas.sincronizarUsuario(req.user); }
+    catch (e) { console.error('Não foi possível atualizar alertas de calibração:',e.message); }
+    const notificacoes = await NotificacoesModel.listarNaoLidas(req.user.id,escopoCalibracao===null?'cal:nenhum:%':'cal:'+escopoCalibracao+':%');
     res.json({ sucesso: true, notificacoes });
   } catch (err) {
     console.error("Erro ao listar notificacoes:", err);

@@ -27,7 +27,7 @@ function adicionarDias(data, quantidade) {
     return novaData;
 }
 
-function tipoInterrupcao(motivo) {
+export function tipoInterrupcao(motivo) {
     const texto = normalizarTexto(motivo);
 
     if (texto.includes('ferias') || texto.includes('maternidade') || texto.includes('paternidade')) {
@@ -238,10 +238,7 @@ function montarDiasResumo(dados, dataAdmissao) {
     return dias;
 }
 
-function renderizarResumoAnual(dados, dataAdmissao) {
-    const $painel = $('#resumoAnualColab');
-    if (!$painel.length) return;
-
+export function calcularResumoAnual(dados, dataAdmissao) {
     const dias = montarDiasResumo(dados, dataAdmissao);
     const contagem = dias.reduce((total, dia) => {
         if (dia.tipo in total) total[dia.tipo] += 1;
@@ -250,9 +247,17 @@ function renderizarResumoAnual(dados, dataAdmissao) {
     const diasAvaliados = contagem.trabalhado + contagem.especial + contagem.ausencia + contagem.justificada;
     const diasPositivos = contagem.trabalhado + contagem.especial;
     const percentual = diasAvaliados ? (diasPositivos / diasAvaliados) * 100 : 0;
+    const diasAteHoje = dias.filter(dia => dia.tipo !== 'futuro').length;
+    return { dias, contagem, diasAvaliados, diasPositivos, percentual, diasAteHoje };
+}
+
+function renderizarResumoAnual(dados, dataAdmissao) {
+    const $painel = $('#resumoAnualColab');
+    if (!$painel.length) return;
+
+    const { dias, contagem, diasAvaliados, diasPositivos, percentual, diasAteHoje } = calcularResumoAnual(dados, dataAdmissao);
     const percentualFormatado = `${percentual.toFixed(2).replace('.', ',')}%`;
     const classePercentual = faixaPercentual(percentual);
-    const diasAteHoje = dias.filter(dia => dia.tipo !== 'futuro').length;
     const grupos = [
         { tipo: 'trabalhado', quantidade: contagem.trabalhado, titulo: 'dias trabalhados' },
         { tipo: 'justificada', quantidade: contagem.justificada, titulo: 'faltas justificadas' },

@@ -66,6 +66,7 @@ initSockets(wss);
 // sobe servidor
 server.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+  require('./src/server/services/calibracoesAlertas.service').iniciarVerificacao();
 });
 
 

@@ -12,7 +12,7 @@ function normalizarNotificacoes(lista) {
       ? { mensagem: item, origem: "local" }
       : item
     )
-    .filter((item) => item?.mensagem);
+    .filter((item) => item?.mensagem && item.tipo !== "calibracao_vencimento");
 }
 
 function salvarLocal() {
@@ -143,7 +143,11 @@ function montarMetaNotificacao(item) {
     quando: formatarQuando(item.criado_em)
   };
 
-  if (tipo.includes("programacao")) {
+  if (tipo === "calibracao_vencimento") {
+    meta.tipo = "alerta";
+    meta.titulo = "Calibração de equipamento";
+    meta.icone = "fa-gauge-high";
+  } else if (tipo.includes("programacao")) {
     meta.tipo = "programacao";
     meta.titulo = "Programação";
     meta.icone = "fa-calendar-check";
@@ -329,6 +333,7 @@ function getPreferenciasNotificacoes() {
       notificacoesProgramacao: preferencias.notificacoesProgramacao !== false,
       notificacoesChat: preferencias.notificacoesChat !== false,
       notificacoesAlertas: preferencias.notificacoesAlertas !== false,
+      notificacoesCalibracoes: preferencias.notificacoesCalibracoes !== false,
       notificacoesGerais: preferencias.notificacoesGerais !== false
     };
   } catch {
@@ -336,6 +341,7 @@ function getPreferenciasNotificacoes() {
       notificacoesProgramacao: true,
       notificacoesChat: true,
       notificacoesAlertas: true,
+      notificacoesCalibracoes: true,
       notificacoesGerais: true
     };
   }
@@ -343,6 +349,7 @@ function getPreferenciasNotificacoes() {
 
 function notificacaoPermitida(item) {
   const preferencias = getPreferenciasNotificacoes();
+  if (item.tipo === "calibracao_vencimento") return preferencias.notificacoesCalibracoes;
   const tipo = montarMetaNotificacao(item).tipo;
 
   if (tipo === "aprovacao") return true;
@@ -399,7 +406,7 @@ async function carregarNotificacoesServidor() {
     // nas notificações locais de outros tipos.
     notificacoes = notificacoes.filter((item) => {
       const tipo = String(item?.tipo || "").toLowerCase();
-      const eAprovacaoServidor = item?.origem === "servidor" && tipo.includes("aprovacao");
+      const eAprovacaoServidor = item?.origem === "servidor" && (tipo.includes("aprovacao") || tipo === "calibracao_vencimento");
       return !eAprovacaoServidor || referenciasServidor.has(item.referencia);
     });
 
@@ -409,7 +416,8 @@ async function carregarNotificacoesServidor() {
         tipo: item.tipo,
         referencia: item.referencia,
         mensagem: item.mensagem,
-        origem: "servidor"
+        origem: "servidor",
+        criado_em: item.criado_em
       });
     });
 
@@ -480,6 +488,7 @@ document.addEventListener("visibilitychange", () => {
 document.addEventListener("preferencias-usuario:alteradas", () => {
   if (notificacoesInicializadas) {
     renderizarNotificacoes();
+    carregarNotificacoesServidor();
   }
 });
 

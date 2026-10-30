@@ -56,7 +56,11 @@ async function listarPaineis() {
 
 async function anexarImagensAosPaineis(paineis = []) {
   const ids = paineis.map(painel => painel.id_painel).filter(Boolean);
-  const imagens = await PaineisModel.listarImagensPorPaineis(ids);
+  const [imagens,diagramas] = await Promise.all([
+    PaineisModel.listarImagensPorPaineis(ids),
+    require('../models/paineisDiagramas.model').contarPorPaineis(ids)
+  ]);
+  const totaisDiagramas = new Map(diagramas.map(d=>[String(d.id_painel),Number(d.total)]));
   const porPainel = new Map();
 
   imagens.forEach(imagem => {
@@ -79,7 +83,8 @@ async function anexarImagensAosPaineis(paineis = []) {
     const imagensPainel = galeria.length ? galeria : imagemAntiga;
     return {
       ...painel,
-      imagens: imagensPainel
+      imagens: imagensPainel,
+      diagramas_total: totaisDiagramas.get(String(painel.id_painel)) || 0
     };
   });
 }
@@ -112,13 +117,15 @@ async function gerarProximoNumeroSerie(ano, mes) {
   const prefixoMes = getPrefixoMes(mes);
   const prefixo = `${prefixoAno}.${prefixoMes}`;
   const ultimo = await PaineisModel.buscarUltimoNumeroSeriePorAnoMes(prefixo);
-  const ultimoSequencial = Number(String(ultimo || "").split("-").pop() || 0);
+  const serie = String(ultimo || '');
+  const sequencia = serie.match(/^\d{2}\.(\d+)\/\d{2}$/) || serie.match(/^\d{2}\.\d{2}-(\d+)$/);
+  const ultimoSequencial = Number(sequencia?.[1] || 0);
   const proximoSequencial = Number.isFinite(ultimoSequencial) ? ultimoSequencial + 1 : 1;
 
   return {
     ano_prefixo: prefixoAno,
     mes_prefixo: prefixoMes,
-    numero_serie: `${prefixo}-${String(proximoSequencial).padStart(3, "0")}`
+    numero_serie: `${prefixoMes}.${String(proximoSequencial).padStart(3, "0")}/${prefixoAno}`
   };
 }
 
@@ -251,19 +258,25 @@ async function deletarImagemPainel(idImagem) {
 
 async function deletarPainel(id) {
   const painel = await PaineisModel.buscarPainelPorId(id);
-  if (!painel) {
-    throw { status: 404, mensagem: "Painel elétrico não encontrado." };
-  }
+  if (!painel) throw { status: 404, mensagem: "Painel elétrico não encontrado." };
+
+  const Diagramas = require('./paineisDiagramas.service');
+  const diagramas = await Diagramas.listar(id);
+  for (const diagrama of diagramas) await Diagramas.remover(id, diagrama.id);
 
   const imagens = await PaineisModel.listarImagensPainel(id);
-  const deletado = await PaineisModel.deletarPainel(id);
-  if (deletado) {
-    const paths = imagens.map(imagem => imagem.imagem_path).filter(Boolean);
-    if (painel.imagem_path) paths.push(painel.imagem_path);
-    if (paths.length) await supabase.storage.from(BUCKET_PAINEIS).remove(paths);
+  const paths = [...new Set([...imagens.map(imagem => imagem.imagem_path), painel.imagem_path].filter(Boolean))];
+  for (const path of paths) {
+    const { data, error } = await supabase.storage.from(BUCKET_PAINEIS).remove([path]);
+    if (error || !data?.length) throw { status: 503, mensagem: "Não foi possível excluir uma foto na nuvem. O painel foi mantido; tente novamente. Os anexos já excluídos não serão recuperados." };
+    // Clear only the references whose cloud deletion has been confirmed, so
+    // retrying a partially completed deletion starts with the remaining files.
+    for (const imagem of imagens.filter(imagem => imagem.imagem_path === path)) await PaineisModel.deletarImagemPainel(imagem.id_imagem);
+    if (painel.imagem_path === path) await PaineisModel.atualizarImagemPainel(id, null, null);
   }
-
-  return { mensagem: "Painel elétrico excluído." };
+  const deletado = await PaineisModel.deletarPainel(id);
+  if (!deletado) throw { status: 404, mensagem: "Painel elétrico não encontrado." };
+  return { mensagem: "Diagramas, fotos e painel elétrico excluídos." };
 }
 
 module.exports = {

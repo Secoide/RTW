@@ -1,3 +1,5 @@
+import { initTourCalibracoes } from './calibracoes-tour.js';
+import { initCalibracoes } from './calibracoes-init.js';
 const TIPOS_DOCUMENTO = [
   ["PE", "PROJETO ELÉTRICO", "PRANCHAS DE PROJETO EM GERAL, ILUMINAÇÃO, TOMADAS ETC"],
   ["DE", "DIAGRAMA ELÉTRICO", "DIAGRAMAS ELÉTRICOS MULTIFILARES E UNIFILARES DOS QUADROS"],
@@ -680,6 +682,7 @@ async function gerarNumeroSeriePainel() {
     const mes = String(byId("painelData")?.value || "").slice(5, 7);
     const data = await requestJson(`${API_PAINEIS}/proximo-numero?ano=${encodeURIComponent(normalizarAnoPainel())}&mes=${encodeURIComponent(mes)}`);
     input.value = data.numero_serie || "";
+    atualizarProgressoCadastro();
   } catch (err) {
     input.value = "";
     toast("error", err.message);
@@ -697,6 +700,7 @@ async function limparFormularioPainel() {
   atualizarCampoDimensaoPersonalizada();
   byId("painelSubmitText").textContent = "Salvar painel";
   await gerarNumeroSeriePainel();
+  atualizarProgressoCadastro();
 }
 
 function preencherFormularioPainel(painel) {
@@ -719,14 +723,14 @@ function preencherFormularioPainel(painel) {
   byId("painelMontador").value = painel.montador || "";
   byId("painelLinkExterno").value = painel.link_externo || "";
   byId("painelSubmitText").textContent = "Salvar edição";
-  byId("formPainelEletrico")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  abrirCadastroPainel(true);
 }
 
 async function carregarPaineis() {
   const tbody = byId("paineisTabelaBody");
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr class="numdoc-empty-row"><td colspan="17">Carregando painéis...</td></tr>';
+  tbody.innerHTML = '<tr class="numdoc-empty-row"><td colspan="7">Carregando painéis...</td></tr>';
 
   try {
     state.paineis = await requestJson(API_PAINEIS);
@@ -734,7 +738,7 @@ async function carregarPaineis() {
     renderPaineis();
   } catch (err) {
     console.error("Erro ao carregar painéis elétricos:", err);
-    tbody.innerHTML = `<tr class="numdoc-empty-row"><td colspan="17">${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = `<tr class="numdoc-empty-row"><td colspan="7">${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -804,18 +808,8 @@ function renderFotoCardPainel(painel) {
 }
 
 function renderLinkPainel(painel) {
-  if (!painel.link_externo) return '<span class="painel-muted">Sem link</span>';
-
-  return `
-    <div class="painel-row-actions">
-      <a class="numdoc-icon-btn" href="${escapeHtml(painel.link_externo)}" target="_blank" rel="noopener" title="Abrir link externo">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-      </a>
-      <button type="button" class="numdoc-icon-btn" data-action="qr-link" title="Gerar QR Code do link">
-        <i class="fa-solid fa-qrcode"></i>
-      </button>
-    </div>
-  `;
+  const total=Number(painel.diagramas_total) || 0;
+  return '<button type="button" class="ferramenta-btn ferramenta-btn-ghost painel-doc-btn '+(total?'painel-doc-presente':'')+'" data-action="diagrams" title="'+(total?total+' diagrama(s) PDF anexado(s)':'Nenhum PDF anexado')+'">'+(total?'✓ '+total+' PDF'+(total>1?'s':''):'Sem PDF')+'</button>';
 }
 
 function renderPainelCardInfo(label, valor) {
@@ -866,16 +860,11 @@ function renderPainelCard(painel) {
           ${renderPainelCardInfo("Projetista", painel.projetista)}
           ${renderPainelCardInfo("Montador", painel.montador)}
           ${renderPainelCardInfo("ART", painel.art)}
-          ${renderPainelCardInfo("Peso kg", painel.peso_kg ?? "-")}
         </div>
 
         <footer class="painel-card-actions">
           <div class="painel-card-links">
-            ${painel.link_externo ? `
-              <button type="button" class="numdoc-icon-btn" data-action="qr-link" title="Gerar QR Code">
-                <i class="fa-solid fa-qrcode"></i>
-              </button>
-            ` : ""}
+            ${renderLinkPainel(painel)}
             ${totalFotos ? `
               <button type="button" class="numdoc-icon-btn" data-action="view-gallery" title="Visualizar galeria">
                 <i class="fa-solid fa-eye"></i>
@@ -904,12 +893,12 @@ function renderPaineisCards() {
   const cards = byId("paineisCards");
   if (!cards) return;
 
-  if (!state.paineis.length) {
+  if (!paineisFiltrados().length) {
     cards.innerHTML = '<div class="painel-cards-empty">Nenhum painel cadastrado ainda.</div>';
     return;
   }
 
-  cards.innerHTML = state.paineis.map(renderPainelCard).join("");
+  cards.innerHTML = paineisFiltrados().map(renderPainelCard).join("");
 }
 
 function aplicarVisualizacaoPaineis() {
@@ -926,8 +915,9 @@ function renderPaineis() {
   const tbody = byId("paineisTabelaBody");
   if (!tbody) return;
 
-  if (!state.paineis.length) {
-    tbody.innerHTML = '<tr class="numdoc-empty-row"><td colspan="17">Nenhum painel cadastrado ainda.</td></tr>';
+  atualizarResumoPaineis();
+  if (!paineisFiltrados().length) {
+    tbody.innerHTML = '<tr class="numdoc-empty-row"><td colspan="7">Nenhum painel cadastrado ainda.</td></tr>';
     renderPaineisCards();
     aplicarVisualizacaoPaineis();
     return;
@@ -935,23 +925,13 @@ function renderPaineis() {
 
   const focoPainel = sessionStorage.getItem("ferramentas_focus_painel");
 
-  tbody.innerHTML = state.paineis.map(painel => `
+  tbody.innerHTML = paineisFiltrados().map(painel => `
     <tr data-id="${painel.id_painel}" class="${String(painel.id_painel) === focoPainel ? "painel-row-focus" : ""}">
-      <td>${escapeHtml(painel.cliente)}</td>
-      <td>${escapeHtml(painel.atuacao_painel || "-")}</td>
-      <td>${escapeHtml(painel.art || "-")}</td>
-      <td>${escapeHtml(painel.numero_serie)}</td>
-      <td>${escapeHtml(formatarData(painel.data_registro))}</td>
-      <td>${escapeHtml(painel.tensao || "-")}</td>
-      <td>${escapeHtml(painel.frequencia || "-")}</td>
-      <td>${escapeHtml(painel.dimensoes || "-")}</td>
-      <td>${escapeHtml(painel.ano || "-")}</td>
-      <td>${escapeHtml(painel.senha || "-")}</td>
-      <td>${escapeHtml(painel.peso_kg ?? "-")}</td>
-      <td>${escapeHtml(painel.projetista || "-")}</td>
-      <td>${escapeHtml(painel.montador || "-")}</td>
-      <td>${renderLinkPainel(painel)}</td>
+      <td><strong>${escapeHtml(painel.atuacao_painel || 'Painel elétrico')}</strong><span class="painel-cell-sub">${escapeHtml(painel.cliente)} · ${escapeHtml(painel.numero_serie)}</span></td>
+      <td>${escapeHtml([painel.tensao,painel.frequencia,painel.dimensoes].filter(Boolean).join(' · ') || '—')}<span class="painel-cell-sub">${escapeHtml(formatarData(painel.data_registro))}${painel.art?' · ART '+escapeHtml(painel.art):''}</span></td>
+      <td>${escapeHtml(painel.projetista || '—')}<span class="painel-cell-sub">Montagem: ${escapeHtml(painel.montador || '—')}</span></td>
       <td>${renderChecklistPainel(painel)}</td>
+      <td>${renderLinkPainel(painel)}</td>
       <td>${renderImagemPainel(painel)}</td>
       <td>
         <div class="painel-row-actions">
@@ -984,6 +964,8 @@ async function salvarPainel(event) {
 
   const id = byId("painelEditId")?.value;
   const payload = lerFormularioPainel();
+  const salvar=byId("formPainelEletrico").querySelector('button[type="submit"]');
+  if(salvar.disabled)return;salvar.disabled=true;byId("painelCadastroErro").textContent="";
   const url = id ? `${API_PAINEIS}/${id}` : API_PAINEIS;
   const method = id ? "PUT" : "POST";
 
@@ -994,11 +976,13 @@ async function salvarPainel(event) {
     });
 
     toast("success", id ? "Painel atualizado" : "Painel cadastrado");
-    limparFormularioPainel();
+    byId("painelCadastroDialog").close();
+    await limparFormularioPainel();
     await carregarPaineis();
   } catch (err) {
     toast("error", err.message);
-  }
+    byId("painelCadastroErro").textContent=err.message;
+  } finally { salvar.disabled=false; }
 }
 
 async function atualizarChecklistPainel(row, input) {
@@ -1092,14 +1076,14 @@ async function excluirPainel(painel) {
   const confirmar = window.Swal
     ? await Swal.fire({
       title: "Excluir painel?",
-      text: `O registro ${painel.numero_serie} será removido.`,
+      text: `Serão excluídos primeiro todos os diagramas PDF e fotos da nuvem e, depois, o painel ${painel.numero_serie}. Os links e QR Codes dos diagramas deixarão de funcionar. Esta ação não pode ser desfeita.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Excluir",
+      confirmButtonText: "Excluir painel e anexos",
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#ee7722"
     })
-    : { isConfirmed: confirm(`Excluir painel ${painel.numero_serie}?`) };
+    : { isConfirmed: confirm(`Excluir todos os diagramas PDF e fotos da nuvem e, depois, o painel ${painel.numero_serie}? Os links e QR Codes deixarão de funcionar. Esta ação não pode ser desfeita.`) };
 
   if (!confirmar.isConfirmed) return;
 
@@ -1113,7 +1097,34 @@ async function excluirPainel(painel) {
   }
 }
 
+
+function paineisFiltrados(){const busca=(byId('painelBusca')?.value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return state.paineis.filter(p=>[p.cliente,p.numero_serie,p.atuacao_painel,p.projetista,p.montador].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(busca));}
+function atualizarResumoPaineis(){const n=state.paineis.length,prontos=state.paineis.filter(p=>calcularProgressoPainel(p).percentual===100).length;byId('painelResumo').innerHTML='<span><strong>'+n+'</strong> painéis registrados</span><span><strong>'+(n-prontos)+'</strong> em produção</span><span><strong>'+prontos+'</strong> concluídos</span>';byId('painelContagem').textContent=paineisFiltrados().length+' resultado(s)';}
+function atualizarProgressoCadastro(){
+ const campos=['painelCliente','painelAtuacao','painelData','painelTensao','painelFrequencia','painelDimensoes','painelProjetista','painelMontador'];
+ const preenchidos=campos.filter(id=>byId(id)?.value.trim() && (id!=='painelDimensoes'||byId(id).value!=='Personalizado'||byId('painelDimensoesCustom').value.trim())).length,percentual=Math.round(preenchidos/campos.length*100);
+ if(byId('painelCadastroProgresso'))byId('painelCadastroProgresso').value=percentual;if(byId('painelCadastroPercentual'))byId('painelCadastroPercentual').textContent=percentual+'% · '+preenchidos+'/'+campos.length;
+ const salvo=!!byId('painelEditId').value;byId('painelCadastroDiagramas').disabled=!salvo;byId('painelCadastroDiagramaAviso').textContent=salvo?'Gerencie os PDFs e gere o QR Code para o cliente.':'Disponível após salvar o painel.';
+}
+function abrirCadastroPainel(editando=false){byId('painelCadastroErro').textContent='';byId('painelCadastroTitulo').textContent=editando?'Editar painel':'Novo painel';atualizarProgressoCadastro();if(!byId('painelCadastroDialog').open)byId('painelCadastroDialog').showModal();}
+let painelDiagramasAtual=null,diagramasAtuais=[];
+const urlDocumentoSegura=url=>{try{const u=new URL(url);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}};
+async function abrirDiagramasPainel(painel){painelDiagramasAtual=painel;diagramasAtuais=[];byId('painelDiagramaForm').reset();byId('painelDiagramaCompartilhar').hidden=true;byId('painelDiagramasIdentificacao').textContent=[painel.numero_serie,painel.cliente,painel.atuacao_painel].filter(Boolean).join(' · ');byId('painelDiagramasLista').innerHTML='';byId('painelDiagramasStatus').textContent='Carregando diagramas…';if(!byId('painelDiagramasDialog').open)byId('painelDiagramasDialog').showModal();await carregarDiagramasPainel();}
+async function carregarDiagramasPainel(){const id=painelDiagramasAtual?.id_painel;if(!id)return;try{const data=await requestJson(API_PAINEIS+'/'+id+'/diagramas');if(String(painelDiagramasAtual?.id_painel)!==String(id))return;diagramasAtuais=data;const painel=state.paineis.find(p=>String(p.id_painel)===String(id));if(painel){painel.diagramas_total=data.length;renderPaineis();}renderDiagramasPainel();byId('painelDiagramasStatus').textContent='';}catch(e){byId('painelDiagramasStatus').textContent=e.message;}}
+function renderDiagramasPainel(){const legado=urlDocumentoSegura(painelDiagramasAtual?.link_externo);byId('painelDiagramasLista').innerHTML=diagramasAtuais.map(d=>'<article class="painel-pdf-item" data-diagrama="'+Number(d.id)+'"><div><strong>'+escapeHtml(d.nome)+'</strong><small>'+escapeHtml(formatarData(d.criado_em))+'</small></div><div class="painel-head-actions"><a class="ferramenta-btn ferramenta-btn-ghost" href="'+escapeHtml(urlDocumentoSegura(d.url))+'" target="_blank" rel="noopener noreferrer">Abrir PDF</a><button type="button" class="ferramenta-btn ferramenta-btn-ghost" data-pdf-action="qr">Gerar QR / Link</button><button type="button" class="ferramenta-btn ferramenta-btn-ghost painel-pdf-delete" data-pdf-action="remover">Excluir</button></div></article>').join('') || '<p class="painel-muted">Nenhum diagrama anexado. Envie o primeiro PDF acima.</p>';if(legado)byId('painelDiagramasLista').insertAdjacentHTML('beforeend','<p class="painel-muted">Documento anterior: <a target="_blank" rel="noopener noreferrer" href="'+escapeHtml(legado)+'">Abrir link já cadastrado</a></p>');}
+function compartilharDiagramaPainel(d){const url=urlDocumentoSegura(d.url);if(!url)return;const a=byId('painelDiagramaLink');a.href=url;a.textContent=url;byId('painelDiagramaCompartilhar').hidden=false;const img=byId('painelDiagramaQr');byId('painelDiagramaQrStatus').textContent='Gerando QR Code…';img.hidden=false;img.onload=()=>byId('painelDiagramaQrStatus').textContent='';img.onerror=()=>{img.hidden=true;byId('painelDiagramaQrStatus').textContent='Não foi possível carregar o QR Code. Use o link abaixo.';};img.src='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='+encodeURIComponent(url);}
+function initJanelasPaineis(){
+ byId('painelNovo').addEventListener('click',async()=>{await limparFormularioPainel();abrirCadastroPainel();});byId('painelAtualizar').addEventListener('click',carregarPaineis);byId('painelBusca').addEventListener('input',renderPaineis);
+ document.querySelectorAll('[data-painel-close]').forEach(b=>b.addEventListener('click',()=>byId(b.dataset.painelClose).close()));
+ for(const ev of ['input','change'])byId('formPainelEletrico').addEventListener(ev,atualizarProgressoCadastro);
+ byId('painelCadastroDiagramas').addEventListener('click',()=>{const p=state.paineis.find(p=>String(p.id_painel)===byId('painelEditId').value);if(p)abrirDiagramasPainel(p);});
+ byId('painelDiagramaCopiar').addEventListener('click',()=>copiarTexto(byId('painelDiagramaLink').href));
+ byId('painelDiagramaForm').addEventListener('submit',async ev=>{ev.preventDefault();const file=byId('painelDiagramaArquivo').files[0];if(!file)return;const status=byId('painelDiagramasStatus');if(file.size>20*1024*1024 || !/\.pdf$/i.test(file.name)){status.textContent='Selecione um PDF de até 20 MB.';return;}const id=painelDiagramasAtual.id_painel,button=ev.currentTarget.querySelector('button[type="submit"]'),dados=new FormData();dados.append('arquivo',file);button.disabled=true;status.textContent='Enviando PDF para a nuvem…';try{await requestJson(API_PAINEIS+'/'+id+'/diagramas',{method:'POST',body:dados});byId('painelDiagramaForm').reset();await carregarDiagramasPainel();status.textContent='Diagrama anexado. Use Gerar QR / Link para compartilhar.';}catch(e){status.textContent=e.message;}finally{button.disabled=false;}});
+ byId('painelDiagramasLista').addEventListener('click',async ev=>{const b=ev.target.closest('[data-pdf-action]');if(!b)return;const d=diagramasAtuais.find(d=>String(d.id)===b.closest('[data-diagrama]').dataset.diagrama);if(!d)return;if(b.dataset.pdfAction==='qr'){compartilharDiagramaPainel(d);return;}if(!confirm('Excluir este diagrama e o PDF na nuvem?'))return;b.disabled=true;try{await requestJson(API_PAINEIS+'/'+painelDiagramasAtual.id_painel+'/diagramas/'+d.id,{method:'DELETE'});byId('painelDiagramaCompartilhar').hidden=true;await carregarDiagramasPainel();}catch(e){byId('painelDiagramasStatus').textContent=e.message;b.disabled=false;}});
+}
+
 function initEventos() {
+  initJanelasPaineis();
   byId("formNumeracaoDocumento")?.addEventListener("submit", salvarRegistro);
   byId("btnLimparNumeracao")?.addEventListener("click", limparFormulario);
   byId("btnCopiarResultadoAtual")?.addEventListener("click", () => copiarTexto(byId("numdocResultado").value));
@@ -1171,6 +1182,7 @@ function initEventos() {
     const painel = state.paineis.find(item => String(item.id_painel) === container?.dataset.id);
     if (!painel) return;
 
+    if (button.dataset.action === "diagrams") abrirDiagramasPainel(painel);
     if (button.dataset.action === "edit-panel") preencherFormularioPainel(painel);
     if (button.dataset.action === "delete-panel") excluirPainel(painel);
     if (button.dataset.action === "qr-link") abrirQrPainel(painel.link_externo);
@@ -1197,6 +1209,7 @@ function initEventos() {
 
 export async function initFerramentas() {
   initFerramentasTabs();
+  initTourCalibracoes(initCalibracoes());
   aplicarBloqueiosFerramentas();
   if (sessionStorage.getItem("ferramentas_focus_painel")) ativarAbaFerramenta("paineis");
   popularTiposDocumento();

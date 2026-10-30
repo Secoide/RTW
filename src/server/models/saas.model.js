@@ -3,6 +3,7 @@ const connection = require("../config/db");
 const RECURSOS_PADRAO = [
   { chave: "menu.inicio", nome: "Início", tipo: "menu", rota: "/client/pages/inicio.html", ordem: 10 },
   { chave: "menu.rh", nome: "RH", tipo: "menu", rota: "/client/pages/rh.html", ordem: 20 },
+  { chave: "menu.colaborador", nome: "Colaborador", tipo: "menu", rota: "/client/pages/colaborador.html", ordem: 25 },
   { chave: "menu.programacao", nome: "Programação OS", tipo: "menu", rota: "/client/pages/programacaoOS.html", ordem: 30 },
   { chave: "menu.projetos", nome: "Projetos", tipo: "menu", rota: "/client/pages/projetos.html", ordem: 40 },
   { chave: "menu.spda", nome: "SPDA", tipo: "menu", rota: "/client/pages/spda.html", ordem: 45 },
@@ -19,7 +20,8 @@ const RECURSOS_PADRAO = [
   { chave: "menu.ia", nome: "IA 2.0", tipo: "menu", rota: "/client/pages/ia2.html", ordem: 120 },
   { chave: "menu.permissoes", nome: "Permissões", tipo: "menu", rota: "/client/pages/permissoes.html", ordem: 125 },
   { chave: "tool.numdocs", nome: "Numeração Documentos", tipo: "ferramenta", rota: "ferramentas:numdocs", ordem: 210 },
-  { chave: "tool.paineis", nome: "Registros Painel Elétrico", tipo: "ferramenta", rota: "ferramentas:paineis", ordem: 220 }
+  { chave: "tool.paineis", nome: "Registros Painel Elétrico", tipo: "ferramenta", rota: "ferramentas:paineis", ordem: 220 },
+  { chave: "tool.calibracoes", nome: "Calibrações", tipo: "ferramenta", rota: "ferramentas:calibracoes", ordem: 230 }
 ];
 
 function isMissingTableError(err) {

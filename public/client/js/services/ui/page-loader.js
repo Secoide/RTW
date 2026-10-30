@@ -1,3 +1,4 @@
+import { initColaborador } from '../../bootstrap/colaborador-init.js';
 import { initProgramacao } from "../../bootstrap/programacao-init.js";
 import { inciarRH } from "../../bootstrap/rh-init.js";
 import { initGestao } from "../../bootstrap/gestao-init.js";
@@ -40,6 +41,9 @@ export function carregarPagina(pagina, opcoes = {}) {
 
         if (pagina.includes('programacaoOS')) {
           initProgramacao();
+        }
+        if (pagina.includes('colaborador.html')) {
+          initColaborador();
         }
         if (pagina.includes('rh')) {
           inciarRH();

@@ -1,3 +1,5 @@
+import { iniciarTourPreferencias } from './user-preferences-tour.js';
+
 const STORAGE_PREFIX = "preferencias_usuario";
 
 const DEFAULT_PREFERENCES = {
@@ -8,6 +10,7 @@ const DEFAULT_PREFERENCES = {
   notificacoesProgramacao: true,
   notificacoesChat: true,
   notificacoesAlertas: true,
+  notificacoesCalibracoes: true,
   notificacoesGerais: true,
   abrirChatOnline: false,
   historicoChatDias: 10,
@@ -123,9 +126,12 @@ function criarModalSeNecessario() {
           <span>Configurações locais</span>
           <h2 id="preferenciasTitulo">Preferências do usuário</h2>
         </div>
+        <div class="preferencias-head-actions">
+        <button type="button" id="btnTourPreferencias" title="Como usar as preferências" aria-label="Iniciar tour das preferências">?</button>
         <button type="button" id="btnFecharPreferencias" title="Fechar">
           <i class="fa-solid fa-xmark"></i>
         </button>
+        </div>
       </div>
 
       <div class="preferencias-tabs" role="tablist" aria-label="Configurações do usuário">
@@ -288,6 +294,7 @@ function preencherFormulario(preferencias) {
   document.getElementById("preferenciasNotificacoes").innerHTML = [
     criarSwitch("prefNotifProgramacao", "Programação", "Recebe avisos quando a programação do dia for lançada ou alterada.", preferencias.notificacoesProgramacao),
     //criarSwitch("prefNotifChat", "Chat online", "Recebe avisos de mensagens, menções e chamadas do chat.", preferencias.notificacoesChat),
+    criarSwitch("prefNotifCalibracoes", "Notificações de calibrações", "Recebe avisos da Engenharia aos 30 dias, 15 dias e no vencimento dos equipamentos.", preferencias.notificacoesCalibracoes),
     criarSwitch("prefNotifAlertas", "Alertas importantes", "Recebe avisos de atenção, falhas e alertas do sistema.", preferencias.notificacoesAlertas),
     criarSwitch("prefNotifGerais", "Notificações gerais", "Recebe comunicados e avisos que não se encaixam nas categorias acima.", preferencias.notificacoesGerais)
   ].join("");
@@ -312,6 +319,7 @@ function lerFormulario() {
     notificacoesProgramacao: getMarcado("prefNotifProgramacao", preferenciasAtuais.notificacoesProgramacao),
     notificacoesChat: getMarcado("prefNotifChat", preferenciasAtuais.notificacoesChat),
     notificacoesAlertas: getMarcado("prefNotifAlertas", preferenciasAtuais.notificacoesAlertas),
+    notificacoesCalibracoes: getMarcado("prefNotifCalibracoes", preferenciasAtuais.notificacoesCalibracoes),
     notificacoesGerais: getMarcado("prefNotifGerais", preferenciasAtuais.notificacoesGerais),
     abrirChatOnline: getMarcado("prefAbrirChatOnline", preferenciasAtuais.abrirChatOnline),
     historicoChatDias: getNumero("prefHistoricoChatDias", preferenciasAtuais.historicoChatDias),
@@ -324,6 +332,7 @@ function abrirModalPreferencias() {
   preencherFormulario(carregarPreferencias());
   ativarAbaPreferencias("geral");
   document.getElementById("preferenciasUsuarioOverlay").classList.add("active");
+  iniciarTourPreferencias({ ativarAba: ativarAbaPreferencias, usuario: getUsuarioKey(), automatico: true });
 }
 
 function fecharModalPreferencias() {
@@ -507,6 +516,11 @@ export function initPreferenciasUsuario() {
   listenersRegistrados = true;
 
   document.addEventListener("click", (event) => {
+    if (event.target.closest("#btnTourPreferencias")) {
+      iniciarTourPreferencias({ ativarAba: ativarAbaPreferencias, usuario: getUsuarioKey() });
+      return;
+    }
+
     const tab = event.target.closest(".preferencias-tab");
     if (tab) {
       ativarAbaPreferencias(tab.dataset.prefTab);

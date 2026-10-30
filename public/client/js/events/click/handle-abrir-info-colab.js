@@ -90,7 +90,9 @@ export function initAbrirInfoColabClick() {
 }
 
 // ABRIR Form Colaborador com os dados do colaborador clicado
-export async function get_carregarPerfilUsuario(funcId) {
+export async function get_carregarPerfilUsuario(funcId, opcoes = {}) {
+    const destinoOriginal = opcoes.destino ? document.querySelector(opcoes.destino) : null;
+    const destinoValido = () => !opcoes.destino || (destinoOriginal?.isConnected && document.querySelector(opcoes.destino) === destinoOriginal);
     try {
 
         initColabForm();
@@ -119,6 +121,7 @@ export async function get_carregarPerfilUsuario(funcId) {
         }
 
         const dados = await response.json();
+        if (!destinoValido()) return null;
 
         if (!dados || !dados.id) {
             alert("Colaborador nÃ£o encontrado.");
@@ -126,11 +129,14 @@ export async function get_carregarPerfilUsuario(funcId) {
         }
 
         // ðŸ”¹ 2 - Carregar HTML do formulÃ¡rio como Promise
-        await carregarFormulario();
+        if (!opcoes.destino) document.getElementById("colaborador-perfil")?.replaceChildren();
+        await carregarFormulario(opcoes.destino);
+        if (!destinoValido()) return null;
 
         // ðŸ”¹ 3 - Preencher combobox setor
         const $wrap = $('#formColaboradorProfissional');
         await preencherCbxSetor($wrap);
+        if (!destinoValido()) return null;
 
 
         // ðŸ”¹ 4 - Ajustar painÃ©is
@@ -182,9 +188,8 @@ export async function get_carregarPerfilUsuario(funcId) {
         $('#selectSetor').val(dados.setor);
 
         await preencherCbxCargo(dados.setor, $wrap)
-        setTimeout(() => {
-            $('#selectCargo').val(dados.cargo);
-        }, 100);
+        if (!destinoValido()) return null;
+        $('#selectCargo').val(dados.cargo);
 
         initMaleta();
         preencherTabelaAtestar(dados.id);
@@ -203,10 +208,10 @@ export async function get_carregarPerfilUsuario(funcId) {
     }
 }
 
-function carregarFormulario() {
+function carregarFormulario(destino = "#form_cadColab") {
     return new Promise((resolve, reject) => {
 
-        $('#form_cadColab')
+        $(destino)
             .empty()
             .load('../html/forms/cadastrocolaborador.html', function (response, status) {
 

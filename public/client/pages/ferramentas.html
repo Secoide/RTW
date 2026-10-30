@@ -1,20 +1,21 @@
 <main id="ferramentas">
   
   <nav class="ferramentas-tabs" aria-label="Ferramentas disponíveis">
-    <button type="button" class="ferramentas-tab active" data-tool-tab="numdocs" data-feature="tool.numdocs">
-      <i class="fa-solid fa-file-signature"></i>
-      <span>Numeração Documentos</span>
-    </button>
-    <button type="button" class="ferramentas-tab" data-tool-tab="paineis" data-feature="tool.paineis">
+    <button type="button" class="ferramentas-tab active" data-tool-tab="calibracoes" data-permission="menu.ferramentas" data-feature="tool.calibracoes"><i class="fa-solid fa-gauge-high"></i><span>Calibrações</span></button>
+    <button type="button" class="ferramentas-tab" data-tool-tab="paineis" data-permission="menu.ferramentas" data-feature="tool.paineis">
       <i class="fa-solid fa-table-list"></i>
       <span>Registros Painel Elétrico</span>
     </button>
+    <button type="button" class="ferramentas-tab" data-tool-tab="numdocs" data-permission="menu.ferramentas" data-feature="tool.numdocs">
+      <i class="fa-solid fa-file-signature"></i>
+      <span>Numeração Documentos</span>
+    </button>
   </nav>
 
-  <section class="ferramenta-card ferramenta-numdocs ferramentas-tool-panel active" data-tool-panel="numdocs">
+  <section class="ferramenta-card ferramenta-numdocs ferramentas-tool-panel" data-tool-panel="numdocs">
     <div class="ferramenta-card-head">
       <div>
-        <span>Primeira ferramenta</span>
+        <span>Padronização de arquivos</span>
         <h3>Numeração de documentos</h3>
       </div>
       <button type="button" id="btnLimparNumeracao" class="ferramenta-btn ferramenta-btn-ghost">
@@ -118,18 +119,72 @@
   </section>
 
   <section class="ferramenta-card ferramenta-paineis ferramentas-tool-panel" data-tool-panel="paineis">
-    <div class="ferramenta-card-head">
-      <div>
-        <span>Controle de produção</span>
-        <h3>Registros Painel Elétrico</h3>
-      </div>
-      <button type="button" id="btnLimparPainel" class="ferramenta-btn ferramenta-btn-ghost">
-        <i class="fa-solid fa-eraser"></i>
-        <span>Limpar campos</span>
+    <div class="ferramenta-card-head painel-page-head"><div class="painel-page-title"><h3>Painéis elétricos</h3><p>Cadastro, produção e documentação em um só lugar.</p></div><div class="painel-head-actions"><button type="button" id="painelAtualizar" class="ferramenta-btn ferramenta-btn-ghost">Atualizar</button><button type="button" id="painelNovo" class="ferramenta-btn ferramenta-btn-primary">+ Novo painel</button></div></div>
+    <div id="painelResumo" class="painel-resumo" aria-live="polite"></div>
+    <div class="painel-search-row"><label><span class="cal-sr">Buscar painel</span><input id="painelBusca" type="search" placeholder="Buscar cliente, série, atuação ou responsável…"></label><span id="painelContagem"></span></div>
+
+
+
+    <div class="painel-view-toolbar" aria-label="Modo de visualização dos painéis">
+      <button type="button" class="painel-view-btn active" data-painel-view="lista" title="Visualizar em lista">
+        <i class="fa-solid fa-list"></i>
+        <span>Lista</span>
+      </button>
+      <button type="button" class="painel-view-btn" data-painel-view="cards" title="Visualizar em cards">
+        <i class="fa-solid fa-grip"></i>
+        <span>Cards</span>
       </button>
     </div>
 
-    <form id="formPainelEletrico" class="painel-form" autocomplete="off">
+    <div class="numdoc-table-wrap painel-table-wrap">
+      <table class="numdoc-table painel-table">
+        <thead><tr><th>Painel / Cliente</th><th>Dados técnicos</th><th>Responsáveis</th><th>Produção</th><th>Diagrama</th><th>Fotos</th><th>Ações</th></tr></thead>
+        <tbody id="paineisTabelaBody">
+          <tr class="numdoc-empty-row">
+            <td colspan="7">Nenhum painel cadastrado ainda.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="paineisCards" class="painel-cards-view" hidden></div>
+  </section>
+
+
+  <section id="calibracoes" class="ferramenta-card ferramentas-tool-panel active" data-tool-panel="calibracoes" aria-label="Controle de calibrações">
+    <header class="cal-header"><div><small>Equipamentos de medição</small><h3>Calibrações</h3></div><div class="cal-actions"><button type="button" id="cal-tour-help" class="cal-btn cal-tour-help" title="Como usar Calibrações" aria-label="Abrir tour de Calibrações">?</button><button type="button" data-cal-action="importar" class="cal-btn">Importar planilha de referência</button><button type="button" data-cal-action="atualizar" class="cal-btn" title="Atualizar lista">Atualizar</button><button type="button" data-cal-action="novo" class="cal-btn cal-primary">+ Equipamento</button></div></header>
+    <div id="cal-resumo" class="cal-resumo" aria-label="Resumo dos vencimentos"></div>
+    <div class="cal-filters"><label class="cal-search"><span class="cal-sr">Buscar equipamento</span><input id="cal-busca" type="search" placeholder="Buscar nome, modelo, série ou código…"></label><label><span class="cal-sr">Situação</span><select id="cal-filtro"><option value="todos">Todas as situações</option><option value="vencida">Vencidas</option><option value="proxima">Vencem em até 30 dias</option><option value="regular">Em dia</option><option value="pendente">Sem validade informada</option><option value="arquivados">Arquivados</option></select></label><span id="cal-contagem"></span></div>
+    <p id="cal-mensagem" class="cal-message" role="status" aria-live="polite"></p>
+    <div class="cal-workspace"><div id="cal-cards" class="cal-cards" aria-label="Equipamentos"></div><aside id="cal-inspector" class="cal-inspector"><div class="cal-empty">Selecione um equipamento para consultar os certificados e o histórico.</div></aside></div>
+    <section class="cal-timeline" aria-labelledby="cal-timeline-title">
+      <header class="cal-timeline-head"><div><h4 id="cal-timeline-title">Calendário de calibrações</h4><small>Último registro por equipamento · ordem alfabética</small></div><div class="cal-timeline-controls"><span class="cal-timeline-legend"><span><i class="cal-legend-start"></i>Calibração</span><span><i class="cal-legend-end"></i>Vencimento</span></span><label for="cal-timeline-year">Ano <select id="cal-timeline-year" aria-label="Ano do calendário de calibrações"></select></label><button type="button" class="cal-btn" data-cal-action="imprimir-calendario" title="Imprimir ou salvar calendário em PDF">Imprimir / PDF</button><button type="button" id="cal-timeline-expand" class="cal-btn" data-cal-action="expandir-calendario" aria-expanded="false" aria-controls="cal-timeline-scroll" title="Expandir calendário">⛶ Expandir</button></div></header>
+      <div id="cal-timeline-scroll" class="cal-timeline-scroll"><div id="cal-timeline-chart" class="cal-timeline-chart" aria-label="Períodos mensais de calibração dos equipamentos"></div></div>
+    </section>
+    <footer class="cal-foot">As datas da planilha são registros de controle. Os certificados PDF são anexados separadamente.</footer>
+
+    <dialog id="cal-equip-dialog" class="cal-dialog" aria-labelledby="cal-equip-title"><form id="cal-equip-form"><header><div><small>Cadastro</small><h3 id="cal-equip-title">Novo equipamento</h3></div><button type="button" data-cal-close class="cal-btn" aria-label="Fechar">×</button></header><input type="hidden" name="id"><div class="cal-form-grid">
+      <label class="cal-wide">Equipamento<input name="nome" maxlength="180" required placeholder="Ex.: Alicate terrômetro"></label>
+      <label>Modelo<input name="modelo" maxlength="180"></label><label>Fabricante<input name="fabricante" maxlength="120"></label>
+      <label>Número de série<input name="numero_serie" maxlength="120"></label><label>Código interno<input name="codigo" maxlength="80"></label>
+      <label class="cal-wide">Desenho do equipamento<select name="tipo"><option value="">Automático pelo nome</option><option value="multimetro">Multímetro</option><option value="alicate">Alicate de medição</option><option value="energia">Analisador de energia</option><option value="luximetro">Luxímetro</option><option value="isolamento">Megôhmetro / Hipot</option><option value="resistencia">Terrômetro / Ohmímetro</option><option value="termico">Câmera térmica</option><option value="temperatura">Termohigrômetro</option><option value="transformacao">Relação de transformação</option><option value="tensao">Detector de tensão</option><option value="fase">Fasímetro</option><option value="luva">Luva isolante</option><option value="aterramento">Aterramento temporário</option><option value="outro">Outro</option></select></label>
+      <label class="cal-wide">Observações<textarea name="observacoes" maxlength="5000" rows="3"></textarea></label>
+      <label class="cal-wide cal-check" id="cal-ativo-wrap" hidden><input type="checkbox" name="ativo" checked>Equipamento ativo</label>
+    </div><p class="cal-form-error" role="alert"></p><footer><button type="button" data-cal-close class="cal-btn">Cancelar</button><button type="submit" class="cal-btn cal-primary">Salvar equipamento</button></footer></form></dialog>
+
+    <dialog id="cal-cert-dialog" class="cal-dialog" aria-labelledby="cal-cert-title"><form id="cal-cert-form"><header><div><small>Histórico de calibração</small><h3 id="cal-cert-title">Adicionar certificado</h3></div><button type="button" data-cal-close class="cal-btn" aria-label="Fechar">×</button></header><input type="hidden" name="equipamento_id"><div class="cal-form-grid">
+      <label>Data da calibração<input type="date" name="data_calibracao" required></label><label>Data de vencimento<input type="date" name="data_recalibracao" required><small>Preenchida com um ano a mais. Pode ser ajustada.</small></label>
+      <label>Número do certificado<input name="numero" maxlength="120"></label><label>Laboratório<input name="laboratorio" maxlength="180"></label>
+      <label class="cal-wide cal-file">Anexar certificado PDF<input name="arquivo" type="file" accept="application/pdf,.pdf"><small>PDF de até 20 MB, armazenado na nuvem.</small></label>
+      <label class="cal-wide">Ou link do PDF já na nuvem<input name="link_externo" type="url" maxlength="2048" placeholder="https://…"><small>Use um link que permita ao cliente visualizar o documento.</small></label>
+      <label class="cal-wide">Observações<textarea name="observacoes" maxlength="5000" rows="2"></textarea></label>
+    </div><p class="cal-form-error" role="alert"></p><footer><button type="button" data-cal-close class="cal-btn">Cancelar</button><button type="submit" class="cal-btn cal-primary">Adicionar ao histórico</button></footer></form></dialog>
+
+    <dialog id="cal-share-dialog" class="cal-dialog cal-share-dialog" aria-labelledby="cal-share-title"><header><div><small>Acesso do cliente</small><h3 id="cal-share-title">Certificado de calibração</h3></div><button type="button" data-cal-close class="cal-btn" aria-label="Fechar">×</button></header><div class="cal-share-content"><p>Quem tiver este link poderá abrir somente este certificado, sem login.</p><img id="cal-qr" width="240" height="240" alt="QR Code do certificado"><p id="cal-qr-status" role="status"></p><a id="cal-public-link" target="_blank" rel="noopener noreferrer"></a><p id="cal-public-notice" hidden>Este é um link público do Supabase. Ele pode ser compartilhado para visualizar o PDF e permanece acessível enquanto o arquivo estiver no bucket público.</p><p id="cal-local-link" hidden>Para acesso fora da empresa, gere o link pelo endereço público do ConnectPear.</p><div class="cal-actions"><button type="button" data-cal-action="copiar" class="cal-btn">Copiar link</button><button type="button" data-cal-action="baixar-qr" class="cal-btn">Abrir QR Code</button><button type="button" data-cal-action="revogar-atual" class="cal-btn cal-danger">Revogar link</button></div></div></dialog>
+  </section>
+
+
+  <dialog id="painelCadastroDialog" class="painel-dialog" aria-labelledby="painelCadastroTitulo"><header class="painel-dialog-head"><div><small>REGISTRO DO PAINEL</small><h3 id="painelCadastroTitulo">Novo painel</h3></div><button type="button" class="ferramenta-btn ferramenta-btn-ghost" data-painel-close="painelCadastroDialog" aria-label="Fechar cadastro">×</button></header>    <form id="formPainelEletrico" class="painel-form" autocomplete="off">
       <input type="hidden" id="painelEditId">
 
       <label class="numdoc-field painel-field-large painel-field-main">
@@ -141,7 +196,7 @@
 
       <label class="numdoc-field">
         <span>Nº de série</span>
-        <input id="painelNumeroSerie" type="text" placeholder="26.09-001" readonly required>
+        <input id="painelNumeroSerie" type="text" placeholder="10.001/26" readonly required>
       </label>
 
       <label class="numdoc-field">
@@ -167,10 +222,7 @@
         </select>
       </label>
 
-      <label class="numdoc-field painel-field-optional">
-        <span>Peso opcional</span>
-        <input id="painelPeso" type="number" min="0" step="0.01" placeholder="0,00">
-      </label>
+      <input id="painelPeso" type="hidden">
 
       <label class="numdoc-field">
         <span>Projetista</span>
@@ -213,69 +265,18 @@
         <input id="painelDimensoesCustom" type="text" placeholder="LxAxP">
       </label>
 
-      <label class="numdoc-field painel-link-field painel-field-dashed">
-        <span>Link externo</span>
-        <input id="painelLinkExterno" type="url" placeholder="https://...">
-      </label>
+      <input id="painelLinkExterno" type="hidden"><div class="numdoc-field painel-diagrama-field"><span>Documentação</span><button type="button" id="painelCadastroDiagramas" class="ferramenta-btn ferramenta-btn-ghost">Diagramas elétricos · PDF / QR</button><small id="painelCadastroDiagramaAviso">Disponível após salvar o painel.</small></div>
 
-      <label class="numdoc-field painel-field-dashed">
-        <span>Senha</span>
-        <input id="painelSenha" type="text" placeholder="Opcional">
-      </label>
+      <input id="painelSenha" type="hidden">
 
-      <div class="numdoc-form-actions painel-form-actions">
+      <p id="painelCadastroErro" class="painel-cadastro-erro" role="alert"></p><div class="painel-cadastro-progress"><div><span>Informações preenchidas</span><strong id="painelCadastroPercentual">0%</strong></div><progress id="painelCadastroProgresso" value="0" max="100" aria-label="Progresso de preenchimento"></progress><small>ART é opcional.</small></div><div class="numdoc-form-actions painel-form-actions"><button type="button" class="ferramenta-btn ferramenta-btn-ghost" data-painel-close="painelCadastroDialog">Cancelar</button>
         <button type="submit" class="ferramenta-btn ferramenta-btn-primary">
           <i class="fa-solid fa-floppy-disk"></i>
           <span id="painelSubmitText">Salvar painel</span>
         </button>
       </div>
-    </form>
-
-    <div class="painel-view-toolbar" aria-label="Modo de visualização dos painéis">
-      <button type="button" class="painel-view-btn active" data-painel-view="lista" title="Visualizar em lista">
-        <i class="fa-solid fa-list"></i>
-        <span>Lista</span>
-      </button>
-      <button type="button" class="painel-view-btn" data-painel-view="cards" title="Visualizar em cards">
-        <i class="fa-solid fa-grip"></i>
-        <span>Cards</span>
-      </button>
-    </div>
-
-    <div class="numdoc-table-wrap painel-table-wrap">
-      <table class="numdoc-table painel-table">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Atuação</th>
-            <th>ART</th>
-            <th>Nº série</th>
-            <th>Data</th>
-            <th>Tensão</th>
-            <th>Freq.</th>
-            <th>Dimensões</th>
-            <th>Ano</th>
-            <th>Senha</th>
-            <th>Peso kg</th>
-            <th>Projetista</th>
-            <th>Montador</th>
-            <th>Link externo</th>
-            <th>Checklist</th>
-            <th>Imagem</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="paineisTabelaBody">
-          <tr class="numdoc-empty-row">
-            <td colspan="17">Nenhum painel cadastrado ainda.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div id="paineisCards" class="painel-cards-view" hidden></div>
-  </section>
-
+    </form><footer class="painel-dialog-bottom"><button type="button" id="btnLimparPainel" class="ferramenta-btn ferramenta-btn-ghost">Limpar campos</button></footer></dialog>
+  <dialog id="painelDiagramasDialog" class="painel-dialog painel-diagramas-dialog" aria-labelledby="painelDiagramasTitulo"><header class="painel-dialog-head"><div><small>DOCUMENTAÇÃO DO PAINEL</small><h3 id="painelDiagramasTitulo">Diagramas elétricos</h3><p id="painelDiagramasIdentificacao"></p></div><button type="button" class="ferramenta-btn ferramenta-btn-ghost" data-painel-close="painelDiagramasDialog" aria-label="Fechar diagramas">×</button></header><div class="painel-dialog-content"><form id="painelDiagramaForm" class="painel-pdf-upload"><label>Diagrama elétrico em PDF<input id="painelDiagramaArquivo" type="file" accept="application/pdf,.pdf" required><small>Até 20 MB. O cliente acessa somente o PDF pelo link público.</small></label><button type="submit" class="ferramenta-btn ferramenta-btn-primary">Anexar PDF</button></form><p id="painelDiagramasStatus" role="status"></p><div id="painelDiagramasLista"></div><section id="painelDiagramaCompartilhar" class="painel-diagrama-share" hidden><h4>Compartilhar diagrama</h4><p>Quem tiver o link poderá visualizar este documento sem login.</p><img id="painelDiagramaQr" width="180" height="180" alt="QR Code do diagrama"><small id="painelDiagramaQrStatus" role="status"></small><a id="painelDiagramaLink" target="_blank" rel="noopener noreferrer"></a><button type="button" id="painelDiagramaCopiar" class="ferramenta-btn ferramenta-btn-ghost">Copiar link</button></section></div></dialog>
   <div id="painelQrModal" class="painel-qr-modal" aria-hidden="true">
     <div class="painel-qr-card" role="dialog" aria-modal="true" aria-labelledby="painelQrTitulo">
       <button type="button" id="painelQrFechar" class="numdoc-icon-btn painel-qr-close" title="Fechar">

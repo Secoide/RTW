@@ -52,45 +52,40 @@ async function buscarNomeUsuario(idUsuario) {
   return rows[0]?.nome || "Usuário não identificado";
 }
 
-async function buscarGerentesEngenharia() {
+// A mesma regra define os destinatários e quem pode decidir a solicitação.
+const criterioAprovadorResponsavelOS = `(
+  f.id = 999
+  OR LOWER(TRIM(IFNULL(c.cargo, ''))) = 'diretor'
+  OR LOWER(IFNULL(c.cargo, '')) LIKE '%gerente%engenharia%'
+  OR (
+    LOWER(IFNULL(c.cargo, '')) LIKE '%gerente%'
+    AND LOWER(IFNULL(s.categoria, '')) LIKE '%engenharia%'
+  )
+  OR IFNULL(c.nivel_acesso, 0) = 99
+  OR IFNULL(s.nivel_acesso, 0) = 99
+)`;
+
+async function buscarAprovadoresResponsavelOS() {
   const [rows] = await connection.query(`
     SELECT DISTINCT f.id, f.nome
     FROM funcionarios f
     LEFT JOIN tb_cargos c ON f.cargo = c.id
     LEFT JOIN tb_setores s ON c.idsetor = s.id_catnvl
-    WHERE f.id <> 999
-      AND (
-        LOWER(IFNULL(c.cargo, '')) LIKE '%gerente%engenharia%'
-        OR LOWER(IFNULL(c.cargo, '')) = 'gerente de engenharia'
-        OR (
-          LOWER(IFNULL(c.cargo, '')) LIKE '%gerente%'
-          AND LOWER(IFNULL(s.categoria, '')) LIKE '%engenharia%'
-        )
-        OR IFNULL(c.nivel_acesso, 0) = 99
-        OR IFNULL(s.nivel_acesso, 0) = 99
-      )
+    WHERE ${criterioAprovadorResponsavelOS}
   `);
 
   return rows;
 }
 
 async function usuarioPodeAprovarResponsavelOS(idUsuario, role) {
-  if (Number(role) === 99) return true;
+  if (Number(idUsuario) === 999 || Number(role) === 99) return true;
 
   const [rows] = await connection.query(`
     SELECT f.id
     FROM funcionarios f
     LEFT JOIN tb_cargos c ON f.cargo = c.id
     LEFT JOIN tb_setores s ON c.idsetor = s.id_catnvl
-    WHERE f.id = ?
-      AND (
-        LOWER(IFNULL(c.cargo, '')) LIKE '%gerente%engenharia%'
-        OR LOWER(IFNULL(c.cargo, '')) = 'gerente de engenharia'
-        OR (
-          LOWER(IFNULL(c.cargo, '')) LIKE '%gerente%'
-          AND LOWER(IFNULL(s.categoria, '')) LIKE '%engenharia%'
-        )
-      )
+    WHERE f.id = ? AND ${criterioAprovadorResponsavelOS}
     LIMIT 1
   `, [idUsuario]);
 
@@ -195,13 +190,13 @@ async function solicitarResponsavelOS({ idFuncionario, valorSolicitado, solicita
 
   await NotificacoesModel.desativarPorReferencia(`aprovacao:${idAprovacao}`);
 
-  const gerentes = await buscarGerentesEngenharia();
+  const aprovadores = await buscarAprovadoresResponsavelOS();
   const solicitante = await buscarNomeUsuario(solicitadoPor);
   const mensagem = `${funcionario.nome} precisa de aprovação para ${solicitado ? "entrar" : "sair"} como Gestor de Obras. Solicitado por: ${solicitante}.`;
 
-  for (const gerente of gerentes) {
+  for (const aprovador of aprovadores) {
     await NotificacoesModel.criarParaUsuario({
-      idUsuario: gerente.id,
+      idUsuario: aprovador.id,
       tipo: "aprovacao_responsavel_os",
       referencia: `aprovacao:${idAprovacao}`,
       mensagem
@@ -220,7 +215,7 @@ async function decidirResponsavelOS({ idAprovacao, aprovado, aprovadorId, aprova
 
   const podeAprovar = await usuarioPodeAprovarResponsavelOS(aprovadorId, aprovadorRole);
   if (!podeAprovar) {
-    const erro = new Error("Apenas o Gerente de Engenharia pode aprovar esta solicitação.");
+    const erro = new Error("Apenas o Gerente de Engenharia, o Diretor ou um administrador pode aprovar esta solicitação.");
     erro.status = 403;
     throw erro;
   }

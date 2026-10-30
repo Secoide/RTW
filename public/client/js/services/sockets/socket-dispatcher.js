@@ -1,4 +1,4 @@
-import { atualizarUsuariosOnline, atualizarListaOnline, receberMensagemChat, receberErroChat } from "./socket-users.js";
+import { atualizarUsuariosOnline, atualizarListaOnline, receberMensagemChat, receberReacaoChat, receberErroChat } from "./socket-users.js";
 import { atualizarUI } from "./socket-notifications.js";
 import {
     handleAlocarColaborador,
@@ -59,6 +59,9 @@ export function handleSocketMessage(data, socket) {
             break;
         case "mensagem_chat":
             receberMensagemChat(data);
+            break;
+        case "reacao_chat":
+            receberReacaoChat(data);
             break;
         case "erro_chat":
             receberErroChat(data);

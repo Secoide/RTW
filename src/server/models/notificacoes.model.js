@@ -87,7 +87,7 @@ async function criarParaUsuario({ idUsuario, tipo, referencia, mensagem }) {
   };
 }
 
-async function listarNaoLidas(idUsuario) {
+async function listarNaoLidas(idUsuario, prefixoCalibracao = 'cal:nenhum:%') {
   await garantirTabelas();
 
   const [rows] = await connection.query(`
@@ -104,9 +104,10 @@ async function listarNaoLidas(idUsuario) {
     WHERE n.ativo = 1
       AND (n.id_destinatario IS NULL OR n.id_destinatario = ?)
       AND l.id_notificacao IS NULL
+      AND (n.tipo <> 'calibracao_vencimento' OR n.referencia LIKE ?)
     ORDER BY n.criado_em DESC
     LIMIT 50
-  `, [idUsuario, idUsuario]);
+  `, [idUsuario, idUsuario, prefixoCalibracao]);
 
   return rows;
 }
@@ -148,6 +149,7 @@ async function desativarPorReferencia(referencia) {
 }
 
 module.exports = {
+  garantirTabelas,
   criarGlobal,
   criarParaUsuario,
   listarNaoLidas,

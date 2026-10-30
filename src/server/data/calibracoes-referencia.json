@@ -1,0 +1,212 @@
+[
+  {
+    "nome": "Fasímetro instrutherm",
+    "modelo": "SPI-210",
+    "numero_serie": "1131019130",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2024-03-13",
+    "recalibracao": "2025-03-13",
+    "linha_origem": 3
+  },
+  {
+    "nome": "Aterramento temporário",
+    "modelo": "P/ linha áerea até 34,5kV",
+    "numero_serie": "18011",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2024-08-01",
+    "recalibracao": "2025-08-01",
+    "linha_origem": 4
+  },
+  {
+    "nome": "Alicate terrometro (Prova 5600)",
+    "modelo": "5600",
+    "numero_serie": "2410985",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2026-05-11",
+    "recalibracao": "2027-05-11",
+    "linha_origem": 5
+  },
+  {
+    "nome": "Analisador de Energia (AE-200)",
+    "modelo": "AE-200",
+    "numero_serie": "19010801300526",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2026-05-11",
+    "recalibracao": "2027-05-11",
+    "linha_origem": 6
+  },
+  {
+    "nome": "Analisador de energia (P1000R)",
+    "modelo": "P1000R",
+    "numero_serie": "",
+    "fabricante": "ISSO DMI",
+    "codigo": "8740",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 7
+  },
+  {
+    "nome": "Luxímetro Digital Minipa",
+    "modelo": "MLM-1011",
+    "numero_serie": "2816823",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2026-05-11",
+    "recalibracao": "2027-05-11",
+    "linha_origem": 8
+  },
+  {
+    "nome": "Megohmetro digital (MI-1000A)",
+    "modelo": "MI-1000A",
+    "numero_serie": "",
+    "fabricante": "MINIPA",
+    "codigo": "7179",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 9
+  },
+  {
+    "nome": "Milliomimetro Digital (Milliohm 1)",
+    "modelo": "INSTRUM MILLIOHM 1",
+    "numero_serie": "910151-26095",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2026-04-27",
+    "recalibracao": "2027-04-27",
+    "linha_origem": 10
+  },
+  {
+    "nome": "Terrômetro digital INSTRUTHERM",
+    "modelo": "MRT-1000",
+    "numero_serie": "295231",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2026-04-27",
+    "recalibracao": "2027-04-27",
+    "linha_origem": 11
+  },
+  {
+    "nome": "Analisador de energia (P500R)",
+    "modelo": "DMI P500R BLACK BOX",
+    "numero_serie": "219-A4A-286-395",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2025-08-27",
+    "recalibracao": "2026-08-27",
+    "linha_origem": 12
+  },
+  {
+    "nome": "Med. Dig. rel. de transformação",
+    "modelo": "(TTR 2000 i)",
+    "numero_serie": "IN 428080-33540",
+    "fabricante": "INSTRUM",
+    "codigo": "7669",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 13
+  },
+  {
+    "nome": "Megôhmetro digital (DGM 10 Ki)",
+    "modelo": "DMG 10 Ki",
+    "numero_serie": "IN 428080-33541",
+    "fabricante": "INSTRUM",
+    "codigo": "7671",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 14
+  },
+  {
+    "nome": "Micro-ohmimetro (MICROHM 10 i)",
+    "modelo": "MICROHM 10 i",
+    "numero_serie": "IN 428080-33542",
+    "fabricante": "INSTRUM",
+    "codigo": "7672",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 15
+  },
+  {
+    "nome": "Termohigrometro (MT241A)",
+    "modelo": "MT 241A",
+    "numero_serie": "3989940",
+    "fabricante": "MINIPA",
+    "codigo": "7674",
+    "calibracao": "2025-08-27",
+    "recalibracao": "2026-08-27",
+    "linha_origem": 16
+  },
+  {
+    "nome": "HIPOT (HI 5KV)",
+    "modelo": "HY 5kV - 10mA CA",
+    "numero_serie": "IN 428080-33635",
+    "fabricante": "INSTRUM",
+    "codigo": "7667",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 17
+  },
+  {
+    "nome": "Detector de tensão (DMU-35)",
+    "modelo": "DMU-35",
+    "numero_serie": "18013",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2025-08-27",
+    "recalibracao": "2026-08-27",
+    "linha_origem": 18
+  },
+  {
+    "nome": "Câmera térmica Flir",
+    "modelo": "E54",
+    "numero_serie": "84512016",
+    "fabricante": "FLIR",
+    "codigo": "7677",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 19
+  },
+  {
+    "nome": "Milliomimetro Digital (MTR-2001)",
+    "modelo": "MTR-2001",
+    "numero_serie": "",
+    "fabricante": "MINIPA",
+    "codigo": "10948",
+    "calibracao": "2026-09-04",
+    "recalibracao": "2027-09-04",
+    "linha_origem": 20
+  },
+  {
+    "nome": "Luva Isolante Classe 00",
+    "modelo": "Orion",
+    "numero_serie": "0607",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2025-11-26",
+    "recalibracao": "2026-11-26",
+    "linha_origem": 22
+  },
+  {
+    "nome": "Luva Isolante Classe 2",
+    "modelo": "Orion",
+    "numero_serie": "0809",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2025-11-26",
+    "recalibracao": "2026-11-26",
+    "linha_origem": 23
+  },
+  {
+    "nome": "Luva Isolante Classe 00",
+    "modelo": "Orion",
+    "numero_serie": "1011",
+    "fabricante": "",
+    "codigo": "",
+    "calibracao": "2025-12-01",
+    "recalibracao": "2026-12-01",
+    "linha_origem": 24
+  }
+]

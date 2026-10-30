@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="/css/colaborador.css">
+<main id="colaborador" class="colaborador-page">
+  <header class="colaborador-header">
+    <div><span class="colaborador-kicker">PESSOAS · PERFIL INDIVIDUAL</span><h1>Colaborador</h1></div>
+    <div class="colaborador-selecao">
+      <label><span class="sr-only">Buscar colaborador</span><input id="colaborador-busca" type="search" placeholder="Buscar nome, cargo ou setor" autocomplete="off"></label>
+      <label><span class="sr-only">Selecionar colaborador</span><select id="colaborador-selecao" aria-label="Selecionar colaborador"><option value="">Carregando colaboradores…</option></select></label>
+      <button type="button" id="colaborador-imprimir" title="Imprimir ou salvar em PDF · A4 horizontal" disabled><i class="fa-solid fa-print" aria-hidden="true"></i><span>Imprimir / PDF</span></button>
+      <button type="button" id="colaborador-atualizar" title="Atualizar dados"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i><span>Atualizar</span></button>
+    </div>
+  </header>
+  <p id="colaborador-status" class="colaborador-status" role="status" aria-live="polite">Carregando colaboradores…</p>
+  <div id="colaborador-perfil"></div>
+</main>

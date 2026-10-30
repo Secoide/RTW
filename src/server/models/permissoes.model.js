@@ -5,6 +5,7 @@ let tabelasGarantidas = false;
 const RECURSOS_PADRAO = [
   ['menu.inicio', 'Início', 'fa-house', 'Acesso à página inicial'],
   ['menu.rh', 'RH', 'fa-stethoscope', 'Tabela e perfil dos colaboradores'],
+  ['menu.colaborador', 'Colaborador', 'fa-address-card', 'Painel individual com resumo anual e indicadores de OS'],
   ['menu.programacao', 'Programação OS', 'fa-clock', 'Programação das ordens de serviço'],
   ['menu.projetos', 'Projetos', 'fa-briefcase', 'Projetos operacionais'],
   ['menu.spda', 'SPDA', 'fa-cloud-bolt', 'Diagramas e registros SPDA'],

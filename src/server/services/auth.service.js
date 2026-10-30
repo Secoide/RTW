@@ -32,25 +32,20 @@ async function login(username, password, options = {}) {
     return { sucesso: false, mensagem: 'Usuário ou senha incorretos' };
   }
 
-  const empresaSelecionadaId = Number(options.empresaSaasId || 0);
   const isAdminGlobal = Number(usuario.id) === ID_ADMIN_GLOBAL;
-  const saas = isAdminGlobal && empresaSelecionadaId
-    ? await SaasService.buscarContextoEmpresaAdmin(empresaSelecionadaId)
+  const saas = isAdminGlobal
+    ? await SaasService.buscarContextoRTW()
     : await SaasService.buscarContextoUsuario(usuario.id);
-
-  if (isAdminGlobal && !empresaSelecionadaId) {
-    return {
-      sucesso: false,
-      requerEmpresa: true,
-      mensagem: 'Selecione a empresa que deseja acessar.'
-    };
-  }
 
   if (!saas.modo_saas || !saas.empresa) {
     return {
       sucesso: false,
       mensagem: 'Seu usuário ainda não está associado a uma empresa. Entre em contato com o suporte ConnectPear para avaliação e vínculo com a empresa correspondente.'
     };
+  }
+
+  if (!['EMP001', 'RTW'].includes(String(saas.empresa.codigo || '').trim().toUpperCase())) {
+    return { sucesso: false, mensagem: 'O acesso está disponível somente para a empresa RTW no momento.' };
   }
 
   if (saas.bloqueado) {

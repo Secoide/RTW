@@ -898,7 +898,7 @@ O sistema possui ferramentas automáticas de:
 
 &#128274; <b>Aprova&ccedil;&atilde;o de Gestor de Obras:</b><br>
 Ao marcar ou desmarcar <b>Gestor de Obras</b>, o sistema n&atilde;o altera o respons&aacute;vel da OS imediatamente.
-Uma solicita&ccedil;&atilde;o &eacute; enviada para o <b>Gerente de Engenharia</b> pelo sininho de notifica&ccedil;&otilde;es.
+Uma solicita&ccedil;&atilde;o &eacute; enviada para o <b>Gerente de Engenharia, Diretor e Admin 999</b> pelo sininho de notifica&ccedil;&otilde;es.
 Somente ap&oacute;s aprova&ccedil;&atilde;o o colaborador passa a aparecer, ou deixa de aparecer, no campo de respons&aacute;vel ao cadastrar uma OS.
 Na notifica&ccedil;&atilde;o tamb&eacute;m aparece o nome do usu&aacute;rio que solicitou a altera&ccedil;&atilde;o.
 
@@ -6808,7 +6808,7 @@ As preferências do Chat Online ficam no menu de configurações do usuário e s
 
 &#128276; <b>Aprova&ccedil;&otilde;es no sininho:</b><br>
 Al&eacute;m de chat e programa&ccedil;&atilde;o, o sininho tamb&eacute;m pode receber solicita&ccedil;&otilde;es de aprova&ccedil;&atilde;o.
-No caso de <b>Gestor de Obras</b>, o Gerente de Engenharia recebe uma notifica&ccedil;&atilde;o com o nome do colaborador,
+No caso de <b>Gestor de Obras</b>, o Gerente de Engenharia, o Diretor e o Admin 999 recebem uma notifica&ccedil;&atilde;o com o nome do colaborador,
 o tipo de altera&ccedil;&atilde;o solicitada e o nome do usu&aacute;rio que fez a solicita&ccedil;&atilde;o.
 Essa aprova&ccedil;&atilde;o fica salva para o destinat&aacute;rio e pode ser vista mesmo se ele n&atilde;o estava online na hora.
 
@@ -7168,7 +7168,7 @@ Nas configurações do usuário, a aba <b>Notificações</b> permite ativar ou d
 <p>
 
 Para aparecer no campo <b>Respons&aacute;vel</b> da OS, o colaborador precisa estar liberado como <b>Gestor de Obras</b>.
-Quando o RH marca essa op&ccedil;&atilde;o nos Dados Profissionais, a altera&ccedil;&atilde;o fica aguardando aprova&ccedil;&atilde;o do Gerente de Engenharia.
+Quando o RH marca essa op&ccedil;&atilde;o nos Dados Profissionais, a altera&ccedil;&atilde;o fica aguardando aprova&ccedil;&atilde;o do Gerente de Engenharia, Diretor ou Admin 999.
 Depois de aprovada pelo sininho, o status &eacute; aplicado no cadastro e o colaborador passa a aparecer na lista de respons&aacute;veis.
 
 </p>

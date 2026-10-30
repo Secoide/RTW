@@ -98,7 +98,7 @@ async function logoutOwner() {
 
 async function carregarRecursos() {
   state.recursos = (await api("/api/owner/recursos")).filter(recurso => recurso.chave !== "menu.relatos");
-  const recursosObrigatorios = ["menu.prototipo_atributos", "menu.spda", "menu.permissoes"];
+  const recursosObrigatorios = ["menu.prototipo_atributos", "menu.spda", "menu.permissoes", "tool.calibracoes", "menu.colaborador"];
   if (recursosObrigatorios.some(chave => !state.recursos.some(recurso => recurso.chave === chave))) {
     state.recursos = (await api("/api/owner/recursos/sincronizar", { method: "POST" }))
       .filter(recurso => recurso.chave !== "menu.relatos");
@@ -225,14 +225,14 @@ async function excluirEmpresa() {
 
 function renderRecursos() {
   const selecionados = new Set(state.recursosEmpresa);
-  const recursosNovos = ["menu.catalogo_materiais", "menu.materiais", "menu.estoque", "menu.prototipo_atributos", "menu.spda"];
+  const recursosNovos = ["menu.catalogo_materiais", "menu.materiais", "menu.estoque", "menu.prototipo_atributos", "menu.spda", "tool.calibracoes"];
   byId("ownerRecursosLista").innerHTML = state.recursos.map(recurso => `
     <label class="owner-resource ${recursosNovos.includes(recurso.chave) ? "owner-resource-novo" : ""}">
       <input type="checkbox" value="${escapeHtml(recurso.chave)}" ${selecionados.has(recurso.chave) ? "checked" : ""}>
       <span>
         ${escapeHtml(recurso.nome)}
         <small>(${escapeHtml(recurso.tipo)})</small>
-        ${recursosNovos.includes(recurso.chave) ? `<em>Novo menu</em>` : ""}
+        ${recursosNovos.includes(recurso.chave) ? `<em>${recurso.tipo === "ferramenta" ? "Nova ferramenta" : "Novo menu"}</em>` : ""}
       </span>
     </label>
   `).join("");

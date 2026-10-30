@@ -332,6 +332,7 @@ function normalizarMensagemPersistida(msg) {
     texto,
     hora: msg.hora || "",
     criadoEm,
+    mensagemId: msg.mensagemId || "",
     reacao: REACOES_CHAT.includes(msg.reacao) ? msg.reacao : "",
     localId: msg.localId || `${criadoEm}_${normalizarTexto(usuario).slice(0, 18)}_${normalizarTexto(texto).slice(0, 18)}`
   };
@@ -387,7 +388,30 @@ function alternarReacaoMensagem(localId, reacao) {
   const mensagem = mensagensChat.find(msg => msg.localId === localId);
   if (!mensagem) return;
 
-  mensagem.reacao = mensagem.reacao === reacao ? "" : reacao;
+  const socket = window.rtwSocket;
+  if (!mensagem.mensagemId) {
+    alert("Esta mensagem antiga nao permite sincronizar reacoes. Envie uma nova mensagem.");
+    return;
+  }
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    alert("Sem conexao com servidor. Tente novamente.");
+    return;
+  }
+  socket.send(JSON.stringify({
+    acao: "reacao_chat",
+    mensagemId: mensagem.mensagemId,
+    reacao: mensagem.reacao === reacao ? "" : reacao,
+    tipo: mensagem.tipo,
+    usuario: mensagem.usuario,
+    destinatario: mensagem.destinatario
+  }));
+}
+
+export function receberReacaoChat(data) {
+  if (!data.mensagemId || (data.reacao !== "" && !REACOES_CHAT.includes(data.reacao))) return;
+  const mensagem = mensagensChat.find(msg => msg.mensagemId === data.mensagemId);
+  if (!mensagem) return;
+  mensagem.reacao = data.reacao;
   salvarHistoricoChatLocal();
   renderChat();
 }
@@ -714,12 +738,13 @@ export function receberMensagemChat(data) {
       && ((remetente === meuNome && destino === privadoAtual) || (remetente === privadoAtual && destino === meuNome));
 
   mensagensChat.push(normalizarMensagemPersistida({
+    mensagemId: data.mensagemId,
     tipo: data.tipo || "global",
     destinatario: data.destinatario || "",
     usuario: data.usuario,
     texto: data.texto,
     hora: data.hora,
-    criadoEm: Date.now()
+    criadoEm: data.criadoEm || Date.now()
   }));
 
   if (mensagensChat.length > 80) {

@@ -8,11 +8,15 @@
   <link rel="shortcut icon" type="image/png" href="/logo_GS.png">
   <title>ConnectPear Engenharia a Campo</title>
   <link rel="stylesheet" type="text/css" href="/css/diagramas.css">
+  <link rel="stylesheet" href="/css/infra-eletrica.css">
   <script src="https://kit.fontawesome.com/e2064f5125.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="eng-campo-app">
   <aside class="eng-campo-menu" aria-label="Menu Engenharia a Campo">
+    <a class="eng-campo-menu-item" href="#infra-eletrica" title="Infraestrutura elétrica" aria-label="Infraestrutura elétrica">
+      <i class="fa-solid fa-grip-lines"></i>
+    </a>
     <a class="eng-campo-menu-item active" href="#dimensionamento" title="Dimensionamento" aria-label="Dimensionamento">
       <i class="fa-solid fa-calculator"></i>
     </a>
@@ -25,6 +29,254 @@
   </aside>
 
   <main class="eng-campo-page" aria-label="Engenharia a Campo">
+    <section id="infra-eletrica" class="infra-page" aria-label="Infraestrutura elétrica" hidden>
+      <header class="infra-header">
+        <div><details id="infra-file-menu" class="infra-file-menu"><summary>Arquivo</summary><div><button id="infra-file-new" type="button">Novo Projeto</button><button id="infra-file-project" type="button">Dados do projeto</button><button id="infra-file-save" type="button">Salvar como…</button><button id="infra-file-import" type="button">Importar desenho…</button></div></details><input id="infra-file-input" type="file" accept=".json,application/json" hidden><span class="infra-eyebrow">ENGENHARIA A CAMPO / PLANTA BAIXA</span><h1 id="infra-project-title">Infraestrutura elétrica</h1></div>
+        <span id="infra-save" role="status">Salvo neste navegador</span>
+      </header>
+      <div class="infra-toolbar" role="toolbar" aria-label="Ferramentas da planta">
+        <button type="button" id="infra-finish">Concluir traçado <kbd>Esc</kbd></button>
+        <button type="button" id="infra-undo">Desfazer</button>
+        <span class="infra-toolbar-divider"></span>
+        <button type="button" id="infra-zoom-out" aria-label="Diminuir zoom">−</button>
+        <button type="button" id="infra-zoom-reset" title="Restaurar vista">100%</button>
+        <button type="button" id="infra-zoom-in" aria-label="Aumentar zoom">+</button>
+        <button type="button" id="infra-print" title="Imprimir a planta baixa em A3, sem grade, ou salvar como PDF">Imprimir / PDF</button>
+        <span class="infra-toolbar-note">Referência angular · 15°</span>
+      </div>
+      <div class="infra-workspace">
+        <div class="infra-drawing">
+          <form id="infra-project-menu" class="infra-connection-menu infra-project-menu" role="dialog" aria-labelledby="infra-project-heading" hidden><strong id="infra-project-heading">Novo Projeto</strong><p id="infra-project-description">Cria um desenho em branco. Use Salvar como… para guardar uma cópia do desenho atual.</p><label for="infra-project-name">Nome do projeto</label><input id="infra-project-name" type="text" maxlength="160" required><label for="infra-project-client">Cliente (empresa)</label><input id="infra-project-client" type="text" maxlength="160" required><label for="infra-project-art">ART (opcional)</label><input id="infra-project-art" type="text" maxlength="100"><label for="infra-project-revision">Revisão</label><input id="infra-project-revision" type="text" maxlength="7" value="Rev.00" required><small id="infra-project-dates"></small><p id="infra-project-error" role="alert"></p><button type="submit">Salvar projeto</button><button id="infra-project-cancel" type="button">Cancelar</button></form>
+          <svg id="infra-canvas" xmlns="http://www.w3.org/2000/svg" tabindex="0" role="application" aria-label="Planta baixa. Selecione a eletrocalha e clique para adicionar pontos. Escape conclui o traçado.">
+            <defs><pattern id="infra-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e7eceb" stroke-width="0.7"/></pattern></defs>
+            <rect id="infra-grid-bg" fill="url(#infra-grid)"/>
+            <g id="infra-panels"></g><g id="infra-routes"></g><g id="infra-details"></g><g id="infra-preview" pointer-events="none"></g><g id="infra-overlap-alerts"></g><g id="infra-level-alerts"></g>
+          </svg>
+          <div id="infra-empty"><span>⌁</span><strong>Seu projeto começa com um ponto.</strong><p>Selecione a eletrocalha à direita e clique na planta para iniciar.</p></div>
+          <div class="infra-canvas-label">PLANTA BAIXA <span>Vista superior · esquema sem escala</span></div>
+          <section id="infra-front-window" class="infra-front-window" aria-label="Vista apurada frontal" hidden>
+            <header><strong id="infra-front-title">Vista apurada frontal</strong><button id="infra-front-close" type="button" title="Fechar vista frontal" aria-label="Fechar vista frontal">×</button></header>
+            <div class="infra-front-toolbar" role="toolbar" aria-label="Controles da vista frontal"><button id="infra-front-edit-enabled" type="button" aria-pressed="false">Editar</button><button id="infra-front-panel-new" type="button" hidden>Novo painel</button><select id="infra-front-action" hidden aria-label="Ferramenta da vista frontal"><option value="selecionar" selected>Selecionar / ajustar</option><option value="navegar">Navegar</option><option value="desenhar">Desenhar aramado</option><option value="colorir">Colorir</option><option value="remover">Remover</option><option value="suportes">Suportes</option><option value="emendas">Emendas</option><option value="tampas">Tampas</option><option value="painel">Novo painel</option></select><button id="infra-front-refresh" type="button">Atualizar</button><button id="infra-front-out" type="button" aria-label="Diminuir zoom frontal">−</button><button id="infra-front-reset" type="button" title="Enquadrar a vista frontal">100%</button><button id="infra-front-in" type="button" aria-label="Aumentar zoom frontal">+</button><button id="infra-front-print" type="button" title="Imprimir a vista salva ou salvar como PDF em folha A4">Imprimir / PDF</button><button id="infra-front-export-detail" type="button" title="Inserir uma cópia da vista frontal na planta para impressão">Exportar detalhe para a planta</button><button id="infra-front-delete" type="button" title="Remover esta referência da planta">Remover vista</button></div>
+            <details id="infra-front-list-details" class="infra-front-list-details"><summary id="infra-front-list-summary">Vistas salvas (0)</summary><div id="infra-front-list"></div></details>
+            <div id="infra-front-draw-options" class="infra-front-draw-options" hidden><label>Plano / profundidade (m)<input id="infra-front-depth" type="number" min="0" max="1000" step="0.1" value="0" title="Distância da linha de referência até o plano do desenho. Ao iniciar sobre uma infraestrutura, usa a profundidade dela."></label><label>Bocal do novo aramado<select id="infra-front-opening"><option value="cima">Para cima</option><option value="frente">Para frente</option></select></label></div>
+            <details id="infra-front-selection" class="infra-front-selection" hidden open><summary id="infra-front-selection-title">Seleção</summary><div id="infra-front-selection-fields"><label>Altura do piso (m)<input id="infra-front-edit-height" type="text" inputmode="decimal"></label><label>Deslocamento horizontal (m)<input id="infra-front-edit-shift" type="text" inputmode="decimal" value="0"></label><label>Largura (mm)<select id="infra-front-edit-width"><option value="50">50</option><option value="100">100</option><option value="150">150</option><option value="200">200</option><option value="250">250</option><option value="300">300</option><option value="350">350</option><option value="400">400</option><option value="450">450</option><option value="500">500</option></select></label><label>Altura do aramado (mm)<select id="infra-front-edit-tray-height"><option value="50">50</option><option value="100">100</option></select></label><button id="infra-front-apply" type="button">Aplicar ao desenho</button><small class="infra-front-edit-tip">Altura e deslocamento mantêm o conjunto conectado. As dimensões afetam o trecho selecionado.</small></div><button id="infra-front-panel-properties" type="button" hidden>Editar dimensões do painel</button></details>
+            <form id="infra-front-continuation-menu" class="infra-front-panel-menu" role="dialog" aria-labelledby="infra-front-continuation-title" hidden><strong id="infra-front-continuation-title">Continuar infraestrutura</strong><label>Bocal do novo trecho<select id="infra-front-continuation-opening"><option value="mesmo">Manter o bocal da infra existente</option><option value="frente">Bocal para frente</option><option value="cima">Bocal para cima</option></select></label><small>A conexão mantém a altura e o plano da ponta selecionada.</small><div><button type="submit">Conectar e desenhar</button><button id="infra-front-continuation-cancel" type="button">Cancelar</button></div></form>
+            <form id="infra-front-panel-menu" class="infra-front-panel-menu" hidden><div class="infra-front-panel-heading"><strong id="infra-front-panel-title">Novo painel nesta vista</strong><button id="infra-front-panel-collapse" type="button" aria-expanded="true">Recolher parâmetros</button></div><div id="infra-front-panel-fields"><label>Tipo<select id="infra-front-panel-type"><option value="normal">Painel de parede</option><option value="armario">Armário de piso</option></select></label><div class="infra-front-panel-dimensions"><label>Altura (mm)<input id="infra-front-panel-height" type="number" min="100" max="5000" value="600" required></label><label>Largura (mm)<input id="infra-front-panel-width" type="number" min="100" max="5000" value="400" required></label><label>Profundidade (mm)<input id="infra-front-panel-depth" type="number" min="50" max="2000" value="200" required></label></div><label>Vista do painel<select id="infra-front-panel-face"><option value="frontal">Frontal</option><option value="lateral-esquerda">Lateral esquerda</option><option value="lateral-direita">Lateral direita</option></select></label><label>Centro do painel em relação ao piso (m)<input id="infra-front-panel-floor" type="text" inputmode="decimal" value="1,5" required></label><label>Profundidade a partir da linha da vista (m)<input id="infra-front-panel-plane" type="text" inputmode="decimal" value="0" required></label><div id="infra-front-panel-entry-fields" hidden><label>Entrada no painel<select id="infra-front-panel-entry"><option value="superior">Superior</option><option value="inferior">Inferior</option><option value="traseira">Traseira</option></select></label><label id="infra-front-panel-side-field" hidden>Lado da subida inferior<select id="infra-front-panel-side"><option value="direita">Direita</option><option value="esquerda">Esquerda</option></select></label></div><p id="infra-front-panel-help">Escolha a vista e a altura. O painel acompanha o mouse nesta janela.</p></div><p id="infra-front-panel-error" role="alert"></p><button id="infra-front-panel-place" type="submit">Posicionar painel</button><button id="infra-front-panel-drop" type="button">Usar descida existente</button><button id="infra-front-panel-cancel" type="button">Cancelar</button></form>
+            <div class="infra-front-stage"><svg id="infra-front-canvas" xmlns="http://www.w3.org/2000/svg" tabindex="0" role="img" aria-label="Vista frontal da infraestrutura, com referência no piso Y igual a zero. Role para ampliar e arraste para mover."></svg></div>
+            <div id="infra-front-edit-status" class="infra-front-info" role="status">Clique em Editar para usar as ferramentas nesta vista.</div><div id="infra-front-info" class="infra-front-info"></div>
+          </section>
+          <div id="infra-front-side-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-front-side-title" hidden><strong id="infra-front-side-title">Lado da Vista apurada</strong><p id="infra-front-side-info"></p><button id="infra-front-side-negative" type="button">Ver lado esquerdo</button><button id="infra-front-side-positive" type="button">Ver lado direito</button><button id="infra-front-side-cancel" type="button">Cancelar</button></div>
+          <section id="infra-isometric" class="infra-isometric minimized" aria-label="Visualização isométrica">
+            <header><strong>Vista isométrica</strong><button id="infra-isometric-toggle" type="button" aria-expanded="false" aria-controls="infra-isometric-body" title="Restaurar vista isométrica">+</button></header>
+            <div id="infra-isometric-body" hidden>
+              <div class="infra-isometric-zoom" role="toolbar" aria-label="Controles da vista isométrica"><button id="infra-isometric-print" type="button" title="Imprimir a vista isométrica em A3 ou salvar como PDF">Imprimir / PDF</button><button id="infra-isometric-refresh" type="button" title="Aplicar as alterações da planta à vista isométrica">Atualizar</button><button id="infra-isometric-breaks" type="button" aria-pressed="false" title="Alternar entre a infra completa e os trechos abreviados na planta">Recolher trechos</button><button id="infra-isometric-left" type="button" aria-label="Girar vista 90 graus para a esquerda" title="Girar 90° para a esquerda (← na isométrica)">↶</button><span id="infra-isometric-angle" role="status" aria-label="Giro da vista">0°</span><button id="infra-isometric-right" type="button" aria-label="Girar vista 90 graus para a direita" title="Girar 90° para a direita (→ na isométrica)">↷</button><button id="infra-isometric-out" type="button" aria-label="Diminuir zoom isométrico">−</button><button id="infra-isometric-reset" type="button" title="Restaurar vista isométrica próxima">100%</button><button id="infra-isometric-in" type="button" aria-label="Aumentar zoom isométrico">+</button></div>
+              <div id="infra-isometric-loading" class="infra-isometric-loading" role="status" aria-live="polite" hidden><div class="infra-isometric-progress"><progress id="infra-isometric-progress" max="100" value="0" aria-label="Progresso de carregamento da isométrica"></progress><span id="infra-isometric-progress-value">0%</span></div><span id="infra-isometric-loading-text">Carregando desenho isométrico…</span></div>
+              <svg id="infra-isometric-canvas" tabindex="0" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Infraestrutura em isométrico. X e Z negativos ao fundo; Y indica altura."></svg>
+              <svg id="infra-isometric-axes" class="infra-isometric-axes" viewBox="0 0 100 90" aria-hidden="true"><g fill="none" stroke-width="1.2"><path d="M50 45 82 64" stroke="#b76a62"/><path d="M50 45 18 64" stroke="#608da7"/><path d="M50 45V9" stroke="#589b78"/><path d="M50 45 18 26 M50 45 82 26" stroke="#a9b7ae" stroke-dasharray="3 3"/></g><g font-size="9" font-family="Segoe UI" fill="#64786c"><text x="84" y="69">X</text><text x="8" y="69">Z</text><text x="55" y="13">Y</text><text x="3" y="24">−X</text><text x="81" y="24">−Z</text></g></svg>
+              <span class="infra-isometric-note">Aramada · alturas 50 / 100 mm · Y / altura</span>
+            </div>
+          </section>
+          <form id="infra-panel-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-panel-title" hidden>
+            <strong id="infra-panel-title">Novo painel elétrico</strong>
+            <label>Tipo<select id="infra-panel-type"><option value="normal">Painel normal · centro a 1,5 m</option><option value="armario">Painel armário · apoiado no piso</option></select></label>
+            <label>Altura (mm)<input id="infra-panel-height" type="number" min="100" max="5000" value="600" required></label>
+            <label>Largura (mm)<input id="infra-panel-width" type="number" min="100" max="5000" value="400" required></label>
+            <label>Profundidade (mm)<input id="infra-panel-depth" type="number" min="50" max="2000" value="200" required></label>
+            <label>Giro (graus)<input id="infra-panel-angle" type="number" step="15" value="0" required></label>
+            <p id="infra-panel-error" role="alert"></p><button type="submit">Posicionar painel</button><button id="infra-panel-drop" type="button">Conectar a uma descida existente</button><button id="infra-panel-delete" type="button" hidden>Remover painel</button><button id="infra-panel-cancel" type="button">Cancelar</button>
+          </form>
+          <form id="infra-panel-connect" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-panel-connect-title" hidden>
+            <strong id="infra-panel-connect-title">Conectar aramada ao painel</strong>
+            <label>Entrada<select id="infra-panel-entry"><option value="superior">Superior</option><option value="inferior">Inferior</option><option value="traseira">Traseira</option></select></label>
+            <label id="infra-panel-side-field" hidden>Lado da subida inferior<select id="infra-panel-side"><option value="direita">Direita do painel</option><option value="esquerda">Esquerda do painel</option></select></label>
+            <p id="infra-panel-entry-info"></p>
+            <label id="infra-panel-drop-angle-field" hidden>Giro do painel após selecionar a descida (graus)<input id="infra-panel-drop-angle" type="number" step="15" value="0"></label>
+            <label>Altura final em relação ao piso (m)<input id="infra-panel-rise" type="number" min="0.1" max="100" step="0.1" value="3" required></label>
+            <p>Referência: piso Y = 0. A calha seguirá na altura informada; a subida desde a entrada é calculada automaticamente. O giro do painel define o sentido de saída na planta.</p><p id="infra-panel-connect-error" role="alert"></p>
+            <button type="submit">Conectar e continuar</button><button id="infra-panel-connect-cancel" type="button">Cancelar</button>
+          </form>
+          <div id="infra-break-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-break-title" hidden>
+            <strong id="infra-break-title">Interrupção gráfica de trecho</strong><p id="infra-break-info"></p>
+            <button id="infra-break-show" type="button">Mostrar somente este trecho</button><button id="infra-break-remove" type="button">Remover esta interrupção</button><button id="infra-break-close" type="button">Fechar</button>
+          </div>
+          <form id="infra-vertical-branch-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-vertical-branch-title" hidden>
+            <strong id="infra-vertical-branch-title">Calha horizontal na subida/descida</strong>
+            <label>Altura da calha a partir do piso (m)<input id="infra-vertical-branch-height" type="text" inputmode="decimal" value="2" required></label>
+            <p id="infra-vertical-branch-range"></p>
+            <label>Orientação do bocal<select id="infra-vertical-branch-view"><option value="frente">Bocal para frente · mesmo plano da descida</option><option value="cima">Bocal para cima · posição horizontal</option></select></label>
+            <label>Lado da saída<select id="infra-vertical-branch-side"><option value="1">Primeiro lado</option><option value="-1">Lado oposto</option></select></label>
+            <p>O T mantém a dimensão da descida. Se a nova calha tiver outra dimensão, a redução fica depois do T. A altura usa o piso Y = 0.</p>
+            <p id="infra-vertical-branch-error" role="alert"></p>
+            <button type="submit">Conectar e desenhar</button><button id="infra-vertical-branch-cancel" type="button">Cancelar</button>
+          </form>
+          <form id="infra-drop-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-drop-title" hidden>
+            <strong id="infra-drop-title">Derivação de descida vertical</strong>
+            <label>Altura final em relação ao piso (m)<input id="infra-drop-height" type="number" min="0.1" max="100" step="0.1" value="1.5" required></label>
+            <label>Sentido da saída<select id="infra-drop-direction"><option value="fim">Seguir o sentido da calha</option><option value="inicio">Sentido contrário</option><option value="lateral-positivo">Lateral +90° · junto à parede</option><option value="lateral-negativo">Lateral −90° · junto à parede</option></select></label>
+            <p>Os sentidos laterais são relativos à calha: em uma calha no eixo X positivo, correspondem a Z positivo e Z negativo.</p>
+            <p>A calha horizontal permanece contínua. A descida utiliza a largura e a altura selecionadas no menu Aramado e segue na altura informada, com referência no piso Y = 0.</p>
+            <p id="infra-drop-error" role="alert"></p><button type="submit">Criar descida e continuar</button><button id="infra-drop-cancel" type="button">Cancelar</button>
+          </form>
+          <form id="infra-level-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-level-title" hidden>
+            <strong id="infra-level-title">Subida / descida de infraestrutura</strong>
+            <p id="infra-level-description">Escolha a altura da mudança e o sentido que permanecerá no novo nível. As ligações nesse sentido acompanham a alteração.</p>
+            <label for="infra-level-sign">Movimento</label><select id="infra-level-sign"><option value="subir">Subir</option><option value="descer">Descer</option></select>
+            <label for="infra-level-height">Altura da mudança (m)</label><input id="infra-level-height" type="number" min="0.1" max="100" step="0.1" value="1.5" required>
+            <label for="infra-level-direction">Sentido no novo nível</label><select id="infra-level-direction"><option value="fim">Seta 1 · seguir para o fim do traçado</option><option value="inicio">Seta 2 · seguir para o início do traçado</option></select>
+            <div id="infra-level-opening-field" hidden><label for="infra-level-opening">Sentido do bocal na vertical</label><select id="infra-level-opening"><option value="padrao">Padrão · acompanhar a curva</option><option value="frente">Para frente do trajeto</option><option value="tras">Para trás do trajeto</option><option value="esquerda">Para a esquerda do trajeto</option><option value="direita">Para a direita do trajeto</option></select><small>A abertura fica voltada para o lado escolhido. A ponta continua vertical, sem prolongamento horizontal.</small></div>
+            <p id="infra-level-error" role="alert"></p>
+            <button type="submit">Aplicar altura</button><button id="infra-level-remove" type="button" hidden>Remover mudança</button><button id="infra-level-cancel" type="button">Cancelar</button>
+          </form>
+          <div id="infra-overlap-menu" class="infra-connection-menu infra-overlap-menu" role="dialog" aria-labelledby="infra-overlap-title" hidden>
+            <strong id="infra-overlap-title">Sobreposição de infraestruturas</strong>
+            <p id="infra-overlap-description">As eletrocalhas ocupam a mesma altura neste cruzamento.</p>
+            <label for="infra-overlap-route">Qual infraestrutura fará a manobra?</label>
+            <select id="infra-overlap-route"><option id="infra-overlap-a" value="a"></option><option id="infra-overlap-b" value="b"></option></select>
+            <label for="infra-overlap-type">Formato da manobra</label>
+            <select id="infra-overlap-type"><option value="rampa">Rampa · início a 30 cm</option><option value="90">Curvas internas de 90° · início a 10 cm</option></select>
+            <p>A manobra atravessa com folga e retorna à altura original. Quando faltar espaço para a rampa, escolha as curvas internas de 90°.</p>
+            <p id="infra-overlap-error" role="status"></p>
+            <button id="infra-overlap-above" type="button">Desviar por cima</button>
+            <button id="infra-overlap-below" type="button">Desviar por baixo</button>
+            <label for="infra-overlap-t-size">Tamanho da derivação T</label>
+            <select id="infra-overlap-t-size"><option value="existente">T igual à calha principal</option><option value="nova">T igual à calha do ramal</option></select>
+            <button id="infra-overlap-t" type="button">Conectar com derivação T</button>
+            <button id="infra-overlap-x" type="button">Conectar com derivação X</button>
+            <button id="infra-overlap-remove" type="button" hidden>Remover desvio aplicado</button>
+            <button id="infra-overlap-cancel" type="button">Cancelar</button>
+          </div>
+          <div id="infra-connection-menu" class="infra-connection-menu" role="dialog" aria-labelledby="infra-connection-title" hidden>
+            <strong id="infra-connection-title">Dimensionar conexão em T</strong>
+            <p id="infra-connection-description"></p>
+            <button type="button" id="infra-t-existing"></button>
+            <button type="button" id="infra-t-new"></button>
+            <button type="button" id="infra-t-direct" hidden>T reto com saída de 50 mm · sem redução</button>
+            <button type="button" id="infra-t-without" hidden>Não, finalizar sem conectar</button>
+            <button type="button" id="infra-t-cancel">Cancelar</button>
+          </div>
+          <div id="infra-detail-menu" class="infra-fitting-menu" role="dialog" aria-label="Detalhe na planta" hidden><header><strong>Detalhe para impressão</strong><button id="infra-detail-close" type="button" aria-label="Fechar opções do detalhe">×</button></header><p>Desenho bloqueado. Você pode mover, escalar ou apagar este quadro.</p><div class="infra-detail-scale-controls"><label for="infra-detail-scale">Escala (%)</label><input id="infra-detail-scale" type="number" min="10" max="1000" step="10" value="100" inputmode="decimal"><button id="infra-detail-scale-apply" type="button">Aplicar escala</button></div><p id="infra-detail-scale-error" role="alert"></p><div class="infra-fitting-rotate"><button id="infra-detail-move" type="button">Mover</button><button id="infra-detail-delete" type="button">Apagar</button></div></div>
+          <div id="infra-reducer-menu" class="infra-fitting-menu" role="dialog" aria-labelledby="infra-reducer-title" hidden>
+            <header><strong id="infra-reducer-title">Alinhamento da redução</strong><button id="infra-reducer-close" type="button" aria-label="Fechar redução">×</button></header>
+            <p>Sentido de referência: da calha existente para a continuação.</p>
+            <div class="infra-fitting-options" role="group" aria-label="Alinhamento da redução">
+              <button id="infra-reducer-esquerda" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 5H42V15L24 33V43H6Z"/></svg><span>Esquerda</span></button>
+              <button id="infra-reducer-centro" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 5H42V15L33 33V43H15V33L6 15Z"/></svg><span>Centralizada</span></button>
+              <button id="infra-reducer-direita" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 5H42V43H24V33L6 15Z"/></svg><span>Direita</span></button>
+            </div>
+            <p id="infra-reducer-warning">Ao aplicar, o aramado conectado terá um pequeno reposicionamento. O comprimento de trechos perpendiculares poderá aumentar ou diminuir.</p>
+            <p id="infra-reducer-error" role="alert"></p>
+            <button id="infra-reducer-apply" type="button">Aplicar alinhamento</button>
+            <button id="infra-reducer-cancel" type="button">Cancelar</button>
+          </div>
+          <div id="infra-fitting-menu" class="infra-fitting-menu" role="dialog" aria-labelledby="infra-fitting-title" hidden>
+            <header><strong id="infra-fitting-title">Trocar peça</strong><button id="infra-fitting-close" type="button" aria-label="Fechar opções de peça">×</button></header>
+            <p id="infra-fitting-size"></p>
+            <div class="infra-fitting-options" role="group" aria-label="Tipo de peça">
+              <button id="infra-fitting-normal" type="button" aria-pressed="false" title="Curva normal">
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 13h13Q35 13 35 30v13H25V30Q25 23 18 23H5z"/></svg><span>Curva normal</span>
+              </button>
+              <button id="infra-fitting-square" type="button" aria-pressed="false" title="Curva reta">
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 13h30v30H25V23H5z"/></svg><span>Curva reta</span>
+              </button>
+              <button id="infra-fitting-t" type="button" aria-pressed="false" title="Derivação T">
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 12h40v10H33Q29 22 29 27v16H19V27Q19 22 15 22H4z"/></svg><span>T</span>
+              </button>
+              <button id="infra-fitting-x" type="button" aria-pressed="false" title="Derivação X">
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M19 4h10v10Q29 19 34 19h10v10H34Q29 29 29 34v10H19V34Q19 29 14 29H4V19h10Q19 19 19 14z"/></svg><span>X</span>
+              </button>
+            </div>
+            <div class="infra-fitting-orientation">
+              <strong>Escolher lado</strong>
+              <div class="infra-fitting-sides" role="group" aria-label="Orientação da peça">
+                <button id="infra-fitting-side-0" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path id="infra-fitting-side-path-0" transform="translate(24 24)"/></svg></button>
+                <button id="infra-fitting-side-1" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path id="infra-fitting-side-path-1" transform="translate(24 24)"/></svg></button>
+                <button id="infra-fitting-side-2" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path id="infra-fitting-side-path-2" transform="translate(24 24)"/></svg></button>
+                <button id="infra-fitting-side-3" type="button" aria-pressed="false"><svg viewBox="0 0 48 48" aria-hidden="true"><path id="infra-fitting-side-path-3" transform="translate(24 24)"/></svg></button>
+              </div>
+              <div class="infra-fitting-rotate">
+                <button id="infra-fitting-rotate-left" type="button" title="Girar para o lado anterior">↶ Girar</button>
+                <button id="infra-fitting-rotate-right" type="button" title="Girar para o próximo lado">Girar ↷</button>
+                <button id="infra-fitting-auto" type="button" title="Encaixar nas conexões existentes">Encaixar</button>
+              </div>
+              <p>Encaixar aproveita as conexões anteriores. Trechos fora das saídas escolhidas ficam desconectados e podem ser religados ao reabrir o lado.</p>
+            </div>
+          </div>
+        </div>
+        <aside class="infra-palette" aria-label="Biblioteca de infraestrutura">
+          <section class="infra-library-section infra-library-main" aria-label="Menus principais"><div class="infra-eyebrow">BIBLIOTECA</div><h2>Infraestruturas</h2>
+          <div class="infra-tools">
+            <button id="infra-wire" type="button" aria-label="Desenhar eletrocalha aramada" aria-pressed="false" title="Eletrocalha aramada">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 12h30v16H5z M5 17h30 M5 23h30 M11 12v16 M17 12v16 M23 12v16 M29 12v16"/></svg>
+              <span>Aramada</span>
+            </button>
+            <button id="infra-front-create" type="button" aria-pressed="false" title="Definir uma vista frontal por uma linha horizontal ou vertical"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 10h30M8 7v6M32 7v6M20 10v12m-5-5 5 5 5-5M7 29h26v7H7z"/></svg><span>Vista apurada</span></button>
+            <button id="infra-panel" type="button" aria-pressed="false" title="Novo painel elétrico"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M9 5h22v30H9z M25 18v5 M15 10h10 M15 14h10"/></svg><span>Novo painel</span></button>
+            <button id="infra-select" type="button" aria-label="Navegar pela planta" aria-pressed="true" title="Navegar pela planta">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><path d="m11 6 21 17-12 1-6 11z"/></svg><span>Navegar</span>
+            </button>
+            <button id="infra-erase" type="button" aria-label="Remover suportes e trechos de eletrocalha aramada" aria-pressed="false" title="Remover: clique para apagar; Shift + clique em um suporte remove o conjunto da aplicação; Ctrl Z desfaz">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><path d="m7 24 17-17a3 3 0 0 1 4 0l7 7a3 3 0 0 1 0 4L20 33H14z M18 13l13 13 M20 33h15"/></svg><span>Remover</span>
+            </button>
+          </div>
+          </section><section class="infra-library-section infra-library-submenus" aria-label="Submenus"><div class="infra-eyebrow">SUBMENUS</div><details id="infra-wire-submenu" class="infra-wire-submenu">
+            <summary>Ferramentas da aramada</summary>
+            <div class="infra-tools">
+              <button id="infra-wire-draw" type="button"><span>Desenhar</span></button>
+              <button id="infra-break" type="button" aria-pressed="false" title="Abreviar um trecho reto na planta sem alterar a metragem real"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 12h11m12 0h11M3 28h11m12 0h11M16 6q-5 7 0 14t0 14M24 6q-5 7 0 14t0 14"/></svg><span>Interrupção de trecho</span></button>
+              <button id="infra-drop" type="button" aria-pressed="false" title="Derivação de descida vertical"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 10h32 M12 10q8 0 8 8v16 M15 28l5 6 5-6"/></svg><span>Derivação de descida</span></button>
+              <button id="infra-level" type="button" aria-pressed="false" title="Subida ou descida de infraestrutura"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 30h10V10h16 M26 4l7 6-7 6"/></svg><span>Subida/descida</span></button>
+              <button id="infra-color" type="button" aria-pressed="false"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="m9 22 13-13 11 11-13 13z M8 31h26 M25 6l-8 8"/></svg><span>Colorir</span></button>
+              <button id="infra-support" type="button" aria-pressed="false" title="Distribuir suportes na infraestrutura existente"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 16h30v8H5z M12 8v24 M28 8v24"/></svg><span>Suportes</span></button>
+              <button id="infra-cover" type="button" aria-pressed="false" title="Adicionar tampas no bocal da calha · Shift + clique aplica à rede conectada"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 12h30v7H5z M8 22v8h24v-8 M12 22v5m8-5v5m8-5v5"/></svg><span>Tampas</span></button>
+              <button id="infra-splice" type="button" aria-pressed="false" title="Distribuir emendas de barras de 3 ou 6 metros"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 9h30M5 20h30M5 31h30M17 6h6v6h-6zM17 17h6v6h-6zM17 28h6v6h-6z"/></svg><span>Emendas</span></button>
+            </div>
+          </details>
+          </section>
+          <section class="infra-library-section infra-properties" aria-label="Parâmetros dos submenus"><div class="infra-eyebrow">PARÂMETROS</div><div id="infra-color-parameters" hidden>            <label for="infra-color-value">Cor das eletrocalhas</label>
+            <input id="infra-color-value" type="color" value="#c44883">
+            <p class="infra-fitting-tip">Colorir: clique no trecho ou na derivação para pintar somente o elemento escolhido. Shift + clique pinta toda a rede conectada.</p>
+<label>Cores em uso</label><div id="infra-used-colors" class="infra-used-colors" aria-label="Cores usadas nas infraestruturas"></div></div>
+            <div id="infra-cover-parameters" hidden><strong>Tampas do aramado</strong><label for="infra-cover-action">Ação</label><select id="infra-cover-action"><option value="adicionar">Adicionar tampas</option><option value="remover">Remover tampas</option></select><p class="infra-fitting-tip">Clique somente no trecho desejado para aplicar. Curvas e horizontais ficam separadas da vertical. Shift + clique aplica à rede conectada. Na vista frontal, ative Editar e use a mesma ferramenta. A tampa acompanha o bocal nas curvas, subidas e descidas.</p></div>
+            <div id="infra-front-parameters" hidden><strong>Vista apurada</strong><p>Marque o primeiro e o segundo ponto na planta. A seleção fica horizontal ou vertical. Depois escolha o lado de observação.</p><button id="infra-front-open-list" type="button">Abrir vistas salvas</button><p>Clique em A1, A2… na planta para reabrir a vista. Na janela frontal, role para ampliar e arraste para mover.</p></div>
+            <div id="infra-wire-parameters" hidden>
+              <strong>Desenhar aramado</strong>
+              <label class="infra-auto-splice"><input id="infra-wire-auto-splice" type="checkbox"> Emendas a cada 3 m</label>
+              <p class="infra-muted">Adiciona emendas durante o desenho e nas conexões das derivações. Desmarcar mantém as emendas já aplicadas.</p>
+            </div>
+            <form id="infra-splice-menu" hidden>
+              <strong>Adicionar emendas</strong>
+              <label for="infra-splice-length">Comprimento máximo da barra</label>
+              <select id="infra-splice-length"><option value="3">3 metros</option><option value="6">6 metros</option></select>
+              <p class="infra-muted">Clique no aramado. As emendas seguem o início de cada trecho e as conexões das derivações. Curvas padrão não recebem emendas extras.</p>
+              <p id="infra-splice-error" role="alert"></p>
+              <button type="submit">Aplicar na planta</button><button id="infra-splice-cancel" type="button">Cancelar</button>
+            </form>
+            <form id="infra-support-menu" hidden>
+              <strong>Adicionar suportes</strong>
+              <p>Seção do suporte: 38 × 38 mm.</p>
+              <label for="infra-support-type">Tipo de suporte</label>
+              <select id="infra-support-type"><option value="fixo">Suporte fixo ▭</option><option value="balanco">Suporte balanço ⊔</option></select>
+              <label for="infra-support-spacing">Distância entre suportes (m)</label>
+              <input id="infra-support-spacing" type="number" min="0.1" max="100" step="0.1" value="1.5" required>
+              <label for="infra-support-offset">Distância até as derivações (m)</label>
+              <input id="infra-support-offset" type="number" min="0.1" max="100" step="0.05" value="0.4" required>
+              <p class="infra-muted">Do fim da peça até o centro do suporte. Os vãos intermediários se ajustam automaticamente.</p>
+              <p class="infra-muted">Escala de distribuição: 120 unidades da planta = 1 m.</p>
+              <p id="infra-support-error" role="alert"></p>
+              <button type="submit">Aplicar na planta</button><button id="infra-support-cancel" type="button">Cancelar</button>
+            </form>
+            <label for="infra-size">Largura (mm)</label>
+            <select id="infra-size"><option value="50">50 mm</option><option value="100" selected>100 mm</option><option value="150">150 mm</option><option value="200">200 mm</option><option value="250">250 mm</option><option value="300">300 mm</option><option value="350">350 mm</option><option value="400">400 mm</option><option value="450">450 mm</option><option value="500">500 mm</option></select>
+            <label for="infra-height">Altura da eletrocalha (mm)</label>
+            <select id="infra-height"><option value="50">50 mm</option><option value="100">100 mm · largura a partir de 100 mm</option></select>
+            <p>Curvas automáticas<br><strong>90° com raio amplo</strong></p>
+            <p class="infra-muted">A dimensão é uma identificação do elemento. A planta é esquemática.</p>
+          </section>
+          <section class="infra-library-section infra-help" aria-label="Ajuda"><div class="infra-eyebrow">AJUDA</div><p class="infra-fitting-tip">Com Aramada selecionada, aproxime de uma saída livre de T ou X para continuar. Use Navegar para trocar a peça mantendo sua largura.</p><strong>Como desenhar</strong><p>Clique para iniciar e adicionar trechos. A direção acompanha passos de 15°.</p><p>Para continuar uma calha, aproxime o mouse de uma ponta livre e clique. A mesma largura continua o traçado; outra largura cria uma transição automática. Afaste o mouse na direção da ponta para confirmar a nova seção.</p><p>Para interligar no meio, inicie perto de um trecho existente. O encaixe aparece em verde. Clique e afaste o mouse para formar o T perpendicular. Larguras diferentes permitem escolher o tamanho do T e suas reduções.</p><p>Selecione <strong>Remover</strong> e clique nos trechos destacados em vermelho para apagar. Clique em um T ou transição para retirar a conexão.</p><p><kbd>Enter</kbd> conclui e inicia outro.<br><kbd>Esc</kbd> sai da ferramenta.<br><kbd>Ctrl Z</kbd> desfaz, inclusive exclusões.</p><p>Clique nas peças em Navegar para abrir suas opções. Role para ampliar. Arraste com o botão do meio para mover a vista.</p></section>
+        </aside>
+      </div>
+      <footer class="infra-status"><span id="infra-hint" role="status">Selecione a eletrocalha para começar.</span><span id="infra-count">0 trechos</span></footer>
+    </section>
     <section id="dimensionamento" class="eng-campo-section active" aria-label="Dimensionamento">
       <nav class="eng-campo-submenu" aria-label="Ferramentas de dimensionamento">
         <button id="btnReferenciaServico" class="eng-campo-submenu-btn" type="button" title="Referencia de servico" aria-label="Referencia de servico">
@@ -176,6 +428,7 @@
   </dialog>
 
   <script type="module" src="/client/js/main-eng-campo.js"></script>
+  <script type="module" src="/client/js/infra-eletrica.js"></script>
 </body>
 
 </html>

@@ -1219,7 +1219,7 @@
     $(document).on("click", "#bt_sair_perfil", function () {
         $('#form_cadColab').empty();
     });
-    $(document).on("click", "#gerarFichaCompletaEPI", function () {
+    $(document).off("click.perfilFichaEPI", "#gerarFichaCompletaEPI").on("click.perfilFichaEPI", "#gerarFichaCompletaEPI", function () {
         const idColaborador = $('#idColaborador').val();
 
         const link = document.createElement("a");

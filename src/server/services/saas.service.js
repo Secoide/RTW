@@ -101,6 +101,13 @@ async function buscarContextoEmpresaAdmin(idEmpresa) {
   return montarContextoEmpresa(empresa, false);
 }
 
+async function buscarContextoRTW() {
+  const empresas = await SaasModel.listarEmpresas();
+  const empresa = empresas.find(e => limpar(e.codigo).toUpperCase() === 'EMP001')
+    || empresas.find(e => limpar(e.codigo).toUpperCase() === 'RTW');
+  return montarContextoEmpresa(empresa, false);
+}
+
 async function listarEmpresasParaLoginAdmin() {
   const empresas = await SaasModel.listarEmpresas();
   return empresas
@@ -180,6 +187,7 @@ async function buscarAvisoEmpresa(idEmpresa) {
 }
 
 module.exports = {
+  buscarContextoRTW,
   buscarContextoUsuario,
   buscarContextoEmpresaAdmin,
   listarEmpresasParaLoginAdmin,

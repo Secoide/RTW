@@ -1,0 +1,75 @@
+{
+  "data": "2026-10-28",
+  "execucoes": 5,
+  "metodo": "Mediana, motor JavaScript com DOM simulado dos testes, antes/depois na mesma sessão",
+  "resultados": [
+    {
+      "cenario": "planta100",
+      "antes": {
+        "ms": 24.04,
+        "elementos": 18
+      },
+      "depois": {
+        "ms": 15.65,
+        "elementos": 18
+      }
+    },
+    {
+      "cenario": "frontal",
+      "antes": {
+        "ms": 115.06,
+        "elementos": 12621
+      },
+      "depois": {
+        "ms": 89.01,
+        "elementos": 22
+      }
+    },
+    {
+      "cenario": "selecao",
+      "antes": {
+        "ms": 659.7,
+        "elementos": 12621
+      },
+      "depois": {
+        "ms": 85.89,
+        "elementos": 22
+      }
+    },
+    {
+      "cenario": "isometrica",
+      "antes": {
+        "ms": 33.93,
+        "elementos": 1386
+      },
+      "depois": {
+        "ms": 27.15,
+        "elementos": 1386
+      }
+    },
+    {
+      "cenario": "tampas",
+      "antes": {
+        "ms": 108.5,
+        "elementos": 1394
+      },
+      "depois": {
+        "ms": 33.59,
+        "elementos": 1394
+      }
+    },
+    {
+      "cenario": "salvar",
+      "antes": {
+        "ms": 0.24,
+        "elementos": 0,
+        "gravacoes": 120
+      },
+      "depois": {
+        "ms": 0.17,
+        "elementos": 0,
+        "gravacoes": 0
+      }
+    }
+  ]
+}

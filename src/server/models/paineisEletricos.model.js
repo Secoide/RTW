@@ -85,14 +85,17 @@ async function buscarUltimoNumeroSeriePorAno(prefixoAno) {
 }
 
 async function buscarUltimoNumeroSeriePorAnoMes(prefixoAnoMes) {
+  const [ano,mes] = prefixoAnoMes.split('.');
   const [rows] = await connection.query(`
     SELECT numero_serie
     FROM paineis_eletricos
-    WHERE numero_serie LIKE ?
-    ORDER BY CAST(SUBSTRING_INDEX(numero_serie, '-', -1) AS UNSIGNED) DESC
+    WHERE numero_serie LIKE ? OR numero_serie LIKE ?
+    ORDER BY CASE
+      WHEN numero_serie LIKE ? THEN CAST(SUBSTRING_INDEX(numero_serie, '-', -1) AS UNSIGNED)
+      ELSE CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(numero_serie, '/', 1), '.', -1) AS UNSIGNED)
+    END DESC
     LIMIT 1
-  `, [`${prefixoAnoMes}-%`]);
-
+  `, [`${prefixoAnoMes}-%`, `${mes}.%/${ano}`, `${prefixoAnoMes}-%`]);
   return rows[0]?.numero_serie || null;
 }
 
