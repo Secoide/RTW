@@ -113,3 +113,38 @@
 #colaborador .co-mapa-legenda .co-amostra-justificada:before{background:#a38ac3;opacity:1}
 #colaborador .co-mapa-legenda .co-amostra-ausencia:before{background:#ce7779;opacity:1}
 #colaborador .co-mapa-legenda .co-amostra-feriado-trabalhado:before{background:#5f9fc6;opacity:1}
+
+/* Ranking anual no lugar das vestimentas. */
+#colaborador .co-dashboard{grid-template-columns:minmax(0,1fr) 250px}
+#colaborador .co-ranking{display:flex;flex-direction:column;min-height:0;min-width:0;border-left:1px solid var(--co-line);padding:10px 0 4px 12px;gap:10px}
+#colaborador .co-ranking-cab{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+#colaborador .co-ranking-cab h2{font-size:12px;font-weight:500;margin:0;color:var(--co-text)}
+#colaborador .co-ranking-cab small{font-size:9px;color:var(--co-muted)}
+#colaborador .co-ranking-lista{list-style:none;padding:0;margin:0;overflow:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:var(--co-line) transparent}
+#colaborador .co-ranking-item{display:grid;grid-template-columns:23px minmax(0,1fr) 46px;align-items:center;gap:5px;min-height:30px;padding:6px 5px;border-bottom:1px solid var(--co-line);font-size:10px}
+#colaborador .co-ranking-posicao{color:var(--co-muted);font-size:9px}
+#colaborador .co-ranking-nome{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#colaborador .co-ranking-item strong{font-size:11px;font-weight:500;text-align:right;color:var(--co-blue)}
+#colaborador .co-ranking-item strong small{font-size:8px;color:var(--co-muted);font-weight:400}
+#colaborador .co-ranking-item.selecionado{background:#3498f10c;box-shadow:inset 2px 0 var(--co-blue)}
+#colaborador .co-ranking-legenda{display:grid;grid-template-columns:1fr;gap:4px;border-top:1px solid var(--co-line);padding:8px 5px 0;font-size:8px;color:var(--co-muted);flex-shrink:0}
+#colaborador .co-ranking-legenda>span{display:flex;justify-content:space-between;gap:8px}
+#colaborador .co-ranking-legenda b{font-size:9px;font-weight:400;color:var(--co-text)}
+@media(min-width:1800px){#colaborador .co-dashboard{grid-template-columns:minmax(0,1fr) 280px}}
+@media(max-width:1100px){#colaborador .co-dashboard{grid-template-columns:minmax(0,1fr) 220px}}
+@media(max-width:900px){#colaborador .co-ranking{max-height:540px}}
+@media(max-width:540px){#colaborador .co-ranking{border-left:0;border-top:1px solid var(--co-line);padding:12px 0 0;max-height:450px}#colaborador .co-ranking-legenda{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px}}
+
+#colaborador .co-ranking-ajuda{position:relative;display:inline-flex;margin-left:auto}
+#colaborador .co-ranking-ajuda-botao{width:17px;height:17px;padding:0;border:1px solid var(--co-muted);border-radius:50%;background:none;color:var(--co-muted);font:600 11px Arial;line-height:15px;cursor:help}
+#colaborador .co-ranking-tooltip{display:none;position:absolute;top:24px;right:0;width:210px;padding:11px 12px;border:1px solid var(--co-line);border-radius:5px;background:var(--co-bg);color:var(--co-muted);font-size:10px;line-height:1.5;box-shadow:0 6px 20px #0003;z-index:20;gap:5px}
+#colaborador .co-ranking-tooltip>span{display:flex;justify-content:space-between;gap:10px}
+#colaborador .co-ranking-tooltip b{font-size:10px;font-weight:500;color:var(--co-text)}
+#colaborador .co-ranking-ajuda:hover .co-ranking-tooltip,#colaborador .co-ranking-ajuda:focus-within .co-ranking-tooltip{display:grid}
+
+#colaborador .co-ranking-imprimir{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:3px;background:none;color:var(--co-muted);font-size:12px;cursor:pointer;flex-shrink:0}
+#colaborador .co-ranking-imprimir:hover{color:var(--co-blue);background:#3498f10a}
+
+#colaborador .co-ranking-ano{width:56px;min-width:52px;height:23px;padding:2px 3px;border:0;border-bottom:1px solid var(--co-line);border-radius:0;background:var(--co-bg);color:var(--co-text);font:10px Arial;cursor:pointer}
+#colaborador .co-ranking-ano:disabled{opacity:.55;cursor:wait}
+#colaborador .co-ranking-imprimir:disabled{opacity:.4;cursor:default}

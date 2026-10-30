@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const verificarAutenticacao = require('../middlewares/auth.middleware');
 const colaboradoresController = require('../controllers/colaboradores.controller');
+const rankingController = require('../controllers/colaboradorRanking.controller');
 const upload = require('../middlewares/uploudfotos.middleware');
 const uploadAtestadoPDF = require('../middlewares/uploadExame.middleware');
 
 // Rotas específicas
+router.get('/ranking-anual', verificarAutenticacao, rankingController.getRankingAnual);
 router.get("/disponiveis", verificarAutenticacao, colaboradoresController.getColaboradoresDisp);
 router.get("/emOS", verificarAutenticacao, colaboradoresController.getColaboradoresEmOS);
 router.post("/excluir", verificarAutenticacao, colaboradoresController.excluirColaboradorEmos);

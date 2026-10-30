@@ -1,4 +1,4 @@
-import { imprimirColaborador } from './colaborador-impressao.js';
+import { imprimirColaborador, imprimirRanking } from './colaborador-impressao.js';
 import { canSee, getUserRole } from '../state/role.js';
 import { calcularResumoAnual } from '../utils/dom/preencher-resumo-anual-colab.js';
 import { atividadeOS, graficoLinha, graficoMapa, graficoClientes, graficoSemana } from './colaborador-graficos.js';
@@ -56,12 +56,39 @@ export async function initColaborador(){
     const area=elemento('section','co-grafico '+classe),cab=elemento('header');cab.append(elemento('h2','',titulo),elemento('span','',detalhe));
     const conteudo=elemento('div','co-grafico-conteudo');area.append(cab,conteudo);vazio(conteudo,'Carregando…');return {area,conteudo,cab};
   }
-  function vestimentas(dados,alvo){
-    const mapa={1:'capacete',2:'oculos',3:'fone',4:'mascara',5:'luva',6:'luvadecouro',7:'sapato',8:'jaleco',9:'calca',10:'colete'};
-    const itens=lista(dados);if(!itens.length){vazio(alvo,'Sem vestimentas registradas.');return;}
-    const figura=elemento('div','co-epi-figura');figura.setAttribute('role','img');figura.setAttribute('aria-label','Vestimentas por situação: verde apto, laranja avaliar, vermelho trocar, cinza não entregue.');
-    for(const d of itens){const nome=mapa[d.idepi];if(!nome)continue;const situacao=normalizar(d.situacao).trim(),img=elemento('img','co-epi-'+(['ok','avaliar','trocar','faltando'].includes(situacao)?situacao:'neutro'));img.src='/imagens/epi/'+nome+'.webp';img.alt='';img.title=nome+' · '+d.situacao;img.addEventListener('error',()=>img.remove(),{once:true});figura.append(img);}
-    alvo.replaceChildren(figura);
+  const anoAtualRanking=Number(new Intl.DateTimeFormat('en',{timeZone:'America/Sao_Paulo',year:'numeric'}).format(new Date()));
+  let anoRanking=anoAtualRanking;
+  const rankingCache=new Map(),rankingPromises=new Map();
+  function obterRanking(ano=anoRanking){
+    if(rankingCache.has(ano))return Promise.resolve(rankingCache.get(ano));
+    if(!rankingPromises.has(ano))rankingPromises.set(ano,api('/api/colaboradores/ranking-anual?ano='+ano).then(d=>{rankingCache.set(ano,d);return d;}).finally(()=>rankingPromises.delete(ano)));
+    return rankingPromises.get(ano);
+  }
+  function renderRanking(dados,alvo,id){
+    const cab=elemento('header','co-ranking-cab'),ano=elemento('select','co-ranking-ano');ano.setAttribute('aria-label','Ano do ranking');
+    for(let valor=anoAtualRanking;valor>=2000;valor--)ano.add(new Option(String(valor),String(valor)));
+    ano.value=String(dados.ano);cab.append(elemento('h2','','Ranking'),ano);
+    ano.addEventListener('change',async()=>{
+      anoRanking=Number(ano.value);ano.disabled=true;alvo.setAttribute('aria-busy','true');alvo.querySelector('.co-ranking-imprimir').disabled=true;vazio(listaRanking,'Carregando ranking…');
+      try{const atualizado=await obterRanking(anoRanking);if(alvo.isConnected)renderRanking(atualizado,alvo,id);}
+      catch{if(alvo.isConnected){vazio(listaRanking,'Ranking indisponível. Tente outro ano ou Atualizar.');ano.disabled=false;}}
+      finally{alvo.removeAttribute('aria-busy');}
+    });
+    const listaRanking=elemento('ol','co-ranking-lista');
+    for(const r of lista(dados.ranking)){
+      const item=elemento('li','co-ranking-item'+(String(r.id)===String(id)?' selecionado':''));
+      const detalhes=r.normais+' normais · '+r.sabados+' sábados · '+r.domingosFeriados+' domingos/feriados · '+r.naoJustificadas+' faltas não justificadas · '+r.justificadas+' justificadas';item.title=r.nome+'\n'+detalhes;
+      const nome=elemento('span','co-ranking-nome',r.nome);const pontos=elemento('strong','',r.pontos);pontos.append(elemento('small','',' pts'));
+      item.append(elemento('span','co-ranking-posicao',r.posicao+'º'),nome,pontos);listaRanking.append(item);
+    }
+    if(!dados.ranking?.length)vazio(listaRanking,'Sem colaboradores disponíveis.');
+    const ajuda=elemento('span','co-ranking-ajuda'),botao=elemento('button','co-ranking-ajuda-botao','!');botao.type='button';botao.setAttribute('aria-label','Regras da pontuação do ranking');botao.setAttribute('aria-describedby','co-ranking-regras');
+    const legenda=elemento('div','co-ranking-tooltip');legenda.id='co-ranking-regras';legenda.setAttribute('role','tooltip');
+    for(const [nome,pontos] of [['Dia normal','+1'],['Sábado','+2'],['Domingo/feriado','+3'],['Férias/licença','0'],['Falta não justificada','−2'],['Falta justificada','−1']]){const linha=elemento('span');linha.append(document.createTextNode(nome),elemento('b','',pontos));legenda.append(linha);}
+    legenda.title='Um lançamento por dia. Apenas faltas registradas e aprovadas descontam pontos. Empates compartilham a posição.';
+    const imprimir=elemento('button','co-ranking-imprimir');imprimir.type='button';imprimir.title='Imprimir ranking / PDF · A4 vertical';imprimir.setAttribute('aria-label','Imprimir ranking em A4 vertical');const icone=elemento('i','fa-solid fa-print');icone.setAttribute('aria-hidden','true');imprimir.append(icone);imprimir.addEventListener('click',()=>imprimirRanking(root));
+    ajuda.append(botao,legenda);cab.append(ajuda,imprimir);
+    alvo.replaceChildren(cab,listaRanking);
   }
   async function abrir(id){
     if(!id)return;selecionado=String(id);controle?.abort();controle=new AbortController();const signal=controle.signal,atual=++ciclo,valido=()=>root.isConnected&&ciclo===atual;
@@ -83,10 +110,8 @@ export async function initColaborador(){
         mapa.area.append(legenda);
       });
       if(autorizado('5,6,7,99'))carregar('/api/colaboradores/historico-empresas/'+d.id,[clientes.conteudo],dados=>graficoClientes(clientes.conteudo,dados));else vazio(clientes.conteudo,'Indicador restrito ao seu perfil.');
-      if(autorizado('99')){
-        const epi=elemento('aside','co-protecao');epi.append(elemento('h2','','Vestimentas'));const boneco=elemento('div','co-boneco');epi.append(boneco);dashboard.append(epi);
-        carregar('/api/epi/por-colaborador/'+d.id,[boneco],dados=>vestimentas(dados,boneco));
-      }else dashboard.classList.add('sem-vestimentas');
+      const ranking=elemento('aside','co-ranking');vazio(ranking,'Carregando ranking…');dashboard.append(ranking);
+      tarefas.push(obterRanking().then(dados=>{if(valido())renderRanking(dados,ranking,d.id);}).catch(()=>{if(valido())vazio(ranking,'Ranking indisponível. Use Atualizar.');}));
       mensagem('');destino.removeAttribute('aria-busy');atualizar.disabled=false;await Promise.allSettled(tarefas);
     }catch(e){if(valido()&&e.name!=='AbortError'){destino.replaceChildren();mensagem('Não foi possível carregar o colaborador. Use Atualizar.',true);}}
     finally{if(valido()){atualizar.disabled=false;imprimir.disabled=!destino.querySelector('.co-identidade');destino.removeAttribute('aria-busy');}}
@@ -105,6 +130,6 @@ export async function initColaborador(){
   }
   busca.addEventListener('input',opcoes);
   seletor.addEventListener('change',()=>{if(seletor.value){sessionStorage.setItem('colaborador_selecionado',seletor.value);abrir(seletor.value);}});
-  atualizar.addEventListener('click',()=>selecionado?abrir(selecionado):carregarLista());
+  atualizar.addEventListener('click',()=>{rankingCache.clear();return selecionado?abrir(selecionado):carregarLista();});
   await carregarLista();
 }
