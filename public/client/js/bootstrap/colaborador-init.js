@@ -36,7 +36,7 @@ export async function initColaborador(){
     const nomes=elemento('div','co-nomes');nomes.append(elemento('h2','',d.nome),elemento('p','co-funcao',[d.nomeCargo,d.nomeSetor,d.empresaContrato].filter(Boolean).join(' · ')));
     const contato=elemento('p','co-contato',[d.mail,d.telefone].filter(Boolean).join(' · '));contato.title=contato.textContent;nomes.append(contato);
     const fatos=elemento('dl','co-fatos');
-    for(const [titulo,valor] of [['Admissão',data(d.data_experiencia)],['Nascimento',data(d.nascimento)],['CPF',d.cpf],['RG',d.rg],['CNH',Array.isArray(d.cnh)?d.cnh.join(' / '):d.cnh],['Situação',d.motivo||'Ativo'],['Registro',String(d.id)],['Gestor',Number(d.responsavelOSs)===1?'Sim':'Não'],['Gênero',({0:'Feminino',1:'Masculino',2:'Outro'})[d.sexo]],['Endereço',d.endereco]])fatos.append(dado(titulo,valor));
+    for(const [titulo,valor] of [['Admissão',data(d.data_experiencia)],['Nascimento',data(d.nascimento)],['CPF','*****'],['RG','*****'],['CNH',Array.isArray(d.cnh)?d.cnh.join(' / '):d.cnh],['Situação',d.motivo||'Ativo'],['Registro',String(d.id)],['Gestor',Number(d.responsavelOSs)===1?'Sim':'Não'],['Gênero',({0:'Feminino',1:'Masculino',2:'Outro'})[d.sexo]],['Endereço',d.endereco]])fatos.append(dado(titulo,valor));
     hero.append(foto,nomes,fatos);destino.append(hero);
   }
   function anual(dados,d,alvo){
