@@ -95,7 +95,7 @@ export async function initColaborador(){
     mensagem('Carregando colaboradores…'); atualizar.disabled = true;
     try {
       const dados = await api('/api/rh/listar-geral'); if (!root.isConnected) return;
-      colaboradores = lista(dados).filter(c=>normalizar(c.contrato).trim()!=='desligado' && !/^terceir[oa]s?$/.test(normalizar(c.funcao).trim()) && !/^terceir[oa]s?$/.test(normalizar(c.categoria).trim())).sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+      colaboradores = lista(dados).filter(c=>normalizar(c.categoria).trim()==='producao' && normalizar(c.contrato).trim()!=='desligado' && !/^terceir[oa]s?$/.test(normalizar(c.funcao).trim()) && !/^terceir[oa]s?$/.test(normalizar(c.categoria).trim())).sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
       if (!colaboradores.length) { opcoes(); seletor.disabled=true; vazio(destino,'Nenhum colaborador disponível para consulta.'); mensagem(''); return; }
       seletor.disabled=false;
       const salvo = sessionStorage.getItem('colaborador_selecionado') || sessionStorage.getItem('id_usuario');
