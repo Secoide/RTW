@@ -39,24 +39,7 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
-## [2.4.0] - 2026-06-16
-## Nome: 🛠️ Ferramentas e Complementos
-- Adicionado novo menu 'Ferramentas';
-- Ferramentas não contratadas podem aparecer bloqueadas com prévia visual;
-- Nova ferramenta 'Numeração de Documentos', permitindo gerar, copiar, editar e apagar padrões de nomes para arquivos;
-- Nova ferramenta 'Registros Painel Elétrico' com cadastro em banco, edição, exclusão, checklist de produção e upload de imagem do painel montado;
-- Checklist visual dos painéis elétricos com etapas de produção e barra de progresso colorida conforme avanço;
-- Upload de múltiplas imagens para painéis elétricos, com galeria para visualizar fotos do painel montado;
-- Geração de QR Code para links externos dos painéis elétricos;
-- Nova aba Complementos no cadastro de OS;
-- Complementos da OS agora permitem informar tipo de serviço, observação complementar, PTA alocada e previsão de painel para montar/instalar;
-- Integração entre OS e Painéis Elétricos, permitindo vincular painel cadastrado a uma OS;
-- Atalho no painel vinculado da OS para abrir diretamente a tela de Ferramentas no painel correspondente;
-- Tipo de serviço da OS separado em duas combos: Categoria e Serviço, com serviços filtrados conforme a categoria escolhida;
-
-
-
-## [2.3.0] - 2026-07-02
+## [2.4.0] - 2026-07-02
 ## Nome: 💬 Chat online
 ### Adicionado
 - Widget Online ganhou aba de chat em tempo real, agora usuários conectados conseguem trocar mensagens rápidas pelo sistema;
@@ -73,23 +56,48 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Adicionada exportação em PDF da programação diária, incluindo apenas OS do dia selecionado que possuem colaboradores alocados;
 - Nova aba de Notificações nas preferências do perfil, permitindo escolher quais tipos de aviso aparecem no sininho do usuário;
 - Adicionada exportação em PDF no RH e no perfil do colaborador, permitindo imprimir resumos gerais e relatórios completos individuais com histórico, anexos operacionais e gráfico de participações;
+
+### Alterado
+- Layout do Chat Online ampliado, com área de conversa e lista de usuários online lado a lado;
+- Lista Online deixou de exibir o próprio usuário logado;
+
+### Corrigido
+- Sincronização das reações do chat para que apareçam também para o autor da mensagem;
+
+### Removido
+
+
+
+## [2.3.0] - 2026-10-30
+## Nome: 🛠️ Ferramentas e Complementos
+### Adicionado
+- Adicionado novo menu 'Ferramentas';
+- Ferramentas não contratadas podem aparecer bloqueadas com prévia visual;
+- Nova ferramenta 'Numeração de Documentos', permitindo gerar, copiar, editar e apagar padrões de nomes para arquivos;
+- Nova ferramenta 'Registros Painel Elétrico' com cadastro em banco, edição, exclusão, checklist de produção e upload de imagem do painel montado;
+- Checklist visual dos painéis elétricos com etapas de produção e barra de progresso colorida conforme avanço;
+- Upload de múltiplas imagens para painéis elétricos, com galeria para visualizar fotos do painel montado;
+- Geração de QR Code para links externos dos painéis elétricos;
+- Nova aba 'Calibrações' em Ferramentas, com cards ilustrados dos equipamentos, busca e filtros por vencimento;
+- Controle das datas de calibração e recalibração, com cadastro de equipamentos e importação dos registros da planilha de referência;
+- Histórico de certificados por equipamento, com upload de PDFs na nuvem ou vínculo de documentos por link externo;
+- Compartilhamento de certificados com clientes por link e QR Code, com opção de revogar o acesso;
+- Ferramenta 'Calibrações' disponível em 'Menus e ferramentas contratadas' na tela do dono, permitindo liberar o acesso por empresa;
+- Alertas para a Engenharia aos 30 dias, 15 dias e no vencimento de uma calibração, sem duplicações;
+- Opção Notificações de calibrações nas preferências locais para ativar ou desativar os avisos;
+- Nova aba Complementos no cadastro de OS;
+- Complementos da OS agora permitem informar tipo de serviço, observação complementar, PTA alocada e previsão de painel para montar/instalar;
+- Integração entre OS e Painéis Elétricos, permitindo vincular painel cadastrado a uma OS;
+- Atalho no painel vinculado da OS para abrir diretamente a tela de Ferramentas no painel correspondente;
+- Tipo de serviço da OS separado em duas combos: Categoria e Serviço, com serviços filtrados conforme a categoria escolhida;
 - Adicionada campo 'Data de admissão', data de entrada na empresa nos Dados Profissionais do colaborador;
 - Adicionado responsável da OS na exportação da programação para whatsapp;
 - Adicionado botão de ajustes na Programação com opção local para mostrar/ocultar o responsável da OS, mostrar/ocultar aniversariantes e incluir observações automaticamente na exportação da Programação para WhatsApp;
 - Novo guia de 'Ordem de Serviço - OS' no Guia Geral;
 
 ### Alterado
-- Layout do Chat Online ampliado, com área de conversa e lista de usuários online lado a lado;
-- Lista Online deixou de exibir o próprio usuário logado;
 - Melhorado o painel de notificações do perfil com layout em cards, botão Limpar, contador, horário e melhor visual para notificações vazias;
 - Atualizados colunas do banco de dados para usarem a data de entrada no lugar do exame admissional;
-
-### Corrigido
-- Ajustado badge de mensagens privadas para aparecer alinhado ao nome de quem chamou;
-- Corrigido problema em que colaboradores adicionados por # ou $ podiam aparecer na OS sem terem sido gravados no banco após reconexão do servidor;
-- Não avisava quando a OS já estava cadastrada antes de tentar salvar novamente;
-
-### Removido
 
 
 
