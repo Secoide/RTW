@@ -10,7 +10,7 @@
 #colaborador .colaborador-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:7px;border-bottom:1px solid var(--co-line);flex-shrink:0}
 #colaborador .colaborador-kicker{font-size:8px;letter-spacing:.1em;color:var(--co-muted)}
 #colaborador h1{font-size:13px;line-height:1.3;font-weight:500;margin:1px 0 0;color:inherit}
-#colaborador .colaborador-selecao{display:flex;gap:8px;align-items:center}
+#colaborador .colaborador-selecao{display:flex;gap:8px;align-items:center;margin-right:72px}
 #colaborador .colaborador-selecao label{margin:0}
 #colaborador .colaborador-selecao :is(input,select,button){font:10px Arial,sans-serif;border:0;border-bottom:1px solid var(--co-line);border-radius:0;background:transparent;color:var(--co-muted);padding:6px;box-shadow:none;min-height:27px}
 #colaborador .colaborador-selecao input{width:190px}
@@ -127,6 +127,8 @@
 #colaborador .co-ranking-item strong{font-size:11px;font-weight:500;text-align:right;color:var(--co-blue)}
 #colaborador .co-ranking-item strong small{font-size:8px;color:var(--co-muted);font-weight:400}
 #colaborador .co-ranking-item.selecionado{background:#3498f10c;box-shadow:inset 2px 0 var(--co-blue)}
+#colaborador .co-ranking-item[role=button]{cursor:pointer}
+#colaborador .co-ranking-item[role=button]:hover{background:var(--co-line)}
 #colaborador .co-ranking-legenda{display:grid;grid-template-columns:1fr;gap:4px;border-top:1px solid var(--co-line);padding:8px 5px 0;font-size:8px;color:var(--co-muted);flex-shrink:0}
 #colaborador .co-ranking-legenda>span{display:flex;justify-content:space-between;gap:8px}
 #colaborador .co-ranking-legenda b{font-size:9px;font-weight:400;color:var(--co-text)}
@@ -148,3 +150,65 @@
 #colaborador .co-ranking-ano{width:56px;min-width:52px;height:23px;padding:2px 3px;border:0;border-bottom:1px solid var(--co-line);border-radius:0;background:var(--co-bg);color:var(--co-text);font:10px Arial;cursor:pointer}
 #colaborador .co-ranking-ano:disabled{opacity:.55;cursor:wait}
 #colaborador .co-ranking-imprimir:disabled{opacity:.4;cursor:default}
+/* Comparação e ampliação do indicador mensal. */
+#colaborador .co-grafico-acoes{display:flex;gap:4px;margin-left:0}
+#colaborador .co-mensal>header>span{margin-left:auto}
+#colaborador .co-grafico-icone{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:1px solid var(--co-line);border-radius:4px;background:transparent;color:var(--co-muted);cursor:pointer;font-size:11px}
+#colaborador .co-grafico-icone:hover{color:var(--co-blue);background:var(--co-line)}
+#colaborador .co-comparacao-legenda{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:9px;flex-shrink:0}
+#colaborador .co-comparacao-legenda:empty{display:none}
+#colaborador .co-comparacao-legenda>span{display:inline-flex;align-items:center;gap:5px}
+#colaborador .co-comparacao-legenda>span:before{content:'';width:12px;height:3px;background:var(--serie-cor);flex-shrink:0}
+#colaborador .co-comparacao-dialogo{position:fixed;inset:0;margin:auto;width:min(440px,94vw);max-width:94vw;max-height:90dvh;padding:18px;border:1px solid var(--co-line);border-radius:8px;background:var(--co-card);color:var(--co-text);font:12px/1.5 Arial,sans-serif;overflow:auto}
+#colaborador .co-comparacao-dialogo::backdrop{background:#0009}
+#colaborador .co-comparacao-dialogo>header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px}
+#colaborador .co-comparacao-dialogo h2{font-size:14px;font-weight:500;margin:0;color:inherit}
+#colaborador .co-comparacao-dialogo>input{width:100%;padding:8px;border:1px solid var(--co-line);background:var(--co-bg);color:inherit;border-radius:4px;font:inherit}
+#colaborador .co-comparacao-opcoes{max-height:40dvh;overflow:auto;margin-top:10px}
+#colaborador .co-comparacao-opcoes label{display:flex;align-items:center;gap:8px;padding:7px 0;margin:0;color:inherit;font:inherit;cursor:pointer}
+#colaborador .co-comparacao-opcoes input{width:15px;height:15px;margin:0;accent-color:var(--co-blue)}
+#colaborador .co-comparacao-opcoes input:disabled{opacity:.35}
+#colaborador .co-comparacao-aviso,#colaborador .co-comparacao-nota{color:var(--co-muted);font-size:11px}
+#colaborador .co-comparacao-aplicar{padding:8px 12px;border:0;border-radius:4px;background:#3269cc;color:#fff;cursor:pointer;font:inherit}
+#colaborador .co-comparacao-aplicar:disabled{opacity:.5;cursor:wait}
+#colaborador .co-comparacao-dialogo.ampliado{width:min(1200px,94vw)}
+#colaborador .co-comparacao-grafico{height:clamp(200px,48dvh,520px);width:100%}
+#colaborador .co-comparacao-grafico svg{width:100%;height:100%}
+#colaborador .co-comparacao-tabela-scroll{overflow:auto;margin-top:18px}
+#colaborador .co-comparacao-tabela{width:100%;border-collapse:collapse;font-size:11px;color:inherit}
+#colaborador .co-comparacao-tabela :is(td,th){padding:7px 6px;text-align:right;border-bottom:1px solid var(--co-line);white-space:nowrap;font-weight:400;background:transparent;color:inherit}
+#colaborador .co-comparacao-tabela th:first-child{text-align:left;min-width:150px}
+@media print{#colaborador .co-grafico-acoes,#colaborador .co-comparacao-dialogo{display:none!important}}
+/* Guia de primeiro acesso, com destaque no controle apresentado. */
+#colaborador #colaborador-tour{border:1px solid var(--co-line);border-radius:50%;width:26px;height:26px;min-height:26px;padding:0;justify-content:center;color:var(--co-blue);font-weight:700}
+#colaborador .co-tour-dialogo{position:fixed;inset:auto;margin:0;padding:0;border:0;background:transparent;color:var(--co-text);width:min(350px,calc(100vw - 24px));max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:visible;font:12px/1.6 Arial,sans-serif}
+#colaborador .co-tour-dialogo::backdrop{background:transparent}
+#colaborador .co-tour-destaque{position:fixed;pointer-events:none;border:2px solid var(--co-blue);border-radius:5px;box-shadow:0 0 0 9999px #000a;z-index:-1}
+#colaborador .co-tour-caixa{position:relative;background:var(--co-card);border:1px solid var(--co-line);border-radius:7px;padding:18px;max-height:calc(100dvh - 24px);overflow:auto}
+#colaborador .co-tour-dialogo h2{margin:4px 20px 8px 0;font-size:15px;font-weight:500;color:inherit}
+#colaborador .co-tour-dialogo p{margin:0 0 15px;color:var(--co-muted);font-size:12px}
+#colaborador .co-tour-progresso{color:var(--co-blue);font-size:10px}
+#colaborador .co-tour-dialogo button{font:11px Arial,sans-serif;cursor:pointer;border:1px solid var(--co-line);border-radius:4px;background:transparent;color:var(--co-text);padding:7px 12px}
+#colaborador .co-tour-dialogo button:disabled{opacity:.4;cursor:default}
+#colaborador .co-tour-dialogo .co-tour-fechar{position:absolute;right:10px;top:8px;font-size:20px;border:0;padding:1px 6px}
+#colaborador .co-tour-acoes{display:flex;justify-content:space-between;gap:12px}
+#colaborador .co-tour-dialogo [data-passo=proximo]{background:#3269cc;color:#fff;border-color:transparent}
+@media print{#colaborador .co-tour-dialogo{display:none!important}}
+@media(max-width:900px){#colaborador .colaborador-header>.colaborador-selecao{margin-right:0}#colaborador .colaborador-header>div:first-child{padding-right:72px}}
+/* Medidor anual junto aos dados e à barra de resumo. */
+#colaborador-perfil{display:grid;grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:auto auto minmax(0,1fr);align-content:start}
+#colaborador .co-identidade{grid-column:1;grid-row:1;grid-template-columns:56px minmax(180px,.85fr) minmax(300px,1.5fr)}
+#colaborador .co-annual{grid-column:1;grid-row:2}
+#colaborador .co-dashboard{grid-column:1/-1;grid-row:3}
+#colaborador .co-desempenho{grid-column:2;grid-row:1/3;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-left:12px;border-left:1px solid var(--co-line)}
+#colaborador .co-desempenho h2{font-size:10px;font-weight:500;margin:0 0 2px;color:var(--co-muted)}
+#colaborador .co-desempenho-desenho{width:100%;max-width:230px}
+#colaborador .co-desempenho svg{display:block;width:100%;height:auto}
+#colaborador .co-medidor-marca{stroke:var(--co-muted);stroke-width:1}
+#colaborador .co-medidor-eixo{fill:var(--co-muted);font:8px Arial,sans-serif}
+#colaborador .co-medidor-ponteiro{stroke:var(--co-text);stroke-width:3;stroke-linecap:round}
+#colaborador .co-medidor-centro{fill:var(--co-text)}
+#colaborador .co-medidor-valor{fill:var(--co-text);font:bold 15px Arial,sans-serif}
+@media(max-width:1100px) and (min-width:901px){#colaborador-perfil{grid-template-columns:minmax(0,1fr) 170px}#colaborador .co-identidade{grid-template-columns:46px minmax(130px,.7fr) minmax(270px,1.5fr)}#colaborador .co-nomes h2{font-size:15px}}
+@media(max-width:900px){#colaborador-perfil{display:flex}#colaborador .co-identidade{grid-template-columns:48px 1fr}#colaborador .co-desempenho{order:0;border-left:0;border-bottom:1px solid var(--co-line);padding:8px 0}#colaborador .co-dashboard{order:1}}
+@media print{#colaborador-perfil{display:grid;grid-template-columns:minmax(0,1fr) 170px;grid-template-rows:auto auto minmax(0,1fr)}#colaborador .co-desempenho{grid-column:2;grid-row:1/3;border-bottom:0;border-left:1px solid var(--co-line)}}

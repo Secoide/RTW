@@ -4,6 +4,7 @@ export function imprimirColaborador(root) {
   document.querySelector('#colaborador-impressao-frame')?.remove();
   const copia=root.cloneNode(true);copia.querySelector('.colaborador-selecao')?.remove();copia.querySelector('#colaborador-status')?.remove();
   copia.querySelector('.co-ranking')?.remove();
+  copia.querySelectorAll('.co-grafico-acoes,.co-comparacao-dialogo,.co-tour-dialogo').forEach(el=>el.remove());
   copia.querySelector('.co-dashboard')?.classList.add('co-impressao-sem-ranking');
   copia.querySelector('.colaborador-kicker').textContent='VISÃO GERAL DO COLABORADOR';
   for(const img of copia.querySelectorAll('img'))img.src=new URL(img.getAttribute('src'),window.location.href).href;
@@ -42,7 +43,7 @@ export function imprimirRanking(root) {
     for(const texto of [item.querySelector('.co-ranking-posicao').textContent,item.querySelector('.co-ranking-nome').textContent,item.querySelector('strong').textContent]){const td=document.createElement('td');td.textContent=texto;linha.append(td);}body.append(linha);
   }
   pagina.append(tabela);
-  const legenda=document.createElement('p');legenda.className='ranking-legenda';legenda.textContent='Normal +1 · Sábado +2 · Domingo/feriado +3 · Férias/licença 0 · Falta não justificada −2 · Falta justificada −1';pagina.append(legenda);
+  const legenda=document.createElement('p');legenda.className='ranking-legenda';legenda.textContent='Normal +1 · Sábado +2 · Domingo/feriado +3 · Férias/licença 0 · Falta não justificada −2 · Falta justificada −1 · Dia útil sem OS: informativo, sem desconto';pagina.append(legenda);
   const titulo=document.createElement('title');titulo.textContent=h.textContent;
   const estilo=document.createElement('style');estilo.textContent='@page{size:A4 portrait;margin:12mm}html,body{margin:0;padding:0;background:#fff;color:#26313a;font:11px Arial,sans-serif}.ranking-pagina{width:100%}h1{font-size:18px;margin:0 0 6px;font-weight:500}.ranking-emissao{font-size:10px;color:#687078;margin:0 0 15px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e2e4e7}th{font-size:10px;background:#f2f3f5}th:last-child,td:last-child{text-align:right}th:first-child,td:first-child{width:55px;color:#687078}thead{display:table-header-group}tr{break-inside:avoid}.ranking-legenda{font-size:9px;line-height:1.6;color:#687078;margin-top:14px;break-inside:avoid}';
   const frame=document.createElement('iframe');frame.id='colaborador-ranking-impressao-frame';frame.title='Impressão do ranking em A4 vertical';frame.setAttribute('aria-hidden','true');frame.style.cssText='position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;pointer-events:none';

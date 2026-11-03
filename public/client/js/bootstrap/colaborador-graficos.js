@@ -2,6 +2,17 @@ import { tipoInterrupcao } from '../utils/dom/preencher-resumo-anual-colab.js';
 
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const NS = 'http://www.w3.org/2000/svg';
+export function graficoDesempenho(alvo,percentual,ano,diasAvaliados){
+  const valor=Math.max(0,Math.min(100,Number(percentual)||0));
+  const svg=svgEl('svg',{viewBox:'0 0 250 155',role:'img','aria-label':'Desempenho anual '+ano+': '+(diasAvaliados?valor.toFixed(2).replace('.',',')+'%':'sem dias avaliados')});
+  const ponto=(v,r)=>{const a=Math.PI-v/100*Math.PI;return [125+Math.cos(a)*r,126-Math.sin(a)*r];};
+  const cores=['#df7272','#e6a19b','#cf98d8','#78a8e8','#68bfa1'];
+  cores.forEach((cor,i)=>{const a=ponto(i*20,96),b=ponto((i+1)*20,96),c=ponto((i+1)*20,51),d=ponto(i*20,51);svg.append(svgEl('path',{d:'M '+a+' A 96 96 0 0 1 '+b+' L '+c+' A 51 51 0 0 0 '+d+' Z',fill:cor}));});
+  for(let v=0;v<=100;v+=20){const a=ponto(v,98),b=ponto(v,103),t=ponto(v,113);svg.append(svgEl('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:'co-medidor-marca'}),svgEl('text',{x:t[0],y:t[1]+3,'text-anchor':'middle',class:'co-medidor-eixo'},v));}
+  if(diasAvaliados){const p=ponto(valor,91);svg.append(svgEl('line',{x1:125,y1:126,x2:p[0],y2:p[1],class:'co-medidor-ponteiro'}),svgEl('circle',{cx:125,cy:126,r:4,class:'co-medidor-centro'}));}
+  svg.append(svgEl('text',{x:125,y:148,'text-anchor':'middle',class:'co-medidor-valor'},diasAvaliados?valor.toFixed(2).replace('.',',')+'%':'Sem avaliação'));
+  alvo.replaceChildren(svg);
+}
 function svgEl(tag, atributos = {}, texto) {
   const el = document.createElementNS(NS,tag);
   for (const [nome,valor] of Object.entries(atributos)) el.setAttribute(nome,valor);
@@ -30,18 +41,22 @@ export function atividadeOS(dados, admissao, hoje = isoHoje()) {
   }
   return {ano,dias,mensais,total:dias.filter(d=>d.ativo).length};
 }
-export function graficoLinha(alvo, dados) {
+export function graficoLinha(alvo, dados, comparacoes = []) {
+  const series=[dados,...comparacoes];
   const svg = svgEl('svg',{viewBox:'0 0 560 180',role:'img','aria-label':'Dias com OS por mês em '+dados.ano});
-  const max = Math.max(5,...dados.mensais.filter(v=>v!==null)), teto = Math.ceil(max/5)*5;
+  const max = Math.max(5,...series.flatMap(s=>s.mensais.filter(v=>v!==null))), teto = Math.ceil(max/5)*5;
   const x=i=>35+i*46, y=v=>145-(v/teto)*115;
   for (const valor of [0,teto/2,teto]) {svg.append(svgEl('line',{x1:35,x2:541,y1:y(valor),y2:y(valor),class:'co-grid'}),svgEl('text',{x:26,y:y(valor)+3,'text-anchor':'end',class:'co-axis'},Number.isInteger(valor)?valor:valor.toFixed(1)));}
   MESES.forEach((mes,i)=>svg.append(svgEl('text',{x:x(i),y:168,'text-anchor':'middle',class:'co-axis'},mes)));
-  const pontos = dados.mensais.map((v,i)=>v===null?null:[x(i),y(v)]).filter(Boolean);
+  series.forEach((serie,indice)=>{
+  const cor=serie.cor || ['#73abfa','#edaa55','#ae8fe5','#54bfa3'][indice];
+  const pontos = serie.mensais.map((v,i)=>v===null?null:[x(i),y(v)]).filter(Boolean);
   if (pontos.length) {
-    svg.append(svgEl('polygon',{points:[[pontos[0][0],145],...pontos,[pontos.at(-1)[0],145]].map(p=>p.join(',')).join(' '),class:'co-area'}));
-    svg.append(svgEl('polyline',{points:pontos.map(p=>p.join(',')).join(' '),class:'co-linha'}));
-    dados.mensais.forEach((v,i)=>{if(v===null)return;const p=svgEl('circle',{cx:x(i),cy:y(v),r:3.5,class:'co-ponto'});p.append(svgEl('title',{},MESES[i]+': '+v+' dias com OS'));svg.append(p);});
+    if(series.length===1)svg.append(svgEl('polygon',{points:[[pontos[0][0],145],...pontos,[pontos.at(-1)[0],145]].map(p=>p.join(',')).join(' '),class:'co-area'}));
+    svg.append(svgEl('polyline',{points:pontos.map(p=>p.join(',')).join(' '),class:'co-linha',style:'stroke:'+cor}));
+    serie.mensais.forEach((v,i)=>{if(v===null)return;const p=svgEl('circle',{cx:x(i),cy:y(v),r:3.5,class:'co-ponto',style:'fill:'+cor});p.append(svgEl('title',{},(serie.nome?serie.nome+' · ':'')+MESES[i]+': '+v+' dias com OS'));svg.append(p);});
   }
+  });
   const titulo = svgEl('title',{},dados.mensais.map((v,i)=>MESES[i]+': '+(v===null?'mês futuro':v+' dias')).join('; '));svg.prepend(titulo);alvo.replaceChildren(svg);
 }
 export function graficoMapa(alvo, dados) {

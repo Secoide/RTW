@@ -20,14 +20,17 @@ function calcularRanking(base, ano, hoje = hojeBrasil()) {
   for (const a of base.interrupcoes) { const tipo = tipoAusencia(a.motivo);if(!tipo)continue;const id=String(a.id);if(!ausencias.has(id))ausencias.set(id,[]);ausencias.get(id).push({...a,tipo,inicio:iso(a.inicio),fim:iso(a.fim)}); }
   const prioridades = {licencas:3,naoJustificadas:2,justificadas:1};
   const ranking = base.colaboradores.map(c=>{
-    const r = {id:c.id,nome:c.nome,fotoperfil:c.fotoperfil,versao_foto:c.versao_foto,pontos:0,diasTrabalhados:0,normais:0,sabados:0,domingosFeriados:0,justificadas:0,naoJustificadas:0,licencas:0};
+    const r = {id:c.id,nome:c.nome,fotoperfil:c.fotoperfil,versao_foto:c.versao_foto,pontos:0,diasTrabalhados:0,normais:0,sabados:0,domingosFeriados:0,justificadas:0,naoJustificadas:0,licencas:0,uteisSemOS:0};
     const dias = trabalhos.get(String(c.id)) || new Set(), faltas = ausencias.get(String(c.id)) || [], admissao = iso(c.admissao);
     for(let d=new Date(Date.UTC(ano,0,1));d.getUTCFullYear()===ano;d.setUTCDate(d.getUTCDate()+1)){
       const dia=d.toISOString().slice(0,10);if(dia>hoje || (admissao && dia<admissao))continue;
       let ausencia=null;
       for(const a of faltas)if(dia>=a.inicio&&dia<=a.fim&&(!ausencia||prioridades[a.tipo]>prioridades[ausencia]))ausencia=a.tipo;
       if(ausencia){r[ausencia]++;r.pontos-=ausencia==='naoJustificadas'?2:ausencia==='justificadas'?1:0;continue;}
-      if(!dias.has(dia))continue;
+      if(!dias.has(dia)){
+        if(d.getUTCDay()!==0&&d.getUTCDay()!==6&&!feriados.has(dia)){r.uteisSemOS++;}
+        continue;
+      }
       r.diasTrabalhados++;
       if(feriados.has(dia)||d.getUTCDay()===0){r.domingosFeriados++;r.pontos+=3;}
       else if(d.getUTCDay()===6){r.sabados++;r.pontos+=2;}
