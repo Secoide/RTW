@@ -228,6 +228,7 @@ function renderTabela() {
     return;
   }
 
+  if(!tbody.dataset.fallbackImagem){tbody.dataset.fallbackImagem='true';tbody.addEventListener('error',e=>{const img=e.target;if(img.matches?.('img.materiais-catalogo-img')){const substituto=img.nextElementSibling;if(substituto){substituto.hidden=false;img.replaceWith(substituto);}}},true);}
   tbody.innerHTML = getLinhasCatalogoOrdenadas().map(item => {
     const editando = estadoMateriais.editando === Number(item.id);
     return `
@@ -236,7 +237,7 @@ function renderTabela() {
         <td class="materiais-catalogo-categoria">${escapeHtml(item.categoria || "-")}</td>
         <td class="materiais-catalogo-foto">
           ${item.imagem
-            ? `<img class="materiais-catalogo-img" src="${escapeHtml(montarSrcImagemMaterial(item))}" alt="${escapeHtml(item.descricao)}" loading="lazy" onerror="this.replaceWith(this.nextElementSibling)">
+            ? `<img class="materiais-catalogo-img" src="${escapeHtml(montarSrcImagemMaterial(item))}" alt="${escapeHtml(item.descricao)}" loading="lazy">
                <span class="materiais-catalogo-sem-img" hidden><i class="fa-solid fa-image"></i></span>`
             : `<span class="materiais-catalogo-sem-img"><i class="fa-solid fa-image"></i></span>`}
         </td>

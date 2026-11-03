@@ -1,3 +1,4 @@
+const {removerArquivoPublico}=require('./storagePublico.service');
 const {randomUUID}=require('node:crypto');
 const storage=require('../config/supabase');
 const Paineis=require('../models/paineisEletricos.model');
@@ -19,5 +20,5 @@ async function anexar(id,usuario,file){
  try{const d=await Model.criar(id,String(file.originalname).replace(/[\\/]/g,'_').slice(0,255),path,url,usuario);return {id:d.id,id_painel:d.id_painel,nome:d.nome,url:d.url,criado_em:d.criado_em};}
  catch(e){await bucket.remove([path]);throw e;}
 }
-async function remover(painelId,id){await painel(painelId);const d=await Model.buscar(id,painelId);if(!d)throw erro(404,'Diagrama não encontrado.');const {data,error}=await storage.storage.from(BUCKET).remove([d.arquivo_path]);if(error || !data?.length)throw erro(503,'Não foi possível excluir o PDF na nuvem. O registro foi mantido.');await Model.remover(id,painelId);return {sucesso:true};}
+async function remover(painelId,id){await painel(painelId);const d=await Model.buscar(id,painelId);if(!d)throw erro(404,'Diagrama não encontrado.');if(!await removerArquivoPublico(storage.storage.from(BUCKET),d.arquivo_path))throw erro(503,'Não foi possível excluir o PDF na nuvem. O registro foi mantido.');await Model.remover(id,painelId);return {sucesso:true};}
 module.exports={listar,anexar,remover};

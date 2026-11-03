@@ -1,3 +1,4 @@
+import { prepararFallbackImagens } from '../utils/dom/fallback-imagens.js';
 import { get_carregarPerfilUsuario } from "../events/click/handle-abrir-info-colab.js";
 import { open_form_AnexarCurso } from "../events/forms/anexarCurso.js";
 import { open_form_AnexarExame } from "../events/forms/anexarExame.js";
@@ -351,6 +352,7 @@ export function preencherTabelaColaboradoresRH() {
         xhrTabelaColaboradoresRH.abort();
     }
 
+    prepararFallbackImagens(tbody[0]);
     tbody.empty(); // Limpa antes de preencher
     xhrTabelaColaboradoresRH = $.ajax({
         url: 'api/rh/listar-geral',
@@ -379,7 +381,7 @@ export function preencherTabelaColaboradoresRH() {
                            <td>
                             <img class="tb_fotoColab"
                                     src="${colab.fotoperfil}?v=${colab.versao_foto}"
-                                    onerror="this.src='/imagens/user-default.webp'">
+                                    data-fallback-src="/imagens/user-default.webp">
                             </img>${colab.nome}</td>
                             <td>${colab.nascimento_idade}</td>
                             <td>${colab.cargo}</td>

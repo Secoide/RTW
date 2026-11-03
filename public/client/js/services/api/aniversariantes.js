@@ -1,3 +1,4 @@
+import { prepararFallbackImagens } from '../../utils/dom/fallback-imagens.js';
 export async function carregarAniversariantes() {
     try {
         const resp = await fetch("/api/colaboradores/aniversariantes");
@@ -20,6 +21,8 @@ export async function carregarAniversariantes() {
             return;
         }
 
+        prepararFallbackImagens(listaMes);
+        prepararFallbackImagens(listaProximos);
         listaMes.innerHTML = "";
         listaProximos.innerHTML = "";
 
@@ -59,9 +62,7 @@ export async function carregarAniversariantes() {
 
             return 0;
         });
-        aniversariantesMesProcessado.forEach(c => {
-            listaMes.innerHTML += montarCard(c);
-        });
+        listaMes.innerHTML = aniversariantesMesProcessado.map(montarCard).join('');
 
         // próximos 40 dias
         const proximos = colaboradores
@@ -110,9 +111,7 @@ export async function carregarAniversariantes() {
 
 
 
-        proximos.forEach(c => {
-            listaProximos.innerHTML += montarCardProximo(c);
-        });
+        listaProximos.innerHTML = proximos.map(montarCardProximo).join('');
         setTimeout(() => {
             document.querySelectorAll(".card-aniver[data-hoje='true']").forEach(card => {
                 aplicarConfeteNoCard(card);
@@ -167,7 +166,7 @@ function montarCard(colab) {
     <div class="card-aniver ${classeHoje}" data-hoje="${isHoje}">
         <img class="tb_fotoColab"
             src="${colab.fotoperfil}?v=${colab.versao_foto}"
-            onerror="this.src='/imagens/user-default.webp'">
+            data-fallback-src="/imagens/user-default.webp">
 
         <div>
             <div class="nome">${colab.nome}</div>
@@ -185,7 +184,7 @@ function montarCardProximo(colab) {
         <div class="card-aniver">
            <img class="tb_fotoColab"
                 src="${colab.fotoperfil}?v=${colab.versao_foto}"
-                onerror="this.src='/imagens/user-default.webp'">
+                data-fallback-src="/imagens/user-default.webp">
             <div>
                 <div class="nome">${colab.nome}</div>
                 <div class="data">${colab.dataFormatada} <span style="color:#aaa;"> — em ${colab.diff} dias</span></div>

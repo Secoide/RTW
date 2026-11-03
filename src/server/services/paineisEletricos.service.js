@@ -1,6 +1,7 @@
 const path = require("path");
 const supabase = require("../config/supabase");
 const PaineisModel = require("../models/paineisEletricos.model");
+const { removerArquivoPublico } = require('./storagePublico.service');
 
 const BUCKET_PAINEIS = "Paineis";
 const PASTA_PAINEIS = "Painel_Eletrico";
@@ -245,10 +246,8 @@ async function deletarImagemPainel(idImagem) {
     throw { status: 404, mensagem: "Imagem do painel não encontrada." };
   }
 
-  const deletada = await PaineisModel.deletarImagemPainel(idImagem);
-  if (deletada && imagem.imagem_path) {
-    await supabase.storage.from(BUCKET_PAINEIS).remove([imagem.imagem_path]);
-  }
+  if(imagem.imagem_path&&!await removerArquivoPublico(supabase.storage.from(BUCKET_PAINEIS),imagem.imagem_path))throw {status:503,mensagem:'Não foi possível confirmar a exclusão da foto na nuvem. Verifique as permissões SELECT e DELETE do bucket Paineis. O registro foi mantido.'};
+  await PaineisModel.deletarImagemPainel(idImagem);
 
   return {
     mensagem: "Imagem do painel excluída.",
@@ -267,8 +266,7 @@ async function deletarPainel(id) {
   const imagens = await PaineisModel.listarImagensPainel(id);
   const paths = [...new Set([...imagens.map(imagem => imagem.imagem_path), painel.imagem_path].filter(Boolean))];
   for (const path of paths) {
-    const { data, error } = await supabase.storage.from(BUCKET_PAINEIS).remove([path]);
-    if (error || !data?.length) throw { status: 503, mensagem: "Não foi possível excluir uma foto na nuvem. O painel foi mantido; tente novamente. Os anexos já excluídos não serão recuperados." };
+    if (!await removerArquivoPublico(supabase.storage.from(BUCKET_PAINEIS),path)) throw { status: 503, mensagem: "Não foi possível confirmar a exclusão de uma foto na nuvem. Verifique as permissões SELECT e DELETE do bucket Paineis. O painel foi mantido; os anexos já excluídos não serão recuperados." };
     // Clear only the references whose cloud deletion has been confirmed, so
     // retrying a partially completed deletion starts with the remaining files.
     for (const imagem of imagens.filter(imagem => imagem.imagem_path === path)) await PaineisModel.deletarImagemPainel(imagem.id_imagem);

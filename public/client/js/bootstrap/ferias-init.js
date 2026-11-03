@@ -406,7 +406,7 @@ function renderFerias() {
             <div class="barra-esquerda">
               <img class="barra-foto"
                    src="${colab.fotoperfil || "/imagens/user-default.webp"}?v=${colab.versao_foto || ""}"
-                   onerror="this.src='/imagens/user-default.webp'">
+                   data-fallback-src="/imagens/user-default.webp">
               <span class="barra-nome">${colab.nome}</span>
             </div>
             <div class="barra-direita">
@@ -418,6 +418,7 @@ function renderFerias() {
           width: duracao * LARGURA_DIA
         });
 
+        barra.find('img').one('error',function(){if(this.getAttribute('src')!=='/imagens/user-default.webp')this.src='/imagens/user-default.webp';});
         grade.append(barra);
         initDragBarra(barra, colab.id, periodo.id);
       });

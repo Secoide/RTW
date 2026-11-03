@@ -67,7 +67,7 @@ function mostrarModal401() {
       <div class="erro-401-html">
         <div class="erro-401-modal">
           <div class="erro-401-illustration" aria-hidden="true">
-            <img src="/imagens/erro-401-sessao.png" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+            <img src="/imagens/erro-401-sessao.png" alt="">
             <div class="erro-401-fallback">
               <i class="fa-solid fa-lock"></i>
             </div>
@@ -87,6 +87,10 @@ function mostrarModal401() {
     </div>
   `;
 
+  overlay.querySelector('.erro-401-illustration img')?.addEventListener('error',function(){
+    this.style.display='none';
+    this.nextElementSibling.style.display='grid';
+  },{once:true});
   document.body.appendChild(overlay);
   document.body.classList.add("erro-401-bloqueado");
   document.getElementById("erro401LoginBtn")?.addEventListener("click", irParaLogin401);

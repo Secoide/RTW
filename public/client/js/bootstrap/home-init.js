@@ -779,6 +779,9 @@ export async function initHome() {
     .then(res => res.text())
     .then(html => {
       document.getElementById("menuperfil").innerHTML = html;
+      document.getElementById('fotoavatarPerfil')?.addEventListener('error',function(){
+        this.src='/imagens/user-default.webp';
+      },{once:true});
       document.getElementById("bt_perfilhome").innerText =
         sessionStorage.getItem("nome_usuario");
 
