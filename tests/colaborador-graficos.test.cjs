@@ -32,3 +32,8 @@ test('folga e feriado sem trabalho são neutros; antes da admissão fica fora do
   assert.equal(r.dias.find(d=>d.iso==='2026-01-01').tipo,'descanso');assert.equal(r.dias.find(d=>d.iso==='2026-01-03').tipo,'descanso');
   const outro=atividade({ano:2026,trabalhados:['2026-01-01']},'2026-01-02','2026-01-05');assert.equal(outro.dias[0].tipo,'fora');
 });
+
+test('mapa identifica afastamentos sem classificar como falta ou licença',()=>{
+ const r=atividade({ano:2026,trabalhados:[],interrupcoes:[{inicio:'2026-01-05',fim:'2026-01-09',motivo:'Afastamento INSS'}]},'2026-01-05','2026-01-09');
+ assert.equal(r.dias.filter(d=>d.tipo==='afastamento').length,5);assert.equal(r.dias.filter(d=>d.tipo==='ausencia').length,0);
+});

@@ -29,8 +29,9 @@ function adicionarDias(data, quantidade) {
 
 export function tipoInterrupcao(motivo) {
     const texto = normalizarTexto(motivo);
+    if (texto.includes('afast')) return 'afastamento';
 
-    if (texto.includes('ferias') || texto.includes('maternidade') || texto.includes('paternidade')) {
+    if (texto.includes('ferias') || texto.includes('licenca') || texto.includes('maternidade') || texto.includes('paternidade')) {
         return 'licenca';
     }
 
@@ -243,7 +244,7 @@ export function calcularResumoAnual(dados, dataAdmissao) {
     const contagem = dias.reduce((total, dia) => {
         if (dia.tipo in total) total[dia.tipo] += 1;
         return total;
-    }, { trabalhado: 0, especial: 0, justificada: 0, ausencia: 0, licenca: 0, descanso: 0, futuro: 0 });
+    }, { trabalhado: 0, especial: 0, justificada: 0, ausencia: 0, licenca: 0, afastamento: 0, descanso: 0, futuro: 0 });
     const diasAvaliados = contagem.trabalhado + contagem.especial + contagem.ausencia + contagem.justificada;
     const diasPositivos = contagem.trabalhado + contagem.especial;
     const percentual = diasAvaliados ? (diasPositivos / diasAvaliados) * 100 : 0;
@@ -264,6 +265,7 @@ function renderizarResumoAnual(dados, dataAdmissao) {
         { tipo: 'ausencia', quantidade: contagem.ausencia, titulo: 'faltas nao justificadas ou dias sem OS' },
         { tipo: 'especial', quantidade: contagem.especial, titulo: 'dias trabalhados em fim de semana/feriado' },
         { tipo: 'licenca', quantidade: contagem.licenca, titulo: 'dias de ferias/licenca descontados' },
+        { tipo: 'afastamento', quantidade: contagem.afastamento, titulo: 'dias de afastamento, sem desconto' },
         { tipo: 'descanso', quantidade: contagem.descanso + contagem.futuro, titulo: 'dias de folga, feriado ou ainda a apurar' }
     ];
     const segmentos = grupos

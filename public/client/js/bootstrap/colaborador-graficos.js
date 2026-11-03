@@ -67,7 +67,7 @@ export function graficoMapa(alvo, dados) {
     const coluna=Math.floor((offset+i)/7),x=31+coluna*passo,y=20+d.semana*passo;
     if(d.iso.endsWith('-01'))svg.append(svgEl('text',{x,y:11,class:'co-axis'},MESES[d.mes]));
     const rect=svgEl('rect',{x,y,width:9,height:9,rx:2,class:'co-dia '+d.tipo});
-    const descricoes={futuro:'Data futura',fora:'Antes da admissão',ativo:'Alocado em OS','feriado-trabalhado':'Feriado trabalhado',descanso:'Folga / feriado sem OS',licenca:'Férias / licença',justificada:'Falta justificada',ausencia:'Falta não justificada / dia útil sem OS'};
+    const descricoes={futuro:'Data futura',fora:'Antes da admissão',ativo:'Alocado em OS','feriado-trabalhado':'Feriado trabalhado',descanso:'Folga / feriado sem OS',licenca:'Férias / licença',afastamento:'Afastamento',justificada:'Falta justificada',ausencia:'Falta não justificada / dia útil sem OS'};
     rect.append(svgEl('title',{},d.iso.split('-').reverse().join('/')+' · '+(d.motivo && !d.futuro && d.vinculado ? d.motivo : descricoes[d.tipo])));svg.append(rect);
   });
   alvo.replaceChildren(svg);

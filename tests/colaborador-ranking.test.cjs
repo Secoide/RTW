@@ -28,3 +28,8 @@ test('consulta em lote filtra Produção, desligados e apenas faltas aprovadas',
  const ctx=vm.createContext({require:n=>n.includes('feriados')?{listarFeriados:async()=>[]}:db,module:{exports:{}},console});vm.runInContext(fs.readFileSync(path.join(raiz,'src/server/models/colaboradorRanking.model.js'),'utf8'),ctx);await ctx.module.exports.carregarBase(2026);
  assert.equal(chamadas.length,3);assert(chamadas[0][0].includes('c.idsetor = 1'));assert(chamadas[0][0].includes("'demissional'"));assert(chamadas[1][0].includes('SELECT DISTINCT'));assert(chamadas[2][0].includes("status = 'aprovado'"));assert.deepEqual(Array.from(chamadas[1][1]),[1,2,'2026-01-01','2027-01-01']);
 });
+
+test('afastamento não desconta pontos nem conta como dia útil sem OS, mesmo sobreposto a falta',()=>{
+ const b=base();b.trabalhados=[{id:1,dia:'2026-01-05'}];b.interrupcoes=[{id:1,inicio:'2026-01-06',fim:'2026-01-09',motivo:'Afastamento por saúde'},{id:1,inicio:'2026-01-06',fim:'2026-01-06',motivo:'Falta Não Justificada'}];
+ const r=servico().calcularRanking(b,2026,'2026-01-09').ranking[0];assert.equal(r.pontos,1);assert.equal(r.licencas,4);assert.equal(r.naoJustificadas,0);assert.equal(r.uteisSemOS,0);
+});

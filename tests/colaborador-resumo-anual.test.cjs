@@ -21,3 +21,8 @@ test('o período anterior à admissão não conta como ausência',()=>{
 test('anos bissextos preservam o total de 366 dias',()=>{
   const r=calcular(2024,11,31,{ano:2024,trabalhados:[]});assert.equal(r.dias.length,366);assert.equal(r.percentual,0);
 });
+
+test('afastamento fica separado das faltas e não reduz o percentual anual',()=>{
+ const r=calcular(2026,0,9,{ano:2026,trabalhados:['2026-01-05'],interrupcoes:[{inicio:'2026-01-06',fim:'2026-01-09',motivo:'Afastamento por saúde'}]},'2026-01-05');
+ assert.equal(r.contagem.afastamento,4);assert.equal(r.contagem.ausencia,0);assert.equal(r.diasAvaliados,1);assert.equal(r.percentual,100);
+});

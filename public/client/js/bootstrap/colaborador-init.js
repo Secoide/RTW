@@ -51,7 +51,7 @@ export async function initColaborador(){
     const cab=elemento('header','co-ano-cab');cab.append(elemento('h2','','Resumo anual · '+dados.ano),elemento('strong','co-percentual',r.percentual.toFixed(2).replace('.',',')+'%'));
     const barra=elemento('div','co-ano-barra');barra.setAttribute('role','img');barra.setAttribute('aria-label','Resumo anual: '+r.percentual.toFixed(2)+'% dos dias avaliados');
     const legenda=elemento('div','co-ano-legenda');
-    for(const [tipo,titulo,qtd] of [['trabalhado','Trabalhados',r.contagem.trabalhado],['especial','Fds./feriado',r.contagem.especial],['justificada','Justificadas',r.contagem.justificada],['ausencia','Faltas/sem OS',r.contagem.ausencia],['licenca','Licenças',r.contagem.licenca],['descanso','Folgas/a apurar',r.contagem.descanso+r.contagem.futuro]]){
+    for(const [tipo,titulo,qtd] of [['trabalhado','Trabalhados',r.contagem.trabalhado],['especial','Fds./feriado',r.contagem.especial],['justificada','Justificadas',r.contagem.justificada],['ausencia','Faltas/sem OS',r.contagem.ausencia],['licenca','Licenças',r.contagem.licenca],['afastamento','Afastamentos',r.contagem.afastamento],['descanso','Folgas/a apurar',r.contagem.descanso+r.contagem.futuro]]){
       if(qtd){const parte=elemento('span',tipo);parte.style.width=(qtd/r.dias.length*100)+'%';parte.title=qtd+' dias · '+titulo;barra.append(parte);}
       const item=elemento('span');item.append(elemento('i',tipo),document.createTextNode(titulo+' '),elemento('b','',qtd));legenda.append(item);
     }
@@ -142,7 +142,7 @@ export async function initColaborador(){
         linha.cab.lastChild.textContent=atividade.total+' dias · '+dados.ano;
         configurarComparacao({root,linha,atividade,pessoa:d,colaboradores,api,signal});
         const legenda=elemento('div','co-mapa-legenda');
-        for(const [classe,texto] of [['ativo','Com OS'],['feriado-trabalhado','Feriado trabalhado'],['licenca','Férias/licenças'],['justificada','Justificadas'],['ausencia','Faltas/sem OS'],['descanso','Folgas'],['futuro','Futuro/fora do vínculo']])legenda.append(elemento('span','co-amostra-'+classe,texto));
+        for(const [classe,texto] of [['ativo','Com OS'],['feriado-trabalhado','Feriado trabalhado'],['licenca','Férias/licenças'],['afastamento','Afastamento'],['justificada','Justificadas'],['ausencia','Faltas/sem OS'],['descanso','Folgas'],['futuro','Futuro/fora do vínculo']])legenda.append(elemento('span','co-amostra-'+classe,texto));
         mapa.area.append(legenda);
       });
       if(autorizado('5,6,7,99'))carregar('/api/colaboradores/historico-empresas/'+d.id,[clientes.conteudo],dados=>graficoClientes(clientes.conteudo,dados));else vazio(clientes.conteudo,'Indicador restrito ao seu perfil.');
