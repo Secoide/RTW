@@ -23,8 +23,10 @@ router.post('/referencia',executar(async(req,res)=>{
 }));
 router.post('/',executar(async(req,res)=>res.status(201).json(await Service.criar(req.calibracaoEscopo,req.user.id,req.body))));
 router.put('/:id',executar(async(req,res)=>res.json(await Service.atualizar(req.calibracaoEscopo,req.params.id,req.body))));
+router.delete('/:id',executar(async(req,res)=>res.json(await Service.removerEquipamento(req.calibracaoEscopo,req.params.id))));
 router.post('/:id/certificados',(req,res,next)=>upload(req,res,e=>e?res.status(400).json({erro:e.code === 'LIMIT_FILE_SIZE'?'O PDF deve ter até 20 MB.':'Não foi possível receber o PDF. Verifique o arquivo e os campos.'}):next()),executar(async(req,res)=>res.status(201).json(await Service.anexar(req.calibracaoEscopo,req.user.id,req.params.id,req.body,req.file))));
 router.get('/certificados/:id/abrir',executar(async(req,res)=>{res.set('Referrer-Policy','no-referrer');res.redirect(302,await Service.abrir(req.calibracaoEscopo,req.params.id));}));
+router.put('/certificados/:id',executar(async(req,res)=>res.json(await Service.atualizarCertificado(req.calibracaoEscopo,req.params.id,req.body))));
 router.post('/certificados/:id/compartilhar',executar(async(req,res)=>res.json(await Service.compartilhar(req.calibracaoEscopo,req.params.id))));
 router.delete('/certificados/:id/compartilhar',executar(async(req,res)=>res.json(await Service.revogar(req.calibracaoEscopo,req.params.id))));
 router.delete('/certificados/:id',executar(async(req,res)=>res.json(await Service.remover(req.calibracaoEscopo,req.params.id))));

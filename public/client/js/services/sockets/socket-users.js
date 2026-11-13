@@ -1,6 +1,5 @@
 // /public/client/js/services/sockets/socket-users.js
 import { reduzirNome } from "../../utils/formatters/strings-format.js";
-import { get_carregarPerfilUsuario } from "../../events/click/handle-abrir-info-colab.js";
 
 let ultimaListaUsuarios = [];
 let usuariosAtuais = [];
@@ -234,9 +233,13 @@ function encontrarColaboradoresMencionados(texto) {
 
 async function abrirInfoColaborador(id) {
   try {
-    await get_carregarPerfilUsuario(id);
+    const resposta = await (window.apiFetch || fetch)(`/api/colaboradores/info-chat/${encodeURIComponent(id)}`, { credentials: 'include' });
+    if (!resposta.ok) throw new Error('Não foi possível consultar o colaborador.');
+    const { nome, cargo, setor } = await resposta.json();
+    const texto = [cargo, setor].filter(Boolean).join(' · ') || 'Informações profissionais indisponíveis.';
+    await Swal.fire({ titleText: nome || 'Colaborador', text: texto, confirmButtonText: 'Fechar', theme: 'dark' });
   } catch (err) {
-    console.warn("Nao foi possivel abrir o perfil do colaborador.", err);
+    if (typeof Swal !== 'undefined') Swal.fire('Consulta indisponível', 'Não foi possível consultar o colaborador.', 'warning');
   }
 }
 

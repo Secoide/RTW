@@ -1,4 +1,5 @@
 import { preencherTabelaAtestar } from "../../utils/dom/preencher-tabela-atestar.js";
+import { podeGerenciarAusencias, podeEditarDadosPessoais, podeEditarDadosProfissionais } from "../../state/role.js";
 import { preencherTabelaColaboradoresRH } from "../../bootstrap/rh-init.js";
 import {
     preencherCbxSetor,
@@ -6,7 +7,12 @@ import {
 } from "./populate-combobox.js";
 
 
-export function initColabForm() {
+export function initColabForm(idColaborador) {
+    $('#form_atestar').prop('hidden', !podeGerenciarAusencias());
+    $('#bt_editColab').prop('hidden', !podeEditarDadosPessoais(idColaborador));
+    $('#camposProfissionais').prop('disabled', !podeEditarDadosProfissionais());
+    $('#bt_editColabProf').prop('hidden', !podeEditarDadosProfissionais());
+
     $(document).off("submit.colabForm", "#form_atestar");
     $(document).off("submit.colabForm", "#formColaborador");
     $(document).off("submit.colabForm", "#formColaboradorProfissional");
@@ -59,7 +65,7 @@ export function initColabForm() {
 
                 // 🔹 Estado UI
                 $('#btn_upload').removeClass('hidden-inicial');
-                $('#bt_editColab').removeClass('hidden-inicial');
+                $('#bt_editColab').removeClass('hidden-inicial').prop('hidden', !podeEditarDadosPessoais(res.id));
                 $('#bt_cadColaborador').addClass('hidden-inicial');
 
                 const $wrap = $('#formColaboradorProfissional');
@@ -75,6 +81,7 @@ export function initColabForm() {
             else if (botaoClicado === 'editColab') {
 
                 const idColaborador = $('#idColaborador').val();
+                if (!podeEditarDadosPessoais(idColaborador)) return;
 
                 const res = await $.ajax({
                     url: `/api/colaboradores/editar/${idColaborador}`,
@@ -190,6 +197,7 @@ export function initColabForm() {
 
     $(document).on('submit.colabForm', '#formColaboradorProfissional', function (e) {
         e.preventDefault();
+        if (!podeEditarDadosProfissionais()) return;
         const $form = $(this);
         const $botao = $form.find('[type="submit"], button:not([type]), #bt_editColabProf').filter(':visible').last();
 

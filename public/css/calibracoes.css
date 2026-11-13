@@ -1,4 +1,6 @@
 /* Controle de calibração: estilos restritos à terceira ferramenta. */
+.swal2-popup.cal-confirm-dialog .swal2-title{font-size:18px}
+.swal2-popup.cal-confirm-dialog .swal2-html-container{font-size:13px;line-height:1.5}
 #ferramentas:has([data-tool-panel="calibracoes"].active){grid-template-rows:auto minmax(0,1fr)}
 #calibracoes{--cal-bg:#1c1c1c;--cal-ink:#e6e6e6;--cal-muted:#a0a0a0;--cal-line:#ffffff12;--cal-accent:#3498f1;color:var(--cal-ink);background:var(--cal-bg);box-shadow:none;backdrop-filter:none;color-scheme:dark;font:12px/1.4 Arial,sans-serif}
 #calibracoes [hidden]{display:none!important}
@@ -16,6 +18,8 @@
 #calibracoes .cal-primary{background:#2263ee;color:#fff;border-color:transparent}
 #calibracoes .cal-primary:hover{background:#1c56d5}
 #calibracoes .cal-danger{color:#ed9898}
+#calibracoes .cal-actions .cal-btn.cal-danger[data-cal-action="remover-equipamento"]{background:#ae3038;color:#fff;border-color:#ae3038}
+#calibracoes .cal-btn[data-cal-action="remover-equipamento"]:hover{background:#932830;border-color:#932830}
 #calibracoes .cal-resumo{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:6px 14px 0}
 #calibracoes .cal-stat{border:0;border-bottom:1px solid var(--cal-line);border-radius:0;background:transparent;padding:6px 10px;display:flex;align-items:baseline;gap:8px;text-align:left;color:var(--cal-muted)}
 #calibracoes .cal-stat strong{font-size:20px;color:var(--cal-ink);font-weight:500}
@@ -40,6 +44,7 @@
 #calibracoes .cal-badge.regular{background:transparent;color:#91c9a1}#calibracoes .cal-badge.vencida{background:transparent;color:#ed9898}#calibracoes .cal-badge.proxima{background:transparent;color:#e2b96e}
 #calibracoes .cal-inspector{border-left:1px solid var(--cal-line);background:#202020;overflow:auto;padding:12px;scrollbar-width:thin}
 #calibracoes .cal-inspector h4{font-size:14px;margin-bottom:4px}#calibracoes .cal-inspector small{color:var(--cal-muted)}
+#calibracoes .cal-model,#calibracoes .cal-inspector .cal-model{color:var(--cal-accent);font-weight:600}
 #calibracoes .cal-inspector dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:4px;font-size:11px;margin:12px 0}
 #calibracoes dt{color:var(--cal-muted)}#calibracoes dd{margin:0;overflow-wrap:anywhere}
 #calibracoes .cal-note{background:#ffffff04;padding:8px;border-radius:4px;font-size:12px;white-space:pre-wrap;margin:10px 0}
@@ -222,3 +227,12 @@
 
 #calibracoes .cal-timeline-period.proxima{--cal-period-color:#e59a38}
 #calibracoes .cal-timeline-period.vencida{--cal-period-color:#e16a6a}
+#calibracoes .cal-timeline-navigation{display:flex;align-items:center;gap:3px}
+#calibracoes #cal-timeline-scroll{cursor:grab;touch-action:pan-y;user-select:none}
+#calibracoes #cal-timeline-scroll:active{cursor:grabbing}
+#calibracoes #cal-timeline-chart{min-width:0}
+#calibracoes #cal-timeline-chart [aria-current="date"]{background:color-mix(in srgb,#3498f1 17%,var(--cal-bg));color:var(--cal-ink);font-weight:700}
+@media(max-width:760px){
+  #calibracoes #cal-timeline-chart :is(.cal-timeline-axis,.cal-timeline-row,.cal-timeline-totals){grid-template-columns:minmax(72px,23%) minmax(0,1fr);gap:4px}
+  #calibracoes #cal-timeline-chart .cal-timeline-months{font-size:8px}
+}

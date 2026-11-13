@@ -64,7 +64,28 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Corrigido
 - Sincronização das reações do chat para que apareçam também para o autor da mensagem;
 
+
+
 ### Removido
+
+
+
+## [2.3.1] - 2026-11-12
+## Nome: 🔨 Ajustes
+### Adicionado
+- Adicionado botão Editar em cada certificado do histórico de calibrações. A janela abre com datas, número, laboratório e observações preenchidos para alteração;
+- Fabricante e Laboratório agora sugerem nomes já cadastrados enquanto você digita, permitindo também novos valores;
+- Filtro “Ocultar concluídas” ativado por padrão na Gestão → OS; ao desmarcar, as OS concluídas voltam a aparecer, respeitando a busca.
+- Adicionado Botão vermelho “Excluir" à direita de Editar Equipamente, com confirmação para apagar primeiro os certificados e PDFs anexados e depois o equipamento; se houver falha, o equipamento é mantido;
+
+### Alterado
+- O calendário das calibrações agora abre com 12 meses: 5 anteriores, o atual destacado e 6 seguintes. Arrastar ou usar as setas desloca o período. Hoje volta à janela do mês atual;
+- Ao selecionar Concluído na Gestão → OS, o sistema registra a data atual e atualiza a coluna de conclusão;
+
+### Corrigido
+- Não era possivel excluir painel cadastrado quando referencia de imagem não era encontrado no banco de dados;
+- Sistema não mostrava a lista de status para alteração na tela Gestão, aba OS;
+- As exportações da programação para WhatsApp e PDF agora incluem todas as OS com colaboradores alocados no dia, mesmo as que ainda não aparecem na tela;
 
 
 

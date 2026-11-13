@@ -1,6 +1,7 @@
 // /public/client/js/utils/dom/preencher-tabela-atestar.js
 
 import { formatarDataISO } from "../formatters/date-format.js";
+import { podeGerenciarAusencias } from "../../state/role.js";
 
 function escaparHtml(valor) {
   return String(valor ?? "")
@@ -55,7 +56,7 @@ function montarLinha(registro, { pendente = false } = {}) {
           </button>
         </div>
       `
-    : `${statusNormalizado(registro) === "reprovado" ? statusHtml(registro) : ""} <i class="fa-solid fa-trash-can bt_excluirHistoricoAtestar" title="Excluir registro" aria-label="Excluir registro"></i>`;
+    : `${statusNormalizado(registro) === "reprovado" ? statusHtml(registro) : ""}${podeGerenciarAusencias() ? ' <i class="fa-solid fa-trash-can bt_excluirHistoricoAtestar" title="Excluir registro" aria-label="Excluir registro"></i>' : ""}`;
 
   return `
     <tr data-idatestar="${escaparHtml(registro.id_funcInterrups)}">

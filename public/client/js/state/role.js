@@ -5,6 +5,27 @@ export function getUserRole() {
   return (papel && papel.trim()) || (nivel && nivel.trim()) || '';
 }
 
+export function podeGerenciarAusencias() {
+  const nivel = Number(sessionStorage.getItem('nivel_acesso'));
+  return Number(sessionStorage.getItem('id_usuario')) === 999 || [4, 5, 99].includes(nivel);
+}
+
+export function podeEditarDadosPessoais(id) {
+  const usuario = Number(sessionStorage.getItem('id_usuario'));
+  const nivel = Number(sessionStorage.getItem('nivel_acesso'));
+  return Number(id) > 0 && (Number(id) === usuario || usuario === 999 || [4, 6, 7, 99].includes(nivel));
+}
+
+export function podeEditarDadosProfissionais() {
+  const nivel = Number(sessionStorage.getItem('nivel_acesso'));
+  return Number(sessionStorage.getItem('id_usuario')) === 999 || [4, 99].includes(nivel);
+}
+
+export function podeVerResumoAnual() {
+  const nivel = Number(sessionStorage.getItem('nivel_acesso'));
+  return Number(sessionStorage.getItem('id_usuario')) === 999 || [4, 5, 6, 7, 99].includes(nivel);
+}
+
 let permissoesDinamicas = null;
 let carregamentoPermissoes = null;
 const RECURSOS_PUBLICOS = new Set(['menu.inicio', 'menu.versao', 'menu.guia']);

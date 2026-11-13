@@ -10,6 +10,7 @@ function service(options={}) {
  const calls=[],certs=new Map();
  const model={ listar:async()=>[], equipamento:async(s,id)=>options.semEquipamento?null:{id}, cadastrar:async(r,s,u,imp)=>{calls.push({r,s,u,imp});return r.length;}, atualizar:async()=>{}, adicionarCertificado:async(c,s,e,u)=>{if(options.dbFalha)throw new Error('db');calls.push({c,s,e,u});}, certificado:async(s,id)=>certs.get(s+':'+id)||null, compartilhar:async(s,id,token)=>{certs.get(s+':'+id).compartilhamento=token;}, publico:async t=>[...certs.values()].find(c=>c.compartilhamento===t), removerCertificado:async(s,id)=>certs.delete(s+':'+id) };
  const storage={getBucket:async()=>{calls.push({bucketConsulta:true});return options.bucketErro?{error:options.bucketErro}:options.bucketAusente?{error:{statusCode:404,message:'Bucket not found'}}:{data:{public:!!options.publicBucket}};},createBucket:async()=>{calls.push({bucketCriacao:true});return {};},from:bucket=>({getPublicUrl:p=>{calls.push({publicUrl:p,bucket});return {data:{publicUrl:"https://storage.example/storage/v1/object/public/"+bucket+"/"+p}};},upload:async(p,b,o)=>{calls.push({upload:p,o});return options.uploadErro?{error:options.uploadErro}:options.uploadFalha?{error:{message:'down'}}:{};},remove:async p=>{calls.push({removed:p,bucket});return {data:options.semExclusao?[]:[{name:p[0]}]};},createSignedUrl:async(p,ttl)=>({data:{signedUrl:'https://storage.example/'+p+'?ttl='+ttl}})})};
+ model.anexarCertificado=model.adicionarCertificado;
  const ctx={require:n=>n==='crypto'?crypto:n.includes('calibracoes.model')?model:n.includes('referencia.json')?referencia:{storage},module:{exports:{}},process:{env:{SUPABASE_URL:'https://storage.example',SUPABASE_SERVICE_ROLE_KEY:options.chave || 'sb_secret_teste'}},Buffer,URL,console};
  vm.runInNewContext(fs.readFileSync(path.join(root,'src/server/services/calibracoes.service.js'),'utf8'),ctx);
  return {s:ctx.module.exports,calls,certs};
@@ -49,6 +50,38 @@ test('shared access opens only requested certificate, expires signed URLs and su
  assert.equal((await s.compartilhar(8,'one')).caminho,r.caminho);await s.revogar(8,'one');await assert.rejects(s.publico(token),{status:404});assert.notEqual((await s.compartilhar(8,'one')).caminho,r.caminho);
 });
 test('records without PDFs cannot be shared',async()=>{const {s,certs}=service();certs.set('0:old',{id:'old'});await assert.rejects(s.compartilhar(0,'old'),{status:400});});
+test('equipment deletion removes certificates first and preserves equipment on document failure',async()=>{
+ for(const falhar of [false,true]){
+  const eventos=[];
+  const conexao={
+   beginTransaction:async()=>eventos.push('begin'),commit:async()=>eventos.push('commit'),rollback:async()=>eventos.push('rollback'),release:()=>{},
+   query:async(sql,args)=>{
+    if(sql.includes('FOR UPDATE')){assert.deepEqual(Array.from(args),[8,'equip']);return [[{id:'equip'}]];}
+    if(sql.startsWith('SELECT *'))return [[{id:'a'},{id:'b'}]];
+    eventos.push(sql.includes('DELETE FROM calibracao_equipamentos')?'equipamento':'certificado '+args[1]);return [{affectedRows:1}];
+   }
+  };
+  const ctx={require:()=>({query:async sql=>[sql.startsWith('SHOW')?[{Field:'arquivo_bucket'}]:[]],getConnection:async()=>conexao}),module:{exports:{}},console};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'src/server/models/calibracoes.model.js'),'utf8'),ctx);
+  const executar=ctx.module.exports.removerEquipamento(8,'equip',async c=>{eventos.push('pdf '+c.id);if(falhar&&c.id==='b')throw new Error('storage');});
+  if(falhar){await assert.rejects(executar,/storage/);assert.deepEqual(eventos,['begin','pdf a','certificado a','pdf b','commit']);}
+  else{await executar;assert.deepEqual(eventos,['begin','pdf a','certificado a','pdf b','certificado b','equipamento','commit']);}
+ }
+});
+test('certificate editing requires tenant ownership and validates dates before updating metadata',async()=>{
+ const original={id:'cert',arquivo_path:'8/e/cert.pdf',compartilhamento:'token'};
+ const changes=[];
+ const model={certificado:async(s,id)=>s===8&&id==='cert'?original:null,atualizarCertificado:async(c,s,id)=>changes.push({c,s,id})};
+ const ctx={require:n=>n==='crypto'?crypto:n.includes('calibracoes.model')?model:n.includes('referencia.json')?referencia:{},module:{exports:{}},process:{env:{}},Buffer,URL,console};
+ vm.runInNewContext(fs.readFileSync(path.join(root,'src/server/services/calibracoes.service.js'),'utf8'),ctx);
+ const s=ctx.module.exports;
+ await assert.rejects(s.atualizarCertificado(9,'cert',{data_calibracao:'2026-11-10'}),{status:404});
+ await assert.rejects(s.atualizarCertificado(8,'cert',{data_calibracao:'2026-11-10',data_recalibracao:'2026-11-09'}),{status:400});
+ assert.equal(changes.length,0);
+ await s.atualizarCertificado(8,'cert',{data_calibracao:'2026-11-10',data_recalibracao:'2028-11-10',numero:'A-12',laboratorio:'Laboratório',observacoes:'Corrigido'});
+ assert.equal(changes.length,1);assert.equal(changes[0].s,8);assert.equal(changes[0].id,'cert');assert.equal(changes[0].c.data_recalibracao,'2028-11-10');assert.equal(changes[0].c.numero,'A-12');
+ assert.deepEqual(original,{id:'cert',arquivo_path:'8/e/cert.pdf',compartilhamento:'token'});
+});
 function front(){const c={Intl,Date,URL,console};vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(root,'public/client/js/bootstrap/calibracoes-init.js'),'utf8').replace(/export /g,''),c);return c;}
 test('expiration boundaries include today and 30 days, future calibration does not replace current',()=>{
  const c=front(),status=c.situacaoEquipamento;
@@ -167,4 +200,16 @@ test('custom certificate expiration is validated, saved and used by status and c
  await s.anexar(0,1,'e',data);assert.equal(calls.find(c=>c.c).c.data_recalibracao,'2026-11-11');
  const e={id:'e',nome:'Medidor',ativo:1,historico:[{id:'c',...data}]};assert.equal(f.situacaoEquipamento(e,'2026-10-29').status,'proxima');assert.equal(f.situacaoEquipamento(e,'2026-11-12').status,'vencida');assert.equal(f.dadosCronogramaCalibracoes([e],2026)[0].vencimento,'2026-11-11');assert(f.dadosCronogramaCalibracoes([e],2026)[0].marcaFim);
  for(const value of ['2026-05-10','2026-02-30'])assert.throws(()=>s.normalizarCertificado({...data,data_recalibracao:value}),{status:400});
+});
+
+test('rolling calendar keeps historical periods and positions month markers across December',()=>{
+ const f=front(), equipamento={nome:'Medidor',historico:[
+  {data_calibracao:'2026-10-02',data_recalibracao:'2026-12-02'},
+  {data_calibracao:'2027-01-04',data_recalibracao:'2027-03-04'}
+ ]};
+ const [linha]=f.dadosCronogramaCalibracoes([equipamento],2026,1,6,12,true);
+ assert.equal(linha.periodos.length,2);
+ assert.equal(linha.periodos[0].esquerda,3.5/12*100);
+ assert.equal(linha.periodos[1].esquerda,6.5/12*100);
+ assert.equal(linha.periodos[1].marcaFim,true);
 });

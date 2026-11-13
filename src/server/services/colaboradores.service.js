@@ -274,6 +274,10 @@ async function listarOcupacoesColaboradoresEmOS(dataDia) {
   }
 }
 
+async function listarProgramacaoParaExportacao(dataDia) {
+  return ColabModel.buscarProgramacaoParaExportacao(dataDia);
+}
+
 
 // ============================================================
 // BUSCAR COLABORADORES IA
@@ -658,6 +662,7 @@ module.exports = {
   deletarColaborador,
   listarColaboradoresDisponiveis,
   listarColaboradoresEmOS,
+  listarProgramacaoParaExportacao,
   listarOcupacoesColaboradoresEmOS,
   excluirColaboradorEmOS,
   alocarColaboradores,

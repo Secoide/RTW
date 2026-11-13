@@ -11,6 +11,7 @@ import {
 } from "../forms/populate-combobox.js";
 import { carregarConquistasColaborador, initaddConquistas} from "./handle-conquistas.js"
 import { carregarResumoAnualColaborador } from "../../utils/dom/preencher-resumo-anual-colab.js";
+import { podeVerResumoAnual } from "../../state/role.js";
 
 function erroDeSessaoExpirada(error) {
     return error?.status === 401 || /401|sessao|session|nao autorizado|nÃ£o autorizado/i.test(error?.message || "");
@@ -95,8 +96,6 @@ export async function get_carregarPerfilUsuario(funcId, opcoes = {}) {
     const destinoValido = () => !opcoes.destino || (destinoOriginal?.isConnected && document.querySelector(opcoes.destino) === destinoOriginal);
     try {
 
-        initColabForm();
-
         if (!funcId) {
             alert('ID do colaborador nÃ£o encontrado!');
             throw new Error("ID nÃ£o encontrado");
@@ -132,6 +131,7 @@ export async function get_carregarPerfilUsuario(funcId, opcoes = {}) {
         if (!opcoes.destino) document.getElementById("colaborador-perfil")?.replaceChildren();
         await carregarFormulario(opcoes.destino);
         if (!destinoValido()) return null;
+        initColabForm(dados.id);
 
         // ðŸ”¹ 3 - Preencher combobox setor
         const $wrap = $('#formColaboradorProfissional');
@@ -193,7 +193,7 @@ export async function get_carregarPerfilUsuario(funcId, opcoes = {}) {
 
         initMaleta();
         preencherTabelaAtestar(dados.id);
-        await carregarResumoAnualColaborador(dados.id, dados.data_experiencia, dados.nomeSetor);
+        if (podeVerResumoAnual()) await carregarResumoAnualColaborador(dados.id, dados.data_experiencia, dados.nomeSetor);
         await carregarConquistasColaborador(
             dados.id
         );

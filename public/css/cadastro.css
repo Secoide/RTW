@@ -6,6 +6,21 @@
     display: none !important;
 }
 
+#form_atestar[hidden] {
+    display: none !important;
+}
+
+#bt_editColab[hidden], #bt_editColabProf[hidden] {
+    display: none !important;
+}
+
+#camposProfissionais {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-inline-size: 0;
+}
+
 .ativo {
     display: block;
 }

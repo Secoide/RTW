@@ -57,11 +57,44 @@ async function adicionarCertificado(c, escopo, equipamentoId, usuario, conexao =
 async function certificado(escopo, id) {
   await garantirTabelas(); const [rows] = await db.query('SELECT * FROM calibracao_certificados WHERE escopo = ? AND id = ?', [escopo, id]); return rows[0] || null;
 }
+async function atualizarCertificado(c, escopo, id) {
+  await db.query(`UPDATE calibracao_certificados SET data_calibracao = ?, data_recalibracao = ?, numero = ?, laboratorio = ?, observacoes = ?
+    WHERE escopo = ? AND id = ?`, [c.data_calibracao, c.data_recalibracao, c.numero, c.laboratorio, c.observacoes, escopo, id]);
+}
 async function compartilhar(escopo, id, token) { await db.query('UPDATE calibracao_certificados SET compartilhamento = ? WHERE escopo = ? AND id = ?', [token, escopo, id]); }
 async function publico(token) {
   await garantirTabelas(); const [rows] = await db.query('SELECT * FROM calibracao_certificados WHERE compartilhamento = ? LIMIT 1', [token]); return rows[0] || null;
 }
 async function removerCertificado(escopo, id) { await db.query('DELETE FROM calibracao_certificados WHERE escopo = ? AND id = ?', [escopo, id]); }
+async function anexarCertificado(c, escopo, equipamentoId, usuario) {
+  const conexao=await db.getConnection();
+  try{
+    await conexao.beginTransaction();
+    const [rows]=await conexao.query('SELECT id FROM calibracao_equipamentos WHERE escopo = ? AND id = ? FOR UPDATE',[escopo,equipamentoId]);
+    if(!rows.length)throw Object.assign(new Error('Equipamento não encontrado.'),{status:404});
+    await adicionarCertificado(c,escopo,equipamentoId,usuario,conexao);
+    await conexao.commit();
+  }catch(e){await conexao.rollback();throw e;}finally{conexao.release();}
+}
+async function removerEquipamento(escopo,id,excluirDocumento) {
+  await garantirTabelas();
+  const conexao=await db.getConnection();
+  let falha;
+  try{
+    await conexao.beginTransaction();
+    const [equipamentos]=await conexao.query('SELECT id FROM calibracao_equipamentos WHERE escopo = ? AND id = ? FOR UPDATE',[escopo,id]);
+    if(!equipamentos.length)throw Object.assign(new Error('Equipamento não encontrado.'),{status:404});
+    const [certificados]=await conexao.query('SELECT * FROM calibracao_certificados WHERE escopo = ? AND equipamento_id = ?',[escopo,id]);
+    for(const c of certificados){
+      try{await excluirDocumento(c);}catch(e){falha=e;break;}
+      await conexao.query('DELETE FROM calibracao_certificados WHERE escopo = ? AND id = ?',[escopo,c.id]);
+    }
+    if(!falha)await conexao.query('DELETE FROM calibracao_equipamentos WHERE escopo = ? AND id = ?',[escopo,id]);
+    // Confirma os documentos já removidos para permitir retomar uma exclusão parcial.
+    await conexao.commit();
+  }catch(e){await conexao.rollback();throw e;}finally{conexao.release();}
+  if(falha)throw falha;
+}
 async function cadastrar(registros, escopo, usuario, importar = false) {
   await garantirTabelas(); const conexao = await db.getConnection(); let criados = 0;
   try {
@@ -75,4 +108,4 @@ async function cadastrar(registros, escopo, usuario, importar = false) {
     await conexao.commit(); return criados;
   } catch (e) { await conexao.rollback(); throw e; } finally { conexao.release(); }
 }
-module.exports = { garantirTabelas, listar, equipamento, criar, cadastrar, atualizar, adicionarCertificado, certificado, compartilhar, publico, removerCertificado };
+module.exports = { garantirTabelas, listar, equipamento, criar, cadastrar, atualizar, adicionarCertificado, anexarCertificado, atualizarCertificado, certificado, compartilhar, publico, removerCertificado, removerEquipamento };

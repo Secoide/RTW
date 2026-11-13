@@ -43,17 +43,25 @@ export function desenhoEquipamento(tipo,nome='') {
 }
 const nomeCalendarioCalibracoes=nome=>String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ').toLowerCase();
 const MESES_CALIBRACAO = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-export function dadosCronogramaCalibracoes(equipamentos,ano,quantidadeAnos=1) {
-  const meses=12*quantidadeAnos,anoFinal=ano+quantidadeAnos-1;
+const MESES_ANTERIORES=5, MESES_SEGUINTES=6;
+const MESES_VISIVEIS=MESES_ANTERIORES+1+MESES_SEGUINTES;
+const indiceMes=data=>Number(data.slice(0,4))*12+Number(data.slice(5,7))-1;
+export function dadosCronogramaCalibracoes(equipamentos,ano,quantidadeAnos=1,mesInicial=0,quantidade=12*quantidadeAnos,historico=quantidade!==12*quantidadeAnos) {
+  const meses=quantidade, primeiro=ano*12+mesInicial;
   if(!Number.isInteger(ano) || ano<1900 || ano>2201)throw new RangeError('Ano inválido.');
   return equipamentos.map(e=>{
     const registros=[...(e.historico || [])].filter(c=>/^\d{4}-\d{2}-\d{2}/.test(String(c.data_calibracao || ''))).sort((a,b)=>dia(b.data_calibracao).localeCompare(dia(a.data_calibracao)) || String(b.criado_em || '').localeCompare(String(a.criado_em || '')) || String(b.id || '').localeCompare(String(a.id || '')));
-    const ultimo=registros.find(c=>dia(c.data_calibracao)<=anoFinal+'-12-31') || registros.at(-1);
-    const calibracao=ultimo?dia(ultimo.data_calibracao):null,vencimento=calibracao?vencimentoCertificado(ultimo):null;
-    const inicio=calibracao?(Number(calibracao.slice(0,4))-ano)*12+Number(calibracao.slice(5,7))-.5:0;
-    const fim=vencimento?(Number(vencimento.slice(0,4))-ano)*12+Number(vencimento.slice(5,7))-.5:0;
-    const de=Math.max(0,Math.min(meses,inicio)),ate=Math.max(0,Math.min(meses,fim));
-    return {equipamento:e,calibracao,vencimento,esquerda:de/meses*100,largura:Math.max(0,ate-de)/meses*100,marcaInicio:!!calibracao&&inicio>=0&&inicio<meses,marcaFim:!!vencimento&&fim>=0&&fim<meses,continuaAntes:!!calibracao&&inicio<0&&fim>0,continuaDepois:!!calibracao&&fim>meses&&inicio<meses,fora:!calibracao || fim<=0 || inicio>=meses};
+    const ultimo=registros.find(c=>indiceMes(dia(c.data_calibracao))<primeiro+meses) || registros.at(-1);
+    function criarPeriodo(ultimo){
+      const calibracao=ultimo?dia(ultimo.data_calibracao):null,vencimento=calibracao?vencimentoCertificado(ultimo):null;
+      const inicio=calibracao?indiceMes(calibracao)-primeiro+.5:0;
+      const fim=vencimento?indiceMes(vencimento)-primeiro+.5:0;
+      const de=Math.max(0,Math.min(meses,inicio)),ate=Math.max(0,Math.min(meses,fim));
+      return {equipamento:e,calibracao,vencimento,esquerda:de/meses*100,largura:Math.max(0,ate-de)/meses*100,marcaInicio:!!calibracao&&inicio>=0&&inicio<meses,marcaFim:!!vencimento&&fim>=0&&fim<meses,continuaAntes:!!calibracao&&inicio<0&&fim>0,continuaDepois:!!calibracao&&fim>meses&&inicio<meses,fora:!calibracao || fim<=0 || inicio>=meses};
+    }
+    const principal=criarPeriodo(ultimo);
+    if(historico)principal.periodos=registros.slice().reverse().map(criarPeriodo).filter(p=>!p.fora);
+    return principal;
   }).sort((a,b)=>{
     const grupo=e=>[e.fabricante,e.modelo || e.nome].filter(Boolean).join(' ');
     return String(a.equipamento.nome || '').localeCompare(String(b.equipamento.nome || ''),'pt-BR',{sensitivity:'base',numeric:true}) || grupo(a.equipamento).localeCompare(grupo(b.equipamento),'pt-BR',{sensitivity:'base',numeric:true}) || String(a.equipamento.numero_serie || '').localeCompare(String(b.equipamento.numero_serie || ''),'pt-BR',{numeric:true});
@@ -64,7 +72,8 @@ export function initCalibracoes() {
   const $ = id => root.querySelector('#'+id);
   let equipamentos=[],selecionado=null,carregado=false,carregando=false,compartilhado=null,ultimoFoco=null;
   let carregamentoConcluido=false;
-  let anoCronograma=Number(hoje().slice(0,4)),listaCronograma=[];
+  const mesAtual=indiceMes(hoje());
+  let mesCentral=mesAtual,anoCronograma=Math.floor(mesAtual/12),listaCronograma=[];
   let contexto={}; try { contexto=JSON.parse(sessionStorage.getItem('saas_contexto') || '{}'); } catch {}
   const permitido = !contexto.modo_saas || contexto.acesso_total || contexto.recursos?.includes('tool.calibracoes');
   root.querySelector('[data-cal-action="importar"]').hidden=!!contexto.modo_saas;
@@ -80,37 +89,50 @@ export function initCalibracoes() {
     finally{carregando=false;carregamentoConcluido=true;root.removeAttribute('aria-busy');root.dispatchEvent(new CustomEvent('calibracoes:pronto'));}
   }
   function render(){
+    for(const [id,valores] of [
+      ['cal-fabricantes',equipamentos.map(e=>e.fabricante)],
+      ['cal-laboratorios',equipamentos.flatMap(e=>e.historico.map(c=>c.laboratorio))]
+    ]){
+      const nomes=new Map();
+      for(const valor of valores){
+        const nome=String(valor || '').trim();
+        if(nome)nomes.set(nome.toLocaleLowerCase('pt-BR'),nome);
+      }
+      $(id).innerHTML=[...nomes.values()].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(nome=>'<option value="'+esc(nome)+'"></option>').join('');
+    }
     const filtro=$('cal-filtro').value,busca=$('cal-busca').value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),ativos=equipamentos.filter(e=>Number(e.ativo));
     const resumo=[['todos','Equipamentos',ativos.length],['vencida','Vencidas',ativos.filter(e=>situacaoEquipamento(e).status==='vencida').length],['proxima','Próximas',ativos.filter(e=>situacaoEquipamento(e).status==='proxima').length],['pendente','Sem validade',ativos.filter(e=>situacaoEquipamento(e).status==='pendente').length]];
     $('cal-resumo').innerHTML=resumo.map(([status,label,n])=>'<button type="button" class="cal-stat" data-status="'+status+'" data-cal-action="filtrar" aria-pressed="'+(filtro===status)+'"><strong>'+n+'</strong><span>'+label+'</span></button>').join('');
     const lista=equipamentos.filter(e=>{const s=situacaoEquipamento(e).status,texto=[e.nome,e.modelo,e.numero_serie,e.fabricante,e.codigo].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return (filtro==='arquivados'?s==='arquivado':s!=='arquivado'&&(filtro==='todos'||s===filtro))&&texto.includes(busca);}).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
     $('cal-contagem').textContent=lista.length+' equipamento(s)';
-    $('cal-cards').innerHTML=lista.length?lista.map(e=>{const s=situacaoEquipamento(e);return '<button type="button" class="cal-equipment" data-status="'+s.status+'" data-cal-action="selecionar" data-id="'+esc(e.id)+'" aria-pressed="'+(e.id===selecionado)+'"><span class="cal-drawing">'+desenhoEquipamento(e.tipo,e.nome)+'</span><span class="cal-card-info"><span class="cal-badge '+s.status+'">'+LABELS[s.status]+'</span><h4>'+esc(e.nome)+'</h4><p>'+esc([e.fabricante,e.modelo].filter(Boolean).join(' · ') || 'Modelo não informado')+'</p><p>Série: '+esc(e.numero_serie || 'Não informada')+(e.codigo?' · Cód. '+esc(e.codigo):'')+'</p><p class="cal-due">Recalibrar: '+formatar(s.atual?.data_recalibracao)+'</p><p>'+e.historico.length+' registro(s) · '+e.historico.filter(c=>Number(c.tem_documento)).length+' PDF(s)</p></span></button>';}).join(''):'<div class="cal-empty">'+(equipamentos.length?'Nenhum equipamento corresponde aos filtros.':'Cadastre um equipamento ou importe os 21 registros da planilha de referência.')+'</div>';
+    $('cal-cards').innerHTML=lista.length?lista.map(e=>{const s=situacaoEquipamento(e);return '<button type="button" class="cal-equipment" data-status="'+s.status+'" data-cal-action="selecionar" data-id="'+esc(e.id)+'" aria-pressed="'+(e.id===selecionado)+'"><span class="cal-drawing">'+desenhoEquipamento(e.tipo,e.nome)+'</span><span class="cal-card-info"><span class="cal-badge '+s.status+'">'+LABELS[s.status]+'</span><h4>'+esc(e.nome)+'</h4><p>'+([esc(e.fabricante),e.modelo?'<span class=cal-model>'+esc(e.modelo)+'</span>':''].filter(Boolean).join(' · ') || 'Modelo não informado')+'</p><p>Série: '+esc(e.numero_serie || 'Não informada')+(e.codigo?' · Cód. '+esc(e.codigo):'')+'</p><p class="cal-due">Recalibrar: '+formatar(s.atual?.data_recalibracao)+'</p><p>'+e.historico.length+' registro(s) · '+e.historico.filter(c=>Number(c.tem_documento)).length+' PDF(s)</p></span></button>';}).join(''):'<div class="cal-empty">'+(equipamentos.length?'Nenhum equipamento corresponde aos filtros.':'Cadastre um equipamento ou importe os 21 registros da planilha de referência.')+'</div>';
     listaCronograma=lista;renderCronograma();renderInspector();
   }
   function renderCronograma(){
-    const anos=new Set([anoCronograma,Number(hoje().slice(0,4))-1,Number(hoje().slice(0,4)),Number(hoje().slice(0,4))+1]);
-    for(const e of equipamentos)for(const c of e.historico || []){const data=dia(c.data_calibracao),fim=vencimentoCertificado(c);if(data)anos.add(Number(data.slice(0,4)));if(fim)for(let a=Number(data.slice(0,4));a<=Number(fim.slice(0,4));a++)anos.add(a);}
-    $('cal-timeline-year').innerHTML=[...anos].filter(a=>Number.isInteger(a)&&a>=1900&&a<=2201).sort((a,b)=>a-b).map(a=>'<option value="'+a+'"'+(a===anoCronograma?' selected':'')+'>'+a+'</option>').join('');
-    $('cal-timeline-chart').innerHTML=montarCalendario(anoCronograma);
+    const primeiro=mesCentral-MESES_ANTERIORES;
+    $('cal-timeline-chart').innerHTML=montarCalendario(Math.floor(primeiro/12),1,primeiro%12,MESES_VISIVEIS);
   }
-  function montarCalendario(ano,quantidadeAnos=1){
-    const meses=Array.from({length:12*quantidadeAnos},(_,i)=>({nome:MESES_CALIBRACAO[i%12],ano:ano+Math.floor(i/12)}));
-    const linhas=dadosCronogramaCalibracoes(listaCronograma,ano,quantidadeAnos),contagens=Array(meses.length).fill(0),mesAno=data=>MESES_CALIBRACAO[Number(data.slice(5,7))-1].toLowerCase()+'/'+data.slice(0,4);
-    const axis='<div class="cal-timeline-axis"><span>Equipamento / modelo</span><div class="cal-timeline-months">'+meses.map(m=>'<span>'+m.nome+'</span>').join('')+'</div></div>';
+  function montarCalendario(ano,quantidadeAnos=1,mesInicial=0,quantidade=12*quantidadeAnos){
+    const interativo=arguments.length>2, primeiro=ano*12+mesInicial;
+    const meses=Array.from({length:quantidade},(_,i)=>({nome:MESES_CALIBRACAO[(primeiro+i)%12],ano:Math.floor((primeiro+i)/12)}));
+    const linhas=dadosCronogramaCalibracoes(listaCronograma,ano,quantidadeAnos,mesInicial,quantidade,interativo),contagens=Array(meses.length).fill(0),mesAno=data=>MESES_CALIBRACAO[Number(data.slice(5,7))-1].toLowerCase()+'/'+data.slice(0,4);
+    const axis='<div class="cal-timeline-axis"><span>Equipamento / modelo</span><div class="cal-timeline-months">'+meses.map((m,i)=>'<span'+(interativo&&primeiro+i===mesAtual?' aria-current="date"':'')+'>'+m.nome+(interativo?' / '+m.ano:'')+'</span>').join('')+'</div></div>';
     const rows=linhas.map((l,indice)=>{
       const e=l.equipamento,descricao=l.calibracao?'Calibração: '+mesAno(l.calibracao)+' · Vencimento: '+mesAno(l.vencimento):'Sem certificado de calibração';
       const chave=nomeCalendarioCalibracoes(e.nome);
       const anterior=nomeCalendarioCalibracoes(linhas[indice-1]?.equipamento.nome);
       const seguinte=nomeCalendarioCalibracoes(linhas[indice+1]?.equipamento.nome);
       const repetido=chave&&(chave===anterior||chave===seguinte);
-      const dias=l.vencimento?Math.round((Date.parse(l.vencimento+'T00:00:00Z')-Date.parse(hoje()+'T00:00:00Z'))/86400000):null;
-      const status=dias===null?'':dias<0?'vencida':dias<=30?'proxima':'regular';
-      if(l.marcaFim)contagens[(Number(l.vencimento.slice(0,4))-ano)*12+Number(l.vencimento.slice(5,7))-1]++;
-      const periodo=l.fora?'<span class="cal-timeline-no-period">'+(l.calibracao?'Período fora de '+ano+(quantidadeAnos>1?'–'+(ano+quantidadeAnos-1):''):'Sem certificado')+'</span>':'<span class="cal-timeline-period '+status+'" style="left:'+l.esquerda+'%;width:'+l.largura+'%">'+(l.marcaInicio?'<i class="cal-period-start"></i>':'')+(l.marcaFim?'<i class="cal-period-end '+status+'"></i>':'')+(l.continuaAntes?'<i class="cal-period-before"></i>':'')+(l.continuaDepois?'<i class="cal-period-after"></i>':'')+'</span>';
-      return (repetido&&chave!==anterior?'<div class="cal-timeline-group" role="group" aria-label="'+esc(e.nome)+'">':'')+'<button type="button" class="cal-timeline-row" data-cal-action="selecionar" data-id="'+esc(e.id)+'" aria-pressed="'+(selecionado===e.id)+'" aria-label="'+esc(e.nome+' · '+(e.numero_serie || 'série não informada')+' · '+descricao)+'" title="'+esc(descricao)+'"><span class="cal-timeline-name"><strong>'+esc(e.nome)+'</strong><small>'+esc([e.modelo,e.numero_serie?'Série '+e.numero_serie:'Sem série'].filter(Boolean).join(' · '))+'</small></span><span class="cal-timeline-track" aria-hidden="true">'+periodo+'</span></button>'+(repetido&&chave!==seguinte?'</div>':'');
+      function desenharPeriodo(l){
+        const dias=l.vencimento?Math.round((Date.parse(l.vencimento+'T00:00:00Z')-Date.parse(hoje()+'T00:00:00Z'))/86400000):null;
+        const status=dias===null?'':dias<0?'vencida':dias<=30?'proxima':'regular';
+        if(l.marcaFim)contagens[indiceMes(l.vencimento)-primeiro]++;
+        return l.fora?'<span class="cal-timeline-no-period">'+(l.calibracao?'Sem registro no período':'Sem certificado')+'</span>':'<span class="cal-timeline-period '+status+'" style="left:'+l.esquerda+'%;width:'+l.largura+'%">'+(l.marcaInicio?'<i class="cal-period-start"></i>':'')+(l.marcaFim?'<i class="cal-period-end '+status+'"></i>':'')+(l.continuaAntes?'<i class="cal-period-before"></i>':'')+(l.continuaDepois?'<i class="cal-period-after"></i>':'')+'</span>';
+      }
+      const periodo=(l.periodos?.length?l.periodos:[l]).map(desenharPeriodo).join('');
+      return (repetido&&chave!==anterior?'<div class="cal-timeline-group" role="group" aria-label="'+esc(e.nome)+'">':'')+'<button type="button" class="cal-timeline-row" data-cal-action="selecionar" data-id="'+esc(e.id)+'" aria-pressed="'+(selecionado===e.id)+'" aria-label="'+esc(e.nome+' · '+(e.numero_serie || 'série não informada')+' · '+descricao)+'" title="'+esc(descricao)+'"><span class="cal-timeline-name"><strong>'+esc(e.nome)+'</strong><small>'+[e.modelo?'<span class=cal-model>'+esc(e.modelo)+'</span>':'',esc(e.numero_serie?'Série '+e.numero_serie:'Sem série')].filter(Boolean).join(' · ')+'</small></span><span class="cal-timeline-track" aria-hidden="true">'+periodo+'</span></button>'+(repetido&&chave!==seguinte?'</div>':'');
     }).join('');
-    const total='<div class="cal-timeline-totals"><span>Vencimentos em '+ano+'</span><div class="cal-timeline-months">'+contagens.map((n,m)=>'<span class="'+(n>1?'cal-due-cluster':'')+'" title="'+n+' vencimento(s) em '+meses[m].nome+'/'+meses[m].ano+'">'+(n || '–')+'</span>').join('')+'</div></div>';
+    const total='<div class="cal-timeline-totals"><span>Vencimentos'+(interativo?'':' em '+ano)+'</span><div class="cal-timeline-months">'+contagens.map((n,m)=>'<span class="'+(n>1?'cal-due-cluster':'')+'" title="'+n+' vencimento(s) em '+meses[m].nome+'/'+meses[m].ano+'">'+(n || '–')+'</span>').join('')+'</div></div>';
     const anos=quantidadeAnos>1?'<div class="cal-timeline-axis cal-timeline-years"><span></span><div style="display:grid;grid-template-columns:repeat('+quantidadeAnos+',1fr);text-align:center">'+Array.from({length:quantidadeAnos},(_,i)=>'<strong>'+ (ano+i)+'</strong>').join('')+'</div></div>':'';
     return anos+axis+(rows || '<p class="cal-timeline-empty">Nenhum equipamento nos filtros atuais.</p>')+total;
   }
@@ -137,18 +159,19 @@ export function initCalibracoes() {
       '<p class="cal-cert-file" title="'+esc(arquivo)+'">'+esc(arquivo)+'</p><div class="cal-actions">'+
       (documento?'<a class="cal-btn" href="'+API+'/certificados/'+encodeURIComponent(c.id)+'/abrir" target="_blank" rel="noopener noreferrer">Abrir PDF</a><button class="cal-btn" type="button" data-cal-action="compartilhar" title="Compartilhar link / QR Code">Link / QR</button>':'')+
       (Number(c.compartilhado)?'<button class="cal-btn" type="button" data-cal-action="revogar">Revogar</button>':'')+
+      '<button class="cal-btn" type="button" data-cal-action="editar-cert" title="Editar certificado">Editar</button>'+
       '<button class="cal-btn cal-danger cal-cert-delete" type="button" data-cal-action="remover-cert" aria-label="Excluir certificado" title="Excluir certificado"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/></svg></button></div></article>';
   }
   function renderInspector(){
     const e=equipamentos.find(e=>e.id===selecionado);if(!e){$('cal-inspector').innerHTML='<div class="cal-empty">Selecione um equipamento para consultar os certificados e o histórico.</div>';return;}
     const status=situacaoEquipamento(e);
-    $('cal-inspector').innerHTML='<span class="cal-badge '+status.status+'">'+LABELS[status.status]+'</span><h4>'+esc(e.nome)+'</h4><small>'+esc(e.modelo)+'</small><dl><dt>Fabricante</dt><dd>'+esc(e.fabricante||'Não informado')+'</dd><dt>Nº de série</dt><dd>'+esc(e.numero_serie||'Não informado')+'</dd><dt>Código</dt><dd>'+esc(e.codigo||'Não informado')+'</dd><dt>Calibração</dt><dd>'+formatar(status.atual?.data_calibracao)+'</dd><dt>Recalibrar</dt><dd>'+formatar(status.atual?.data_recalibracao)+'</dd></dl>'+(e.observacoes?'<p class="cal-note">'+esc(e.observacoes)+'</p>':'')+'<div class="cal-actions"><button class="cal-btn" type="button" data-cal-action="editar">Editar equipamento</button></div><div class="cal-history-title"><h4>Histórico ('+e.historico.length+')</h4><button class="cal-btn cal-primary" type="button" data-cal-action="certificado">+ Certificado</button></div>'+e.historico.map(renderCertificado).join('')+(!e.historico.length?'<p class="cal-empty">Nenhum certificado adicionado.</p>':'');
+    $('cal-inspector').innerHTML='<span class="cal-badge '+status.status+'">'+LABELS[status.status]+'</span><h4>'+esc(e.nome)+'</h4><small class=cal-model>'+esc(e.modelo)+'</small><dl><dt>Fabricante</dt><dd>'+esc(e.fabricante||'Não informado')+'</dd><dt>Nº de série</dt><dd>'+esc(e.numero_serie||'Não informado')+'</dd><dt>Código</dt><dd>'+esc(e.codigo||'Não informado')+'</dd><dt>Calibração</dt><dd>'+formatar(status.atual?.data_calibracao)+'</dd><dt>Recalibrar</dt><dd>'+formatar(status.atual?.data_recalibracao)+'</dd></dl>'+(e.observacoes?'<p class="cal-note">'+esc(e.observacoes)+'</p>':'')+'<div class="cal-actions"><button class="cal-btn" type="button" data-cal-action="editar" title="Editar equipamento">Editar</button><button class="cal-btn cal-danger" type="button" data-cal-action="remover-equipamento" title="Excluir equipamento">Excluir</button></div><div class="cal-history-title"><h4>Histórico ('+e.historico.length+')</h4><button class="cal-btn cal-primary" type="button" data-cal-action="certificado">+ Certificado</button></div>'+e.historico.map(renderCertificado).join('')+(!e.historico.length?'<p class="cal-empty">Nenhum certificado adicionado.</p>':'');
   }
   function abrirDialog(id){ultimoFoco=document.activeElement;const d=$(id);d.querySelector('.cal-form-error')?.replaceChildren();d.showModal();}
   function fecharDialog(d){if(d.dataset.busy)return;d.close();ultimoFoco?.focus();}
   function equipamentoForm(e){const f=$('cal-equip-form');f.reset();for(const n of ['id','nome','modelo','fabricante','numero_serie','codigo','tipo','observacoes'])f.elements[n].value=e?.[n] || '';f.elements.ativo.checked=e?!!Number(e.ativo):true;$('cal-ativo-wrap').hidden=!e;$('cal-equip-title').textContent=e?'Editar equipamento':'Novo equipamento';abrirDialog('cal-equip-dialog');}
   async function salvarForm(f,dialog,fn){const b=f.querySelector('[type="submit"]'),error=f.querySelector('.cal-form-error');b.disabled=true;dialog.dataset.busy='true';error.textContent='Salvando…';try{await fn();delete dialog.dataset.busy;fecharDialog(dialog);await carregar();}catch(e){error.textContent=e.message;}finally{delete dialog.dataset.busy;b.disabled=false;}}
-  async function confirmar(t){if(window.Swal){const r=await window.Swal.fire({title:t,icon:'question',showCancelButton:true,confirmButtonText:'Confirmar',cancelButtonText:'Cancelar'});return r.isConfirmed;}return window.confirm(t);}
+  async function confirmar(t){if(window.Swal){const r=await window.Swal.fire({title:'Confirmar ação',text:t,customClass:{popup:'cal-confirm-dialog'},icon:'question',showCancelButton:true,confirmButtonText:'Confirmar',cancelButtonText:'Cancelar'});return r.isConfirmed;}return window.confirm(t);}
   async function compartilhar(id){const r=await api('/certificados/'+id+'/compartilhar',{method:'POST'}),url=new URL(r.caminho,location.origin).href;compartilhado=id;$('cal-public-notice').hidden=!r.publico;$('cal-share-dialog').querySelector('[data-cal-action="revogar-atual"]').hidden=!!r.publico;$('cal-public-link').href=url;$('cal-public-link').textContent=url;$('cal-local-link').hidden=!!r.publico || !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);const img=$('cal-qr');img.hidden=false;$('cal-qr-status').textContent='Gerando QR Code…';img.onload=()=>{$('cal-qr-status').textContent='';};img.onerror=()=>{img.hidden=true;$('cal-qr-status').textContent='Não foi possível gerar o QR Code. O link continua disponível.';};img.src='https://api.qrserver.com/v1/create-qr-code/?size=320x320&data='+encodeURIComponent(url);abrirDialog('cal-share-dialog');const c=equipamentos.find(e=>e.id===selecionado)?.historico.find(c=>c.id===id);if(c)c.compartilhado=r.publico?0:1;renderInspector();}
   root.addEventListener('click',async event=>{
     const close=event.target.closest('[data-cal-close]');if(close){fecharDialog(close.closest('dialog'));return;}
@@ -187,9 +210,29 @@ export function initCalibracoes() {
     }
     if(action==='filtrar'){$('cal-filtro').value=b.dataset.status;render();return;}
     if(action==='novo'){equipamentoForm();return;}if(action==='editar'){equipamentoForm(e);return;}
-    if(action==='certificado'){const f=$('cal-cert-form');f.reset();f.elements.equipamento_id.value=e.id;f.elements.data_calibracao.value=hoje();atualizarVencimentoAutomatico();abrirDialog('cal-cert-dialog');return;}
+    if(action==='certificado'||action==='editar-cert'){
+      const c=action==='editar-cert'?e?.historico.find(c=>c.id===id):null;
+      if(action==='editar-cert'&&!c)return;
+      const f=$('cal-cert-form');f.reset();f.dataset.certificado=c?.id || '';
+      f.elements.equipamento_id.value=e.id;
+      for(const nome of ['data_calibracao','data_recalibracao','numero','laboratorio','observacoes'])f.elements[nome].value=c?(nome.startsWith('data_')?dia(c[nome]):c[nome] || ''):'';
+      if(!c){f.elements.data_calibracao.value=hoje();atualizarVencimentoAutomatico();}
+      f.elements.arquivo.closest('label').hidden=Boolean(c);
+      f.elements.link_externo.closest('label').hidden=Boolean(c);
+      $('cal-cert-title').textContent=c?'Editar certificado':'Adicionar certificado';
+      f.querySelector('[type="submit"]').textContent=c?'Salvar alterações':'Adicionar ao histórico';
+      abrirDialog('cal-cert-dialog');return;
+    }
     b.disabled=true;
     try{
+      if(action==='remover-equipamento' && e){
+        if(await confirmar('Excluir permanentemente o equipamento "'+e.nome+'"? Todos os certificados do histórico e os PDFs anexados no Supabase serão apagados primeiro, e depois o equipamento. Links e QR Codes desses PDFs deixarão de funcionar. Documentos de links externos continuam no provedor de origem.')){
+          try{
+            await api('/'+encodeURIComponent(e.id),{method:'DELETE'});
+            selecionado=null;mensagem('Equipamento e certificados excluídos.');
+          }finally{await carregar();}
+        }
+      }
       if(action==='atualizar')await carregar();
       if(action==='importar' && await confirmar('Importar os 21 equipamentos da planilha? Registros já importados serão preservados.')){const r=await api('/referencia',{method:'POST'});await carregar();mensagem(r.criados+' equipamento(s) importado(s). Os PDFs podem ser anexados no histórico.');}
       if(action==='compartilhar')await compartilhar(id);
@@ -205,28 +248,70 @@ export function initCalibracoes() {
       $('cal-timeline-expand').focus({preventScroll:true});
     }
   });
-  $('cal-timeline-year').addEventListener('change',()=>{anoCronograma=Number($('cal-timeline-year').value);renderCronograma();});
+  const areaCronograma=$("cal-timeline-scroll");
+  function navegarMeses(mes){
+    mesCentral=Math.max(1900*12+MESES_ANTERIORES,Math.min(2202*12-1-MESES_SEGUINTES,mes));
+    anoCronograma=Math.floor(mesCentral/12);
+    renderCronograma();
+  }
+  $("cal-timeline-prev").addEventListener("click",()=>navegarMeses(mesCentral-1));
+  $("cal-timeline-next").addEventListener("click",()=>navegarMeses(mesCentral+1));
+  $("cal-timeline-today").addEventListener("click",()=>navegarMeses(mesAtual));
+  let arrasteMes=null, arrastouMes=false;
+  areaCronograma.addEventListener("pointerdown",e=>{
+    if(e.button!==0)return;
+    arrastouMes=false;
+    arrasteMes={id:e.pointerId,x:e.clientX,y:e.clientY};
+  });
+  areaCronograma.addEventListener("pointermove",e=>{
+    if(arrasteMes?.id!==e.pointerId)return;
+    const delta=e.clientX-arrasteMes.x;
+    const passo=Math.max(20,(areaCronograma.querySelector(".cal-timeline-months")?.clientWidth||areaCronograma.clientWidth)/MESES_VISIVEIS);
+    if(!arrastouMes && Math.abs(delta)<Math.abs(e.clientY-arrasteMes.y))return;
+    const meses=Math.trunc(delta/passo);
+    if(!meses)return;
+    if(!arrastouMes)areaCronograma.setPointerCapture(e.pointerId);
+    arrastouMes=true;
+    arrasteMes.x+=meses*passo;
+    navegarMeses(mesCentral-meses);
+  });
+  for(const evento of ["pointerup","pointercancel","pointerleave","lostpointercapture"]){
+    areaCronograma.addEventListener(evento,()=>{arrasteMes=null;});
+  }
+  areaCronograma.addEventListener("click",e=>{
+    if(arrastouMes&&e.detail){e.preventDefault();e.stopPropagation();arrastouMes=false;}
+  },true);
   $('cal-busca').addEventListener('input',render);$('cal-filtro').addEventListener('change',render);
   $('cal-equip-form').addEventListener('submit',ev=>{ev.preventDefault();const f=ev.currentTarget,p=Object.fromEntries(new FormData(f)),id=p.id;delete p.id;p.ativo=f.elements.ativo.checked;salvarForm(f,$('cal-equip-dialog'),async()=>{const r=await api(id?'/'+id:'',{method:id?'PUT':'POST',body:JSON.stringify(p)});selecionado=r.id;});});
   function atualizarVencimentoAutomatico(){const f=$('cal-cert-form'),data=f.elements.data_calibracao.value;f.elements.data_recalibracao.value=proximaCalibracao(data) || '';f.elements.data_recalibracao.min=data;}
   for(const evento of ['input','change'])$('cal-cert-form').elements.data_calibracao.addEventListener(evento,atualizarVencimentoAutomatico);
-  $('cal-cert-form').addEventListener('submit',ev=>{ev.preventDefault();const f=ev.currentTarget,p=new FormData(f),id=p.get('equipamento_id'),file=f.elements.arquivo.files[0],link=String(p.get('link_externo')||'').trim();if((!file&&!link)||(file&&link)){f.querySelector('.cal-form-error').textContent='Escolha um PDF ou informe um link HTTPS.';return;}if(file && (file.size>20*1024*1024||!/\.pdf$/i.test(file.name))){f.querySelector('.cal-form-error').textContent='Envie um PDF de até 20 MB.';return;}p.delete('equipamento_id');if(!file)p.delete('arquivo');salvarForm(f,$('cal-cert-dialog'),()=>api('/'+id+'/certificados',{method:'POST',body:p}));});
+  $('cal-cert-form').addEventListener('submit',ev=>{
+    ev.preventDefault();const f=ev.currentTarget,p=new FormData(f);
+    if(f.dataset.certificado){
+      const dados=Object.fromEntries(['data_calibracao','data_recalibracao','numero','laboratorio','observacoes'].map(nome=>[nome,p.get(nome)]));
+      salvarForm(f,$('cal-cert-dialog'),()=>api('/certificados/'+encodeURIComponent(f.dataset.certificado),{method:'PUT',body:JSON.stringify(dados)}));return;
+    }
+    const id=p.get('equipamento_id'),file=f.elements.arquivo.files[0],link=String(p.get('link_externo')||'').trim();
+    if((!file&&!link)||(file&&link)){f.querySelector('.cal-form-error').textContent='Escolha um PDF ou informe um link HTTPS.';return;}
+    if(file && (file.size>20*1024*1024||!/\.pdf$/i.test(file.name))){f.querySelector('.cal-form-error').textContent='Envie um PDF de até 20 MB.';return;}
+    p.delete('equipamento_id');if(!file)p.delete('arquivo');salvarForm(f,$('cal-cert-dialog'),()=>api('/'+id+'/certificados',{method:'POST',body:p}));
+  });
   root.querySelectorAll('dialog').forEach(d=>{d.addEventListener('cancel',e=>{if(d.dataset.busy)e.preventDefault();});d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)fecharDialog(d);}});});
   document.querySelector('[data-tool-tab="calibracoes"]')?.addEventListener('click',()=>{if(!carregado)carregar();});
   render();
   if (root.classList.contains('active')) carregar();
   return {
     permitido,pronto:()=>carregamentoConcluido,
-    capturar:()=>({selecionado,busca:$('cal-busca').value,filtro:$('cal-filtro').value,ano:anoCronograma}),
+    capturar:()=>({selecionado,busca:$('cal-busca').value,filtro:$('cal-filtro').value,mes:mesCentral}),
     preparar(){
       $('cal-busca').value='';$('cal-filtro').value='todos';selecionado=equipamentos.find(e=>e.id===selecionado&&Number(e.ativo))?.id || equipamentos.find(e=>Number(e.ativo))?.id || null;render();
       if(!equipamentos.length){
         $('cal-cards').innerHTML='<div class="cal-equipment cal-tour-example" data-tour-example><span class="cal-drawing">'+desenhoEquipamento('luximetro')+'</span><span class="cal-card-info"><span class="cal-badge regular">Exemplo do tour</span><h4>Luxímetro de exemplo</h4><p>MINIPA · MLM-1011</p><p>Série EXEMPLO-001</p></span></div>';
-        $('cal-inspector').innerHTML='<p class="cal-tour-example-label">Exemplo do tour · sem dados cadastrados</p><h4>Luxímetro de exemplo</h4><div class="cal-actions"><button class="cal-btn" type="button" data-cal-action="editar">Editar equipamento</button></div><div class="cal-history-title"><h4>Histórico</h4><button class="cal-btn cal-primary" type="button" data-cal-action="certificado">+ Certificado</button></div>'+renderCertificado({id:'tour-exemplo',data_calibracao:hoje(),data_recalibracao:proximaCalibracao(hoje()),numero:'EXEMPLO',laboratorio:'Laboratório de exemplo',arquivo_nome:'certificado-exemplo.pdf',tem_documento:1});
+        $('cal-inspector').innerHTML='<p class="cal-tour-example-label">Exemplo do tour · sem dados cadastrados</p><h4>Luxímetro de exemplo</h4><div class="cal-actions"><button class="cal-btn" type="button" data-cal-action="editar" title="Editar equipamento">Editar</button></div><div class="cal-history-title"><h4>Histórico</h4><button class="cal-btn cal-primary" type="button" data-cal-action="certificado">+ Certificado</button></div>'+renderCertificado({id:'tour-exemplo',data_calibracao:hoje(),data_recalibracao:proximaCalibracao(hoje()),numero:'EXEMPLO',laboratorio:'Laboratório de exemplo',arquivo_nome:'certificado-exemplo.pdf',tem_documento:1});
         $('cal-inspector').querySelectorAll('a').forEach(a=>a.removeAttribute('href'));
       }
     },
     equipamento:()=>equipamentos.find(e=>e.id===selecionado) || {nome:'Luxímetro de exemplo',modelo:'MLM-1011',fabricante:'MINIPA',numero_serie:'EXEMPLO-001',codigo:'',tipo:'luximetro',observacoes:'',ativo:1},
-    restaurar(estado){selecionado=estado.selecionado;$('cal-busca').value=estado.busca;$('cal-filtro').value=estado.filtro;anoCronograma=estado.ano;render();}
+    restaurar(estado){selecionado=estado.selecionado;$('cal-busca').value=estado.busca;$('cal-filtro').value=estado.filtro;mesCentral=estado.mes;anoCronograma=Math.floor(mesCentral/12);render();}
   };
 }

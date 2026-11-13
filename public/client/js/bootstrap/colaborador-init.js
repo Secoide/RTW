@@ -1,5 +1,5 @@
 import { imprimirColaborador, imprimirRanking } from './colaborador-impressao.js';
-import { canSee, getUserRole } from '../state/role.js';
+import { canSee, getUserRole, podeVerResumoAnual } from '../state/role.js';
 import { calcularResumoAnual } from '../utils/dom/preencher-resumo-anual-colab.js';
 import { atividadeOS, graficoLinha, graficoMapa, graficoClientes, graficoSemana, graficoDesempenho } from './colaborador-graficos.js';
 import { configurarComparacao } from './colaborador-comparacao.js';
@@ -132,11 +132,13 @@ export async function initColaborador(){
     try{
       const d=await api('/api/colaboradores/'+encodeURIComponent(id),signal);if(!valido())return;if(!d?.id)throw Error('Colaborador não encontrado');
       selecionado=String(d.id);seletor.value=selecionado;identidade(d);
-      const resumo=elemento('section','co-annual');resumo.hidden=normalizar(d.nomeSetor).trim()!=='producao';destino.insertBefore(resumo,dashboard);
+      const verResumo=podeVerResumoAnual();
+      const resumo=elemento('section','co-annual');resumo.hidden=!verResumo||normalizar(d.nomeSetor).trim()!=='producao';destino.insertBefore(resumo,dashboard);
       const linha=grafico('Dias com OS','Evolução mensal','co-mensal'),clientes=grafico('Participações por cliente','Histórico · todos os clientes','co-clientes'),mapa=grafico('Mapa de atividade','Cada quadrado representa um dia','co-mapa');const semana=grafico('Ritmo da semana','Dias com OS','co-semana');graficos.append(linha.area,clientes.area,mapa.area,semana.area);
       const tarefas=[];
       function carregar(url,alvos,render){tarefas.push(api(url,signal).then(dados=>{if(valido())render(dados);}).catch(e=>{if(valido()&&e.name!=='AbortError')for(const alvo of alvos)vazio(alvo,'Dados indisponíveis. Use Atualizar.');}));}
-      carregar('/api/colaboradores/resumo-anual/'+d.id,[resumo,linha.conteudo,mapa.conteudo,semana.conteudo],dados=>{
+      for(const grafico of [linha,mapa,semana])grafico.area.hidden=!verResumo;
+      if(verResumo)carregar('/api/colaboradores/resumo-anual/'+d.id,[resumo,linha.conteudo,mapa.conteudo,semana.conteudo],dados=>{
         if(!resumo.hidden)anual(dados,d,resumo);
         const atividade=atividadeOS(dados,d.data_experiencia);graficoLinha(linha.conteudo,atividade);graficoMapa(mapa.conteudo,atividade);graficoSemana(semana.conteudo,atividade);
         linha.cab.lastChild.textContent=atividade.total+' dias · '+dados.ano;

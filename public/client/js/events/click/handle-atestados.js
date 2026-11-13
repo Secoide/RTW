@@ -1,5 +1,6 @@
  
 import { preencherTabelaAtestar } from "../../utils/dom/preencher-tabela-atestar.js";
+import { podeGerenciarAusencias } from "../../state/role.js";
 import {
     abrirModalJustificarFalta,
     decidirFaltaNaoJustificada
@@ -9,6 +10,7 @@ import {
  
 
  $(document).on('click', '.bt_excluirHistoricoAtestar', function () {
+        if (!podeGerenciarAusencias()) return;
         Swal.fire({
             title: "Deletar?",
             text: "Você não poderá reverter isso!",

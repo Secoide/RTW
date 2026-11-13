@@ -4,6 +4,22 @@ const FeriadosModel = require('./feriados.model');
 let enderecoColumnReadyPromise = null;
 let enderecoColumnAvailable = null;
 let anexoAtestadoColumnReadyPromise = null;
+let sequenciasColaboradoresProntas;
+
+function garantirSequenciasColaboradores() {
+  if (!sequenciasColaboradoresProntas) {
+    sequenciasColaboradoresProntas = connection.query(`
+      CREATE TABLE IF NOT EXISTS colaboradores_sequencias_mensais (
+        mes INT UNSIGNED PRIMARY KEY,
+        ultima_sequencia TINYINT UNSIGNED NOT NULL DEFAULT 0
+      ) ENGINE=InnoDB
+    `).catch(err => {
+      sequenciasColaboradoresProntas = null;
+      throw err;
+    });
+  }
+  return sequenciasColaboradoresProntas;
+}
 
 async function garantirColunaAnexoAtestado() {
   if (anexoAtestadoColumnReadyPromise) return anexoAtestadoColumnReadyPromise;
@@ -150,39 +166,47 @@ async function getStatusIntegracaoByColab(idfuncionario, idOS, dataDia) {
 
 async function createColaborador(data) {
   await garantirColunaEndereco();
+  await garantirSequenciasColaboradores();
 
-  const sql = `
-    INSERT INTO funcionarios 
-    (nome, sexo, nascimento, cpf, rg, mail, telefone, endereco, sobre, senha, fotoperfil, versao_foto)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '0')
-  `;
+  const partes = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit'
+  }).formatToParts(new Date()).map(parte => [parte.type, parte.value]));
+  const mes = Number(partes.year + partes.month);
+  const baseId = Number(partes.year.slice(-2) + partes.month) * 100;
+  const conn = await connection.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.query(`
+      INSERT INTO colaboradores_sequencias_mensais (mes) VALUES (?)
+      ON DUPLICATE KEY UPDATE mes = mes
+    `, [mes]);
+    const [[contador]] = await conn.query(
+      'SELECT ultima_sequencia FROM colaboradores_sequencias_mensais WHERE mes = ? FOR UPDATE', [mes]
+    );
+    const [[existente]] = await conn.query(
+      'SELECT MAX(id) AS id FROM funcionarios WHERE id BETWEEN ? AND ?', [baseId + 1, baseId + 99]
+    );
+    const sequencia = Math.max(contador.ultima_sequencia, existente.id === null ? 0 : Number(existente.id) - baseId) + 1;
+    if (sequencia > 99) throw new Error('Os 99 IDs disponíveis para este mês já foram utilizados.');
 
-  const [result] = await connection.query(sql, [
-    data.nome,
-    data.sexo,
-    data.nascimento,
-    data.cpf,
-    data.rg,
-    data.mail,
-    data.telefone,
-    data.endereco,
-    data.sobre,
-    data.senha,
-    data.fotoperfil || '/imagens/user-default.webp'
-  ]);
-  const [rows] = await connection.execute(
-    `SELECT id FROM funcionarios WHERE cpf = ? LIMIT 1`,
-    [data.cpf]
-  );
-
-  if (!rows.length) {
-    throw new Error('Colaborador criado, mas o ID não foi localizado.');
+    const id = baseId + sequencia;
+    await conn.query(`
+      INSERT INTO funcionarios
+      (id, nome, sexo, nascimento, cpf, rg, mail, telefone, endereco, sobre, senha, fotoperfil, versao_foto)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '0')
+    `, [
+      id, data.nome, data.sexo, data.nascimento, data.cpf, data.rg, data.mail,
+      data.telefone, data.endereco, data.sobre, data.senha, data.fotoperfil || '/imagens/user-default.webp'
+    ]);
+    await conn.query('UPDATE colaboradores_sequencias_mensais SET ultima_sequencia = ? WHERE mes = ?', [sequencia, mes]);
+    await conn.commit();
+    return { ...data, id };
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
   }
-
-  return {
-    ...data,
-    id: rows[0].id
-  };
 }
 
 
@@ -396,6 +420,14 @@ async function buscarColaboradoresDisponiveis(dataDia) {
 }
 
 // Buscar por Data
+const funcaoProgramacaoSQL = `CASE
+  WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
+  WHEN cc.idsetor IN (5, 6, 10) THEN 'lider'
+  WHEN cc.idsetor = 1 AND f.cargo NOT IN (12, 13, 31, 32) THEN 'producao'
+  WHEN cc.idsetor = 12 THEN 'terceiro'
+  ELSE ''
+END`;
+
 async function buscarColaboradoresEmOS(dataDia, opcoes = {}) {
   const limite = Number.isFinite(Number(opcoes.limit)) && Number(opcoes.limit) > 0
     ? Math.min(Number(opcoes.limit), 100)
@@ -559,13 +591,7 @@ async function buscarColaboradoresEmOS(dataDia, opcoes = {}) {
       ) AS aniver,
       ANY_VALUE(IFNULL(f.nome, '')) AS nome, 
   
-      CASE
-        WHEN nv.id_catnvl = 1 AND f.cargo IN (12, 31) THEN 'encarregado'
-        WHEN cc.idsetor IN (5, 6, 10) THEN 'lider'
-        WHEN cc.idsetor = 1 AND f.cargo NOT IN (12, 13, 31, 32) THEN 'producao'
-        WHEN cc.idsetor = 12 THEN 'terceiro'
-        ELSE ''
-		  END AS funcao, 
+      ${funcaoProgramacaoSQL} AS funcao,
 
       ANY_VALUE(
         CASE fno.supervisor 
@@ -654,6 +680,32 @@ async function buscarColaboradoresEmOS(dataDia, opcoes = {}) {
     quantidade: ids.size,
     busca
   };
+}
+
+async function buscarProgramacaoParaExportacao(dataDia) {
+  const [rows] = await connection.query(`
+    SELECT o.id_OSs, COALESCE(o.descricao, '') AS descricao, COALESCE(e.nome, '') AS nomeEmpresa,
+           COALESCE(c.nome, 'VERIFICAR GERÊNCIA') AS nomeCidade, COALESCE(resp.nome, '') AS nomeResp,
+           CONCAT(SUBSTRING_INDEX(f.nome, ' ', 1), ' ', LEFT(SUBSTRING_INDEX(f.nome, ' ', -1), 1), '.') AS nome_formatado,
+           ${funcaoProgramacaoSQL} AS funcao,
+           IF(a.supervisor = 1, 'supervisor', '') AS supervisor,
+           IF(DATE_FORMAT(f.nascimento, '%m-%d') = DATE_FORMAT(a.data, '%m-%d'), 'aniver', '') AS aniver
+    FROM (
+      SELECT id_OS, idfuncionario, DATE(data) AS data, MAX(supervisor) AS supervisor
+      FROM funcionario_na_os
+      WHERE data = DATE(?)
+      GROUP BY id_OS, idfuncionario, DATE(data)
+    ) a
+    JOIN tb_obras o ON o.id_OSs = a.id_OS
+    JOIN funcionarios f ON f.id = a.idfuncionario
+    LEFT JOIN tb_empresa e ON e.id_empresas = o.id_empresa
+    LEFT JOIN tb_cidades c ON c.id_cidades = o.id_cidade
+    LEFT JOIN funcionarios resp ON resp.id = o.id_responsavel
+    LEFT JOIN tb_setores nv ON nv.id_catnvl = f.idnvlacesso
+    LEFT JOIN tb_cargos cc ON cc.id = f.cargo
+    ORDER BY o.id_OSs DESC, FIELD(nv.id_catnvl, 10, 5, 6, 1, 12), f.nome
+  `, [dataDia]);
+  return rows;
 }
 
 // Busca a ocupação completa do dia, sem paginação ou filtro de OS.
@@ -1753,6 +1805,7 @@ module.exports = {
   deleteColaborador,
   buscarColaboradoresDisponiveis,
   buscarColaboradoresEmOS,
+  buscarProgramacaoParaExportacao,
   buscarOcupacoesColaboradoresEmOS,
   getColaboradoresResponsavelOS,
   getColaboradoresCBX,

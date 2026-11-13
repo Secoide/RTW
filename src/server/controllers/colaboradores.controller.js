@@ -29,6 +29,17 @@ async function getColaborador(req, res) {
   }
 }
 
+async function getInfoColaboradorChat(req, res) {
+  try {
+    const colaborador = await ColabService.buscarColaborador(req.params.id);
+    if (!colaborador) return res.status(404).json({ erro: 'Colaborador não encontrado.' });
+    const { nome, nomeCargo, nomeSetor } = colaborador;
+    return res.json({ nome, cargo: nomeCargo, setor: nomeSetor });
+  } catch (err) {
+    return res.status(500).json({ erro: 'Não foi possível consultar o colaborador.' });
+  }
+}
+
 // POST /api/colaboradores
 async function createColaborador(req, res) {
   try {
@@ -55,6 +66,11 @@ async function createColaborador(req, res) {
 
 // PUT /api/colaboradores/:id (controller.js)
 async function updateColaborador(req, res) {
+  const usuario = Number(req.user?.id);
+  const nivel = Number(req.user?.role);
+  if (usuario !== Number(req.params.id) && usuario !== 999 && ![4, 6, 7, 99].includes(nivel)) {
+    return res.status(403).json({ sucesso: false, mensagem: 'Você não tem permissão para editar os dados pessoais deste perfil.' });
+  }
   try {
     const { id } = req.params;
 
@@ -89,6 +105,9 @@ async function updateColaborador(req, res) {
 
 
 async function updateProfissionalColab(req, res) {
+  if (Number(req.user?.id) !== 999 && ![4, 99].includes(Number(req.user?.role))) {
+    return res.status(403).json({ sucesso: false, mensagem: 'Somente RH e ADM podem alterar dados profissionais.' });
+  }
   try {
     const { id } = req.params; // vem da URL
     const atualizado = await ColabService.atualizarProfissionalColab(id, req.body, req.user);
@@ -181,6 +200,13 @@ async function getColaboradoresDisp(req, res) {
 async function getColaboradoresEmOS(req, res) {
   try {
     const dataDia = req.query.dataDia;
+
+    if (req.query.exportacao === "1") {
+      if (typeof dataDia !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(dataDia)) {
+        return res.status(400).json({ erro: true, mensagem: "Informe a data da programação." });
+      }
+      return res.json(await ColabService.listarProgramacaoParaExportacao(dataDia));
+    }
 
     if (req.query.ocupacao === "1") {
       const ocupacoes = await ColabService.listarOcupacoesColaboradoresEmOS(dataDia);
@@ -292,6 +318,12 @@ async function removerSupervisorAtual(req, res, next) {
 }
 
 async function cadastrarAtestado(req, res) {
+  if (![4, 5, 99].includes(Number(req.user?.role)) && Number(req.user?.id) !== 999) {
+    return res.status(403).json({
+      sucesso: false,
+      mensagem: 'Somente RH, Diretoria e ADM podem cadastrar registros de ausência.'
+    });
+  }
   try {
     const resultado = await ColabService.cadastrarAtestado(req.body);
     return res.status(200).json(resultado);
@@ -332,6 +364,9 @@ async function getHistoricoAtestar(req, res) {
 }
 
 async function getResumoAnualColaborador(req, res) {
+  if (Number(req.user?.id) !== 999 && ![4, 5, 6, 7, 99].includes(Number(req.user?.role))) {
+    return res.status(403).json({ erro: 'Somente Diretoria, Gerência, RH e ADM podem consultar o resumo anual.' });
+  }
   try {
     const anoAtual = new Date().getFullYear();
     const anoInformado = Number(req.query.ano || anoAtual);
@@ -1543,6 +1578,7 @@ async function removerConquista(
 module.exports = {
   getColaboradores,
   getColaborador,
+  getInfoColaboradorChat,
   createColaborador,
   updateColaborador,
   updateProfissionalColab,

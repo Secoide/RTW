@@ -42,6 +42,12 @@ async function criar(escopo,usuario,p = {}) {
 }
 
 async function atualizar(escopo,id,p) { await exigirEquipamento(escopo,id); await Model.atualizar(normalizarEquipamento(p),escopo,id); return {id}; }
+async function atualizarCertificado(escopo,id,p) {
+  await exigirCertificado(escopo,id);
+  const c=normalizarCertificado(p);
+  await Model.atualizarCertificado(c,escopo,id);
+  return {id};
+}
 async function importar(escopo,usuario) {
   const registros = referencia.map(r => ({ equipamento: normalizarEquipamento({...r,observacoes: !r.numero_serie ? 'Número de série não informado na planilha de origem.' : ''}), certificado: normalizarCertificado({data_calibracao:r.calibracao,data_recalibracao:r.recalibracao,observacoes:'Registro da planilha de controle. Certificado PDF ainda não anexado.'}), origem:'controle-planilha-2026:linha-' + r.linha_origem }));
   return { criados: await Model.cadastrar(registros,escopo,usuario,true), total:referencia.length };
@@ -69,7 +75,7 @@ async function anexar(escopo,usuario,id,p,file) {
     if (error) throw erroUpload(error);
     c.link_externo = storage().from(BUCKET).getPublicUrl(c.arquivo_path).data.publicUrl;
   }
-  try { await Model.adicionarCertificado(c,escopo,id,usuario); }
+  try { await Model.anexarCertificado(c,escopo,id,usuario); }
   catch (e) { if (c.arquivo_path) await storage().from(BUCKET).remove([c.arquivo_path]); throw e; }
   return {id:c.id};
 }
@@ -85,6 +91,10 @@ async function publico(token) { if (!/^[a-f0-9]{48}$/.test(token)) throw erro(40
 async function abrir(escopo,id) { return urlDocumento(await exigirCertificado(escopo,id)); }
 async function remover(escopo,id) {
   const c=await exigirCertificado(escopo,id);
+  await excluirDocumento(c);
+  await Model.removerCertificado(escopo,id);return {sucesso:true};
+}
+async function excluirDocumento(c) {
   if(c.arquivo_path){
     validarStorage();
     const {data,error}=await storage().from(c.arquivo_bucket || 'Calibracoes').remove([c.arquivo_path]);
@@ -93,6 +103,9 @@ async function remover(escopo,id) {
       throw erro(503,'O Supabase não confirmou a exclusão do PDF. O registro foi preservado. Confira as políticas SELECT e DELETE do bucket calibracoes para a mesma chave já usada em Exames e Cursos.');
     }
   }
-  await Model.removerCertificado(escopo,id);return {sucesso:true};
 }
-module.exports = { criar, atualizar, importar, anexar, compartilhar, revogar, publico, abrir, remover, listar:Model.listar, normalizarEquipamento, normalizarCertificado, tipoAutomatico, proximaCalibracao };
+async function removerEquipamento(escopo,id){
+  await Model.removerEquipamento(escopo,id,excluirDocumento);
+  return {sucesso:true};
+}
+module.exports = { criar, atualizar, atualizarCertificado, importar, anexar, compartilhar, revogar, publico, abrir, remover, removerEquipamento, listar:Model.listar, normalizarEquipamento, normalizarCertificado, tipoAutomatico, proximaCalibracao };

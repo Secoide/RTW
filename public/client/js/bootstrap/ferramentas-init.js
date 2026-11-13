@@ -692,7 +692,7 @@ async function gerarNumeroSeriePainel() {
 async function limparFormularioPainel() {
   byId("painelEditId").value = "";
   byId("formPainelEletrico")?.reset();
-  byId("painelTensao").value = "380V";
+  byId("painelTensao").value = "";
   byId("painelFrequencia").value = "60Hz";
   const agora = new Date();
   byId("painelData").value = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}`;

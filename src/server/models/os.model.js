@@ -194,6 +194,7 @@ async function atualizarOS({ idos, descricao, dataconclusao, cliente, cidade, su
 
 // Atualizar dados OS (GESTAO)
 async function updateOS(id, data) {
+  await garantirSchemaCadastroOS();
   const campos = [];
   const valores = [];
 
@@ -201,12 +202,11 @@ async function updateOS(id, data) {
     campos.push("statuss = ?");
     valores.push(data.status);
 
-    // ✅ Se status for '4' (Concluído), define dataAtual (substitui qualquer valor existente)
-    if (String(data.status) === "4") {
-      const dataAtual = new Date().toISOString().slice(0, 10); // formato 'YYYY-MM-DD'
-      campos.push("dataconclusao = ?");
-      valores.push(dataAtual);
-    }
+    const partes = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date()).map(p => [p.type, p.value]));
+    campos.push("dataconclusao = ?");
+    valores.push(String(data.status) === "4" ? `${partes.year}-${partes.month}-${partes.day}` : null);
   }
 
   if (data.descricao !== undefined) {
@@ -238,8 +238,7 @@ async function updateOS(id, data) {
     valores.push(data.responsavel);
   }
 
-  // Só define data de conclusão manual se status NÃO for '4'
-  if (data.concluido !== undefined && String(data.status) !== "4") {
+  if (data.concluido !== undefined && data.status === undefined) {
     campos.push("dataconclusao = ?");
     valores.push(data.concluido);
   }

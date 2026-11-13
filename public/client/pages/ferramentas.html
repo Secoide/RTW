@@ -158,14 +158,14 @@
     <p id="cal-mensagem" class="cal-message" role="status" aria-live="polite"></p>
     <div class="cal-workspace"><div id="cal-cards" class="cal-cards" aria-label="Equipamentos"></div><aside id="cal-inspector" class="cal-inspector"><div class="cal-empty">Selecione um equipamento para consultar os certificados e o histórico.</div></aside></div>
     <section class="cal-timeline" aria-labelledby="cal-timeline-title">
-      <header class="cal-timeline-head"><div><h4 id="cal-timeline-title">Calendário de calibrações</h4><small>Último registro por equipamento · ordem alfabética</small></div><div class="cal-timeline-controls"><span class="cal-timeline-legend"><span><i class="cal-legend-start"></i>Calibração</span><span><i class="cal-legend-end"></i>Vencimento</span></span><label for="cal-timeline-year">Ano <select id="cal-timeline-year" aria-label="Ano do calendário de calibrações"></select></label><button type="button" class="cal-btn" data-cal-action="imprimir-calendario" title="Imprimir ou salvar calendário em PDF">Imprimir / PDF</button><button type="button" id="cal-timeline-expand" class="cal-btn" data-cal-action="expandir-calendario" aria-expanded="false" aria-controls="cal-timeline-scroll" title="Expandir calendário">⛶ Expandir</button></div></header>
+      <header class="cal-timeline-head"><div><h4 id="cal-timeline-title">Calendário de calibrações</h4><small>Histórico por equipamento · ordem alfabética</small></div><div class="cal-timeline-controls"><span class="cal-timeline-legend"><span><i class="cal-legend-start"></i>Calibração</span><span><i class="cal-legend-end"></i>Vencimento</span></span><div class="cal-timeline-navigation" aria-label="Navegação por mês"><button type="button" class="cal-btn" id="cal-timeline-prev" aria-label="Mês anterior">‹</button><button type="button" class="cal-btn" id="cal-timeline-today">Hoje</button><button type="button" class="cal-btn" id="cal-timeline-next" aria-label="Próximo mês">›</button></div><button type="button" class="cal-btn" data-cal-action="imprimir-calendario" title="Imprimir ou salvar calendário em PDF">Imprimir / PDF</button><button type="button" id="cal-timeline-expand" class="cal-btn" data-cal-action="expandir-calendario" aria-expanded="false" aria-controls="cal-timeline-scroll" title="Expandir calendário">⛶ Expandir</button></div></header>
       <div id="cal-timeline-scroll" class="cal-timeline-scroll"><div id="cal-timeline-chart" class="cal-timeline-chart" aria-label="Períodos mensais de calibração dos equipamentos"></div></div>
     </section>
     <footer class="cal-foot">As datas da planilha são registros de controle. Os certificados PDF são anexados separadamente.</footer>
 
     <dialog id="cal-equip-dialog" class="cal-dialog" aria-labelledby="cal-equip-title"><form id="cal-equip-form"><header><div><small>Cadastro</small><h3 id="cal-equip-title">Novo equipamento</h3></div><button type="button" data-cal-close class="cal-btn" aria-label="Fechar">×</button></header><input type="hidden" name="id"><div class="cal-form-grid">
       <label class="cal-wide">Equipamento<input name="nome" maxlength="180" required placeholder="Ex.: Alicate terrômetro"></label>
-      <label>Modelo<input name="modelo" maxlength="180"></label><label>Fabricante<input name="fabricante" maxlength="120"></label>
+      <label>Modelo<input name="modelo" maxlength="180"></label><label>Fabricante<input name="fabricante" maxlength="120" list="cal-fabricantes"><datalist id="cal-fabricantes"></datalist></label>
       <label>Número de série<input name="numero_serie" maxlength="120"></label><label>Código interno<input name="codigo" maxlength="80"></label>
       <label class="cal-wide">Desenho do equipamento<select name="tipo"><option value="">Automático pelo nome</option><option value="multimetro">Multímetro</option><option value="alicate">Alicate de medição</option><option value="energia">Analisador de energia</option><option value="luximetro">Luxímetro</option><option value="isolamento">Megôhmetro / Hipot</option><option value="resistencia">Terrômetro / Ohmímetro</option><option value="termico">Câmera térmica</option><option value="temperatura">Termohigrômetro</option><option value="transformacao">Relação de transformação</option><option value="tensao">Detector de tensão</option><option value="fase">Fasímetro</option><option value="luva">Luva isolante</option><option value="aterramento">Aterramento temporário</option><option value="outro">Outro</option></select></label>
       <label class="cal-wide">Observações<textarea name="observacoes" maxlength="5000" rows="3"></textarea></label>
@@ -174,7 +174,7 @@
 
     <dialog id="cal-cert-dialog" class="cal-dialog" aria-labelledby="cal-cert-title"><form id="cal-cert-form"><header><div><small>Histórico de calibração</small><h3 id="cal-cert-title">Adicionar certificado</h3></div><button type="button" data-cal-close class="cal-btn" aria-label="Fechar">×</button></header><input type="hidden" name="equipamento_id"><div class="cal-form-grid">
       <label>Data da calibração<input type="date" name="data_calibracao" required></label><label>Data de vencimento<input type="date" name="data_recalibracao" required><small>Preenchida com um ano a mais. Pode ser ajustada.</small></label>
-      <label>Número do certificado<input name="numero" maxlength="120"></label><label>Laboratório<input name="laboratorio" maxlength="180"></label>
+      <label>Número do certificado<input name="numero" maxlength="120"></label><label>Laboratório<input name="laboratorio" maxlength="180" list="cal-laboratorios"><datalist id="cal-laboratorios"></datalist></label>
       <label class="cal-wide cal-file">Anexar certificado PDF<input name="arquivo" type="file" accept="application/pdf,.pdf"><small>PDF de até 20 MB, armazenado na nuvem.</small></label>
       <label class="cal-wide">Ou link do PDF já na nuvem<input name="link_externo" type="url" maxlength="2048" placeholder="https://…"><small>Use um link que permita ao cliente visualizar o documento.</small></label>
       <label class="cal-wide">Observações<textarea name="observacoes" maxlength="5000" rows="2"></textarea></label>
@@ -201,7 +201,7 @@
 
       <label class="numdoc-field">
         <span>Tensão</span>
-        <select id="painelTensao">
+        <select id="painelTensao" required>
           <option value="">Selecione...</option>
           <option>12V</option>
           <option>24V</option>

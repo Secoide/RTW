@@ -57,6 +57,7 @@ export function initGestao() {
         $searchInput.val("");
 
         $("#gestao").attr("data-entity", entidadeAtual);
+        $("#filtroOSConcluidas").toggle(entidadeAtual === "OS");
         $btnSugestoesFeriados.toggle(entidadeAtual === "Feriados");
 
         carregarTabela().then(() => {
@@ -229,7 +230,7 @@ export function initGestao() {
                     responsavel: e.lider,
                     orcado: e.orcado,
                     criado: e.mesCriado,
-                    concluido: e.mesConcluido,
+                    concluido: String(e.statuss) === "4" ? e.mesConcluido : null,
                 }));
             } else if (entidadeAtual === "Cargo") {
                 const data = await $.ajax({
@@ -374,12 +375,6 @@ export function initGestao() {
 
             // Linhas
             renderLinhasTabela();
-
-            // 🔎 Reaplica filtro se houver texto digitado
-            const termoAtual = $searchInput.val();
-            if (termoAtual) {
-                aplicarFiltro(termoAtual);
-            }
 
             // ======== Cards de resumo (Aba OS) / Total (demais abas) ========
             const $resumo = $("#resumo");
@@ -1624,7 +1619,10 @@ export function initGestao() {
         let visiveis = 0;
 
         $("#tbody tr").each(function () {
-            const visible = $(this).text().toLowerCase().includes(termo);
+            const registro = $(this).data("registro");
+            const textoLinha = entidadeAtual === "OS" && registro ? Object.values(registro).join(" ") : $(this).text();
+            const concluidaOculta = entidadeAtual === "OS" && $("#ocultarOSConcluidas").is(":checked") && registro?.status === "🟢 Concluído";
+            const visible = !concluidaOculta && textoLinha.toLowerCase().includes(termo);
             $(this).toggle(visible);
             if (visible) visiveis++;
         });
@@ -1633,8 +1631,10 @@ export function initGestao() {
         if (entidadeAtual !== "OS") {
             $("#totalCount").text(`Total: ${visiveis}`);
         }
+        $empty.toggle(visiveis === 0);
     };
     $searchInput.on("input", debounced(e => aplicarFiltro(e.target.value)));
+    $("#ocultarOSConcluidas").on("change", () => aplicarFiltro($searchInput.val()));
 
     // ========================== BOTÕES ==========================
     $btnReload.on("click", carregarTabela);
@@ -2359,7 +2359,7 @@ export function initGestao() {
         const $fragBody = $(document.createDocumentFragment());
 
         dados.forEach(item => {
-            const $tr = $("<tr>");
+            const $tr = $("<tr>").data("registro", item);
 
             lastCols.forEach(c => {
                 const $td = $("<td>");
@@ -2395,22 +2395,37 @@ export function initGestao() {
                         $sel.append($("<option>").val(val).text(label));
                     });
 
-                    const current = Object.entries(map).find(([_, lbl]) => lbl === item.status)?.[0] ?? "0";
+                    let current = Object.entries(map).find(([_, lbl]) => lbl === item.status)?.[0] ?? "0";
                     $sel.val(current);
 
                     // 🔁 Atualiza backend e cards ao mudar
                     $sel.on("change", async function () {
                         const novoValor = $(this).val();
                         const id = $(this).data("id");
+                        $(this).prop("disabled", true);
                         try {
                             await updateRegistro("OS", id, { status: novoValor });
-                            const item = dados.find(d => d.id === id);
-                            if (item) item.status = map[novoValor] ?? item.status;
+                            item.status = map[novoValor] ?? item.status;
+                            if (novoValor === "4") {
+                                const partes = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+                                    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit'
+                                }).formatToParts(new Date()).map(p => [p.type, p.value]));
+                                item.concluido = `${partes.year}-${partes.month}-${partes.day}`;
+                            } else {
+                                item.concluido = null;
+                            }
+                            const colunaConclusao = lastCols.indexOf("concluido");
+                            if (colunaConclusao >= 0) $tr.children("td").eq(colunaConclusao).text(item.concluido ? formatCell(item.concluido, "concluido") : "–");
+                            current = novoValor;
+                            aplicarFiltro($searchInput.val());
                             atualizarCardsResumo();
                             atualizarGraficoOS(); // 🔹 atualiza o gráfico
                             Toast.fire({ icon: "success", theme: 'dark', title: "Status atualizado!" });
                         } catch (err) {
+                            $(this).val(current);
                             Toast.fire({ icon: "error", theme: 'dark', title: "Falha ao atualizar status." });
+                        } finally {
+                            $(this).prop("disabled", false);
                         }
                     });
 
@@ -2418,7 +2433,7 @@ export function initGestao() {
                 }
 
                 // ======== Coluna de ícone (Exame) ========
-                if (entidadeAtual === "Exame" && c === "icone") {
+                else if (entidadeAtual === "Exame" && c === "icone") {
                     renderIconeExame($td, item[c]);
                 }
 
@@ -2531,6 +2546,9 @@ export function initGestao() {
                 else if (entidadeAtual === "OS" && c === "orcado") {
                     $td.text(formatarMoedaBR(item[c]));
                 }
+                else if (entidadeAtual === "OS" && c === "concluido") {
+                    $td.text(item.status === "🟢 Concluído" && item[c] && item[c] !== "0.00" ? formatCell(item[c], c) : "–");
+                }
 
                 else {
                     $td.text(formatCell(item[c], c));
@@ -2550,6 +2568,7 @@ export function initGestao() {
         });
 
         $tbody.append($fragBody);
+        aplicarFiltro($searchInput.val());
     }
 
     function formatarMoedaBR(valor) {

@@ -218,93 +218,102 @@ async function exportarDADOS($btn) {
   }
 }
 
-async function exportarWHATS($btn) {
+async function carregarProgramacaoParaExportacao(diaOriginal) {
+  const params = new URLSearchParams({ dataDia: diaOriginal, exportacao: "1" });
+  const linhas = await $.get(`/api/colaboradores/emOS?${params}`);
+  if (!Array.isArray(linhas)) throw new Error("Resposta inválida ao carregar a programação.");
 
-  const preferenciasExportacao = carregarPreferenciasExportacaoProgramacao();
-  const $painelDia = $btn.closest(".painelDia");
-  const diaOriginal = obterDiaPainel($painelDia);
-  const dia = formatarData(diaOriginal);
-
-  let enviar = `📆 *${dia.toUpperCase()}*\n\n`;
-  let cidades = {};
-  const todosNomes = [];
-
-  // 🔹 Coleta nomes
-  $painelDia.find(".painel_OS").each(function () {
-    $(this).find(".colaborador").each(function () {
-      todosNomes.push($(this).data("nome"));
-    });
-  });
-
-  // 🔹 Conta primeiros nomes
-  const contagem = {};
-
-  todosNomes.forEach(nomeCompleto => {
-    const primeiro = nomeCompleto.split(" ")[0].trim().toLowerCase();
-    contagem[primeiro] = (contagem[primeiro] || 0) + 1;
-  });
-
-  // 🔹 Monta OS
-  $painelDia.find(".painel_OS").filter(function () {
-    return $(this).find(".colaborador").length > 0;
-  }).each(function () {
-
-    const $os = $(this);
-
-    const idOS = $os.find(".lbl_OS").text().trim();
-    const descricao = $os.find(".lbl_descricaoOS").text().trim();
-    const cliente = $os.find(".lbl_clienteOS").text().trim();
-    const cidade = $os.find(".p_infoOS").data("cidade");
-    const responsavel = formatarNomeResponsavelWhats($os.find(".p_infoOS").data("resp"));
-
-    const descricaoFormatada =
-      descricao.charAt(0).toUpperCase() +
-      descricao.slice(1).toLowerCase();
-
-    let dadosOS =
-      `—— *OS ${idOS}* ——\n` +
-      `> ${cliente.toUpperCase()} - ${descricaoFormatada}\n` + 
-       "» ```Gestor: " + `${responsavel}` + "``` \n";
-
-    if (!preferenciasExportacao.mostrarResponsavel) {
-      dadosOS = dadosOS.replace(/(?:Â»|»)\s*```[\s\S]*?```\s*\n?$/, "");
+  const ordens = new Map();
+  for (const linha of linhas) {
+    const nome = String(linha.nome_formatado || "").trim();
+    if (!nome) continue;
+    const os = String(linha.id_OSs);
+    if (!ordens.has(os)) {
+      ordens.set(os, {
+        os,
+        descricao: String(linha.descricao || "").trim(),
+        cliente: String(linha.nomeEmpresa || "").trim(),
+        cidade: linha.nomeCidade || "-",
+        responsavel: linha.nomeResp,
+        total: 0,
+        colaboradores: []
+      });
     }
+    const ordem = ordens.get(os);
+    const marcadores = [];
+    if (linha.supervisor === "supervisor") marcadores.push("Supervisor");
+    if (linha.aniver === "aniver") marcadores.push("Aniversário");
+    if (linha.funcao === "lider") marcadores.push("Líder");
+    const cargo = linha.funcao === "lider" ? "" : String(linha.funcao || "").replace(/_/g, " ");
+    ordem.colaboradores.push({ nome, cargo, marcadores });
+    ordem.total++;
+  }
+  return { diaOriginal, diaFormatado: formatarData(diaOriginal), ordens: [...ordens.values()] };
+}
 
-    let colaboradores = "";
-
-    $os.find(".colaborador").each(function () {
-
-      let nome = $(this).data("nome");
-      const primeiro = nome.split(" ")[0].trim().toLowerCase();
-
-      if (contagem[primeiro] === 1) {
-        nome = nome.slice(0, -3);
-      }
-
-      if ($(this).hasClass("supervisor")) {
-        colaboradores += "```  └ " + nome + " ★```\n";
-
-      } else if (preferenciasExportacao.mostrarAniversariantes && $(this).hasClass("aniver")) {
-        colaboradores += "```  └ " + nome + " 🎉```\n";
-
-      } else if ($(this).find(".nome").hasClass("lider")) {
-        colaboradores += "```  └ Eng. " + nome + "```\n";
-
-      } else {
-        colaboradores += "```  └ " + nome + "```\n";
-      }
-
-    });
-
-    if (!cidades[cidade]) cidades[cidade] = [];
-
-    cidades[cidade].push(dadosOS + colaboradores + "\n");
-
+function avisarFalhaExportacao(erro) {
+  console.error("Erro ao carregar a programação para exportação:", erro);
+  Swal.fire({
+    icon: "error",
+    title: "Não foi possível exportar",
+    theme: "dark",
+    text: "Não foi possível carregar a programação completa. Tente novamente."
   });
+}
 
-  // 🔹 Texto final
-  for (const cidade in cidades) {
-    enviar += `\`${cidade.toUpperCase()} ▼\`\n${cidades[cidade].join("")}`;
+function avisarProgramacaoVazia() {
+  Swal.fire({
+    icon: "warning",
+    title: "Sem colaboradores",
+    theme: "dark",
+    text: "Este dia não possui OS com colaboradores para exportar."
+  });
+}
+
+async function exportarWHATS($btn) {
+  const preferenciasExportacao = carregarPreferenciasExportacaoProgramacao();
+  const diaOriginal = obterDiaPainel($btn.closest(".painelDia"));
+  let dadosDia;
+  try {
+    dadosDia = await carregarProgramacaoParaExportacao(diaOriginal);
+  } catch (erro) {
+    avisarFalhaExportacao(erro);
+    return;
+  }
+  if (!dadosDia.ordens.length) {
+    avisarProgramacaoVazia();
+    return;
+  }
+
+  const dia = dadosDia.diaFormatado;
+  let enviar = `📆 *${dia.toUpperCase()}*\n\n`;
+  const cidades = new Map();
+  const contagem = new Map();
+  const primeiroNome = nome => nome.split(" ")[0].toLowerCase();
+  for (const { colaboradores } of dadosDia.ordens) {
+    for (const { nome } of colaboradores) {
+      const primeiro = primeiroNome(nome);
+      contagem.set(primeiro, (contagem.get(primeiro) || 0) + 1);
+    }
+  }
+  for (const { os, descricao, cliente, cidade, responsavel, colaboradores } of dadosDia.ordens) {
+    const descricaoFormatada = descricao.charAt(0).toUpperCase() + descricao.slice(1).toLowerCase();
+    let dadosOS = `—— *OS ${os}* ——\n> ${cliente.toUpperCase()} - ${descricaoFormatada}\n`;
+    if (preferenciasExportacao.mostrarResponsavel) {
+      dadosOS += "» ```Gestor: " + formatarNomeResponsavelWhats(responsavel) + "``` \n";
+    }
+    for (const colab of colaboradores) {
+      let nome = contagem.get(primeiroNome(colab.nome)) === 1 ? colab.nome.replace(/\s\S\.$/u, "") : colab.nome;
+      if (colab.marcadores.includes("Supervisor")) nome += " ★";
+      else if (preferenciasExportacao.mostrarAniversariantes && colab.marcadores.includes("Aniversário")) nome += " 🎉";
+      else if (colab.marcadores.includes("Líder")) nome = "Eng. " + nome;
+      dadosOS += "```  └ " + nome + "```\n";
+    }
+    if (!cidades.has(cidade)) cidades.set(cidade, []);
+    cidades.get(cidade).push(dadosOS + "\n");
+  }
+  for (const [cidade, ordens] of cidades) {
+    enviar += `\`${cidade.toUpperCase()} ▼\`\n${ordens.join("")}`;
   }
 
 
@@ -398,20 +407,7 @@ async function exportarPDF($btn) {
     return;
   }
 
-  const $painelDia = $btn.closest(".painelDia");
-  const dadosDia = coletarProgramacaoDiaPDF($painelDia);
-  dadosDia.anotacoes = await carregarAnotacoesProgramacaoPDF(dadosDia.diaOriginal);
-
-  if (!dadosDia.ordens.length) {
-    Swal.fire({
-      icon: "warning",
-      title: "Sem colaboradores",
-      theme: "dark",
-      text: "Este dia não possui OS com colaboradores para exportar."
-    });
-    return;
-  }
-
+  const diaOriginal = obterDiaPainel($btn.closest(".painelDia"));
   const janela = window.open("", "_blank", "width=1200,height=900");
 
   if (!janela) {
@@ -424,54 +420,23 @@ async function exportarPDF($btn) {
     return;
   }
 
-  janela.document.open();
-  janela.document.write(montarHtmlProgramacaoPDF(dadosDia));
-  janela.document.close();
-}
-
-function coletarProgramacaoDiaPDF($painelDia) {
-  const diaOriginal = obterDiaPainel($painelDia);
-  const diaFormatado = formatarData(diaOriginal);
-  const ordens = [];
-
-  $painelDia.find(".painel_OS").filter(function () {
-    return $(this).find(".colaborador").length > 0;
-  }).each(function () {
-    const $os = $(this);
-    const colaboradores = [];
-
-    $os.find(".colaborador").each(function () {
-      const $colab = $(this);
-      const nome = $colab.data("nome") || $colab.find(".nome").text().trim() || "-";
-      const cargo = getCargoColaboradorPDF($colab);
-      const marcadores = [];
-
-      if ($colab.hasClass("supervisor")) marcadores.push("Supervisor");
-      if ($colab.hasClass("aniver")) marcadores.push("Aniversário");
-      if ($colab.find(".nome").hasClass("lider")) marcadores.push("Líder");
-
-      colaboradores.push({
-        nome,
-        cargo,
-        marcadores
-      });
-    });
-
-    ordens.push({
-      os: $os.find(".lbl_OS").text().trim(),
-      descricao: $os.find(".lbl_descricaoOS").text().trim(),
-      cliente: $os.find(".lbl_clienteOS").text().trim(),
-      cidade: $os.find(".p_infoOS").data("cidade") || "-",
-      total: colaboradores.length,
-      colaboradores
-    });
-  });
-
-  return {
-    diaOriginal,
-    diaFormatado,
-    ordens
-  };
+  janela.document.body.textContent = "Carregando a programação completa…";
+  try {
+    const dadosDia = await carregarProgramacaoParaExportacao(diaOriginal);
+    if (!dadosDia.ordens.length) {
+      janela.close();
+      avisarProgramacaoVazia();
+      return;
+    }
+    dadosDia.anotacoes = await carregarAnotacoesProgramacaoPDF(diaOriginal);
+    if (janela.closed) return;
+    janela.document.open();
+    janela.document.write(montarHtmlProgramacaoPDF(dadosDia));
+    janela.document.close();
+  } catch (erro) {
+    janela.close();
+    avisarFalhaExportacao(erro);
+  }
 }
 
 async function carregarAnotacoesProgramacaoPDF(diaOriginal) {
@@ -788,15 +753,6 @@ function renderOSProgramacaoPDF(os) {
       </table>
     </section>
   `;
-}
-
-function getCargoColaboradorPDF($colab) {
-  const classes = String($colab.find(".nome").attr("class") || "")
-    .split(/\s+/)
-    .filter(Boolean)
-    .filter(classe => !["nome", "areaRestrita", "lider"].includes(classe));
-
-  return classes.length ? classes[classes.length - 1].replace(/_/g, " ") : "";
 }
 
 function escapeHtmlPDF(valor) {

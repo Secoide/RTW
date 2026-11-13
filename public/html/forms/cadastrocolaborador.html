@@ -163,7 +163,7 @@
                             <div class="div_botoesAcao">
                                 <input id="bt_cadColaborador" class="bt_padrao bt_cad" data-roles="4,6,7,99"
                                     type="submit" name="cadColab" value="Cadastrar">
-                                <input id="bt_editColab" class="bt_padrao bt_cad hidden-inicial" data-roles="4,6,7,99"
+                                <input id="bt_editColab" class="bt_padrao bt_cad hidden-inicial" hidden
                                     type="submit" name="editColab" value="Salvar">
                             </div>
                         </form>
@@ -193,6 +193,7 @@
                             </div>
                         </div>
                         <form id="formColaboradorProfissional" method="POST">
+                            <fieldset id="camposProfissionais" disabled>
                             <div class="linha_infoColab linha_padrao">
                                 <div class="painel_checkBokCNH">
                                     <p>Categoria CNH...</p>
@@ -243,9 +244,10 @@
                             </div>
                             <input type="hidden" name="idColaboradorPro" id="idColaboradorPro">
                             <div class="div_botoesAcao">
-                                <input id="bt_editColabProf" class="bt_padrao bt_cad" data-roles="4,6,7,99"
+                                <input id="bt_editColabProf" class="bt_padrao bt_cad" hidden
                                     type="submit" name="editColabProf" value="Salvar">
                             </div>
+                            </fieldset>
                         </form>
                     </div>
                     <div class="painel_vestimentas">
@@ -296,7 +298,7 @@
                             <i class="fa-solid fa-shield-heart atestar-cabecalho-icone" aria-hidden="true"></i>
                         </div>
 
-                        <form id="form_atestar" class="atestar-form" method="POST" novalidate>
+                        <form id="form_atestar" class="atestar-form" method="POST" novalidate hidden>
                             <div class="div_atestar">
                                 <label class="atestar-campo atestar-campo-motivo" for="motivo">
                                     <span>Tipo de registro</span>
@@ -326,7 +328,7 @@
                             </label>
                             <div class="atestar-form-acoes">
                                 <span id="atestar-form-status" role="status" aria-live="polite"></span>
-                                <input class="bt_teste glass" data-roles="4,6,7,99" type="submit" name="salvarAtestado"
+                                <input class="bt_teste glass" type="submit" name="salvarAtestado"
                                     value="Salvar registro">
                             </div>
                             <input id="id" type="hidden" name="idColab" value="">

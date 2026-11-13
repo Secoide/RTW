@@ -35,6 +35,7 @@ router.post('/upload-foto', verificarAutenticacao, upload.single('fotoperfil'), 
 
 // CRUD
 router.get('/', verificarAutenticacao, colaboradoresController.getColaboradores);
+router.get('/info-chat/:id', verificarAutenticacao, colaboradoresController.getInfoColaboradorChat);
 router.get('/:id', verificarAutenticacao, colaboradoresController.getColaborador);
 router.post('/cadastrar', verificarAutenticacao, colaboradoresController.createColaborador);
 router.put('/editar/:id', verificarAutenticacao, colaboradoresController.updateColaborador);
