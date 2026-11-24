@@ -75,6 +75,9 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Mascote da CIPA adicionado no painel de boas-vindas da Home;
 - Alerta de nova versão com botão Atualizar. Verifica a cada minuto e ao retornar à janela, sem recarregar automaticamente;
 
+### Alterado
+- Ao anexar exame ou curso pelo perfil, o colaborador permanece selecionado após salvar, facilitando o próximo anexo;
+
 ### Corrigido
 - Na tela Gestão, o cadastro de uma nova OS não carregava as cidades e os supervisores vinculados à empresa selecionada;
 

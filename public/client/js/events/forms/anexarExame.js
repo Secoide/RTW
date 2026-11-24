@@ -18,7 +18,7 @@ async function open_form_AnexarExame(idColab, idExame) {
         await preencherCbxColaborador();
         await preencherCbxExame();
         initControleVencimentoExame();
-        initSubmit();
+        initSubmit(idColab != null);
         // agora seleciona o colaborador
         if (idColab != null) {
             $('#selectColaborador').val(String(idColab)).trigger('change');
@@ -57,7 +57,7 @@ function initControleVencimentoExame() {
     aplicarRegra();
 }
 
-function initSubmit() {    
+function initSubmit(manterColaborador = false) {
     $(document).off("submit", "#formAnexarExame");
 
     // delega o evento ao document
@@ -116,6 +116,9 @@ function initSubmit() {
                     title: res.message
                 });
                 form.reset();
+                if (manterColaborador) {
+                    $(form).find('#selectColaborador').val(fd.get('idColab')).trigger('change');
+                }
 
                 // Finaliza a barra em 100%
                 $('#uploadProgress')

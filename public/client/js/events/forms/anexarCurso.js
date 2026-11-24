@@ -17,7 +17,7 @@ async function open_form_AnexarCurso(idColab, idCurso) {
         await preencherCbxColaborador();
         await preencherCbxCurso();
         initControleVencimentoCurso();
-        initSubmit()
+        initSubmit(idColab != null);
         if (idColab != null) {
             $('#selectColaborador').val(String(idColab)).trigger('change');
         }
@@ -55,7 +55,7 @@ function initControleVencimentoCurso() {
     aplicarRegra();
 }
 
-function initSubmit() {
+function initSubmit(manterColaborador = false) {
     $(document).off("submit", "#formAnexarCurso");
 
     // delega o evento ao document
@@ -113,6 +113,9 @@ function initSubmit() {
                     title: res.message
                 });
                 form.reset();
+                if (manterColaborador) {
+                    $(form).find('#selectColaborador').val(fd.get('idColab')).trigger('change');
+                }
 
                 // Finaliza a barra em 100%
                 $('#uploadProgress')
