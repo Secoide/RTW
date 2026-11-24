@@ -37,7 +37,11 @@ export async function carregarOS() {
       );
     });
 
-  if (osFoco && $cbx.find(`option[value="${osFoco}"]`).length) {
+  const osFocoEncontrada = lista.find(os => String(os.id_OSs) === osFoco);
+  if (osFocoEncontrada) {
+    if (!$cbx.find(`option[value="${osFocoEncontrada.id_OSs}"]`).length) {
+      $cbx.append($("<option>").val(osFocoEncontrada.id_OSs).text("OS " + osFocoEncontrada.id_OSs + " - " + osFocoEncontrada.descricao));
+    }
     state.osSelecionada = osFoco;
     $cbx.val(osFoco);
     sessionStorage.removeItem("material_focus_os");
@@ -153,6 +157,13 @@ export function moverListaMaterialOS(id, payload) {
 
 export function listarHistoricoListaMaterialOS(id) {
   return $.get(`${state.BASE_URL}/materiais/listas/${id}/historico`);
+}
+
+export function excluirHistoricoListaMaterialOS(idLista, idHistorico) {
+  return $.ajax({
+    url: `${state.BASE_URL}/materiais/listas/${encodeURIComponent(idLista)}/historico/${encodeURIComponent(idHistorico)}`,
+    method: "DELETE"
+  });
 }
 
 export function excluirListaMaterialOS(id) {

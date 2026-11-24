@@ -64,9 +64,19 @@ e este projeto adere à [Versionamento Semântico](https://semver.org/lang/pt-BR
 ### Corrigido
 - Sincronização das reações do chat para que apareçam também para o autor da mensagem;
 
-
-
 ### Removido
+
+
+
+## [2.3.2] - 2026-11-23
+## Nome: 🔨 Ajustes
+### Adicionado
+- Adicionada a opção Mostrar terceiros ao lado de Mostrar desligados na tabela geral do RH. Terceiros ficam ocultos por padrão. Os filtros podem ser usados juntos e funcionam com a busca por nome;
+- Mascote da CIPA adicionado no painel de boas-vindas da Home;
+- Alerta de nova versão com botão Atualizar. Verifica a cada minuto e ao retornar à janela, sem recarregar automaticamente;
+
+### Corrigido
+- Na tela Gestão, o cadastro de uma nova OS não carregava as cidades e os supervisores vinculados à empresa selecionada;
 
 
 

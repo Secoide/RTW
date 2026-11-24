@@ -1,9 +1,9 @@
 const ESTAGIOS = [
-  { chave: "orcamento", titulo: "Orcamento", icone: "fa-file-invoice-dollar" },
-  { chave: "engenharia", titulo: "Engenharia", icone: "fa-pen-ruler" },
-  { chave: "estoque", titulo: "Estoque", icone: "fa-boxes-stacked" },
-  { chave: "compras", titulo: "Compras", icone: "fa-cart-shopping" },
-  { chave: "finalizado", titulo: "Finalizado", icone: "fa-circle-check" }
+  { chave: "orcamento", titulo: "Orçamento" },
+  { chave: "engenharia", titulo: "Engenharia" },
+  { chave: "estoque", titulo: "Estoque" },
+  { chave: "compras", titulo: "Compras" },
+  { chave: "finalizado", titulo: "Finalizado" }
 ];
 
 export function renderAtalhosSetorMaterial(resumo) {
@@ -42,10 +42,8 @@ export function renderAtalhosSetorMaterial(resumo) {
   $wrap
     .prop("hidden", false)
     .html(`
-      <div class="material-atalhos-head">
-        <i class="fa-solid fa-inbox"></i>
-        <span>Meu setor</span>
-        <small>${escapeHtml(titulo)}</small>
+      <div class="material-atalhos-head" title="${escapeHtml(titulo)}">
+        <span>Pendências</span>
       </div>
       <div class="material-atalhos-lista">
         ${itens}
@@ -137,7 +135,7 @@ export function renderKanbanMateriais(listas, idOS) {
     return `
       <div class="material-kanban-coluna" data-estagio="${estagio.chave}">
         <div class="material-kanban-coluna-head">
-          <span><i class="fa-solid ${estagio.icone}"></i> ${estagio.titulo}</span>
+          <span>${estagio.titulo}</span>
           <b>${listasEstagio.length}</b>
         </div>
         <div class="material-kanban-coluna-body">
@@ -150,11 +148,10 @@ export function renderKanbanMateriais(listas, idOS) {
   $kanban.html(`
     <div class="material-kanban-header">
       <div>
-        <strong>Fluxo de materiais da OS ${escapeHtml(idOS)}</strong>
-        <span>${listaNormalizada.length} lista(s) encontrada(s)</span>
+        <strong>Fluxo de materiais · OS ${escapeHtml(idOS)}</strong>
+        <span>${listaNormalizada.length} lista(s)</span>
       </div>
       <div class="material-kanban-actions">
-        <small>Clique no bloco para abrir a lista completa.</small>
         <button id="btnNovaListaMaterial" class="bt_padrao bt_cad">
           <i class="fa-solid fa-plus"></i> Nova lista
         </button>
@@ -189,10 +186,10 @@ export function getTituloEstagio(status) {
 function renderCardLista(lista, idOS) {
   const progresso = Math.max(lista.percentualCompra, lista.percentualSeparacao);
   const progressoLabel = lista.percentualCompra >= lista.percentualSeparacao ? "Comprando" : "Separando";
-  const statusLabel = getTituloEstagio(lista.status);
   const podeAvancar = lista.status !== "finalizado";
   const podeVoltar = lista.status !== "orcamento";
-  const podeAlterar = usuarioPodeAlterarEstagio(lista.status);
+  const podeAlterar = lista.pode_mudar_estagio === true;
+  const bloqueioCriador = lista.pode_gerenciar === true ? "" : "disabled";
   const prazoClass = getPrazoClass(lista);
   const prazoLabel = lista.sem_prazo ? "Sem prazo" : formatarDataCurta(lista.prazo);
 
@@ -203,9 +200,8 @@ function renderCardLista(lista, idOS) {
           <div class="material-lista-card-top">
             <div class="material-lista-card-nome">
               <strong>${escapeHtml(lista.titulo)}</strong>
-              <small>${escapeHtml(lista.descricao || "Lista de materiais")}</small>
+              ${lista.descricao ? `<small>${escapeHtml(lista.descricao)}</small>` : ""}
             </div>
-            <em class="material-lista-card-status">${escapeHtml(statusLabel)}</em>
           </div>
 
           ${lista.observacao_rapida ? `
@@ -217,13 +213,13 @@ function renderCardLista(lista, idOS) {
 
           <div class="material-lista-card-tags">
             <span class="prioridade-${escapeHtml(lista.prioridade)}">
-              <i class="fa-solid fa-flag"></i> ${escapeHtml(formatarPrioridade(lista.prioridade))}
+              ${escapeHtml(formatarPrioridade(lista.prioridade))}
             </span>
             <span>
-              <i class="fa-solid fa-user"></i> ${escapeHtml(lista.responsavel_nome || "Sem responsavel")}
+              ${escapeHtml(lista.responsavel_nome || "Sem responsável")}
             </span>
             <span>
-              <i class="fa-solid fa-calendar-days"></i> ${escapeHtml(prazoLabel)}
+              ${escapeHtml(prazoLabel)}
             </span>
           </div>
 
@@ -248,8 +244,11 @@ function renderCardLista(lista, idOS) {
       </button>
 
       <div class="material-lista-card-actions">
-        <button class="material-lista-mover-os" data-id="${lista.id}" title="Copiar ou transferir para outra OS">
+        <button class="material-lista-mover-os" data-id="${lista.id}" ${bloqueioCriador} title="Copiar ou transferir para outra OS">
           <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        </button>
+        <button type="button" class="material-lista-exportar-json" data-id="${lista.id}" ${bloqueioCriador} title="Exportar lista em JSON" aria-label="Exportar lista em JSON">
+          <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
         </button>
         ${podeVoltar ? `
           <button class="material-lista-voltar" data-id="${lista.id}" title="Voltar para o estagio anterior" ${podeAlterar ? "" : "disabled"}>
@@ -265,17 +264,17 @@ function renderCardLista(lista, idOS) {
           <i class="fa-solid fa-clock-rotate-left"></i>
         </button>
         ${lista.status === "finalizado" ? `
-          <button class="material-lista-conferir" data-id="${lista.id}" title="Conferir materiais no estoque">
+          <button class="material-lista-conferir" data-id="${lista.id}" ${bloqueioCriador} title="Conferir materiais no estoque">
             <i class="fa-solid fa-clipboard-check"></i>
           </button>
         ` : ""}
-        <button class="material-lista-duplicar" data-id="${lista.id}" title="Duplicar lista">
+        <button class="material-lista-duplicar" data-id="${lista.id}" ${bloqueioCriador} title="Duplicar lista">
           <i class="fa-solid fa-copy"></i>
         </button>
-        <button class="material-lista-editar" data-id="${lista.id}" title="Editar lista">
+        <button class="material-lista-editar" data-id="${lista.id}" ${bloqueioCriador} title="Editar lista">
           <i class="fa-solid fa-pen"></i>
         </button>
-        <button class="material-lista-excluir" data-id="${lista.id}" title="Excluir lista">
+        <button class="material-lista-excluir" data-id="${lista.id}" ${bloqueioCriador} title="Excluir lista">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
@@ -370,21 +369,6 @@ function formatarDataCurta(valor) {
     day: "2-digit",
     month: "2-digit"
   });
-}
-
-function usuarioPodeAlterarEstagio(status) {
-  const nivel = Number(sessionStorage.getItem("nivel_acesso") || localStorage.getItem("nivel_acesso") || 0);
-  if ([6, 7, 99].includes(nivel)) return true;
-
-  const nivelPorEstagio = {
-    orcamento: 3,
-    engenharia: 5,
-    estoque: 2,
-    compras: 3,
-    finalizado: 99
-  };
-
-  return nivel === nivelPorEstagio[status];
 }
 
 function calcularResumo(lista) {

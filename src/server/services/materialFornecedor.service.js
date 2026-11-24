@@ -84,6 +84,8 @@ async function selecionarFornecedor(idFornecedor, options = {}) {
 // ================= CHECKS =================
 
 function validarFornecedor(data, totalItem) {
+  const quantidade = Number(data.quantidade);
+  const total = Number(totalItem);
 
   if (!data.valor || data.valor <= 0) {
     throw new Error("Valor invÃ¡lido");
@@ -93,11 +95,11 @@ function validarFornecedor(data, totalItem) {
     throw new Error("ICMS invÃ¡lido");
   }
 
-  if (!data.quantidade || data.quantidade <= 0) {
+  if (!Number.isFinite(quantidade) || quantidade <= 0) {
     throw new Error("Quantidade invÃ¡lida");
   }
 
-  if (data.quantidade > totalItem) {
+  if (!Number.isFinite(total) || quantidade > total) {
     throw new Error(`Quantidade maior que o total (${totalItem})`);
   }
 
@@ -130,6 +132,9 @@ async function deletarFornecedor(id) {
   if (!ok) return false;
 
   const item = await MaterialOSModel.getMaterialOSById(fornecedor.id_material_os);
+  if (item && Number(fornecedor.selecionado) === 1) {
+    await MaterialOSModel.limparFornecedorMaterialOS(fornecedor.id_material_os, item);
+  }
   await recalcularValorCatalogoDoItem(item);
   return true;
 }

@@ -1,11 +1,11 @@
+import { validarCadastroMaterial } from "../../utils/dom/material-form-render.js";
 import { getVal } from "../../utils/dom/getVal.js";
-import { verificarDuplicado } from "../../utils/material/material.validation.js";
+import { normalizarAtributo, parseAtributos } from "../../utils/material/material.utils.js";
 import { materialState as state } from "../../state/material.state.js";
-import { resetModalMaterial } from "../forms/material.modal.js"
+import { fecharModalMaterial, atualizarEstadoImagemMaterial, atualizarModoModalMaterial } from "../forms/material.modal.js";
+import { carregarVariacoes } from "../../services/api/material.api.js";
 import { aplicarImagemExistenteSelecionada } from "./material.form.events.js";
-function normalizar(attr) {
-    return attr?.replace(/"/g, "").trim();
-}
+import { obterRelacionadosMaterial } from "./material.relacionados.js";
 
 export function initMaterialSave() {
     const Toast = Swal.mixin({
@@ -22,9 +22,10 @@ export function initMaterialSave() {
     // ==============================
     // 🔥 HANDLER ÚNICO E SEGURO
     // ==============================
-    $("#btnSalvarMaterial").off("click").on("click", async function () {
+    $("#btnSalvarMaterial, #btnSalvarMaterialFoto").off("click.materialSalvar").on("click.materialSalvar", async function () {
 
-        const $btn = $(this);
+        const adicionarFoto = this.id === "btnSalvarMaterialFoto";
+        const $btn = $("#btnSalvarMaterial, #btnSalvarMaterialFoto");
 
         // 🔒 evita duplo clique
         if ($btn.data("loading")) return;
@@ -38,205 +39,87 @@ export function initMaterialSave() {
 
             const nome = getVal("#nomeMaterial").trim();
             const categoria = getVal("#categoriaMaterial");
-            const codigo = getVal("#codigo");
-            const fabricante = getVal("#fabricante");
+            const codigo = getVal("#codigo").trim();
+            const fabricante = getVal("#fabricante").trim();
             const unidade = getVal("#unidadeMaterial") || "un";
 
-            if (!nome) {
-                alert("Informe o nome");
+            const { primeiroInvalido, atributos: atributosValidados } = validarCadastroMaterial();
+            if (primeiroInvalido) {
+                primeiroInvalido.focus();
                 return;
             }
 
-            const nomeNormalizado = nome.toUpperCase();
             const idEditando = $("#modoEdicaoMaterial").val() === "1" ? $("#idMaterial").val() : "";
-
-            if (!idEditando && verificarDuplicado(nomeNormalizado)) {
-                $("#alertDuplicado").show();
+            let relacionados;
+            try {
+                relacionados = obterRelacionadosMaterial();
+            } catch (erro) {
+                $("#materialAvisoCadastro").text(erro.message);
                 return;
             }
 
-            $("#alertDuplicado").hide();
-
-            // ==============================
-            // 🔹 VALIDAR ATRIBUTOS
-            // ==============================
-
-            const atributos = Array.isArray(state.atributosSelecionados)
-                ? state.atributosSelecionados
-                : [];
-
-            const atributosValidados = [];
-
-            for (const attr of atributos) {
-
-                if (!attr || typeof attr !== "string") continue;
-
-                const attrLimpo = normalizar(attr);
-
-                const $input = $(`[data-attr="${attrLimpo}"]:visible`).last();
-
-                if (!$input.length) {
-                    console.warn("❌ input não encontrado:", attrLimpo);
-                    alert(`Erro no atributo: ${attrLimpo}`);
+            if (!idEditando) {
+                const normalizar = valor => String(valor ?? "").trim().toLowerCase();
+                const assinatura = registro => JSON.stringify(Object.entries(registro)
+                    .map(([chave, valor]) => [normalizarAtributo(chave), normalizar(valor)])
+                    .sort(([a], [b]) => a.localeCompare(b)));
+                const atributosNovos = assinatura(Object.fromEntries(atributosValidados.map(a => [a.atributo, a.valor])));
+                const duplicado = state.listaVariacoes.some(item =>
+                    normalizar(item.nome) === normalizar(nome) &&
+                    normalizar(item.fabricante) === normalizar(fabricante) &&
+                    normalizar(item.codigo) === normalizar(codigo) &&
+                    normalizar(item.unidade || "un") === normalizar(unidade) &&
+                    assinatura(parseAtributos(item.atributos)) === atributosNovos
+                );
+                if (duplicado) {
+                    $("#materialAvisoCadastro").text("Essa variação já existe.");
                     return;
                 }
-
-                $input.trigger("input").trigger("change");
-
-                let valor = ($input.val() || "");
-                valor = limparValor(valor);
-
-                if (!valor) {
-                    alert(`Preencha o atributo: ${attrLimpo}`);
-                    return;
-                }
-
-                atributosValidados.push({
-                    atributo: attrLimpo,
-                    valor
-                });
             }
 
-            // ==============================
-            // 🔹 BUSCAR OU CRIAR MATERIAL
-            // ==============================
-
+            let idVariacao = idEditando;
+            const salvarJson = (url, method, dados) => $.ajax({
+                url, method, contentType: "application/json", data: JSON.stringify(dados)
+            });
             if (idEditando) {
-                await $.ajax({
-                    url: `/api/materiais/variacoes/${idEditando}`,
-                    method: "PUT",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        nome,
-                        categoria,
-                        codigo,
-                        fabricante,
-                        unidade,
-                        atributos: atributosValidados
-                    })
+                await salvarJson("/api/materiais/variacoes/" + idEditando, "PUT", {
+                    nome, categoria, codigo, fabricante, unidade, atributos: atributosValidados, relacionados
                 });
+            } else {
+                const material = await salvarJson("/api/materiais", "POST", { nome, categoria });
+                if (!material?.id) throw new Error("ID do material inválido");
 
-                await aplicarImagemExistenteSelecionada(idEditando);
-
-                Toast.fire({
-                    icon: "success",
-                    theme: 'dark',
-                    title: "Material atualizado com sucesso"
+                const variacao = await salvarJson("/api/materiais/variacoes", "POST", {
+                    id_material: material.id, codigo, fabricante, unidade, atributos: atributosValidados,
+                    imagem: getVal("#imagemMaterialImportada") || null, relacionados
                 });
+                idVariacao = variacao?.insertId || variacao?.id;
+                if (!idVariacao) throw new Error("ID da variação inválido");
 
-                if (typeof resetModalMaterial === "function") {
-                    resetModalMaterial();
-                }
-
-                $("#modalMaterial").addClass("hidden");
-                state.atributosSelecionados = [];
-
-                await Promise.all([
-                    typeof carregarCatalogoMateriais === "function" ? carregarCatalogoMateriais() : null,
-                    typeof carregarMateriais === "function" ? carregarMateriais() : null
-                ]);
-
-                return;
+                $("#idMaterial").val(idVariacao);
+                $("#imagemMaterialImportada").val("");
+                $("#modoEdicaoMaterial").val("1");
+                $("#btnSalvarMaterial").text("Salvar edição");
+                $("#btnSalvarMaterialFoto, #materialEdicaoPainel").hide();
+                atualizarModoModalMaterial("edicao", "Material cadastrado");
+                atualizarEstadoImagemMaterial();
             }
-
-            let mat;
-
-            const lista = await $.ajax({
-                url: `/api/materiais?nome=${encodeURIComponent(nomeNormalizado)}`,
-                method: "GET"
-            });
-
-            mat = lista.find(m => (m.nome || "").toUpperCase() === nomeNormalizado);
-
-            // 🔒 evita corrida (race condition)
-            if (!mat) {
-
-                await $.ajax({
-                    url: "/api/materiais",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ nome, categoria })
-                });
-
-                const listaAtualizada = await $.ajax({
-                    url: `/api/materiais?nome=${encodeURIComponent(nomeNormalizado)}`,
-                    method: "GET"
-                });
-
-                mat = listaAtualizada.find(m => (m.nome || "").toUpperCase() === nomeNormalizado);
-
-                if (!mat) {
-                    throw new Error("Material não encontrado após criação");
-                }
-            }
-
-            if (!mat?.id) {
-                alert("Erro: material sem ID");
-                return;
-            }
-
-            // ==============================
-            // 🔹 CRIAR VARIAÇÃO
-            // ==============================
-
-            const vari = await $.ajax({
-                url: "/api/materiais/variacoes",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    id_material: mat.id,
-                    codigo,
-                    fabricante,
-                    unidade
-                })
-            });
-
-            const idVariacao = vari?.insertId || vari?.id;
 
             await aplicarImagemExistenteSelecionada(idVariacao);
-
-            if (!idVariacao) {
-                throw new Error("ID da variação inválido");
-            }
-
-            // ==============================
-            // 🔹 SALVAR ATRIBUTOS
-            // ==============================
-
-            await Promise.all(
-                atributosValidados.map(attr =>
-                    $.ajax({
-                        url: "/api/materiais/variacoes/atributos",
-                        method: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify({
-                            id_variacao: idVariacao,
-                            atributo: attr.atributo,
-                            valor: attr.valor
-                        })
-                    })
-                )
-            );
-
-            // ==============================
-            // 🔹 SUCESSO
-            // ==============================
             Toast.fire({
                 icon: "success",
-                theme: 'dark',
-                title: "Material cadastrado com sucesso"
+                theme: "dark",
+                title: idEditando ? "Material atualizado com sucesso" : "Material cadastrado com sucesso"
             });
 
-            if (typeof resetModalMaterial === "function") {
-                resetModalMaterial();
+            if (adicionarFoto) {
+                $("#btn_uploadImagem").trigger("focus");
+            } else {
+                fecharModalMaterial();
             }
 
-            $("#modalMaterial").addClass("hidden");
-
-            state.atributosSelecionados = [];
-
-            // 🔄 atualizações (seguro rodar em paralelo)
-            await Promise.all([
+            await Promise.allSettled([
+                carregarVariacoes(),
                 typeof carregarCatalogoMateriais === "function" ? carregarCatalogoMateriais() : null,
                 typeof carregarMateriais === "function" ? carregarMateriais() : null
             ]);
@@ -244,7 +127,7 @@ export function initMaterialSave() {
         } catch (err) {
 
             console.error("💥 ERRO AO SALVAR MATERIAL:", err);
-            alert("Erro ao salvar material");
+            $("#materialAvisoCadastro").text(err.responseJSON?.erro || "Não foi possível salvar o material. Tente novamente.");
 
         } finally {
 
@@ -254,14 +137,4 @@ export function initMaterialSave() {
 
     });
 
-
-    function limparValor(valor) {
-        if (!valor) return "";
-
-        return valor
-            .replace(/\\"/g, '"')
-            .replace(/^"(.*)"$/, '$1')
-            .replace(/""+/g, '"') // evita "" duplicado
-            .trim();
-    }
 }

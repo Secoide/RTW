@@ -3,12 +3,13 @@ import { initMaterialForm } from "../components/material/material.form.events.js
 import { initMaterialAutocompleteModal } from "../components/material/material.autocomplete.events.js";
 import { initMaterialAtributosModal } from "../components/material/material.atributos.events.js";
 import { initMaterialSave } from "../components/material/material.save.events.js";
+import { initCatalogoMaterialTransferencia } from "../components/material/material.transferencia.events.js";
+import { carregarRelacionadosMaterial } from "../components/material/material.relacionados.js";
 import { carregarVariacoes } from "../services/api/material.api.js";
 import { abrirModalMaterial, atualizarEstadoImagemMaterial, atualizarModoModalMaterial } from "../components/forms/material.modal.js";
 import { materialState as state } from "../state/material.state.js";
 import { renderAtributos } from "../utils/dom/material.atributos.render.js";
-import { ATRIBUTOS_POR_MATERIAL } from "../utils/material/material.config.js";
-import { normalizarAtributo, parseAtributos } from "../utils/material/material.utils.js";
+import { parseAtributos } from "../utils/material/material.utils.js";
 
 const estadoMateriais = {
   pagina: 1,
@@ -115,6 +116,7 @@ export async function initMateriais() {
   estadoMateriais.editando = null;
 
   initMaterialModal();
+  initCatalogoMaterialTransferencia();
   initMaterialForm();
   initMaterialAutocompleteModal();
   initMaterialAtributosModal();
@@ -516,6 +518,7 @@ async function abrirCadastroMaterial(id) {
   $("#categoriaMaterial").val(item.categoria || "");
   $("#codigo").val(item.codigo || "");
   $("#fabricante").val(item.fabricante || "");
+  $("#materialUsoGenerico").prop("checked", !item.fabricante?.trim() || !item.codigo?.trim());
   $("#unidadeMaterial").val(item.unidade || "un");
   $("#idMaterial").val(item.id);
   $("#imagemMaterialOrigemId").val("");
@@ -523,6 +526,7 @@ async function abrirCadastroMaterial(id) {
   $("#materialImagemExistentePainel").prop("hidden", true);
   $("#buscaImagemMaterialExistente").val("");
   $("#modoEdicaoMaterial").val("1");
+  carregarRelacionadosMaterial(item.id);
   $("#btnSalvarMaterial").text("Salvar edição");
   $("#materialEdicaoTexto").text("");
   $("#materialEdicaoPainel").prop("hidden", true).removeClass("editando").hide();
@@ -549,28 +553,8 @@ function preencherAtributosMaterial(item) {
     console.warn("Erro ao carregar atributos do material:", err);
   }
 
-  const nomeKey = String(item.descricao || "").toUpperCase();
-  state.atributosSelecionados = ATRIBUTOS_POR_MATERIAL[nomeKey]
-    ? [...ATRIBUTOS_POR_MATERIAL[nomeKey]]
-    : [];
-
-  Object.keys(atributosObj).forEach(attr => {
-    const attrLimpo = normalizarAtributo(attr);
-    const existe = state.atributosSelecionados
-      .map(a => normalizarAtributo(a))
-      .includes(attrLimpo);
-
-    if (!existe) state.atributosSelecionados.push(attr.trim());
-  });
-
-  renderAtributos();
-
-  setTimeout(() => {
-    Object.entries(atributosObj).forEach(([attr, val]) => {
-      const $input = $(`[data-attr="${attr}"]:visible`).last();
-      if ($input.length) $input.val(val).trigger("input").trigger("change");
-    });
-  }, 50);
+  state.atributosSelecionados = Object.keys(atributosObj);
+  renderAtributos(atributosObj);
 }
 
 async function salvarLinha(id) {

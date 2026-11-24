@@ -60,9 +60,11 @@ bindMiniClick(".mini_integracao", ".painel_integra");
 bindMiniClick(".text-danger", ".painel_vestimentas");
 
 
-$(document).on("click", "#chkDesligados", function (e) {
-    toggleDesligados($(this))
+$(document).on("change", "#chkDesligados", function () {
+    toggleDesligados(this);
 });
+
+$(document).on("change", "#chkTerceiros", aplicarFiltrosRH);
 
 $(document).on("input", "#myInputPesquisaNomeRH", function (e) {
     aplicarFiltrosRH();
@@ -240,6 +242,7 @@ function aplicarFiltrosRH() {
     const statusFiltro = normalizarTexto($("#rhFiltroStatus").val());
     const filtroRapido = getFiltroRapidoRH();
     const mostrarDesligados = $("#chkDesligados").is(":checked");
+    const mostrarTerceiros = $("#chkTerceiros").is(":checked");
 
     $("tr.rh_tb_lin_colob").each(function () {
         const $row = $(this);
@@ -248,6 +251,7 @@ function aplicarFiltrosRH() {
         const setorLinha = normalizarTexto($row.data("setor"));
         const statusLinha = normalizarTexto($row.data("status"));
         const contrato = normalizarTexto($row.data("contrato"));
+        const funcao = normalizarTexto($row.data("funcao"));
 
         const passaTermo = !termo || textoLinha.includes(termo);
         const passaCargo = !cargo || cargoLinha.includes(cargo);
@@ -255,8 +259,9 @@ function aplicarFiltrosRH() {
         const passaStatus = !statusFiltro || statusLinha.includes(statusFiltro) || contrato.includes(statusFiltro);
         const passaRapido = linhaPassaFiltroRapido($row, filtroRapido);
         const passaDesligado = mostrarDesligados || contrato !== "desligado";
+        const passaTerceiro = mostrarTerceiros || funcao !== "terceiro";
 
-        $row.toggle(passaTermo && passaCargo && passaSetor && passaStatus && passaRapido && passaDesligado);
+        $row.toggle(passaTermo && passaCargo && passaSetor && passaStatus && passaRapido && passaDesligado && passaTerceiro);
     });
 
     atualizarResumoRH();
@@ -375,6 +380,7 @@ export function preencherTabelaColaboradoresRH() {
                             data-setor="${colab.categoria || ''}"
                             data-status="${colab.contrato === "desligado" ? "Desligado" : colab.motivo || ''}"
                             data-contrato="${colab.contrato || ''}"
+                            data-funcao="${colab.funcao === 'terceiro' ? 'terceiro' : ''}"
                             data-exames="${colab.exames || ''}"
                             data-epi="${(colab.status_epi || '').replace(/<[^>]*>/g, ' ').replace(/"/g, '&quot;')}">
                             <td>${colab.idFunc}</td>

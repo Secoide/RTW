@@ -19,8 +19,12 @@ import {
 } from "../../services/api/material.modal.api.js";
 
 import { carregarMateriais } from "../../services/api/material.api.js";
+import { initMaterialTransferencia } from "../../components/material/material.transferencia.events.js";
+import { initMaterialRelacionados } from "../../components/material/material.relacionados.js";
 
 export function initMaterialModal() {
+  initMaterialTransferencia();
+  initMaterialRelacionados();
 
   // 🔥 abrir modal
   $("#btnCadastrarMaterial")

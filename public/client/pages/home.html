@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="css/calibracoes.css">
     <link rel="stylesheet" href="css/ferias.css">
     <link rel="stylesheet" href="css/inicio.css?v=20260928-5">
+    <link rel="stylesheet" href="css/home-mascot.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/ia/ia2.css">
     <link rel="stylesheet" href="css/guia.css">
@@ -89,7 +90,7 @@
 
         <div id="online-panel">
             <div class="online-panel-layout">
-                <section class="online-chat-area">
+                <section class="online-chat-area" data-roles="99">
                     <div class="online-chat-head">
                         <div>
                             <strong>Chat</strong>
@@ -227,70 +228,52 @@
     <div id="form_cadCidade"></div>
 
     <!-- 🔥 MODAL CADASTRO MATERIAL -->
-    <div id="modalMaterial" class="modal hidden">
+    <div id="modalMaterial" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="materialModalTitulo">
         <div class="modal-content">
 
             <div class="material-modal-title">
-                <h2>Cadastro de Material</h2>
-                <span id="materialModoBadge" class="material-modo-badge novo">Novo cadastro</span>
-            </div>
-
-            <!-- 🔹 MATERIAL -->
-            <div class="form-group">
-                <label>Material</label>
-                <div class="autocomplete-container">
-                    <input type="text" id="nomeMaterial" placeholder="Ex: Abraçadeira">
-                    <div id="autocompleteMaterial" class="autocomplete-box"></div>
-                    <div id="variacoesExistentes" class="variacoes-box scroll-container"></div>
+                <h2 id="materialModalTitulo">Cadastro de Material</h2>
+                <div class="material-cadastro-transferencia">
+                    <button type="button" id="btnExportarMaterial"><i class="fa-solid fa-download" aria-hidden="true"></i> Exportar material</button>
+                    <button type="button" id="btnImportarMaterial"><i class="fa-solid fa-file-import" aria-hidden="true"></i> Importar material</button>
+                    <input type="file" id="arquivoImportarMaterial" accept=".json,application/json" hidden>
+                    <span id="materialModoBadge" class="material-modo-badge novo">Novo cadastro</span>
                 </div>
             </div>
 
-            <!-- 🔹 CATEGORIA -->
-            <div class="form-group">
-                <label>Categoria</label>
-                <input type="text" id="categoriaMaterial" placeholder="Ex: Fixação">
-            </div>
-
-            <!-- 🔹 VARIAÇÃO -->
-            <div class="section">
-                <div class="section-title">Variação</div>
-
-                <div class="variacao-container">
-
-                    <!-- 🔹 IMAGEM -->
-                    <div class="variacao-imagem">
-                        <img id="imagemmaterial" src="/imagens/imagemmaterial.webp" alt="ImagemMaterial">
-
-                        <input type="file" id="select_imagemmaterial" name="imagemmaterial" accept="image/*">
-                        <input id="idMaterial" type="hidden" name="idMaterial" value="">
-                        <input id="imagemMaterialOrigemId" type="hidden" value="">
-                        <input id="modoEdicaoMaterial" type="hidden" value="0">
-                        <button id="btn_uploadImagem" type="button" class="btn-upload">
-                            📷 Carregar
-                        </button>
-                        <button id="btn_usarImagemExistente" type="button" class="btn-upload material-img-link">
-                            Usar existente
-                        </button>
-                        <span id="imagemMaterialBloqueadaTexto" class="material-img-locked">
-                            Salve o material antes de adicionar foto
-                        </span>
-                        <small id="imagemMaterialOrigemTexto" class="material-img-source"></small>
+            <div class="material-cadastro-colunas">
+                <section class="material-cadastro-area" aria-labelledby="materialDadosTitulo">
+                    <h3 id="materialDadosTitulo">Busca e identificação</h3>
+                    <div class="material-busca-cadastro">
+                        <label for="buscarCadastroMaterial">Buscar material existente</label>
+                        <input type="search" id="buscarCadastroMaterial" autocomplete="off" placeholder="Nome, código, fabricante ou medida">
+                        <div id="autocompleteMaterial" class="autocomplete-box"></div>
+                        <div id="variacoesExistentes" class="variacoes-box scroll-container" aria-live="polite"></div>
                     </div>
-
-                    <!-- 🔹 DADOS -->
-                    <div class="variacao-dados">
-                        <div class="form-group">
-                            <label>Código</label>
-                            <input type="text" id="codigo" placeholder="Ex: ABC123">
+                    <div id="materialEdicaoPainel" class="material-edicao-painel" hidden>
+                        <span id="materialEdicaoTexto">Material existente selecionado.</span>
+                        <div>
+                            <button id="btnEditarMaterialExistente" type="button">Editar este cadastro</button>
+                            <button id="btnUsarMaterialComoBase" type="button">Usar como base</button>
                         </div>
-
-                        <div class="form-group">
-                            <label>Fabricante</label>
-                            <input type="text" id="fabricante" placeholder="Ex: Wago">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Unidade</label>
+                    </div>
+                    <div class="material-cadastro-campos">
+                        <label for="nomeMaterial">Nome do material <span class="material-obrigatorio" aria-hidden="true">*</span>
+                            <input type="text" id="nomeMaterial" required>
+                        </label>
+                        <label for="categoriaMaterial">Categoria
+                            <input type="text" id="categoriaMaterial" list="materialCategorias">
+                            <datalist id="materialCategorias"></datalist>
+                        </label>
+                        <label for="fabricante">Fabricante <span class="material-obrigatorio" data-material-referencia aria-hidden="true">*</span>
+                            <input type="text" id="fabricante" list="materialFabricantes" required>
+                            <datalist id="materialFabricantes"></datalist>
+                        </label>
+                        <label for="codigo">Código <span class="material-obrigatorio" data-material-referencia aria-hidden="true">*</span>
+                            <input type="text" id="codigo" required>
+                        </label>
+                        <label class="material-cadastro-generico"><input id="materialUsoGenerico" type="checkbox"> Uso genérico</label>
+                        <label for="unidadeMaterial">Unidade
                             <select id="unidadeMaterial">
                                 <option value="un" selected>un</option>
                                 <option value="pç">pç</option>
@@ -311,131 +294,151 @@
                                 <option value="barra">barra</option>
                                 <option value="kit">kit</option>
                             </select>
+                        </label>
+                    </div>
+                    <div class="material-previa-cadastro">
+                        <strong>Prévia da descrição</strong>
+                        <output id="materialPreviaDescricao" aria-live="off">Preencha o nome para ver a descrição.</output>
+                    </div>
+                </section>
+                <section class="material-cadastro-area" aria-labelledby="materialDetalhesTitulo">
+                    <h3 id="materialDetalhesTitulo">Atributos e foto</h3>
+                    <div class="material-atributos-cadastro">
+                        <label for="materialBuscarAtributo">Características técnicas</label>
+                        <div class="material-seletor-atributo">
+                            <input id="materialBuscarAtributo" type="text" role="combobox" aria-autocomplete="list"
+                                aria-controls="materialOpcoesAtributo" aria-expanded="false" autocomplete="off" placeholder="Buscar atributo">
+                            <button id="btnAddAtributo" type="button" class="material-acao-secundaria"><i class="fa-solid fa-plus" aria-hidden="true"></i> Adicionar</button>
+                            <div id="materialOpcoesAtributo" role="listbox" aria-label="Atributos disponíveis" hidden></div>
+                            <select id="selectAtributo" hidden>
+                                <option value="">Selecionar atributo</option>
+
+                                <!-- 🔹 BÁSICOS -->
+                                <optgroup label="🔰 Básicos">
+                                    <option value="Material">Material</option>
+                                    <option value="Cor">Cor</option>
+                                    <option value="Modelo">Modelo</option>
+                                    <option value="Linha">Linha</option>
+                                    <option value="Tipo">Tipo</option>
+                                    <option value="Fabricante">Fabricante</option>
+                                </optgroup>
+
+                                <!-- 📏 DIMENSIONAIS -->
+                                <optgroup label="📏 Dimensionais">
+                                    <option value="Tamanho">Tamanho</option>
+                                    <option value="Bitola">Bitola</option>
+                                    <option value="Número de vias">Número de vias</option>
+                                    <option value="Diâmetro">Diâmetro</option>
+                                    <option value="Comprimento">Comprimento</option>
+                                    <option value="Largura">Largura</option>
+                                    <option value="Altura">Altura</option>
+                                    <option value="Espessura">Espessura</option>
+                                    <option value="Raio">Raio</option>
+                                    <option value="Ângulo">Ângulo</option>
+                                </optgroup>
+
+                                <!-- ⚡ ELÉTRICOS -->
+                                <optgroup label="⚡ Elétricos">
+                                    <option value="Tensão">Tensão</option>
+                                    <option value="Corrente">Corrente</option>
+                                    <option value="Sensibilidade">Sensibilidade</option>
+                                    <option value="Potência">Potência</option>
+                                    <option value="Frequência">Frequência</option>
+                                    <option value="Número de polos">Número de polos</option>
+                                    <option value="Curva">Curva</option>
+                                    <option value="Capacidade de interrupção">Capacidade de interrupção</option>
+                                </optgroup>
+
+                                <!-- 🔧 INSTALAÇÃO -->
+                                <optgroup label="🔧 Instalação">
+                                    <option value="Fixação">Fixação</option>
+                                    <option value="Montagem">Montagem</option>
+                                    <option value="Aplicação">Aplicação</option>
+                                </optgroup>
+
+                                <!-- 🏭 PROTEÇÃO / ACABAMENTO -->
+                                <optgroup label="🏭 Proteção / Acabamento">
+                                    <option value="Acabamento">Acabamento</option>
+                                    <option value="Revestimento">Revestimento</option>
+                                    <option value="Grau de proteção">Grau de proteção</option>
+                                    <option value="Classe">Classe</option>
+                                </optgroup>
+
+                                <!-- 🔩 ESPECÍFICOS -->
+                                <optgroup label="🔩 Específicos Infraestrutura">
+                                    <option value="Entrada">Entrada</option>
+                                    <option value="Saída">Saída</option>
+                                    <option value="Curso">Curso</option>
+                                    <option value="Vedação">Vedação</option>
+                                    <option value="Rosca">Rosca</option>
+                                </optgroup>
+                            </select>
+
+                        </div>
+
+                        <div id="valoresAtributos" class="attr-container"></div>
+                        <datalist id="materialSugestoesAtributo"></datalist>
+                    </div>
+                    <div class="material-foto-cadastro">
+                        <div class="variacao-imagem">
+                            <img id="imagemmaterial" src="/imagens/imagemmaterial.webp" alt="Prévia da foto do material">
+
+                            <input type="file" id="select_imagemmaterial" name="imagemmaterial" accept="image/*">
+                            <input id="idMaterial" type="hidden" name="idMaterial" value="">
+                            <input id="imagemMaterialOrigemId" type="hidden" value="">
+                            <input id="imagemMaterialImportada" type="hidden" value="">
+                            <input id="modoEdicaoMaterial" type="hidden" value="0">
+                        </div>
+                        <div class="material-foto-conteudo">
+                            <div class="material-foto-titulo"><strong>Foto do material</strong><small>Opcional</small></div>
+                            <div class="material-foto-acoes">
+                                <button id="btnSalvarMaterialFoto" type="button" class="material-acao-secundaria"><i class="fa-solid fa-camera" aria-hidden="true"></i> Salvar e adicionar foto</button>
+                                <button id="btn_uploadImagem" type="button" class="material-acao-secundaria" hidden><i class="fa-solid fa-upload" aria-hidden="true"></i> Enviar foto</button>
+                                <button id="btn_usarImagemExistente" type="button" class="material-acao-secundaria" hidden>Usar do catálogo</button>
+                            </div>
+                            <small id="imagemMaterialOrigemTexto"></small>
                         </div>
                     </div>
-
-                </div>
+                    <div id="materialImagemExistentePainel" class="material-imagem-existente" hidden>
+                        <div class="material-imagem-existente-head">
+                            <strong>Usar imagem de outro material</strong>
+                            <button id="btnFecharImagemExistente" type="button" title="Fechar">×</button>
+                        </div>
+                        <input id="buscaImagemMaterialExistente" type="search" placeholder="Buscar material, código, fabricante ou atributo...">
+                        <div id="listaImagemMaterialExistente" class="material-imagem-existente-lista">
+                            <span>Carregando materiais com imagem...</span>
+                        </div>
+                        <div id="paginacaoImagemMaterialExistente" class="material-imagem-existente-paginacao"></div>
+                    </div>
+                </section>
+                <section class="material-cadastro-area material-relacionados-area" aria-labelledby="materialRelacionadosTitulo">
+                    <h3 id="materialRelacionadosTitulo">Materiais relacionados</h3>
+                    <label for="materialBuscaRelacionado">Buscar no catálogo</label>
+                    <input id="materialBuscaRelacionado" type="search" autocomplete="off" placeholder="Nome, código ou fabricante">
+                    <div id="materialSugestoesRelacionados" class="material-relacionados-lista"></div>
+                    <p id="materialRelacionadosStatus" role="status"></p>
+                    <div id="materialRelacionadosSelecionados" class="material-relacionados-lista"></div>
+                </section>
             </div>
-
-            <!-- 🔹 ATRIBUTOS -->
-            <div class="section">
-                <div class="section-title">Atributos</div>
-
-                <div class="inline-add">
-                    <select id="selectAtributo">
-                        <option value="">Selecionar atributo</option>
-
-                        <!-- 🔹 BÁSICOS -->
-                        <optgroup label="🔰 Básicos">
-                            <option value="Material">Material</option>
-                            <option value="Cor">Cor</option>
-                            <option value="Modelo">Modelo</option>
-                            <option value="Tipo">Tipo</option>
-                            <option value="Fabricante">Fabricante</option>
-                        </optgroup>
-
-                        <!-- 📏 DIMENSIONAIS -->
-                        <optgroup label="📏 Dimensionais">
-                            <option value="Tamanho">Tamanho</option>
-                            <option value="Bitola">Bitola</option>
-                            <option value="Número de vias">Número de vias</option>
-                            <option value="Diâmetro">Diâmetro</option>
-                            <option value="Comprimento">Comprimento</option>
-                            <option value="Largura">Largura</option>
-                            <option value="Altura">Altura</option>
-                            <option value="Espessura">Espessura</option>
-                            <option value="Raio">Raio</option>
-                            <option value="Ângulo">Ângulo</option>
-                        </optgroup>
-
-                        <!-- ⚡ ELÉTRICOS -->
-                        <optgroup label="⚡ Elétricos">
-                            <option value="Tensão">Tensão</option>
-                            <option value="Corrente">Corrente</option>
-                            <option value="Potência">Potência</option>
-                            <option value="Frequência">Frequência</option>
-                            <option value="Número de polos">Número de polos</option>
-                            <option value="Curva">Curva</option>
-                            <option value="Capacidade de interrupção">Capacidade de interrupção</option>
-                        </optgroup>
-
-                        <!-- 🔧 INSTALAÇÃO -->
-                        <optgroup label="🔧 Instalação">
-                            <option value="Fixação">Fixação</option>
-                            <option value="Montagem">Montagem</option>
-                            <option value="Aplicação">Aplicação</option>
-                        </optgroup>
-
-                        <!-- 🏭 PROTEÇÃO / ACABAMENTO -->
-                        <optgroup label="🏭 Proteção / Acabamento">
-                            <option value="Acabamento">Acabamento</option>
-                            <option value="Revestimento">Revestimento</option>
-                            <option value="Grau de proteção">Grau de proteção</option>
-                            <option value="Classe">Classe</option>
-                        </optgroup>
-
-                        <!-- 🔩 ESPECÍFICOS -->
-                        <optgroup label="🔩 Específicos Infraestrutura">
-                            <option value="Entrada">Entrada</option>
-                            <option value="Saída">Saída</option>
-                            <option value="Curso">Curso</option>
-                            <option value="Vedação">Vedação</option>
-                            <option value="Rosca">Rosca</option>
-                        </optgroup>
-                    </select>
-
-                    <button id="btnAddAtributo" class="btn-mini">+</button>
-                </div>
-
-                <!-- 🔹 LISTA VISUAL DE ATRIBUTOS -->
-                <div id="listaAtributos" class="chips-container"></div>
-
-                <!-- 🔹 INPUTS DOS VALORES -->
-                <div id="valoresAtributos" class="attr-container"></div>
-            </div>
-
-            <!-- 🔹 ALERTA -->
-            <div id="materialImagemExistentePainel" class="material-imagem-existente" hidden>
-                <div class="material-imagem-existente-head">
-                    <strong>Usar imagem de outro material</strong>
-                    <button id="btnFecharImagemExistente" type="button" title="Fechar">×</button>
-                </div>
-                <input id="buscaImagemMaterialExistente" type="search" placeholder="Buscar material, código, fabricante ou atributo...">
-                <div id="listaImagemMaterialExistente" class="material-imagem-existente-lista">
-                    <span>Carregando materiais com imagem...</span>
-                </div>
-                <div id="paginacaoImagemMaterialExistente" class="material-imagem-existente-paginacao"></div>
-            </div>
-
-            <div id="materialEdicaoPainel" class="material-edicao-painel" hidden>
-                <span id="materialEdicaoTexto">Material existente selecionado.</span>
-                <div>
-                    <button id="btnEditarMaterialExistente" type="button">Editar este cadastro</button>
-                    <button id="btnUsarMaterialComoBase" type="button">Usar como base</button>
-                </div>
-            </div>
-
-            <div id="alertDuplicado" class="alert-erro">
-                ⚠️ Essa variação já existe
-            </div>
+            <p id="materialAvisoCadastro" role="alert"></p>
 
             <!-- 🔹 AÇÕES -->
             <div class="modal-actions">
-                <button id="btnFecharModal" class="btn-cancelar">Cancelar</button>
-                <button id="btnSalvarMaterial" class="btn-salvar">Salvar</button>
+                <button id="btnFecharModal" type="button" class="btn-cancelar">Cancelar</button>
+                <button id="btnSalvarMaterial" type="button" class="btn-salvar">Salvar</button>
             </div>
 
         </div>
     </div>
-    <div id="crop-modal" hidden>
+    <div id="crop-modal" role="dialog" aria-modal="true" aria-labelledby="materialCorteFotoTitulo" hidden>
         <div class="crop-panel">
+            <h2 id="materialCorteFotoTitulo">Ajustar foto do material</h2>
             <div id="crop-area"></div>
             <div class="crop-ctrls">
-                <button type="button" id="rotLeft" class="bt_teste glass">⟲</button>
-                <button type="button" id="rotRight" class="bt_teste glass">⟳</button>
-                <button type="button" id="btn_cancel_crop" class="bt_teste glass">Cancelar</button>
-                <!-- NOVO: botão para salvar -->
-                <button type="button" id="btn_save_crop" class="bt_teste glass">Salvar</button>
+                <button type="button" id="rotLeft" aria-label="Girar para a esquerda" title="Girar para a esquerda">⟲</button>
+                <button type="button" id="rotRight" aria-label="Girar para a direita" title="Girar para a direita">⟳</button>
+                <button type="button" id="btn_cancel_crop">Cancelar</button>
+                <button type="button" id="btn_save_crop">Salvar foto</button>
             </div>
         </div>
     </div>

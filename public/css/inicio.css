@@ -358,6 +358,22 @@
     transform: translateY(0);
 }
 
+.system-update-notice {
+    top: auto;
+    bottom: 18px;
+    left: 18px;
+    border-color: #75a8ee;
+}
+
+.system-update-notice .home-aviso-empresa-body strong {
+    color: #75a8ee;
+}
+
+.system-update-notice .home-aviso-empresa-body button {
+    color: #75a8ee;
+    border-color: #75a8ee;
+}
+
 .home-aviso-empresa-icon {
     display: grid;
     place-items: center;
@@ -1067,6 +1083,19 @@
     align-items: center;
 }
 
+:root[data-theme='light'] #online-widget {
+    --online-accent: #1c56d5;
+}
+
+:root[data-theme='light'] #online-panel :is(.online-chat-head > div span, .online-users-head small, .online-chat-empty) {
+    color: #64748b;
+}
+
+:root[data-theme='light'] #online-panel :is(.online-chat-area, .online-users-area, #online-chat-input, #online-chat-suggestions) {
+    border-color: rgba(28, 86, 213, 0.16);
+    background: rgba(28, 86, 213, 0.025);
+}
+
 /* Modal box */
 .modal-conteudo {
     width: 350px;
@@ -1190,6 +1219,7 @@
 
 
 #online-widget {
+    --online-accent: #75baff;
     position: fixed;
     bottom: -5px;
     right: 20px;
@@ -1199,7 +1229,7 @@
 }
 
 #online-button {
-    background: linear-gradient(90deg, #ee7722, #efda38);
+    background: linear-gradient(90deg, #1c56d5, #3498f1);
     color: white;
     padding: 10px 15px;
     border-radius: 6px;
@@ -1275,13 +1305,13 @@
 }
 
 #online-popup.mention {
-    border-left: 4px solid #ee7722;
+    border-left: 4px solid #1c56d5;
     font-weight: 700;
 }
 
 #online-popup.message {
-    border-left: 4px solid #efda38;
-    box-shadow: 0 0 16px rgba(239, 218, 56, 0.22), 0 0 10px rgba(0, 0, 0, 0.5);
+    border-left: 4px solid var(--online-accent);
+    box-shadow: 0 0 16px rgba(52, 152, 241, 0.22), 0 0 10px rgba(0, 0, 0, 0.5);
     font-weight: 700;
 }
 
@@ -1381,14 +1411,14 @@
 }
 
 .online-chat-mode:hover {
-    border-color: rgba(239, 218, 56, 0.45);
-    background: rgba(239, 218, 56, 0.10);
+    border-color: rgba(52, 152, 241, 0.45);
+    background: rgba(52, 152, 241, 0.10);
 }
 
 .online-chat-mode.active {
-    border-color: rgba(239, 218, 56, 0.68);
-    background: linear-gradient(90deg, #ee7722, #efda38);
-    color: #101010;
+    border-color: rgba(52, 152, 241, 0.68);
+    background: linear-gradient(90deg, #1c56d5, #3498f1);
+    color: #fff;
     font-weight: 700;
 }
 
@@ -1410,8 +1440,8 @@
 }
 
 .online-tab.active {
-    background: linear-gradient(90deg, #ee7722, #efda38);
-    color: #101010;
+    background: linear-gradient(90deg, #1c56d5, #3498f1);
+    color: #fff;
 }
 
 #online-chat-unread {
@@ -1461,13 +1491,27 @@
 }
 
 .online-user:hover {
-    color: #efda38;
+    color: var(--online-accent);
 }
 
 .online-user-status {
-    color: #efda38;
+    color: var(--online-accent);
     font-size: 9px;
     line-height: 1;
+}
+
+.online-user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.online-user-role {
+    color: var(--texto-secundario, #aaa);
+    font-size: 10px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 
 .online-user-name {
@@ -1485,15 +1529,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(90deg, #ee7722, #efda38);
-    color: #101010;
+    background: linear-gradient(90deg, #1c56d5, #3498f1);
+    color: #fff;
     font-size: 10px;
     font-weight: 800;
-    box-shadow: 0 0 12px rgba(239, 218, 56, 0.45);
+    box-shadow: 0 0 12px rgba(52, 152, 241, 0.45);
 }
 
 .online-user.has-private-unread .online-user-name {
-    color: #efda38;
+    color: var(--online-accent);
     font-weight: 700;
     animation: onlineUserBlink 1.1s ease-in-out infinite;
 }
@@ -1501,12 +1545,12 @@
 @keyframes onlineUserBlink {
     0%, 100% {
         opacity: 1;
-        text-shadow: 0 0 0 rgba(239, 218, 56, 0);
+        text-shadow: 0 0 0 rgba(52, 152, 241, 0);
     }
 
     50% {
         opacity: 0.55;
-        text-shadow: 0 0 10px rgba(239, 218, 56, 0.78);
+        text-shadow: 0 0 10px rgba(52, 152, 241, 0.78);
     }
 }
 
@@ -1548,11 +1592,11 @@
 
 .online-chat-msg.mine {
     margin-left: auto;
-    background: rgba(238, 119, 34, 0.28);
+    background: rgba(52, 152, 241, 0.28);
 }
 
 .online-chat-msg.private {
-    border: 1px solid rgba(239, 218, 56, 0.28);
+    border: 1px solid rgba(52, 152, 241, 0.28);
 }
 
 .online-chat-reactions {
@@ -1576,8 +1620,8 @@
 
 .online-chat-reaction:hover,
 .online-chat-reaction.active {
-    border-color: rgba(239, 218, 56, 0.55);
-    background: rgba(239, 218, 56, 0.16);
+    border-color: rgba(52, 152, 241, 0.55);
+    background: rgba(52, 152, 241, 0.16);
     transform: translateY(-1px);
 }
 
@@ -1607,7 +1651,7 @@
 }
 
 #online-chat-emoji:hover {
-    background: rgba(238, 119, 34, 0.24);
+    background: rgba(52, 152, 241, 0.24);
 }
 
 #online-chat-input {
@@ -1623,14 +1667,14 @@
 }
 
 #online-chat-input:focus {
-    border-color: #efda38;
+    border-color: var(--online-accent);
 }
 
 #online-chat-send {
     border: 0;
     border-radius: 6px;
-    background: linear-gradient(90deg, #ee7722, #efda38);
-    color: #101010;
+    background: linear-gradient(90deg, #1c56d5, #3498f1);
+    color: #fff;
     cursor: pointer;
     font-size: 11px;
     padding: 0 10px;
@@ -1658,7 +1702,7 @@
 }
 
 #online-chat-emojis button:hover {
-    background: rgba(238, 119, 34, 0.22);
+    background: rgba(52, 152, 241, 0.22);
 }
 
 #online-chat-suggestions {
@@ -1712,8 +1756,8 @@
 }
 
 .chat-suggestion .mention {
-    background: linear-gradient(90deg, #ee7722, #efda38);
-    color: #101010;
+    background: linear-gradient(90deg, #1c56d5, #3498f1);
+    color: #fff;
 }
 
 .chat-info-btn {
@@ -3761,17 +3805,13 @@ LOCK
     color: #efda38;
 }
 
-.home-atualizacao-box button,
-#online-button,
-.online-tab.active,
-#online-chat-send,
-.chat-suggestion .mention {
+.home-atualizacao-box button {
     background: linear-gradient(90deg, #ee7722, #efda38);
     color: #101010;
 }
 
 #online-popup.mention {
-    border-left-color: #ee7722;
+    border-left-color: #3498f1;
 }
 
 .online-user:hover {
@@ -3779,7 +3819,7 @@ LOCK
 }
 
 #online-chat-input:focus {
-    border-color: rgba(239, 218, 56, 0.64);
+    border-color: #3498f1;
 }
 
 .home-versao-btn:hover {
@@ -3806,11 +3846,7 @@ LOCK
     background: rgba(15, 23, 42, 0.05);
 }
 
-:root[data-theme='light'] .home-atualizacao-box button,
-:root[data-theme='light'] #online-button,
-:root[data-theme='light'] .online-tab.active,
-:root[data-theme='light'] #online-chat-send,
-:root[data-theme='light'] .chat-suggestion .mention {
+:root[data-theme='light'] .home-atualizacao-box button {
     background: linear-gradient(90deg, #ee7722, #efda38);
     color: #101010;
 }

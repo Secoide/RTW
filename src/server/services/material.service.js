@@ -1,5 +1,6 @@
 const MaterialModel = require('../models/material.model');
 const MaterialOSModel = require('../models/materialOS.model');
+const { permissoesLista } = require("./material-lista-permissoes.service");
 
 const path = require('path');
 const supabase = require('../config/supabase');
@@ -57,7 +58,12 @@ async function criarMaterial(data) {
 }
 
 async function criarVariacao(data) {
+  if (Object.hasOwn(data, "relacionados")) MaterialModel.validarRelacionados(data.relacionados);
   return await MaterialModel.createVariacao(data);
+}
+
+async function listarRelacionados(id) {
+  return MaterialModel.getRelacionados(id);
 }
 
 async function adicionarAtributo(data) {
@@ -66,7 +72,7 @@ async function adicionarAtributo(data) {
 
 async function criarOuBuscarMaterial(data) {
 
-  const existente = await MaterialModel.findMaterialByNome(data.nome);
+  const existente = await MaterialModel.findMaterialByNome(data.nome, true);
 
   if (existente) return existente;
 
@@ -82,8 +88,17 @@ async function criarMaterialOS(data) {
   };
 }
 
-async function listarListasOS(idOS) {
-  return await MaterialOSModel.getListasByOS(idOS);
+async function listarListasOS(idOS, usuario) {
+  const [listas, contexto] = await Promise.all([
+    MaterialOSModel.getListasByOS(idOS),
+    MaterialOSModel.buscarContextoSetorUsuario(usuario?.id || null)
+  ]);
+  return listas.map(lista => ({ ...lista, ...permissoesLista(lista, usuario, contexto) }));
+}
+
+async function obterDestinoListaOS(id) {
+  const lista = await MaterialOSModel.getListaById(id);
+  return lista ? { id: lista.id, id_os: lista.id_os } : null;
 }
 
 async function listarListasEstoque() {
@@ -109,8 +124,8 @@ async function atualizarListaOS(id, data) {
   return await MaterialOSModel.updateLista(id, data);
 }
 
-async function avancarListaOS(id, usuario = null, data = {}) {
-  const lista = await MaterialOSModel.getListaById(id);
+async function avancarListaOS(id, usuario = null, data = {}, listaAutorizada = null) {
+  const lista = listaAutorizada || await MaterialOSModel.getListaById(id);
   if (!lista) return false;
 
   if (data.confirmado !== true) {
@@ -122,17 +137,19 @@ async function avancarListaOS(id, usuario = null, data = {}) {
   const proximo = getProximoStatusLista(lista.status);
   return await MaterialOSModel.avancarLista(id, proximo, {
     acao: "avancou",
+    status_origem: lista.status,
     usuario_id: usuario?.id || null
   });
 }
 
-async function voltarListaOS(id, data = {}, usuario = null) {
-  const lista = await MaterialOSModel.getListaById(id);
+async function voltarListaOS(id, data = {}, usuario = null, listaAutorizada = null) {
+  const lista = listaAutorizada || await MaterialOSModel.getListaById(id);
   if (!lista) return false;
 
   const anterior = getStatusAnteriorLista(lista.status);
   return await MaterialOSModel.avancarLista(id, anterior, {
     acao: "voltou",
+    status_origem: lista.status,
     usuario_id: usuario?.id || null,
     motivo: data.motivo || null
   });
@@ -150,14 +167,24 @@ async function transferirListaParaOS(id, idOSDestino, usuario) {
   return await MaterialOSModel.transferirLista(id, idOSDestino, usuario?.id || null);
 }
 
-async function listarHistoricoListaOS(id) {
-  return await MaterialOSModel.listarHistoricoLista(id);
+async function listarHistoricoListaOS(id, usuario) {
+  const historico = await MaterialOSModel.listarHistoricoLista(id);
+  const podeExcluir = Number(usuario?.id) === 999 || Number(usuario?.role) === 99;
+  return historico.map(item => ({ ...item, pode_excluir: podeExcluir }));
+}
+
+async function excluirHistoricoListaOS(idLista, idHistorico) {
+  return MaterialOSModel.excluirHistoricoLista(idLista, idHistorico);
 }
 
 
 // ================= UPDATE =================
 
 async function atualizarMaterialOS(id, data) {
+  const campos = Object.keys(data);
+  if (campos.length && campos.every(campo => campo === "codigo_lista" || campo === "fabricante_lista")) {
+    return MaterialOSModel.updateMaterialOS(id, data);
+  }
 
   // 🔥 busca item atual
   const itemAtual = await MaterialOSModel.getMaterialOSById(id);
@@ -185,34 +212,37 @@ async function atualizarConferenciaMaterialOS(id, data) {
 }
 
 async function atualizarVariacao(id, data) {
-  const atual = await MaterialModel.getVariacaoByID(id);
-  if (!atual) return false;
-
-  if (data.nome) {
-    await MaterialModel.updateMaterial(atual.id_material, {
-      nome: data.nome,
-      categoria: data.categoria || null
-    });
+  const editarRelacionados = Object.hasOwn(data, "relacionados");
+  if (editarRelacionados) {
+    MaterialModel.validarRelacionados(data.relacionados, id);
+    await MaterialModel.garantirRelacionados();
   }
+  return MaterialModel.transacaoCadastro(async db => {
+    const atual = await MaterialModel.getVariacaoByID(id, db);
+    if (!atual) return false;
 
-  await MaterialModel.updateVariacao(id, {
-    codigo: data.codigo,
-    fabricante: data.fabricante,
-    unidade: data.unidade || atual.unidade || "un"
-  });
-
-  if (Array.isArray(data.atributos)) {
-    await MaterialModel.deleteAtributosVariacao(id);
-    for (const attr of data.atributos) {
-      await MaterialModel.addAtributoVariacao({
-        id_variacao: id,
-        atributo: attr.atributo,
-        valor: attr.valor
-      });
+    if (data.nome) {
+      await MaterialModel.updateMaterial(atual.id_material, {
+        nome: data.nome,
+        categoria: data.categoria || null
+      }, db);
     }
-  }
 
-  return true;
+    await MaterialModel.updateVariacao(id, {
+      codigo: data.codigo,
+      fabricante: data.fabricante,
+      unidade: data.unidade || atual.unidade || "un"
+    }, db);
+
+    if (Array.isArray(data.atributos)) {
+      await MaterialModel.deleteAtributosVariacao(id, db);
+      for (const attr of data.atributos) {
+        await MaterialModel.addAtributoVariacao({ id_variacao: id, atributo: attr.atributo, valor: attr.valor }, db);
+      }
+    }
+    if (editarRelacionados) await MaterialModel.gravarRelacionados(id, data.relacionados, db);
+    return true;
+  });
 }
 
 async function atualizarCatalogoVariacao(id, data) {
@@ -349,6 +379,7 @@ module.exports = {
 
   listarMateriaisOS,
   listarListasOS,
+  obterDestinoListaOS,
   listarListasEstoque,
   listarListasConferencia,
   listarListasSetorUsuario,
@@ -356,6 +387,7 @@ module.exports = {
 
   criarMaterial,
   criarVariacao,
+  listarRelacionados,
   adicionarAtributo,
   criarOuBuscarMaterial,
   criarMaterialOS,
@@ -372,6 +404,7 @@ module.exports = {
   copiarListaParaOS,
   transferirListaParaOS,
   listarHistoricoListaOS,
+  excluirHistoricoListaOS,
 
   deletarMaterialOS,
   deletarListaOS,

@@ -1,4 +1,6 @@
 const MaterialService = require('../services/material.service');
+const MaterialTransferencia = require('../services/material-transferencia.service');
+const MaterialListaArquivo = require('../services/material-lista-arquivo.service');
 const MaterialFornecedorService = require('../services/materialFornecedor.service');
 const FornecedorService = require('../services/fornecedor.service');
 
@@ -42,6 +44,25 @@ async function getCatalogoMateriais(req, res) {
   }
 }
 
+async function exportarCatalogoMateriais(req, res) {
+  try {
+    res.set("Cache-Control", "no-store").json(await MaterialTransferencia.exportarCatalogo());
+  } catch (erro) {
+    console.error("Erro ao exportar catálogo de materiais:", erro);
+    res.status(500).json({ erro: "Não foi possível exportar os materiais." });
+  }
+}
+
+async function importarCatalogoMateriais(req, res) {
+  try {
+    res.json(await MaterialTransferencia.importarCatalogo(req.body));
+  } catch (erro) {
+    if (erro.status) return res.status(erro.status).json({ erro: erro.message });
+    console.error("Erro ao importar catálogo de materiais:", erro);
+    res.status(500).json({ erro: "Não foi possível concluir a importação dos materiais." });
+  }
+}
+
 async function getVariacaoById(req, res) {
   try {
     const dados = await MaterialService.listarVariacaoById(req.params.id);
@@ -51,6 +72,14 @@ async function getVariacaoById(req, res) {
   }
 }
 
+async function getRelacionados(req, res) {
+  try {
+    res.json(await MaterialService.listarRelacionados(req.params.id));
+  } catch (erro) {
+    console.error("Erro ao carregar os materiais relacionados:", erro.code || erro.message);
+    res.status(500).json({ erro: "Não foi possível carregar os materiais relacionados." });
+  }
+}
 async function getValoresAtributo(req, res) {
   try {
     const { atributo } = req.query;
@@ -76,7 +105,7 @@ async function getMateriaisOS(req, res) {
 
 async function getListasOS(req, res) {
   try {
-    const dados = await MaterialService.listarListasOS(req.params.idOS);
+    const dados = await MaterialService.listarListasOS(req.params.idOS, req.user);
     res.json(dados);
   } catch (err) {
     console.error(err);
@@ -116,7 +145,7 @@ async function getListasSetorUsuario(req, res) {
 
 async function getHistoricoListaOS(req, res) {
   try {
-    const dados = await MaterialService.listarHistoricoListaOS(req.params.id);
+    const dados = await MaterialService.listarHistoricoListaOS(req.params.id, req.user);
     res.json(dados);
   } catch (err) {
     console.error(err);
@@ -187,8 +216,13 @@ async function criarOuBuscarMaterial(req, res) {
 }
 
 async function createVariacao(req, res) {
-  const result = await MaterialService.criarVariacao(req.body);
-  res.json(result);
+  try {
+    const result = await MaterialService.criarVariacao(req.body);
+    res.json(result);
+  } catch (erro) {
+    if (erro.status === 400) return res.status(400).json({ erro: erro.message });
+    throw erro;
+  }
 }
 
 async function addAtributoVariacao(req, res) {
@@ -240,6 +274,7 @@ async function updateVariacao(req, res) {
 
     res.json({ sucesso: true });
   } catch (err) {
+    if (err.status === 400) return res.status(400).json({ erro: err.message });
     console.error(err);
     res.status(500).json({ erro: 'Erro ao atualizar variação' });
   }
@@ -271,7 +306,7 @@ async function updateListaOS(req, res) {
 
 async function avancarListaOS(req, res) {
   try {
-    const ok = await MaterialService.avancarListaOS(req.params.id, req.user, req.body);
+    const ok = await MaterialService.avancarListaOS(req.params.id, req.user, req.body, req.listaMaterial);
     if (!ok) return res.status(404).json({ erro: 'Lista nao encontrada' });
 
     res.json({ sucesso: true });
@@ -283,7 +318,7 @@ async function avancarListaOS(req, res) {
 
 async function voltarListaOS(req, res) {
   try {
-    const ok = await MaterialService.voltarListaOS(req.params.id, req.body, req.user);
+    const ok = await MaterialService.voltarListaOS(req.params.id, req.body, req.user, req.listaMaterial);
     if (!ok) return res.status(404).json({ erro: 'Lista nao encontrada' });
 
     res.json({ sucesso: true });
@@ -458,10 +493,56 @@ async function vincularImagemExistente(req, res) {
 // ================= EXPORT =================
 
 module.exports = {
+  async excluirHistoricoListaOS(req, res) {
+    if (Number(req.user.id) !== 999 && Number(req.user.role) !== 99) {
+      return res.status(403).json({ erro: "Somente o administrador pode excluir registros do histórico." });
+    }
+    try {
+      const removido = await MaterialService.excluirHistoricoListaOS(req.params.id, req.params.historicoId);
+      if (!removido) return res.status(404).json({ erro: "Registro do histórico não encontrado." });
+      res.json({ sucesso: true });
+    } catch (erro) {
+      console.error("Erro ao excluir histórico da lista:", erro);
+      res.status(500).json({ erro: "Não foi possível excluir o registro do histórico." });
+    }
+  },
+  async obterDestinoListaOS(req, res) {
+    try {
+      const destino = await MaterialService.obterDestinoListaOS(req.params.id);
+      if (!destino) return res.status(404).json({ erro: "A lista foi removida ou não está mais disponível." });
+      res.json(destino);
+    } catch (erro) {
+      console.error("Erro ao localizar lista:", erro);
+      res.status(500).json({ erro: "Não foi possível localizar a lista." });
+    }
+  },
+  async exportarListaOS(req, res) {
+    try {
+      const lista = req.listaMaterial;
+      const itens = await MaterialService.listarMateriaisOS(lista.id_os, lista.id);
+      res.json({ formato: "connectpear-lista-materiais", versao: 1, exportadoEm: new Date().toISOString(), lista, itens });
+    } catch (erro) {
+      console.error("Erro ao exportar lista:", erro);
+      res.status(500).json({ erro: "Não foi possível exportar a lista." });
+    }
+  },
+  async importarListaOS(req, res) {
+    try {
+      const dados = typeof req.body === "string" ? JSON.parse(req.body.replace(/^\uFEFF/, "")) : req.body;
+      res.status(201).json(await MaterialListaArquivo.importarLista(dados, req.user));
+    } catch (erro) {
+      console.error("Erro ao importar lista:", erro);
+      res.status(erro instanceof SyntaxError ? 400 : (erro.status || 500))
+        .json({ erro: erro.status === 400 ? erro.message : "Não foi possível importar a lista." });
+    }
+  },
   getMateriais,
   getVariacoes,
   getCatalogoMateriais,
+  exportarCatalogoMateriais,
+  importarCatalogoMateriais,
   getVariacaoById,
+  getRelacionados,
   getValoresAtributo,
 
   getMateriaisOS,

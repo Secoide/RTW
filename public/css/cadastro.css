@@ -183,26 +183,36 @@ g[id^="tool-"].selecionada {
 }
 
 .crop-panel {
-    background: #1c1f21;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 0 25px rgba(0, 0, 0, .7);
-    width: min(92vw, 360px);
+    box-sizing: border-box;
+    background: var(--input-bg, #1c1f21);
+    color: var(--texto-principal, #eee);
+    padding: 10px;
+    border: 1px solid var(--borda, #444);
+    border-radius: 8px;
+    max-height: calc(100dvh - 16px);
+    width: min(calc(100vw - 12px), 324px);
+    overflow: auto;
+}
+
+.crop-panel h2 {
+    font-size: 14px;
+    margin: 0 0 8px;
 }
 
 #crop-area {
     width: 280px;
-    height: 280px;
+    min-height: 280px;
     margin: auto;
 }
 
 .crop-ctrls {
     display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 12px;
+    gap: 5px;
+    align-items: center;
+    margin-top: 8px;
 }
 
+#btn_cancel_crop { margin-inline-start: auto; }
 body.modal-open {
     overflow: hidden;
 }

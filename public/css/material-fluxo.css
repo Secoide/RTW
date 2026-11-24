@@ -1,0 +1,725 @@
+/* Paleta e tipografia compartilhadas pelo fluxo e pelo detalhe da lista. */
+:root #listaMaterial {
+  --fluxo-fundo: #191919;
+  --fluxo-texto: #ededed;
+  --fluxo-azul: #75a8ee;
+  --fluxo-discreto: color-mix(in srgb, var(--fluxo-texto) 65%, var(--fluxo-fundo));
+  --fluxo-linha: color-mix(in srgb, var(--fluxo-texto) 24%, var(--fluxo-fundo));
+  --fluxo-selecao: color-mix(in srgb, var(--fluxo-azul) 9%, var(--fluxo-fundo));
+  --fluxo-card: #2b2b2b;
+  --fluxo-card-hover: #333333;
+  --acao-verde: #71c999;
+  --acao-vermelho: #ef8383;
+  --acao-amarelo: #dfbe62;
+  --material-surface: var(--fluxo-fundo);
+  --material-surface-soft: var(--fluxo-fundo);
+  --material-surface-muted: var(--fluxo-selecao);
+  --material-modal-bg: var(--fluxo-fundo);
+  --material-border: var(--fluxo-linha);
+  --material-border-strong: var(--fluxo-azul);
+  --material-text: var(--fluxo-texto);
+  --material-muted: var(--fluxo-discreto);
+  --material-input-bg: var(--fluxo-fundo);
+  --material-table-head: var(--fluxo-fundo);
+  --material-row-hover: var(--fluxo-selecao);
+  --material-shadow: none;
+  --texto-principal: var(--fluxo-texto);
+  --texto-secundario: var(--fluxo-discreto);
+  background: var(--fluxo-fundo);
+  color: var(--fluxo-texto);
+  padding: 10px 12px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] #listaMaterial {
+  --fluxo-fundo: #f1f1f1;
+  --fluxo-texto: #232a30;
+  --fluxo-azul: #215fb7;
+  --fluxo-linha: color-mix(in srgb, var(--fluxo-texto) 18%, var(--fluxo-fundo));
+  --fluxo-card: #ffffff;
+  --fluxo-card-hover: var(--fluxo-selecao);
+  --acao-verde: #217346;
+  --acao-vermelho: #b52d35;
+  --acao-amarelo: #806000;
+  background: var(--fluxo-fundo);
+  color-scheme: light;
+}
+
+:root #listaMaterial :is(#materialKanbanView, #materialDetalheView)[hidden] {
+  display: none;
+}
+
+:root[data-theme] #listaMaterial :is(button, input, select, textarea) {
+  font-family: inherit;
+  box-shadow: none;
+}
+
+:root[data-theme] #listaMaterial :is(button, input, select, textarea, .material-kanban-coluna, .material-kanban-coluna-head, .material-kanban-empty, .material-kanban-placeholder, .material-lista-card-tags span, .material-lista-card-contagem span, .material-lista-card-nota, .material-atalho-os, .card, .modal-lista-material-box, .modal-confirmacao-material-box, .historico-lista-material-item, th) {
+  background: var(--fluxo-fundo);
+  color: var(--fluxo-texto);
+  border-color: var(--fluxo-linha);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+:root[data-theme] #listaMaterial .toolbar-topo {
+  grid-template-columns: minmax(260px, .9fr) minmax(180px, 1fr) max-content;
+  align-items: center;
+  gap: 14px;
+  padding: 0 0 8px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--fluxo-linha);
+}
+
+:root[data-theme] #listaMaterial :is(button, select, input[type="search"]) {
+  min-height: 28px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+:root[data-theme] #listaMaterial .right-painel {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  height: auto;
+  min-height: 34px;
+  width: auto;
+  grid-column: auto;
+  margin: 0;
+  padding-right: 64px;
+  padding-left: 14px;
+  border-left: 1px solid var(--fluxo-linha);
+}
+
+:root[data-theme] #listaMaterial .material-atalhos-setor {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  min-height: 34px;
+  padding: 0;
+  gap: 8px;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+:root[data-theme] #listaMaterial .material-atalhos-head {
+  display: block;
+  min-width: 0;
+  flex-shrink: 0;
+  color: var(--fluxo-discreto);
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+:root[data-theme] #listaMaterial .material-atalhos-head span {
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+:root[data-theme] #listaMaterial .material-atalhos-lista {
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+}
+
+:root[data-theme] #listaMaterial .material-atalho-os {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 34px;
+  height: 34px;
+  padding: 0 8px;
+}
+
+:root[data-theme] #listaMaterial .material-atalho-os :is(span, small) {
+  min-height: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+:root[data-theme] #listaMaterial .painel-financeiro {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 18px;
+  max-width: none;
+}
+
+:root[data-theme] #listaMaterial .painel-financeiro .card {
+  display: grid;
+  gap: 3px;
+  padding: 0;
+  min-width: 70px;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+}
+
+:root[data-theme] #listaMaterial .painel-financeiro .card span {
+  font-size: 10px;
+  color: var(--fluxo-discreto);
+}
+
+:root[data-theme] #listaMaterial .painel-financeiro .card strong {
+  font-size: 14px;
+  color: var(--fluxo-texto);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+:root[data-theme] #listaMaterial :is(.material-kanban-header strong, .material-detalhe-head strong, .modal-lista-material-head strong) {
+  font: 600 21px/1.15 "Barlow Semi Condensed", sans-serif;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-header {
+  margin: 4px 0 10px;
+}
+
+:root[data-theme] #listaMaterial :is(.material-kanban-header span, .material-detalhe-head span, .material-lista-card-nome small, .material-lista-card-tags span, .material-lista-card-progresso-head, .material-atalho-os small) {
+  color: var(--fluxo-discreto);
+  font-size: 11px;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-board {
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(270px, 1fr));
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna {
+  border: 0;
+  border-right: 1px solid var(--fluxo-linha);
+  border-radius: 0;
+  padding-right: 8px;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna:last-child {
+  border-right: 0;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna-head {
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--fluxo-texto);
+  min-height: 34px;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna-head span {
+  font: 600 16px/1.1 "Barlow Semi Condensed", sans-serif;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna-head b {
+  background: transparent;
+  color: var(--fluxo-discreto);
+  border-radius: 0;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna-body {
+  padding: 6px 2px;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-placeholder {
+  border: 0;
+  justify-content: start;
+  height: 42px;
+  color: var(--fluxo-discreto);
+  font-size: 11px;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card {
+  padding: 9px 7px;
+  margin-bottom: 7px;
+  border: 1px solid var(--fluxo-linha);
+  border-radius: 3px;
+  gap: 8px;
+  transform: none;
+  background: var(--fluxo-card);
+}
+
+:root[data-theme] #listaMaterial .material-lista-card :is(.material-lista-open, .material-lista-card-tags span, .material-lista-card-contagem span) {
+  background: transparent;
+}
+
+:root[data-theme] #listaMaterial .material-kanban-coluna-body .material-lista-card:hover {
+  background: var(--fluxo-card-hover);
+  border-color: var(--fluxo-azul);
+  box-shadow: none;
+  transform: none;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-top {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-nome strong {
+  color: var(--fluxo-azul);
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-tags span {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  max-width: 100%;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-contagem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 7px 0;
+  border-block: 1px solid var(--fluxo-linha);
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-contagem span {
+  border: 0;
+  padding: 0;
+  font-size: 9px;
+  text-align: left;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-contagem b {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-actions {
+  padding-top: 6px;
+  gap: 4px;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-actions button {
+  width: 25px;
+  height: 25px;
+  min-height: 25px;
+  border-color: var(--fluxo-linha);
+  background: transparent;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-actions button:hover {
+  background: var(--fluxo-selecao);
+  border-color: var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-actions .material-lista-exportar-json i {
+  color: var(--acao-amarelo);
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-actions .material-lista-excluir i {
+  color: var(--acao-vermelho);
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-progresso-head b {
+  color: var(--fluxo-texto);
+  font-size: 12px;
+}
+
+:root[data-theme] #listaMaterial :is(.material-lista-card-progresso, .barra, .barra-progresso-material) {
+  background: var(--fluxo-linha);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-theme] #listaMaterial :is(.material-lista-card-progresso span, .material-atalho-progresso) {
+  background: var(--fluxo-azul);
+  border-radius: 0;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card-progresso {
+  height: 4px;
+}
+
+:root[data-theme] #listaMaterial .material-lista-card:is(.is-atrasada, .is-prazo-critico, .is-atencao, .is-prazo-andamento, .is-prazo-ok) {
+  box-shadow: none;
+  border-color: var(--fluxo-linha);
+  border-left-color: var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial .material-lista-destacada {
+  outline-color: var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial :is(.material-atalhos-head i, .material-atalho-os span, .material-livre-label, .material-livre-icone, .material-historico-excluir, .material-empty-state i) {
+  color: var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial #tableMaterial > tbody > tr[data-id] > :is(.col-preco, .col-total) :is(.preco-menor, .preco-escolhido) {
+  color: var(--fluxo-texto);
+}
+
+:root[data-theme] #listaMaterial :is(.material-atalho-os, .material-atalhos-head) {
+  box-shadow: none;
+  border-color: var(--fluxo-linha);
+  background: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial :is(.material-atalho-os:hover, .material-atalho-os small) {
+  color: var(--fluxo-discreto);
+}
+
+:root[data-theme] #listaMaterial #cbxOS {
+  width: 100% !important;
+  min-width: 0;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  margin: 0;
+  line-height: normal;
+  font-size: 12px;
+  align-self: center;
+}
+
+:root[data-theme] #listaMaterial :is(#btnNovaListaMaterial, #btnNovoMaterial, #btnSalvarListaMaterial) {
+  background: var(--fluxo-azul);
+  color: var(--fluxo-fundo);
+  border: 1px solid var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial :is(#btnImportarListaMaterial, #btnCancelarListaMaterial, #btnConfirmarConfirmacaoMaterial, #btnCancelarConfirmacaoMaterial) {
+  background: var(--fluxo-fundo);
+  color: var(--fluxo-texto);
+  border-color: var(--fluxo-linha);
+}
+
+:root[data-theme] #listaMaterial :is(button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 1px solid var(--fluxo-azul);
+  outline-offset: 1px;
+}
+
+:root[data-theme] #listaMaterial button:hover {
+  border-color: var(--fluxo-azul);
+  box-shadow: none;
+}
+
+:root[data-theme] #listaMaterial .material-detalhe-head {
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  gap: 20px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--fluxo-linha);
+}
+
+:root[data-theme] #listaMaterial .toolbar-busca {
+  grid-template-columns: max-content max-content max-content minmax(200px, 1fr) 155px max-content max-content;
+  grid-template-rows: 28px;
+  gap: 4px 7px;
+  align-items: center;
+  padding: 4px 0;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+:root[data-theme] #listaMaterial #btnVoltarKanbanMaterial {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+:root[data-theme] #listaMaterial #btnNovoMaterial {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+:root[data-theme] #listaMaterial #btnReloadMaterial {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+:root[data-theme] #listaMaterial #searchMaterial {
+  grid-column: 4;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+:root[data-theme] #listaMaterial #filtroCategoriaMaterial {
+  grid-column: 5;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+  height: 28px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  line-height: normal;
+}
+
+:root[data-theme] #listaMaterial .material-top-actions {
+  grid-column: 6;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  gap: 5px;
+}
+
+:root[data-theme] #listaMaterial .toolbar-busca button,
+:root[data-theme] #listaMaterial #btnInfoFornecedoresLista {
+  height: 28px;
+  min-height: 28px;
+  white-space: nowrap;
+}
+
+:root[data-theme] #listaMaterial .toolbar-busca .material-icon-action {
+  width: 28px;
+  min-width: 28px;
+}
+
+:root[data-theme] #listaMaterial .material-toggle-imagens input {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+}
+
+:root[data-theme] #listaMaterial .material-lista-opcoes {
+  grid-column: 7;
+  grid-row: 1;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+:root[data-theme] #listaMaterial .painel-quantitativo {
+  display: flex;
+  flex-wrap: nowrap;
+  align-self: start;
+  min-width: 0;
+  gap: 12px;
+  padding: 4px 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+:root[data-theme] #listaMaterial .painel-quantitativo :is(span, b) {
+  color: var(--fluxo-texto);
+  background: transparent;
+}
+
+:root[data-theme] #listaMaterial .table-container {
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--fluxo-texto);
+  border-radius: 0;
+}
+
+:root[data-theme] #listaMaterial th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 6px;
+  text-transform: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fluxo-discreto);
+}
+
+:root[data-theme] #listaMaterial td {
+  padding: 6px;
+  border-color: var(--fluxo-linha);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+:root[data-theme] #listaMaterial #tableMaterial td.col-material {
+  display: table-cell;
+  margin-bottom: 0;
+}
+
+:root[data-theme] #listaMaterial .material-cell-content {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+:root[data-theme] #listaMaterial #tableMaterial > tbody > .linha-fornecedores > td > .fornecedores-box {
+  contain: inline-size;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  overflow: auto;
+}
+
+:root[data-theme] #listaMaterial #tableMaterial > tbody > tr:nth-child(odd of [data-id]):not(.material-cotacao-selecionado):not(.material-radar-linha-destaque) {
+  background: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial #tableMaterial > tbody > tr:nth-child(even of [data-id]):not(.material-cotacao-selecionado):not(.material-radar-linha-destaque) {
+  background: color-mix(in srgb, var(--fluxo-texto) 3%, var(--fluxo-fundo));
+}
+
+:root[data-theme] #listaMaterial #tableMaterial > tbody > tr[data-id]:not(.material-cotacao-selecionado):not(.material-radar-linha-destaque):hover,
+:root[data-theme] #listaMaterial :is(tr:hover, .filtros-status button:hover, .filtros-status button.ativo) {
+  background: var(--fluxo-selecao);
+}
+
+:root[data-theme] #listaMaterial .col-material .tb_imgMaterial {
+  width: 36px;
+  height: 36px;
+  border-radius: 2px;
+}
+
+:root[data-theme] #listaMaterial :is(.barra-fill, .barra-fill:hover) {
+  display: flex;
+  background: none;
+  transition: none;
+}
+
+:root[data-theme] #listaMaterial .barra-fill::before {
+  content: "";
+  width: calc(var(--s) * 1%);
+  height: 100%;
+  background: var(--fluxo-texto);
+}
+
+:root[data-theme] #listaMaterial .barra-fill::after {
+  content: "";
+  width: calc(var(--c) * 1%);
+  height: 100%;
+  background: var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial .progresso.separado {
+  background: var(--fluxo-texto);
+  color: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial .progresso.comprado {
+  background: var(--fluxo-azul);
+  color: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial .progresso.faltante {
+  background: var(--fluxo-linha);
+  color: var(--fluxo-texto);
+}
+
+:root[data-theme] #listaMaterial :is(.modal-lista-material, .modal-confirmacao-material) {
+  background: color-mix(in srgb, var(--fluxo-fundo) 75%, transparent);
+}
+
+:root[data-theme] #listaMaterial .modal-lista-material-box {
+  border-radius: 4px;
+}
+
+:root[data-theme] #listaMaterial :is(.modal-confirmacao-material-icon, .historico-lista-material-item p, .material-lista-card-nota i) {
+  color: var(--fluxo-azul);
+  background: var(--fluxo-fundo);
+}
+
+@media (max-width: 1150px) {
+  :root[data-theme] #listaMaterial .toolbar-topo {
+    grid-template-columns: minmax(180px, 1fr) minmax(200px, 1fr);
+  }
+  :root[data-theme] #listaMaterial .right-painel {
+    grid-column: 1 / -1;
+    padding-right: 0;
+    border-left: 0;
+    padding-left: 0;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 680px) {
+  :root[data-theme] #listaMaterial .toolbar-topo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-theme] #listaMaterial .painel-financeiro {
+    flex-wrap: wrap;
+  }
+}
+
+/* Cores das ações, incluindo os controles criados durante a edição. */
+:root[data-theme] #listaMaterial :is(#btnNovaListaMaterial, #btnNovoMaterial, #btnSalvarListaMaterial, .material-lista-duplicar, .save) {
+  color: var(--acao-verde);
+}
+
+:root[data-theme] #listaMaterial :is(#btnNovaListaMaterial, #btnNovoMaterial, #btnSalvarListaMaterial) {
+  background: var(--acao-verde);
+  border-color: var(--acao-verde);
+  color: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial :is(#btnReloadMaterial) {
+  color: var(--fluxo-azul);
+  border-color: var(--fluxo-azul);
+}
+
+:root[data-theme] #listaMaterial :is(#btnExportarListaPDF, #btnExportarLista, #btnCotarFornecedorLista, #btnImportarListaMaterial, .material-lista-exportar-json) {
+  color: var(--acao-amarelo);
+}
+
+:root[data-theme] #listaMaterial :is(#btnExportarListaPDF, #btnExportarLista, #btnCotarFornecedorLista, #btnImportarListaMaterial) {
+  border-color: var(--acao-amarelo);
+  background: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial button:is(.material-lista-excluir, .material-historico-excluir, [data-action="apagar"]) {
+  color: var(--acao-vermelho);
+}
+
+:root[data-theme] #listaMaterial button.material-historico-excluir {
+  color: var(--acao-vermelho);
+}
+
+:root[data-theme] #listaMaterial #modalConfirmacaoMaterial.is-danger #btnConfirmarConfirmacaoMaterial {
+  background: var(--acao-vermelho);
+  border-color: var(--acao-vermelho);
+  color: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial #modalConfirmacaoMaterial.is-success #btnConfirmarConfirmacaoMaterial {
+  background: var(--acao-verde);
+  border-color: var(--acao-verde);
+  color: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial :is(#btnCancelarListaMaterial, #btnCancelarConfirmacaoMaterial, #btnCancelarCotacaoFornecedor, .cancel, .cancel-edit, .cancelar-separar, .material-separar-cancel) {
+  color: var(--acao-vermelho);
+  border-color: var(--acao-vermelho);
+  background: var(--fluxo-fundo);
+}
+
+:root[data-theme] #listaMaterial button:is(.save, .salvar-separar, .material-separar-save, .material-oc-salvar) {
+  color: var(--acao-verde);
+  border-color: var(--acao-verde);
+  background: var(--fluxo-fundo);
+}
+
+:root #btnCancelarMoverListaMaterial {
+  color: #ef8383;
+  border-color: currentColor;
+  background: transparent;
+}
+
+:root[data-theme="light"] #btnCancelarMoverListaMaterial {
+  color: #b52d35;
+}
+
+:root[data-theme] #listaMaterial .col-material .tb_imgMaterial {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  aspect-ratio: 1;
+  flex: 0 0 36px;
+  object-fit: contain;
+  border-radius: 0;
+}

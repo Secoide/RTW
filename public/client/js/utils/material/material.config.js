@@ -1,6 +1,14 @@
 export const ATRIBUTOS_POR_MATERIAL = {
 
     // 🔥 PROTEÇÃO
+    "IDR": [
+        "Número de polos",
+        "Tensão",
+        "Corrente",
+        "Sensibilidade",
+        "Classe"
+    ],
+
     "DISJUNTOR": [
         "Corrente",
         "Curva",
@@ -207,18 +215,14 @@ export const ATRIBUTOS_POR_MATERIAL = {
         "Largura",
         "Altura",
         "Material",
-        "Cor",
-        "Tipo"
+        "Linha",
+        "Tipo",
+        "Acabamento",
+        "Comprimento"
     ],
 
     "TAMPA CANALETA": [
         "Largura",
-        "Material"
-    ],
-
-    "CANALETA": [
-        "Largura",
-        "Altura",
         "Material"
     ],
 
@@ -279,6 +283,7 @@ export const ATRIBUTOS_POR_MATERIAL = {
 export const CATEGORIA_POR_MATERIAL = {
 
     // 🔥 PROTEÇÃO
+    "IDR": "Proteção Elétrica",
     "DISJUNTOR TRIFÁSICO": "Proteção Elétrica",
     "DPS": "Proteção Elétrica",
 

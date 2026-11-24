@@ -106,7 +106,7 @@ function renderizarNotificacoes() {
 
   [...notificacoesVisiveis].reverse().forEach((item) => {
     const meta = montarMetaNotificacao(item);
-    const acoes = montarAcoesAprovacao(item);
+    const acoes = montarAcoesAprovacao(item) + montarAcaoListaMaterial(item);
 
     $("<div>")
       .addClass("notification-item")
@@ -143,7 +143,13 @@ function montarMetaNotificacao(item) {
     quando: formatarQuando(item.criado_em)
   };
 
-  if (tipo === "calibracao_vencimento") {
+  if (tipo === "lista_materiais_compras") {
+    meta.titulo = "Lista enviada para Compras";
+    meta.icone = "fa-cart-shopping";
+  } else if (tipo === "lista_materiais_estoque") {
+    meta.titulo = "Lista enviada para Estoque";
+    meta.icone = "fa-boxes-stacked";
+  } else if (tipo === "calibracao_vencimento") {
     meta.tipo = "alerta";
     meta.titulo = "Calibração de equipamento";
     meta.icone = "fa-gauge-high";
@@ -174,6 +180,18 @@ function montarMetaNotificacao(item) {
   }
 
   return meta;
+}
+
+function montarAcaoListaMaterial(item) {
+  if (!["lista_materiais_compras", "lista_materiais_estoque"].includes(item.tipo)) return "";
+  const id = String(item.referencia || "").match(/^lista-material:(\d+)$/)?.[1];
+  if (!id) return "";
+  return `<div class="notification-actions">
+    <button type="button" class="notification-action-ok" data-notificacao-lista="${id}"
+      data-notificacao-destino="${item.tipo === "lista_materiais_estoque" ? "estoque" : "fluxo"}">
+      <i class="fa-solid fa-list-check" aria-hidden="true"></i> Verificar lista
+    </button>
+  </div>`;
 }
 
 function obterIdAprovacao(item) {
@@ -511,6 +529,37 @@ $(document).on("click", "#notification-container", async function (e) {
 
   if (!estavaVisivel) {
     renderizarNotificacoes();
+  }
+});
+
+$(document).on("click", "[data-notificacao-lista]", async function (evento) {
+  evento.preventDefault();
+  evento.stopPropagation();
+  if (this.disabled) return;
+  this.disabled = true;
+  try {
+    const abrirEstoque = this.dataset.notificacaoDestino === "estoque";
+    const pagina = abrirEstoque ? "/client/pages/estoque.html" : "/client/pages/lista_material.html";
+    const botaoMateriais = document.querySelector(`.bt_menuP[data-pagina="${pagina}"]`);
+    if (!botaoMateriais) throw new Error("A tela de destino não está disponível no seu menu.");
+    const resposta = await fetch("/api/materiais/listas/" + encodeURIComponent(this.dataset.notificacaoLista) + "/fluxo", {
+      credentials: "include"
+    });
+    const destino = await resposta.json();
+    if (!resposta.ok) throw new Error(destino.erro || "Não foi possível localizar a lista.");
+    if (abrirEstoque) {
+      sessionStorage.setItem("estoque_focus_lista", String(destino.id));
+    } else {
+      sessionStorage.setItem("material_focus_os", String(destino.id_os));
+      sessionStorage.setItem("material_focus_fluxo", String(destino.id));
+      sessionStorage.removeItem("material_focus_lista");
+    }
+    botaoMateriais.click();
+    $("#notification-list").hide();
+  } catch (erro) {
+    alert(erro.message || "Não foi possível abrir a lista.");
+  } finally {
+    this.disabled = false;
   }
 });
 

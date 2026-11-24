@@ -91,6 +91,8 @@ Total: ${total}
     </td>
   `;
   const ehMaterialLivre = Number(item.material_livre || 0) === 1 || (!item.id_variacao && item.material_livre_descricao);
+  const permiteEspecificar = Number(item.permite_referencia_lista) === 1 &&
+    (ehMaterialLivre || (item.id_variacao && (!item.codigo_catalogo?.trim() || !item.fabricante_catalogo?.trim())));
   const imgSrc = item.imagem 
         ? `${item.imagem}?v=${item.versao_foto || ""}` 
         : "/imagens/imagemmaterial.webp";
@@ -105,6 +107,7 @@ Total: ${total}
       <td class="col-id">${item.id}</td>
       <td>${escapeHtml(item.categoria || "-")}</td>
       <td class="col-material">
+        <div class="material-cell-content">
           ${imagemMaterial}
           <div>
             <div> ${highlightTextoSeguro(item.nome || item.material_livre_descricao || "Material especifico", termoBusca)}</div>
@@ -115,11 +118,13 @@ Total: ${total}
               : ""
             }
         </div>
-        
+        </div>
       </td>
 
-      <td>${highlightTextoSeguro(item.codigo, termoBusca)}</td>
-      <td>${escapeHtml(item.fabricante || "-")}</td>
+      <td>
+        ${renderReferenciaLista("codigo", "Código", item, permiteEspecificar, highlightTextoSeguro(item.codigo, termoBusca))}
+      </td>
+      <td>${renderReferenciaLista("fabricante", "Fabricante", item, permiteEspecificar, escapeHtml(item.fabricante || "-"))}</td>
       <td>${total}</td>
       <td class="col-unidade">${escapeHtml(item.unidade || "-")}</td>
       <td class="col-observacao" title="${escapeHtml(item.observacao || "")}">
@@ -207,7 +212,7 @@ Total: ${total}
           <i class="fa-solid fa-box"></i>
         </button>
 
-        <button data-id="${item.id}" data-action="editar" title="Editar quantidade e observacao">
+        <button data-id="${item.id}" data-action="editar" title="${permiteEspecificar ? "Editar código, fabricante, quantidade e observação" : "Editar quantidade e observação"}">
           <i class="fa-solid fa-pen"></i>
         </button>
 
@@ -218,6 +223,16 @@ Total: ${total}
       </td>
     </tr>
   `;
+}
+
+function renderReferenciaLista(campo, rotulo, item, permiteEspecificar, texto) {
+  if (!permiteEspecificar) return texto;
+  const valorCatalogo = item[campo + "_catalogo"]?.trim();
+  return `
+    <span data-referencia-texto="${campo}">${texto}</span>
+    <input type="text" size="1" class="material-referencia-input" data-field="${campo}_lista"
+      aria-label="${rotulo}" value="${escapeHtml(valorCatalogo || item[campo] || "")}" maxlength="180"
+      ${valorCatalogo ? 'readonly title="Definido no catálogo"' : ""} hidden>`;
 }
 
 function formatarMoeda(valor) {

@@ -86,8 +86,20 @@ function renderListaUsuariosOnline(usuariosVisiveis = usuariosAtuais) {
     nomeEl.className = "online-user-name";
     nomeEl.textContent = nome;
 
+    const info = document.createElement("span");
+    info.className = "online-user-info";
+    info.appendChild(nomeEl);
+
+    const colaborador = colaboradoresChat.find(colab => normalizarTexto(colab.nome || "") === normalizarTexto(nome));
+    if (colaborador?.cargo) {
+      const cargoEl = document.createElement("small");
+      cargoEl.className = "online-user-role";
+      cargoEl.textContent = colaborador.cargo;
+      info.appendChild(cargoEl);
+    }
+
     div.appendChild(status);
-    div.appendChild(nomeEl);
+    div.appendChild(info);
 
     if (naoLidas > 0) {
       const badge = document.createElement("span");
@@ -786,7 +798,10 @@ function initMiniChatOnline() {
   chatInicializado = true;
 
   carregarHistoricoChatLocal();
-  carregarColaboradoresChat().then(() => renderChat());
+  carregarColaboradoresChat().then(() => {
+    renderChat();
+    renderListaUsuariosOnline();
+  });
   renderEmoticonsChat();
 
   document.addEventListener("click", (event) => {

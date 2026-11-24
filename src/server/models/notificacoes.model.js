@@ -87,6 +87,22 @@ async function criarParaUsuario({ idUsuario, tipo, referencia, mensagem }) {
   };
 }
 
+async function criarParaSetor({ setor, tipo, referencia, mensagem }, db = connection) {
+  await db.query(`
+    INSERT INTO sistema_notificacoes (id_destinatario, tipo, referencia, mensagem)
+    SELECT DISTINCT f.id, ?, ?, ?
+    FROM funcionarios f
+    JOIN tb_cargos c ON c.id = f.cargo
+    JOIN tb_setores s ON s.id_catnvl = c.idsetor
+    WHERE LOWER(TRIM(s.categoria)) = LOWER(TRIM(?))
+      AND NOT EXISTS (
+        SELECT 1 FROM funcionarios_contem_exames fe
+        JOIN exames e ON e.idexame = fe.idexame
+        WHERE fe.idfuncionario = f.id AND LOWER(e.nome) = 'demissional'
+      )
+  `, [tipo, referencia || null, mensagem, setor]);
+}
+
 async function listarNaoLidas(idUsuario, prefixoCalibracao = 'cal:nenhum:%') {
   await garantirTabelas();
 
@@ -152,6 +168,7 @@ module.exports = {
   garantirTabelas,
   criarGlobal,
   criarParaUsuario,
+  criarParaSetor,
   listarNaoLidas,
   marcarLida,
   marcarTodasLidas,

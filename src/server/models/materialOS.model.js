@@ -8,6 +8,29 @@ let conferenciaColumnsReadyPromise = null;
 let conferenciaColumnsAvailable = null;
 let materialLivreColumnsReadyPromise = null;
 let materialLivreColumnsAvailable = null;
+let referenciasListaProntas;
+const camposReferenciaLista = ["codigo_lista", "fabricante_lista"];
+
+function garantirReferenciasLista() {
+  if (!referenciasListaProntas) {
+    referenciasListaProntas = (async () => {
+      for (const campo of camposReferenciaLista) {
+        const [colunas] = await connection.query("SHOW COLUMNS FROM tb_materiais_os LIKE ?", [campo]);
+        if (colunas.length) continue;
+        try {
+          await connection.query(`ALTER TABLE tb_materiais_os ADD COLUMN ${campo} VARCHAR(180) NULL`);
+        } catch (erro) {
+          if (erro.code !== "ER_DUP_FIELDNAME") throw erro;
+        }
+      }
+      return true;
+    })().catch(erro => {
+      console.warn("Colunas de referência dos materiais indisponíveis:", erro.message);
+      return false;
+    });
+  }
+  return referenciasListaProntas;
+}
 
 async function garantirColunaOC() {
   if (ocColumnAvailable === true) return true;
@@ -160,6 +183,7 @@ async function garantirColunasMaterialLivre() {
 }
 
 async function getMateriaisByOS(idOS, idLista = null) {
+  const temReferenciasLista = await garantirReferenciasLista();
   const temOC = await garantirColunaOC();
   const temObservacao = await garantirColunaObservacao();
   const temConferencia = await garantirColunasConferencia();
@@ -176,8 +200,11 @@ async function getMateriaisByOS(idOS, idLista = null) {
       MAX(${temMaterialLivre ? "CASE WHEN mo.material_livre = 1 OR mo.id_variacao IS NULL THEN 1 ELSE 0 END" : "0"}) AS material_livre,
       MAX(mv.imagem) AS imagem,
       MAX(mv.versao_foto) AS versao_foto,
-      MAX(mv.codigo) AS codigo,
-      MAX(mv.fabricante) AS fabricante,
+      MAX(${temReferenciasLista ? "COALESCE(NULLIF(TRIM(mv.codigo), ''), mo.codigo_lista)" : "mv.codigo"}) AS codigo,
+      MAX(${temReferenciasLista ? "COALESCE(NULLIF(TRIM(mv.fabricante), ''), mo.fabricante_lista)" : "mv.fabricante"}) AS fabricante,
+      ${temReferenciasLista ? "1" : "0"} AS permite_referencia_lista,
+      MAX(mv.codigo) AS codigo_catalogo,
+      MAX(mv.fabricante) AS fabricante_catalogo,
       MAX(COALESCE(mv.unidade, 'un')) AS unidade,
       MAX(mv.valor_orcamento_atual) AS valor_orcamento_atual,
       MAX(forn_min.menor_valor) AS menor_valor,
@@ -603,7 +630,7 @@ function getEstagiosPorContexto(contexto) {
     return ["orcamento", "engenharia", "estoque", "compras"];
   }
 
-  if (texto.includes("compr")) return ["compras"];
+  if (texto.includes("compr")) return ["estoque", "compras"];
   if (texto.includes("estoque") || texto.includes("almox")) return ["estoque"];
   if (texto.includes("orcament")) return ["orcamento"];
   if (texto.includes("engenh")) return ["orcamento", "engenharia"];
@@ -630,7 +657,7 @@ async function getListaById(id) {
   return rows[0] || null;
 }
 
-async function createMaterialOS(data) {
+async function createMaterialOS(data, db = connection) {
   const temObservacao = await garantirColunaObservacao();
   const temMaterialLivre = await garantirColunasMaterialLivre();
   const materialLivreDescricao = String(data.material_livre_descricao || "").trim();
@@ -684,7 +711,7 @@ async function createMaterialOS(data) {
     parametros.push(data.observacao || null);
   }
 
-  const [result] = await connection.query(`
+  const [result] = await db.query(`
     INSERT INTO tb_materiais_os
       (${colunas.join(", ")})
     VALUES (${valoresSql.join(", ")})
@@ -735,10 +762,10 @@ async function addAtributoVariacao(data) {
   return true;
 }
 
-async function createLista(data) {
+async function createLista(data, db = connection) {
   const semPrazo = normalizarBoolean(data.sem_prazo);
 
-  const [result] = await connection.query(`
+  const [result] = await db.query(`
     INSERT INTO tb_materiais_listas
       (id_os, titulo, descricao, status, origem_setor, observacao_rapida, responsavel_id, prioridade, prazo, sem_prazo, criado_por, status_atualizado_em)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -762,7 +789,7 @@ async function createLista(data) {
     status_destino: data.status || data.origem_setor || "orcamento",
     usuario_id: data.criado_por || null,
     motivo: data.motivo || null
-  });
+  }, db);
 
   return { insertId: result.insertId };
 }
@@ -802,32 +829,60 @@ async function updateLista(id, data) {
 }
 
 async function avancarLista(id, status, meta = {}) {
-  const [result] = await connection.query(`
-    UPDATE tb_materiais_listas
-    SET
-      status = ?,
-      status_atualizado_em = CURRENT_TIMESTAMP,
-      atualizado_em = CURRENT_TIMESTAMP
-    WHERE id = ?
-      AND ativo = 1
-  `, [status, id]);
-
-  if (result.affectedRows > 0) {
+  const Notificacoes = require("./notificacoes.model");
+  const setorNotificado = { estoque: "Almoxarifado", compras: "Compras" }[status];
+  if (setorNotificado) await Notificacoes.garantirTabelas();
+  const db = await connection.getConnection();
+  try {
+    await db.beginTransaction();
+    const [[lista]] = await db.query(`
+      SELECT id, id_os, titulo, status
+      FROM tb_materiais_listas
+      WHERE id = ? AND ativo = 1
+      FOR UPDATE
+    `, [id]);
+    if (!lista || lista.status === status) {
+      await db.commit();
+      return Boolean(lista);
+    }
+    if (meta.status_origem && lista.status !== meta.status_origem) {
+      throw Object.assign(new Error("O estágio da lista foi alterado. Atualize a tela e tente novamente."), { status: 409 });
+    }
+    await db.query(`
+      UPDATE tb_materiais_listas
+      SET status = ?, status_atualizado_em = CURRENT_TIMESTAMP, atualizado_em = CURRENT_TIMESTAMP
+      WHERE id = ? AND ativo = 1
+    `, [status, id]);
     await registrarHistoricoLista({
       id_lista: id,
       acao: meta.acao || "status",
+      status_origem: lista.status,
       status_destino: status,
       usuario_id: meta.usuario_id || null,
       motivo: meta.motivo || null
-    });
+    }, db);
+    if (setorNotificado) {
+      await Notificacoes.criarParaSetor({
+        setor: setorNotificado,
+        tipo: "lista_materiais_" + status,
+        referencia: "lista-material:" + id,
+        mensagem: `A lista "${String(lista.titulo || "Lista de materiais").slice(0, 140)}" da OS ${lista.id_os} foi enviada ao estágio ${status === "estoque" ? "Estoque" : "Compras"}.`.slice(0, 255)
+      }, db);
+    }
+    await db.commit();
+    return true;
+  } catch (erro) {
+    await db.rollback();
+    throw erro;
+  } finally {
+    db.release();
   }
-
-  return result.affectedRows > 0;
 }
 
 async function duplicarLista(id, usuarioId = null, idOSDestino = null) {
   const lista = await getListaById(id);
   if (!lista) return null;
+  const referenciasLista = await garantirReferenciasLista() ? ", codigo_lista, fabricante_lista" : "";
 
   const destino = idOSDestino || lista.id_os;
   const temObservacao = await garantirColunaObservacao();
@@ -854,11 +909,11 @@ async function duplicarLista(id, usuarioId = null, idOSDestino = null) {
 
   await connection.query(`
     INSERT INTO tb_materiais_os
-      (id_os, id_lista, id_variacao${colunasMaterialLivre}, quantidade${colunasExtras}, quantidade_separada, quantidade_comprada, id_fornecedor, status)
+      (id_os, id_lista, id_variacao${referenciasLista}${colunasMaterialLivre}, quantidade${colunasExtras}, quantidade_separada, quantidade_comprada, id_fornecedor, status)
     SELECT
       ?,
       ?,
-      id_variacao,
+      id_variacao${referenciasLista},
       ${valoresMaterialLivre ? valoresMaterialLivre.replace(/^, /, "") + "," : ""}
       quantidade${valoresExtras},
       0,
@@ -953,7 +1008,15 @@ async function listarHistoricoLista(id) {
   return rows;
 }
 
-async function updateMaterialOS(id, data) {
+async function excluirHistoricoLista(idLista, idHistorico) {
+  const [resultado] = await connection.query(
+    "DELETE FROM tb_materiais_listas_historico WHERE id = ? AND id_lista = ?",
+    [idHistorico, idLista]
+  );
+  return resultado.affectedRows > 0;
+}
+
+async function updateMaterialOS(id, data, db = connection) {
   const temOC = await garantirColunaOC();
   const temObservacao = await garantirColunaObservacao();
   const campos = [
@@ -968,6 +1031,18 @@ async function updateMaterialOS(id, data) {
     data.quantidade_comprada ?? null,
     data.id_fornecedor ?? null
   ];
+  const referencias = camposReferenciaLista.filter(campo => Object.hasOwn(data, campo));
+  if (referencias.length) {
+    if (!await garantirReferenciasLista()) throw new Error("Referências da lista indisponíveis");
+    for (const campo of referencias) {
+      const colunaCatalogo = campo.replace("_lista", "");
+      campos.push(`${campo} = CASE WHEN tb_materiais_os.id_variacao IS NULL OR EXISTS (
+        SELECT 1 FROM tb_materiais_variacoes WHERE id = tb_materiais_os.id_variacao
+          AND NULLIF(TRIM(${colunaCatalogo}), '') IS NULL
+      ) THEN ? ELSE ${campo} END`);
+      parametros.push(String(data[campo] ?? "").trim().slice(0, 180) || null);
+    }
+  }
 
   if (temObservacao && Object.prototype.hasOwnProperty.call(data, "observacao")) {
     campos.push("observacao = ?");
@@ -982,7 +1057,7 @@ async function updateMaterialOS(id, data) {
   campos.push("status = COALESCE(?, status)");
   parametros.push(data.status ?? null, id);
 
-  const [result] = await connection.query(`
+  const [result] = await db.query(`
     UPDATE tb_materiais_os
     SET ${campos.join(",\n      ")}
     WHERE id = ?
@@ -1094,8 +1169,8 @@ async function garantirListaPadrao(idOS) {
   return nova.insertId;
 }
 
-async function registrarHistoricoLista({ id_lista, acao, status_origem = null, status_destino = null, usuario_id = null, motivo = null }) {
-  await connection.query(`
+async function registrarHistoricoLista({ id_lista, acao, status_origem = null, status_destino = null, usuario_id = null, motivo = null }, db = connection) {
+  await db.query(`
     INSERT INTO tb_materiais_listas_historico
       (id_lista, acao, status_origem, status_destino, usuario_id, motivo)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -1114,6 +1189,13 @@ function normalizarBoolean(valor) {
 }
 
 module.exports = {
+  buscarContextoSetorUsuario,
+  async prepararImportacaoLista() {
+    const estruturas = await Promise.all([
+      garantirReferenciasLista(), garantirColunasMaterialLivre(), garantirColunaObservacao(), garantirColunaOC()
+    ]);
+    if (estruturas.some(disponivel => !disponivel)) throw new Error("Estrutura de materiais indisponível para importar a lista.");
+  },
   getMateriaisByOS,
   getMaterialOSById,
   getCustoTotalOS,
@@ -1136,6 +1218,7 @@ module.exports = {
   duplicarLista,
   transferirLista,
   listarHistoricoLista,
+  excluirHistoricoLista,
 
   deleteMaterialOS,
   deleteLista

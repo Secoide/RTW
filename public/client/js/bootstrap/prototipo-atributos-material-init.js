@@ -1,4 +1,5 @@
 import { ATRIBUTOS_POR_MATERIAL } from "../utils/material/material.config.js";
+import { criarEstadoVazio, exportarPrototipoJson, lerPrototipoJson } from "../utils/material/prototipo-atributos-arquivo.js";
 
 const STORAGE_KEY = "prototipo_atributos_material_v1";
 
@@ -44,8 +45,14 @@ let futuroEstados = [];
 let ultimoSnapshotHistorico = "";
 let restaurandoHistorico = false;
 let atalhosHistoricoConfigurados = false;
-let cameraProto = { panX: 0, panY: 0 };
+const zoomMinimo = 0.25;
+const zoomMaximo = 3;
+const cameraProto = { panX: 0, panY: 0, escala: 1, limiteInferior: zoomMinimo };
 let cameraStageConfigurada = null;
+let eventosCamera = null;
+let observadorQuadro = null;
+let frameCamera = 0;
+let ajustarAoAbrir = true;
 
 export function initPrototipoAtributosMaterial() {
   const stage = document.getElementById("protoStage");
@@ -86,6 +93,12 @@ export function initPrototipoAtributosMaterial() {
 }
 
 export function limparPrototipoAtributosMaterial() {
+  eventosCamera?.abort();
+  observadorQuadro?.disconnect();
+  cancelAnimationFrame(frameCamera);
+  frameCamera = 0;
+  cameraStageConfigurada = null;
+  ajustarAoAbrir = true;
   removerLinhas();
   linhaTemporaria?.remove?.();
   linhaTemporaria = null;
@@ -100,7 +113,6 @@ export function limparPrototipoAtributosMaterial() {
     .proto-block-rule,
     .proto-specific-rule,
     .proto-unique-rule,
-    .proto-add-attr,
     .proto-simulator,
     .proto-attr-drawer,
     .proto-image-modal,
@@ -114,7 +126,7 @@ export function limparPrototipoAtributosMaterial() {
 }
 
 function portalizarPaineisPrototipo(stage) {
-  ["protoAddAtributo", "protoSimuladorDrawer", "protoAttrDrawer"].forEach(id => {
+  ["protoSimuladorDrawer", "protoAttrDrawer"].forEach(id => {
     const elemento = document.getElementById(id);
     if (!elemento || elemento.parentElement === document.body) return;
     elemento.dataset.protoPortal = "1";
@@ -203,14 +215,15 @@ function obterPosicaoPadraoAtributo(indice) {
 }
 
 function renderizarAtributosDinamicos(stage) {
+  const mundo = stage.querySelector(".proto-world");
   stage.querySelectorAll(".proto-node[data-extra='1']").forEach(node => node.remove());
 
   estadoAtual.atributosExtras.forEach(attr => {
     if (!attr?.id || stage.querySelector(`.proto-node[data-node="${attr.id}"]`)) return;
 
-    const node = criarNodeAtributo(attr.id, attr.nome, attr.descricao || "Atributo adicional", attr.left, attr.top);
+    const node = criarNodeAtributo(attr.id, attr.nome, attr.left, attr.top);
     node.dataset.extra = "1";
-    stage.appendChild(node);
+    mundo.appendChild(node);
   });
 }
 
@@ -229,9 +242,6 @@ function atualizarNodeMaterialPrincipal(stage) {
 
   const nome = estadoAtual.materialBase || "Sem material";
   node.querySelector("strong").textContent = nome;
-  node.querySelector("small").textContent = estadoAtual.materialBase
-    ? "Base para formar as variações."
-    : "Escolha um material principal para iniciar.";
 }
 
 function atualizarMapasAtributos(stage) {
@@ -320,63 +330,95 @@ function abrirAtributoPeloContador(contador) {
 }
 
 function configurarSimulador() {
-  const drawer = document.getElementById("protoSimuladorDrawer");
-  const botao = document.getElementById("protoToggleSimulador");
+  const janela = document.getElementById("protoSimuladorDrawer");
+  const abrir = document.getElementById("protoToggleSimulador");
+  const busca = document.getElementById("protoSimuladorBusca");
+  const status = document.getElementById("protoSimuladorStatus");
+  const opcoes = document.getElementById("protoSimuladorOpcoes");
+  const galeria = document.getElementById("protoSimuladorImagens");
+  const copiar = document.getElementById("protoSimuladorCopiar");
+  const retornoCopia = document.getElementById("protoSimuladorRetornoCopia");
+  const fichaTexto = document.getElementById("protoSimuladorFichaTexto");
+  let versaoEtapa = 0;
 
-  botao?.addEventListener("click", event => {
-    event.preventDefault();
-    event.stopPropagation();
-    const scroll = capturarScrollPrototipo();
+  abrir.addEventListener("click", () => {
     fecharDrawerAtributos();
-    const aberto = drawer?.classList.toggle("open");
-    drawer?.setAttribute("aria-hidden", String(!aberto));
-    botao.classList.toggle("open", Boolean(aberto));
-    atualizarVisibilidadeLinhasPorPainel();
-    if (aberto) {
-      atualizarSimulador();
-      document.getElementById("protoSimuladorBusca")?.focus({ preventScroll: true });
+    janela.showModal();
+    atualizarSimulador();
+  });
+  document.getElementById("protoSimuladorFechar").addEventListener("click", () => janela.close());
+  janela.addEventListener("click", event => {
+    if (event.target === janela) janela.close();
+  });
+  janela.addEventListener("close", () => abrir.focus({ preventScroll: true }));
+
+  const atualizarEtapa = () => {
+    versaoEtapa++;
+    busca.value = "";
+    delete galeria.dataset.foto;
+    retornoCopia.textContent = "";
+    fichaTexto.hidden = true;
+    atualizarSimulador();
+    opcoes.closest(".proto-simulator-main").scrollTop = 0;
+    status.focus({ preventScroll: true });
+  };
+
+  busca.addEventListener("input", atualizarSimulador);
+  document.getElementById("protoSimuladorMostrarBloqueados").addEventListener("change", atualizarSimulador);
+  galeria.addEventListener("click", event => {
+    const controle = event.target.closest("[data-sim-foto]");
+    if (!controle) return;
+    galeria.dataset.foto = controle.dataset.simFoto;
+    atualizarImagensSimulador(galeria);
+    galeria.querySelector(`[data-sim-direcao="${controle.dataset.simDirecao}"]`)?.focus({ preventScroll: true });
+  });
+  copiar.addEventListener("click", async () => {
+    const versao = versaoEtapa;
+    const texto = [
+      "Material: " + (estadoAtual.materialBase || "Sem material definido"),
+      ...Object.entries(simuladorEscolhas).map(([atributo, valor]) => (nomesNodes[atributo] || atributo) + ": " + valor)
+    ].join("\n");
+    copiar.disabled = true;
+    try {
+      await navigator.clipboard.writeText(texto);
+      if (versao !== versaoEtapa || !janela.open) return;
+      fichaTexto.hidden = true;
+      retornoCopia.textContent = "Ficha copiada.";
+    } catch {
+      if (versao !== versaoEtapa || !janela.open) return;
+      fichaTexto.value = texto;
+      fichaTexto.hidden = false;
+      fichaTexto.focus();
+      fichaTexto.select();
+      retornoCopia.textContent = "A ficha está selecionada. Use o comando Copiar do seu dispositivo.";
+    } finally {
+      copiar.disabled = false;
     }
-    restaurarScrollPrototipo(scroll);
-    reposicionarLinhasAtivas();
-    setTimeout(() => {
-      restaurarScrollPrototipo(scroll);
-      reposicionarLinhasAtivas();
-    }, 260);
   });
-
-  drawer?.addEventListener("pointerdown", event => event.stopPropagation());
-  drawer?.addEventListener("click", event => event.stopPropagation());
-
-  document.getElementById("protoSimuladorBusca")?.addEventListener("input", atualizarSimulador);
-  document.getElementById("protoSimuladorLimpar")?.addEventListener("click", () => {
+  document.getElementById("protoSimuladorLimpar").addEventListener("click", () => {
     simuladorEscolhas = {};
-    const busca = document.getElementById("protoSimuladorBusca");
-    if (busca) busca.value = "";
-    atualizarSimulador();
+    atualizarEtapa();
   });
-
-  document.getElementById("protoSimuladorOpcoes")?.addEventListener("click", event => {
-    const botao = event.target.closest("[data-sim-option]");
-    if (!botao) return;
-
-    const atributo = botao.dataset.simAttr;
-    const valor = botao.dataset.simOption;
-    simuladorEscolhas[atributo] = valor;
+  const voltarPara = atributo => {
     removerEscolhasPosteriores(atributo);
-
-    const busca = document.getElementById("protoSimuladorBusca");
-    if (busca) busca.value = "";
-    atualizarSimulador();
-  });
-
-  document.getElementById("protoSimuladorEscolhas")?.addEventListener("click", event => {
-    const botao = event.target.closest("[data-sim-remove]");
-    if (!botao) return;
-
-    const atributo = botao.dataset.simRemove;
     delete simuladorEscolhas[atributo];
-    removerEscolhasPosteriores(atributo);
-    atualizarSimulador();
+    atualizarEtapa();
+  };
+  document.getElementById("protoSimuladorVoltar").addEventListener("click", () => {
+    voltarPara(Object.keys(simuladorEscolhas).at(-1));
+  });
+
+  opcoes.addEventListener("click", event => {
+    const botao = event.target.closest("[data-sim-option]");
+    if (!botao || botao.disabled) return;
+
+    simuladorEscolhas[botao.dataset.simAttr] = botao.dataset.simOption;
+    atualizarEtapa();
+  });
+
+  document.getElementById("protoSimuladorEscolhas").addEventListener("click", event => {
+    const botao = event.target.closest("[data-sim-remove]");
+    if (botao) voltarPara(botao.dataset.simRemove);
   });
 }
 
@@ -386,11 +428,9 @@ function fecharDrawerAtributos() {
 
   drawer?.classList.remove("open");
   drawer?.setAttribute("aria-hidden", "true");
+  if (drawer) drawer.inert = true;
   botao?.classList.remove("open");
-  if (botao) {
-    botao.innerHTML = '<i class="fa-solid fa-plus"></i>';
-    botao.title = "Adicionar atributo";
-  }
+  botao?.setAttribute("aria-expanded", "false");
   atualizarVisibilidadeLinhasPorPainel();
 }
 
@@ -404,17 +444,22 @@ function atualizarPosicaoPaineisPrototipo() {
 
   const rect = stage.getBoundingClientRect();
   const root = document.documentElement;
-  root.style.setProperty("--proto-stage-top", `${rect.top}px`);
-  root.style.setProperty("--proto-stage-left", `${rect.left}px`);
-  root.style.setProperty("--proto-stage-right-gap", `${Math.max(0, window.innerWidth - rect.right)}px`);
-  root.style.setProperty("--proto-stage-bottom-gap", `${Math.max(0, window.innerHeight - rect.bottom)}px`);
-  root.style.setProperty("--proto-stage-width", `${rect.width}px`);
-  root.style.setProperty("--proto-stage-height", `${rect.height}px`);
+  const dimensoes = {
+    "--proto-stage-top": rect.top,
+    "--proto-stage-left": rect.left,
+    "--proto-stage-right-gap": Math.max(0, window.innerWidth - rect.right),
+    "--proto-stage-bottom-gap": Math.max(0, window.innerHeight - rect.bottom),
+    "--proto-stage-width": rect.width,
+    "--proto-stage-height": rect.height
+  };
+  for (const [propriedade, comprimento] of Object.entries(dimensoes)) {
+    const valor = comprimento + "px";
+    if (valor !== root.style.getPropertyValue(propriedade)) root.style.setProperty(propriedade, valor);
+  }
 }
 
 function reposicionarLinhasAtivas() {
   atualizarPosicaoPaineisPrototipo();
-  enviarLinhasParaTras();
   const stage = document.getElementById("protoStage");
   if (stage) {
     posicionarCaixasIntermediarias(stage);
@@ -424,98 +469,197 @@ function reposicionarLinhasAtivas() {
   linhasAtribuicaoAtivas.forEach(item => item.line?.position?.());
   linhasAtributoUnicoAtivas.forEach(item => item.line?.position?.());
   linhasImagemAtivas.forEach(item => item.line?.position?.());
+  recortarLinhasAoQuadro();
 }
 
 function configurarCameraStage(stage) {
   if (cameraStageConfigurada === stage) return;
+  eventosCamera?.abort();
+  observadorQuadro?.disconnect();
   cameraStageConfigurada = stage;
+  eventosCamera = new AbortController();
+  const opcoes = { signal: eventosCamera.signal };
+  const botaoMover = document.getElementById("protoModoMover");
+  let arraste = null;
+  let espaco = false;
+  let larguraAnterior = stage.clientWidth;
+  let alturaAnterior = stage.clientHeight;
+
+  const atualizarModo = () => {
+    stage.classList.toggle("modo-mover", espaco || botaoMover.getAttribute("aria-pressed") === "true");
+  };
+  botaoMover.addEventListener("click", () => {
+    botaoMover.setAttribute("aria-pressed", String(botaoMover.getAttribute("aria-pressed") !== "true"));
+    atualizarModo();
+  }, opcoes);
 
   stage.addEventListener("pointerdown", event => {
-    if (event.button !== 1) return;
-    if (event.target.closest("input, textarea, select, .proto-add-attr, .proto-attr-drawer, .proto-simulator")) return;
+    const mover = event.button === 1 || (event.button === 0 &&
+      (stage.classList.contains("modo-mover") || (event.pointerType === "touch" && event.target === stage)));
+    if (!mover || arraste) return;
 
     event.preventDefault();
     event.stopPropagation();
+    stage.setPointerCapture(event.pointerId);
     stage.classList.add("is-panning");
+    arraste = { id: event.pointerId, x: event.clientX, y: event.clientY, panX: cameraProto.panX, panY: cameraProto.panY };
+  }, { ...opcoes, capture: true });
 
-    const inicio = {
-      x: event.clientX,
-      y: event.clientY,
-      panX: cameraProto.panX,
-      panY: cameraProto.panY
-    };
+  stage.addEventListener("pointermove", event => {
+    if (arraste?.id !== event.pointerId) return;
+    cameraProto.panX = arraste.panX + event.clientX - arraste.x;
+    cameraProto.panY = arraste.panY + event.clientY - arraste.y;
+    aplicarCameraStage(stage);
+  }, opcoes);
 
-    const mover = moveEvent => {
-      cameraProto.panX = inicio.panX + moveEvent.clientX - inicio.x;
-      cameraProto.panY = inicio.panY + moveEvent.clientY - inicio.y;
-      aplicarCameraStage(stage);
-    };
-
-    const soltar = () => {
-      document.removeEventListener("pointermove", mover);
-      stage.classList.remove("is-panning");
-    };
-
-    document.addEventListener("pointermove", mover);
-    document.addEventListener("pointerup", soltar, { once: true });
-  }, true);
+  const soltar = event => {
+    if (arraste?.id !== event.pointerId) return;
+    arraste = null;
+    stage.classList.remove("is-panning");
+  };
+  for (const tipo of ["pointerup", "pointercancel", "lostpointercapture"]) {
+    stage.addEventListener(tipo, soltar, opcoes);
+  }
 
   stage.addEventListener("auxclick", event => {
-    if (event.button !== 1) return;
+    if (event.button === 1) event.preventDefault();
+  }, opcoes);
+
+  stage.addEventListener("wheel", event => {
     event.preventDefault();
+    if (arraste || corteAtual || linhaTemporaria || !event.deltaY) return;
+    const rect = stage.getBoundingClientRect();
+    const unidade = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1;
+    const delta = Math.max(-180, Math.min(180, event.deltaY * unidade));
+    ajustarZoomStage(stage, cameraProto.escala * Math.exp(-delta * 0.002), event.clientX - rect.left, event.clientY - rect.top);
+  }, { ...opcoes, passive: false });
+
+  const zoomPorPasso = fator => ajustarZoomStage(stage, cameraProto.escala * fator);
+  document.getElementById("protoZoomMenos").addEventListener("click", () => zoomPorPasso(1 / 1.2), opcoes);
+  document.getElementById("protoZoomMais").addEventListener("click", () => zoomPorPasso(1.2), opcoes);
+  document.getElementById("protoZoomAtual").addEventListener("click", () => ajustarZoomStage(stage, 1), opcoes);
+  document.getElementById("protoEnquadrar").addEventListener("click", () => enquadrarQuadro(stage), opcoes);
+
+  document.addEventListener("keydown", event => {
+    if (event.code !== "Space" || event.target.closest("button, input, textarea, select, [contenteditable]")) return;
+    if (event.target !== stage && !stage.matches(":hover")) return;
+    event.preventDefault();
+    espaco = true;
+    atualizarModo();
+  }, opcoes);
+  const liberarEspaco = () => {
+    espaco = false;
+    atualizarModo();
+  };
+  document.addEventListener("keyup", event => {
+    if (event.code === "Space") liberarEspaco();
+  }, opcoes);
+  window.addEventListener("blur", liberarEspaco, opcoes);
+
+  stage.addEventListener("keydown", event => {
+    if (event.target !== stage) return;
+    const movimento = { ArrowLeft: [40, 0], ArrowRight: [-40, 0], ArrowUp: [0, 40], ArrowDown: [0, -40] }[event.key];
+    if (movimento) {
+      cameraProto.panX += movimento[0];
+      cameraProto.panY += movimento[1];
+      aplicarCameraStage(stage);
+    } else if (event.key === "+" || event.key === "=") {
+      zoomPorPasso(1.2);
+    } else if (event.key === "-") {
+      zoomPorPasso(1 / 1.2);
+    } else if (event.key === "0") {
+      enquadrarQuadro(stage);
+    } else {
+      return;
+    }
+    event.preventDefault();
+  }, opcoes);
+
+  observadorQuadro = new ResizeObserver(() => {
+    const largura = stage.clientWidth;
+    const altura = stage.clientHeight;
+    if (!largura || !altura) return;
+    if (ajustarAoAbrir) {
+      ajustarAoAbrir = false;
+      enquadrarQuadro(stage);
+    } else {
+      cameraProto.panX += (largura - larguraAnterior) / 2;
+      cameraProto.panY += (altura - alturaAnterior) / 2;
+      aplicarCameraStage(stage);
+    }
+    larguraAnterior = largura;
+    alturaAnterior = altura;
   });
+  observadorQuadro.observe(stage);
+  window.addEventListener("resize", () => aplicarCameraStage(stage), opcoes);
+  window.addEventListener("scroll", event => {
+    if (event.target === document || event.target.contains?.(stage)) aplicarCameraStage(stage);
+  }, { ...opcoes, capture: true });
+}
+
+function ajustarZoomStage(stage, escala, x = stage.clientWidth / 2, y = stage.clientHeight / 2) {
+  escala = Math.max(cameraProto.limiteInferior, Math.min(zoomMaximo, escala));
+  if (escala === cameraProto.escala) return;
+  const fator = escala / cameraProto.escala;
+  cameraProto.panX = x - (x - cameraProto.panX) * fator;
+  cameraProto.panY = y - (y - cameraProto.panY) * fator;
+  cameraProto.escala = escala;
+  aplicarCameraStage(stage);
+}
+
+function enquadrarQuadro(stage) {
+  const cartoes = [...stage.querySelectorAll(".proto-node, .proto-image-card")];
+  if (!cartoes.length) return;
+
+  const margem = 40;
+  const esquerda = Math.min(...cartoes.map(item => item.offsetLeft));
+  const topo = Math.min(...cartoes.map(item => item.offsetTop));
+  const direita = Math.max(...cartoes.map(item => item.offsetLeft + item.offsetWidth));
+  const fundo = Math.max(...cartoes.map(item => item.offsetTop + item.offsetHeight));
+  const escala = Math.max(0.01, Math.min(1,
+    (stage.clientWidth - margem * 2) / Math.max(1, direita - esquerda),
+    (stage.clientHeight - margem * 2) / Math.max(1, fundo - topo)
+  ));
+
+  cameraProto.escala = escala;
+  cameraProto.limiteInferior = Math.min(zoomMinimo, escala);
+  cameraProto.panX = (stage.clientWidth - (direita + esquerda) * escala) / 2;
+  cameraProto.panY = (stage.clientHeight - (fundo + topo) * escala) / 2;
+  aplicarCameraStage(stage);
 }
 
 function aplicarCameraStage(stage = document.getElementById("protoStage")) {
-  if (!stage) return;
+  if (!stage || frameCamera) return;
+  frameCamera = requestAnimationFrame(() => {
+    frameCamera = 0;
+    if (!stage.isConnected) return;
 
-  stage.style.setProperty("--proto-camera-pan-x", `${cameraProto.panX}px`);
-  stage.style.setProperty("--proto-camera-pan-y", `${cameraProto.panY}px`);
-  stage.style.backgroundSize = "34px 34px";
-  stage.style.backgroundPosition = `${cameraProto.panX}px ${cameraProto.panY}px`;
+    stage.style.setProperty("--proto-pan-x", cameraProto.panX + "px");
+    stage.style.setProperty("--proto-pan-y", cameraProto.panY + "px");
+    stage.style.setProperty("--proto-escala", cameraProto.escala);
+    document.getElementById("protoZoomAtual").textContent = Math.round(cameraProto.escala * 100) + "%";
+    document.getElementById("protoZoomMenos").disabled = cameraProto.escala <= cameraProto.limiteInferior;
+    document.getElementById("protoZoomMais").disabled = cameraProto.escala >= zoomMaximo;
 
-  const transform = `translate(${cameraProto.panX}px, ${cameraProto.panY}px)`;
-  stage.querySelectorAll(".proto-node, .proto-image-card").forEach(elemento => {
-    elemento.style.transform = transform;
-    elemento.style.transformOrigin = "0 0";
+    reposicionarLinhasAtivas();
   });
-
-  requestAnimationFrame(() => reposicionarLinhasAtivas());
 }
 
 function deltaCamera(valor) {
-  return valor;
+  return valor / cameraProto.escala;
 }
 
-function enviarLinhasParaTras() {
-  document.querySelectorAll(".leader-line, svg[class*='leader-line'], [class*='leader-line']").forEach(linha => {
-    linha.style.setProperty("position", "fixed", "important");
-    linha.style.setProperty("z-index", "10", "important");
-    linha.style.setProperty("pointer-events", "none", "important");
-    linha.style.removeProperty("clip-path");
-  });
+function recortarLinhasAoQuadro() {
+  const quadro = document.getElementById("protoStage")?.getBoundingClientRect();
+  if (!quadro) return;
+  document.querySelectorAll("svg.leader-line").forEach(linha => recortarElementoQuadro(linha, quadro, linha.getBoundingClientRect()));
 }
 
-function capturarScrollPrototipo() {
-  const scrollers = [
-    document.scrollingElement,
-    document.getElementById("prototipoAtributosMaterial"),
-    document.getElementById("protoStage")
-  ].filter(Boolean);
-
-  return {
-    janela: { x: window.scrollX, y: window.scrollY },
-    scrollers: scrollers.map(el => ({ el, left: el.scrollLeft, top: el.scrollTop }))
-  };
-}
-
-function restaurarScrollPrototipo(scroll) {
-  if (!scroll) return;
-  window.scrollTo(scroll.janela.x, scroll.janela.y);
-  scroll.scrollers.forEach(item => {
-    item.el.scrollLeft = item.left;
-    item.el.scrollTop = item.top;
-  });
+function recortarElementoQuadro(elemento, quadro, rect, escala = 1) {
+  const bordas = [quadro.top - rect.top, rect.right - quadro.right, rect.bottom - quadro.bottom, quadro.left - rect.left];
+  elemento.style.clipPath = bordas.some(borda => borda > 0)
+    ? "inset(" + bordas.map(borda => Math.max(0, borda) / escala + "px").join(" ") + ")"
+    : "";
 }
 
 function removerEscolhasPosteriores(atributo) {
@@ -530,73 +674,108 @@ function removerEscolhasPosteriores(atributo) {
 }
 
 function atualizarSimulador() {
+  if (!document.getElementById("protoSimuladorDrawer")?.open || !estadoAtual) return;
   const status = document.getElementById("protoSimuladorStatus");
+
+  const placaEtapa = document.getElementById("protoSimuladorEtapa");
   const escolhasEl = document.getElementById("protoSimuladorEscolhas");
   const opcoesEl = document.getElementById("protoSimuladorOpcoes");
-  const busca = normalizarBusca(document.getElementById("protoSimuladorBusca")?.value || "");
-  if (!status || !escolhasEl || !opcoesEl || !estadoAtual) return;
-
-  escolhasEl.innerHTML = montarHtmlEscolhasSimulador();
+  const filtro = document.getElementById("protoSimuladorFiltro");
+  const imagensEl = document.getElementById("protoSimuladorImagens");
+  const mostrarBloqueados = document.getElementById("protoSimuladorMostrarBloqueados");
+  const controleBloqueados = document.getElementById("protoSimuladorControleBloqueados");
   const proximo = obterProximoPassoSimulador();
+  const escolhas = Object.entries(simuladorEscolhas);
 
+  document.getElementById("protoSimuladorMaterial").textContent = estadoAtual.materialBase || "Sem material definido";
+  document.getElementById("protoSimuladorVoltar").disabled = !escolhas.length;
+  document.getElementById("protoSimuladorLimpar").disabled = !escolhas.length;
+  escolhasEl.innerHTML = montarHtmlEscolhasSimulador(escolhas);
+
+  atualizarImagensSimulador(imagensEl);
+
+  const bloqueadas = proximo?.opcoes.filter(opcao => opcao.bloqueada) || [];
+  const disponiveis = proximo?.opcoes.filter(opcao => !opcao.bloqueada) || [];
+  const visiveis = mostrarBloqueados.checked ? [...disponiveis, ...bloqueadas] : disponiveis;
+  controleBloqueados.hidden = !bloqueadas.length;
+  document.getElementById("protoSimuladorRotuloBloqueados").textContent = `Mostrar bloqueados (${bloqueadas.length})`;
+  document.getElementById("protoSimuladorCopiar").hidden = Boolean(proximo) || !escolhas.length;
+  const campoBusca = document.getElementById("protoSimuladorBusca");
+  filtro.hidden = !proximo || (visiveis.length < 7 && !campoBusca.value);
+  placaEtapa.hidden = !proximo;
+  opcoesEl.classList.toggle("is-finished", !proximo);
   if (!proximo) {
-    status.textContent = "Fluxo finalizado para as regras atuais";
-    opcoesEl.innerHTML = `<div class="proto-simulator-empty">Nenhuma próxima opção disponível.</div>`;
-    opcoesEl.insertAdjacentHTML("beforeend", montarHtmlImagensSimulador());
+    const concluido = escolhas.length > 0;
+    status.textContent = concluido ? "Montagem concluída" : "Nenhuma escolha disponível";
+    opcoesEl.innerHTML = concluido
+      ? '<p class="proto-simulator-empty"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Confira a configuração na ficha do material.</p>'
+      : '<p class="proto-simulator-empty">Configure uma ligação com opções selecionadas no quadro para simular a montagem.</p>';
     return;
   }
 
-  const opcoesFiltradas = proximo.opcoes.filter(opcao => normalizarBusca(opcao.valor).includes(busca));
-  status.textContent = `${nomesNodes[proximo.origem]} -> ${nomesNodes[proximo.destino]}`;
-  opcoesEl.innerHTML = `
-    ${opcoesFiltradas.length
-      ? opcoesFiltradas.map(opcao => `
-        <button type="button" class="${opcao.bloqueada ? "is-blocked" : ""}" ${opcao.bloqueada ? "disabled" : ""} data-sim-attr="${escapeHtml(proximo.destino)}" data-sim-option="${escapeHtml(opcao.valor)}">
-          <span>${escapeHtml(opcao.valor)}</span>
-          <small>${escapeHtml(opcao.motivo || nomesNodes[proximo.destino])}</small>
-        </button>
-      `).join("")
-      : `<div class="proto-simulator-empty">Nenhuma opção encontrada para a busca.</div>`}
-  `;
-  opcoesEl.insertAdjacentHTML("beforeend", montarHtmlImagensSimulador());
+  const busca = normalizarBusca(campoBusca.value);
+  const resultados = visiveis.filter(opcao => normalizarBusca(opcao.valor).includes(busca));
+  const destino = nomesNodes[proximo.destino] || proximo.destino;
+  status.textContent = "Escolha " + destino;
+  placaEtapa.textContent = "Etapa " + (escolhas.length + 1);
+
+  if (proximo.opcoes.every(opcao => opcao.bloqueada)) {
+    status.textContent = destino + " sem opções disponíveis";
+  }
+  opcoesEl.innerHTML = resultados.length ? resultados.map(opcao => `
+    <button type="button" ${opcao.bloqueada ? 'class="is-blocked" disabled' : ''}
+      data-sim-attr="${escapeHtml(proximo.destino)}" data-sim-option="${escapeHtml(opcao.valor)}">
+      <span>${escapeHtml(opcao.valor)}</span>
+      <i class="fa-solid ${opcao.bloqueada ? "fa-lock" : "fa-chevron-right"}" aria-hidden="true"></i>
+      ${opcao.motivo ? `<small>${escapeHtml(opcao.motivo)}</small>` : ""}
+    </button>
+  `).join("") : `<p class="proto-simulator-empty">${!visiveis.length
+    ? "Todas as opções desta etapa estão bloqueadas."
+    : "Nenhuma opção encontrada."}</p>`;
 }
 
-function montarHtmlEscolhasSimulador() {
-  const chips = [
-    `<span class="proto-sim-chip is-base"><b>Material</b>${escapeHtml(estadoAtual.materialBase || "Material")}</span>`,
-    ...Object.entries(simuladorEscolhas).map(([atributo, valor]) => `
-      <button type="button" class="proto-sim-chip" data-sim-remove="${escapeHtml(atributo)}" title="Remover escolha">
-        <b>${escapeHtml(nomesNodes[atributo] || atributo)}</b>
-        ${escapeHtml(valor)}
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    `)
-  ];
-
-  return `
-    <div class="proto-sim-chip-list">${chips.join("")}</div>
-  `;
+function montarHtmlEscolhasSimulador(escolhas) {
+  return escolhas.map(([atributo, valor]) => {
+    const nome = escapeHtml(nomesNodes[atributo] || atributo);
+    return `
+      <div class="proto-sim-escolha">
+        <dt>${nome}</dt>
+        <dd><button type="button" data-sim-remove="${escapeHtml(atributo)}" title="Refazer escolha de ${nome}">
+          <span>${escapeHtml(valor)}</span><i class="fa-solid fa-pen" aria-hidden="true"></i>
+        </button></dd>
+      </div>`;
+  }).join("");
 }
 
-function montarHtmlImagensSimulador() {
+function atualizarImagensSimulador(galeria) {
   const imagens = obterImagensCompativeisSimulador();
-
-  return `
-    <div class="proto-sim-images ${imagens.length ? "" : "is-empty"}">
-      <strong><i class="fa-solid fa-image"></i> Referência visual</strong>
-      <div>
-        ${imagens.length ? imagens.map(imagem => `
-          <figure title="${escapeHtml(imagem.motivo)}">
-            <img src="${escapeHtml(imagem.src)}" alt="${escapeHtml(imagem.nome || "Imagem vinculada")}">
-            <figcaption>${escapeHtml(imagem.motivo)}</figcaption>
-          </figure>
-        `).join("") : `<span>Nenhuma imagem correspondente para as escolhas atuais.</span>`}
-      </div>
+  galeria.hidden = !imagens.length;
+  if (!imagens.length) {
+    galeria.replaceChildren();
+    return;
+  }
+  const indice = Math.max(0, imagens.findIndex(imagem => imagem.id === galeria.dataset.foto));
+  const imagem = imagens[indice];
+  galeria.dataset.foto = imagem.id;
+  const anterior = imagens[(indice + imagens.length - 1) % imagens.length];
+  const proxima = imagens[(indice + 1) % imagens.length];
+  galeria.innerHTML = `
+    <div class="proto-sim-images-head">
+      <strong>Fotos</strong>
+      ${imagens.length > 1 ? `<div class="proto-sim-images-controls">
+        <button type="button" data-sim-foto="${escapeHtml(anterior.id)}" data-sim-direcao="anterior" aria-label="Foto anterior">‹</button>
+        <span aria-live="polite">${indice + 1} / ${imagens.length}</span>
+        <button type="button" data-sim-foto="${escapeHtml(proxima.id)}" data-sim-direcao="proxima" aria-label="Próxima foto">›</button>
+      </div>` : ""}
     </div>
-  `;
+    <figure>
+      <img src="${escapeHtml(imagem.src)}" alt="${escapeHtml(imagem.nome || "Imagem vinculada")}">
+      <figcaption>${escapeHtml(imagem.motivo)}</figcaption>
+    </figure>`;
 }
 
 function obterImagensCompativeisSimulador() {
+  const ultimaEscolha = Object.keys(simuladorEscolhas).at(-1);
   const escolhas = {
     "material-principal": estadoAtual.materialBase,
     ...simuladorEscolhas
@@ -620,13 +799,14 @@ function obterImagensCompativeisSimulador() {
 
       return {
         ...imagem,
+        daUltimaEscolha: vinculosCompativeis.some(vinculo => vinculo.atributo === ultimaEscolha),
         motivo: vinculosCompativeis
           .map(vinculo => `${nomesNodes[vinculo.atributo] || vinculo.atributo}: ${escolhas[vinculo.atributo]}`)
           .join(" | ")
       };
     })
     .filter(Boolean)
-    .slice(0, 4);
+    .sort((a, b) => Number(b.daUltimaEscolha) - Number(a.daUltimaEscolha));
 }
 
 function obterProximoPassoSimulador() {
@@ -920,14 +1100,13 @@ function configurarAdicionarAtributo(stage) {
     fecharDrawerSimulador();
     const aberto = drawer.classList.toggle("open");
     drawer.setAttribute("aria-hidden", String(!aberto));
+    drawer.inert = !aberto;
     botao.classList.toggle("open", aberto);
+    botao.setAttribute("aria-expanded", String(aberto));
     atualizarVisibilidadeLinhasPorPainel();
-    botao.innerHTML = aberto
-      ? '<i class="fa-solid fa-arrow-right"></i>'
-      : '<i class="fa-solid fa-plus"></i>';
-    botao.title = aberto ? "Fechar atributos" : "Adicionar atributo";
     if (aberto) {
       renderizarListaAdicionarAtributos(stage);
+      busca.focus({ preventScroll: true });
     }
     reposicionarLinhasAtivas();
     setTimeout(reposicionarLinhasAtivas, 260);
@@ -950,13 +1129,8 @@ function configurarAdicionarAtributo(stage) {
 }
 
 function fecharDrawerSimulador() {
-  const drawer = document.getElementById("protoSimuladorDrawer");
-  const botao = document.getElementById("protoToggleSimulador");
-
-  drawer?.classList.remove("open");
-  drawer?.setAttribute("aria-hidden", "true");
-  botao?.classList.remove("open");
-  atualizarVisibilidadeLinhasPorPainel();
+  const janela = document.getElementById("protoSimuladorDrawer");
+  if (janela?.open) janela.close();
 }
 
 function renderizarListaAdicionarAtributos(stage) {
@@ -1014,9 +1188,9 @@ function adicionarNodeAtributo(stage, nome, opcoes = {}) {
   }
 
   const pos = obterProximaPosicaoAtributo(stage);
-  const node = criarNodeAtributo(id, nome, "Atributo do cadastro de materiais", pos.left, pos.top);
+  const node = criarNodeAtributo(id, nome, pos.left, pos.top);
   node.dataset.extra = "1";
-  stage.appendChild(node);
+  stage.querySelector(".proto-world").appendChild(node);
 
   estadoAtual.atributosExtras.push({
     id,
@@ -1249,7 +1423,7 @@ function encontrarMaterialRegistrado(nome) {
     || null;
 }
 
-function criarNodeAtributo(id, nome, descricao, left, top) {
+function criarNodeAtributo(id, nome, left, top) {
   const node = document.createElement("article");
   node.className = "proto-node";
   node.dataset.node = id;
@@ -1257,10 +1431,8 @@ function criarNodeAtributo(id, nome, descricao, left, top) {
   node.style.top = `${top}px`;
   node.innerHTML = `
     <button type="button" class="proto-node-handle" title="Arrastar linha"></button>
-    <span class="proto-node-label">Atributo</span>
     <strong>${escapeHtml(nome)}</strong>
-    <small>${escapeHtml(descricao || "Atributo adicional")}</small>
-    <em data-count-for="${escapeHtml(id)}">0 selecionados</em>
+    <button type="button" class="proto-node-count" data-count-for="${escapeHtml(id)}">0 selecionados</button>
   `;
   return node;
 }
@@ -1694,22 +1866,6 @@ function carregarEstado() {
   }
 }
 
-function criarEstadoVazio() {
-  return {
-    materialBase: "",
-    relacoes: {},
-    bloqueios: [],
-    atribuicoesEspecificas: [],
-    atributosUnicos: [],
-    imagensAnexadas: [],
-    materiaisPrincipais: [],
-    atributosExtras: [],
-    opcoesPersonalizadas: {},
-    opcoesRemovidas: {},
-    posicoes: {}
-  };
-}
-
 function salvarEstado() {
   const novoSnapshot = criarSnapshotEstado();
   if (!restaurandoHistorico && ultimoSnapshotHistorico && novoSnapshot !== ultimoSnapshotHistorico) {
@@ -1733,12 +1889,13 @@ function restaurarSnapshotEstado(snapshot) {
   const stage = document.getElementById("protoStage");
   if (!stage || !snapshot) return;
 
+  const novoEstado = JSON.parse(snapshot);
+  localStorage.setItem(STORAGE_KEY, snapshot);
   restaurandoHistorico = true;
-  estadoAtual = JSON.parse(snapshot);
+  estadoAtual = novoEstado;
   normalizarAtributosEstado();
   relacaoSelecionada = null;
   simuladorEscolhas = {};
-  localStorage.setItem(STORAGE_KEY, snapshot);
   ultimoSnapshotHistorico = snapshot;
 
   removerLinhas();
@@ -1763,11 +1920,11 @@ function restaurarSnapshotEstado(snapshot) {
 
 function aplicarPosicoesSalvas(stage) {
   stage.querySelectorAll(".proto-node").forEach(node => {
+    node.dataset.posicaoInicialLeft ??= node.style.left;
+    node.dataset.posicaoInicialTop ??= node.style.top;
     const pos = estadoAtual.posicoes?.[node.dataset.node];
-    if (!pos) return;
-
-    node.style.left = `${pos.left}px`;
-    node.style.top = `${pos.top}px`;
+    node.style.left = pos ? `${pos.left}px` : node.dataset.posicaoInicialLeft;
+    node.style.top = pos ? `${pos.top}px` : node.dataset.posicaoInicialTop;
   });
 }
 
@@ -1792,24 +1949,19 @@ function configurarArrasteNodes(stage) {
         node.style.left = `${left}px`;
         node.style.top = `${top}px`;
         estadoAtual.posicoes[node.dataset.node] = { left, top };
-        linhasAtivas.forEach(item => item.line?.position?.());
-        posicionarCaixasBloqueio(stage);
-        posicionarCaixasAtribuicao(stage);
-        posicionarCaixasAtributoUnico(stage);
-        linhasBloqueioAtivas.forEach(item => item.line?.position?.());
-        linhasAtribuicaoAtivas.forEach(item => item.line?.position?.());
-        linhasAtributoUnicoAtivas.forEach(item => item.line?.position?.());
-        linhasImagemAtivas.forEach(item => item.line?.position?.());
+        aplicarCameraStage(stage);
       };
 
       const soltar = () => {
         node.onpointermove = null;
         node.onpointerup = null;
+        node.onpointercancel = null;
         salvarEstado();
       };
 
       node.onpointermove = mover;
       node.onpointerup = soltar;
+      node.onpointercancel = soltar;
     };
   });
 }
@@ -1932,7 +2084,8 @@ function renderizarImagensAnexadas() {
   const stage = document.getElementById("protoStage");
   if (!stage) return;
 
-  stage.querySelectorAll(".proto-image-card").forEach(card => card.remove());
+  const mundo = stage.querySelector(".proto-world");
+  mundo.querySelectorAll(".proto-image-card").forEach(card => card.remove());
 
   (estadoAtual.imagensAnexadas || []).forEach((imagem, indice) => {
     const card = document.createElement("div");
@@ -1942,7 +2095,7 @@ function renderizarImagensAnexadas() {
     card.style.left = `${posicao.left}px`;
     card.style.top = `${posicao.top}px`;
     card.innerHTML = montarHtmlImagemAnexada(imagem);
-    stage.appendChild(card);
+    mundo.appendChild(card);
   });
 
   configurarArrasteImagens(stage);
@@ -2002,7 +2155,7 @@ function configurarArrasteImagens(stage) {
         const top = topInicial + deltaCamera(moveEvent.clientY - inicioY);
         card.style.left = `${left}px`;
         card.style.top = `${top}px`;
-        reposicionarLinhasAtivas();
+        aplicarCameraStage(stage);
       };
 
       const soltar = () => {
@@ -2071,10 +2224,8 @@ function abrirModalAnexarImagem(atributoId) {
     onConfirmar: ({ valores, arquivo }) => {
       const stage = document.getElementById("protoStage");
       const node = stage?.querySelector(`.proto-node[data-node="${cssEscape(atributoId)}"]`);
-      const nodeRect = node?.getBoundingClientRect();
-      const stageRect = stage?.getBoundingClientRect();
-      const posicao = nodeRect && stageRect
-        ? { left: Math.max(20, nodeRect.left - stageRect.left + 24), top: Math.max(20, nodeRect.top - stageRect.top + 160) }
+      const posicao = node
+        ? { left: node.offsetLeft + 24, top: node.offsetTop + 160 }
         : { left: 80, top: 460 };
 
       estadoAtual.imagensAnexadas.push({
@@ -2435,7 +2586,7 @@ function redesenharLinhas() {
   redesenharAtributosUnicos();
   renderizarImagensAnexadas();
   redesenharLinhasImagens();
-  enviarLinhasParaTras();
+  recortarLinhasAoQuadro();
 }
 
 function removerLinhas() {
@@ -2549,6 +2700,8 @@ function calcularOffsetBloqueio(a, b, indice) {
 
 function posicionarCaixasIntermediarias(stage) {
   const caixasPorPar = new Map();
+  const escala = cameraProto.escala;
+  const stageRect = stage.getBoundingClientRect();
 
   document.querySelectorAll(".proto-block-rule, .proto-specific-rule, .proto-unique-rule").forEach(box => {
     const dados = obterDadosCaixaIntermediaria(box);
@@ -2572,7 +2725,7 @@ function posicionarCaixasIntermediarias(stage) {
     const comprimento = Math.hypot(dx, dy) || 1;
     const normal = { x: -dy / comprimento, y: dx / comprimento };
     const direcao = { x: dx / comprimento, y: dy / comprimento };
-    const espacamento = Math.max(
+    const espacamento = escala * Math.max(
       118,
       ...caixas.map(({ box }) => {
         const larguraProjetada = Math.abs(normal.x) * box.offsetWidth;
@@ -2584,7 +2737,7 @@ function posicionarCaixasIntermediarias(stage) {
     caixas.forEach(({ box }, indice) => {
       const slot = indice - (caixas.length - 1) / 2;
       const avanco = caixas.length > 1
-        ? (indice % 2 ? 34 : -34)
+        ? (indice % 2 ? 34 : -34) * escala
         : 0;
       const offset = {
         x: normal.x * espacamento * slot + direcao.x * avanco,
@@ -2595,15 +2748,13 @@ function posicionarCaixasIntermediarias(stage) {
 
       box.style.left = `${left}px`;
       box.style.top = `${top}px`;
-      box.style.transform = "";
-      box.style.transformOrigin = "";
-      atualizarVisibilidadeCaixaIntermediaria(stage, box);
+      box.style.transform = `scale(${escala})`;
+      atualizarVisibilidadeCaixaIntermediaria(stageRect, box, escala);
     });
   });
 }
 
-function atualizarVisibilidadeCaixaIntermediaria(stage, box) {
-  const stageRect = stage.getBoundingClientRect();
+function atualizarVisibilidadeCaixaIntermediaria(stageRect, box, escala) {
   const boxRect = box.getBoundingClientRect();
   const dentroStage = boxRect.bottom > stageRect.top
     && boxRect.top < stageRect.bottom
@@ -2611,6 +2762,7 @@ function atualizarVisibilidadeCaixaIntermediaria(stage, box) {
     && boxRect.left < stageRect.right;
 
   box.classList.toggle("fora-stage", !dentroStage);
+  if (dentroStage) recortarElementoQuadro(box, stageRect, boxRect, escala);
 }
 
 function centroViewport(elemento) {
@@ -3006,10 +3158,9 @@ function abrirPainelRelacao(chave) {
   titulo.textContent = `${nomesNodes[origem]} → ${nomesNodes[destino]}`;
   conteudo.className = "proto-opcoes";
   conteudo.innerHTML = `
-    <p>Escolha quais opções de <b>${nomesNodes[destino]}</b> pertencem a esta ligação.</p>
     <div class="proto-option-add">
-      <input type="text" placeholder="Adicionar opção para ${escapeHtml(nomesNodes[destino])}..." autocomplete="off" data-option-new>
-      <button type="button" data-option-add title="Adicionar opção">
+      <input type="text" aria-label="Nova opção" placeholder="Nova opção" autocomplete="off" data-option-new>
+      <button type="button" data-option-add title="Adicionar opção" aria-label="Adicionar opção">
         <i class="fa-solid fa-plus"></i>
       </button>
     </div>
@@ -3206,9 +3357,66 @@ function limparPainelRelacao() {
     conteudo.className = "proto-panel-empty";
     conteudo.innerHTML = `
       <i class="fa-solid fa-diagram-project"></i>
-      <p>Conecte duas divs para escolher as opções daquela relação.</p>
+      <p>Conecte dois cartões para configurar a ligação.</p>
     `;
   }
+}
+
+function baixarPrototipo() {
+  const blob = new Blob([exportarPrototipoJson(estadoAtual)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const nome = normalizarIdAtributo(estadoAtual.materialBase).slice(0, 80);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = nome ? `prototipo-atributos-${nome}.json` : "prototipo-atributos.json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function configurarImportacaoPrototipo() {
+  const botao = document.getElementById("protoImportarJson");
+  const entrada = document.getElementById("protoArquivoJson");
+  botao.addEventListener("click", () => entrada.click());
+  entrada.addEventListener("change", async () => {
+    const arquivo = entrada.files[0];
+    entrada.value = "";
+    if (!arquivo) return;
+
+    const stage = cameraStageConfigurada;
+    botao.disabled = true;
+    try {
+      const conteudo = await arquivo.text();
+      if (!stage || cameraStageConfigurada !== stage) return;
+      const novo = JSON.stringify(lerPrototipoJson(conteudo));
+      const anterior = criarSnapshotEstado();
+      if (novo !== anterior) {
+        restaurarSnapshotEstado(novo);
+        historicoEstados.push(anterior);
+        if (historicoEstados.length > 40) historicoEstados.shift();
+        futuroEstados = [];
+        atualizarBotoesHistorico();
+      }
+      enquadrarQuadro(stage);
+      window.Swal?.fire({
+        icon: "success", title: "Protótipo importado", toast: true,
+        position: "top-end", timer: 1800, showConfirmButton: false
+      });
+    } catch (erro) {
+      if (cameraStageConfigurada !== stage) return;
+      const mensagem = erro.name === "QuotaExceededError"
+        ? "O navegador está sem espaço para salvar esta configuração."
+        : erro.message || "Não foi possível abrir o arquivo.";
+      if (window.Swal) {
+        window.Swal.fire({ icon: "error", title: "Não foi possível importar", text: mensagem });
+      } else {
+        window.alert(mensagem);
+      }
+    } finally {
+      botao.disabled = false;
+    }
+  });
 }
 
 function configurarAcoes() {
@@ -3217,7 +3425,7 @@ function configurarAcoes() {
 
   if (!atalhosHistoricoConfigurados) {
     document.addEventListener("keydown", event => {
-      if (!event.ctrlKey || event.target.closest("input, textarea, select")) return;
+      if (!event.ctrlKey || event.target.closest("input, textarea, select, .proto-simulator")) return;
       if (event.key.toLowerCase() === "z") {
         event.preventDefault();
         desfazerAlteracao();
@@ -3230,21 +3438,8 @@ function configurarAcoes() {
     atalhosHistoricoConfigurados = true;
   }
 
-  document.getElementById("protoExportarJson")?.addEventListener("click", async () => {
-    const texto = JSON.stringify(estadoAtual, null, 2);
-    try {
-      await navigator.clipboard.writeText(texto);
-      window.Swal?.fire?.({
-        icon: "success",
-        theme: "dark",
-        title: "JSON copiado",
-        timer: 1400,
-        showConfirmButton: false
-      });
-    } catch {
-      document.getElementById("protoResumoJson")?.select();
-    }
-  });
+  document.getElementById("protoExportarJson")?.addEventListener("click", baixarPrototipo);
+  configurarImportacaoPrototipo();
 
   document.getElementById("protoLimparTudo")?.addEventListener("click", async () => {
     const confirmar = window.Swal
@@ -3267,8 +3462,9 @@ function configurarAcoes() {
     historicoEstados = [];
     futuroEstados = [];
     relacaoSelecionada = null;
-    removerLinhas();
-    initPrototipoAtributosMaterial();
+    restaurarSnapshotEstado(ultimoSnapshotHistorico);
+    const stage = document.getElementById("protoStage");
+    if (stage) enquadrarQuadro(stage);
   });
 
   atualizarBotoesHistorico();

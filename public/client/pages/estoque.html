@@ -1,8 +1,8 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Source+Sans+3:wght@400;500;600;700&amp;display=swap">
 <main id="estoqueMaterial">
   <section class="estoque-head">
     <div>
       <strong>Estoque</strong>
-      <span>Listas liberadas para separação de materiais.</span>
     </div>
     <button id="btnAtualizarEstoque" class="bt_padrao bt_atualizar">
       <i class="fa-solid fa-rotate"></i> Atualizar
@@ -12,7 +12,7 @@
   <section class="estoque-filtros">
     <label class="estoque-filtro-busca">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input id="estoqueBuscaListas" type="search" placeholder="Buscar OS, cliente ou descrição...">
+      <input id="estoqueBuscaListas" type="search" placeholder="Buscar lista, OS ou cliente..." aria-label="Buscar listas">
     </label>
 
     <select id="estoqueFiltroPrioridade" title="Filtrar por prioridade">
@@ -52,7 +52,7 @@
     <aside class="estoque-pendencias">
       <div class="estoque-col-head">
         <div>
-          <strong>Listas pendentes</strong>
+          <strong>Para separar</strong>
           <span id="estoqueTotalPendencias">0 lista(s)</span>
         </div>
       </div>
@@ -63,7 +63,7 @@
 
       <div class="estoque-col-head estoque-conferencia-head">
         <div>
-          <strong>Listas para conferência</strong>
+          <strong>Para conferir</strong>
           <span id="estoqueTotalConferencia">0 lista(s)</span>
         </div>
       </div>
@@ -98,12 +98,12 @@
               <th data-sort="categoria">Categoria</th>
               <th>Foto</th>
               <th data-sort="nome">Material</th>
-              <th data-sort="codigo">Referencia</th>
+              <th data-sort="codigo">Referência</th>
               <th data-sort="fabricante">Fabricante</th>
-              <th data-sort="observacao">Observacao</th>
+              <th data-sort="observacao">Observação</th>
               <th data-sort="quantidade">Qtd.</th>
               <th data-sort="unidade">Und</th>
-              <th data-sort="separacao">Separacao</th>
+              <th data-sort="separacao">Separação</th>
               <th class="col-acoes">Ações</th>
             </tr>
           </thead>

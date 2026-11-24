@@ -1,8 +1,10 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Source+Sans+3:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="/css/material-fluxo.css">
 <main id="listaMaterial" class="material-kanban-mode">
 
     <div class="toolbar-topo">
         <div class="left">
-            <select id="cbxOS" class="cbx_teste glass" style="width: auto;">
+            <select id="cbxOS" class="cbx_teste glass" aria-label="Selecionar ordem de serviço">
                 <option value="">Selecione uma OS</option>
             </select>
 
@@ -42,20 +44,31 @@
 
     <section id="materialDetalheView" class="material-detalhe-view" hidden>
         <div class="material-detalhe-head">
-            <button id="btnVoltarKanbanMaterial" class="bt_padrao bt_atualizar">
-                <i class="fa-solid fa-arrow-left"></i> Voltar ao fluxo
-            </button>
             <div>
                 <strong id="materialDetalheTitulo">Lista #1</strong>
                 <span id="materialDetalheResumo">Detalhes da lista de materiais</span>
             </div>
+            <div class="painel-quantitativo">
+                <span>Itens: <b id="totalItens">0</b></span>
+                <span>Qtd: <b id="qtdTotal">0</b></span>
+                <span>Fornecedores: <b id="totalFornecedores">0</b></span>
+                <span class="ok">Comprado: <b id="qtdComprada">0</b></span>
+                <span class="info">Separado: <b id="qtdSeparada">0</b></span>
+                <span class="danger">Faltante: <b id="qtdFaltante">0</b></span>
+            </div>
         </div>
 
         <div class="toolbar-busca">
+            <button id="btnVoltarKanbanMaterial" class="bt_padrao bt_atualizar">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao fluxo
+            </button>
+            <button id="btnNovoMaterial" class="bt_padrao bt_cad material-detalhe-action">+ Novo Material</button>
+            <button id="btnReloadMaterial" class="bt_padrao bt_atualizar material-detalhe-action">Atualizar</button>
             <input type="search" id="searchMaterial" placeholder="Buscar material...">
+            <select id="filtroCategoriaMaterial" title="Filtrar por categoria">
+                <option value="">Todas categorias</option>
+            </select>
             <div class="material-top-actions">
-                <button id="btnNovoMaterial" class="bt_padrao bt_cad material-detalhe-action">+ Novo Material</button>
-                <button id="btnReloadMaterial" class="bt_padrao bt_atualizar material-detalhe-action">Atualizar</button>
                 <button id="btnExportarListaPDF" class="bt_padrao bt_atualizar material-detalhe-action material-icon-action" title="Exportar PDF">
                     <i class="fa-solid fa-file-pdf"></i>
                 </button>
@@ -65,17 +78,6 @@
                 <button id="btnExportarLista" class="bt_padrao bt_atualizar material-detalhe-action material-icon-action" title="Exportar tabela">
                     <i class="fa-solid fa-table"></i>
                 </button>
-            </div>
-            <select id="filtroCategoriaMaterial" title="Filtrar por categoria">
-                <option value="">Todas categorias</option>
-            </select>
-            <div class="painel-quantitativo">
-                <span>Itens: <b id="totalItens">0</b></span>
-                <span>Qtd: <b id="qtdTotal">0</b></span>
-                <span>Fornecedores: <b id="totalFornecedores">0</b></span>
-                <span class="ok">Comprado: <b id="qtdComprada">0</b></span>
-                <span class="info">Separado: <b id="qtdSeparada">0</b></span>
-                <span class="danger">Faltante: <b id="qtdFaltante">0</b></span>
             </div>
             <div class="bt_submenu material-lista-opcoes">
                 <label class="material-toggle-imagens">
@@ -101,18 +103,18 @@
                         <th>ID</th>
                         <th>Categoria</th>
                         <th>Material</th>
-                        <th>Codigo</th>
+                        <th>Código</th>
                         <th>Fabricante</th>
                         <th>Qtde</th>
                         <th>Und</th>
                         <th>Observa&ccedil;&atilde;o</th>
                         <th>Or&ccedil;ado</th>
-                        <th>Separacao</th>
+                        <th>Separação</th>
                         <th>Fornecedor</th>
-                        <th>Preco</th>
+                        <th>Preço</th>
                         <th>Total R$</th>
                         <th>OC</th>
-                        <th class="col-acoes">Acoes</th>
+                        <th class="col-acoes">Ações</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -202,11 +204,16 @@
             </div>
 
             <div class="modal-lista-material-actions">
+                <button type="button" id="btnImportarListaMaterial">
+                    <i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i> Importar lista
+                </button>
+                <input id="arquivoImportarListaMaterial" type="file" accept=".json,application/json" hidden>
                 <button type="button" id="btnCancelarListaMaterial">Cancelar</button>
                 <button type="button" id="btnSalvarListaMaterial">
                     <i class="fa-solid fa-floppy-disk"></i> Salvar
                 </button>
             </div>
+            <small id="listaMaterialImportacaoInfo" role="status" hidden></small>
         </div>
     </div>
 

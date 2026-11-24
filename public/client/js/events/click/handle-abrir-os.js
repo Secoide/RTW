@@ -13,6 +13,8 @@ function carregarFormularioOS() {
   return new Promise((resolve, reject) => {
     $("#form_cadOS").empty().load("../html/forms/cadastro_os.html", function (response, status, xhr) {
       if (status === "success") {
+        initOSForm();
+        initCombosOS();
         resolve();
         return;
       }
@@ -63,17 +65,19 @@ async function prepararCombosOS(dados = null) {
   $("#selectSupervisor").trigger("change");
 }
 
+export async function abrirNovaOS() {
+  try {
+    await carregarFormularioOS();
+    await prepararCombosOS();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao carregar o formulário da OS.");
+  }
+}
+
 export function initAbrirOSClick() {
   $(document).off(".abrirOS");
-  $(document).on("click.abrirOS", "#bt_abrir_NovaOS", async function () {
-    try {
-      await carregarFormularioOS();
-      await prepararCombosOS();
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Erro ao carregar o formulário da OS.");
-    }
-  });
+  $(document).on("click.abrirOS", "#bt_abrir_NovaOS", abrirNovaOS);
 
   $(document).on("click.abrirOS", ".lbl_OS", async function () {
     const idOS = $(this).text().trim();
@@ -88,30 +92,36 @@ export function initAbrirOSClick() {
       $('.cadOS a.bt_menu[data-target=".painel_status"]').trigger("click");
     }, 400);
   });
+}
 
-  initOSForm();
+function initCombosOS() {
+  const $form = $("#formOS");
+  let consultaEmpresa;
 
-  $(document).on("change.abrirOS", "#selectCliente", async function () {
-    const $wrap = $("#frm_cadastrarOS");
+  $form.on("change", "#selectCliente", async function () {
+    consultaEmpresa?.abort();
+    const $wrap = $(this).closest("#frm_cadastrarOS");
     const idEmpresas = $(this).val();
+    $wrap.find("#selectSupervisor").empty().trigger("change");
+    $wrap.find("#selectCidade").empty();
     if (!idEmpresas) return;
 
+    consultaEmpresa = new AbortController();
+    const { signal } = consultaEmpresa;
     await Promise.all([
-      preencherCbxSupervisor(idEmpresas, $wrap),
-      preencherCbxCidade(idEmpresas, $wrap)
+      preencherCbxSupervisor(idEmpresas, $wrap, signal),
+      preencherCbxCidade(idEmpresas, $wrap, signal)
     ]);
   });
 
-  $(document).on("change.abrirOS", "#selectSupervisor", async function () {
+  $form.on("change", "#selectSupervisor", function () {
     const idSupervisorSelecionado = $(this).val();
+    const $telefone = $form.find("#telefoneSupervisor");
+    const $email = $form.find("#emailSupervisor");
 
     function atualizarCampos({ telefone = "-", email = "-" } = {}) {
-      $("#telefoneSupervisor").text("Telefone: " + (telefone || "-"));
-      if (email && email !== "-") {
-        $("#emailSupervisor").html('E-mail: <a href="mailto:' + email + '">' + email + "</a>");
-      } else {
-        $("#emailSupervisor").text("E-mail: -");
-      }
+      $telefone.text("Telefone: " + (telefone || "-"));
+      $email.text("E-mail: " + (email || "-"));
     }
 
     if (!idSupervisorSelecionado) {
@@ -126,8 +136,8 @@ export function initAbrirOSClick() {
       method: "GET",
       dataType: "json",
       success: function (data) {
-        $("#telefoneSupervisor").text("Telefone: " + (data.telefone || "-"));
-        $("#emailSupervisor").text("E-mail: " + (data.email || "-"));
+        if ($form.find("#selectSupervisor").val() !== idSupervisorSelecionado) return;
+        atualizarCampos(data);
       },
       error: function (xhr) {
         console.error(xhr.responseText);

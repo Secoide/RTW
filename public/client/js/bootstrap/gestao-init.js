@@ -1,8 +1,5 @@
 
-import {
-    preencherCbxCliente,
-    preencherCbxResponsavel
-} from "../events/forms/populate-combobox.js";
+import { abrirNovaOS } from "../events/click/handle-abrir-os.js";
 import { get_carregarPerfilUsuario } from "../events/click/handle-abrir-info-colab.js";
 
 let lastCols = [];
@@ -1396,16 +1393,7 @@ export function initGestao() {
     // ======== Criação inline ========
     async function criarNovoRegistro() {
         if (entidadeAtual === "OS") {
-            $('#form_cadOS').empty().load('../html/forms/cadastro_os.html', function (response, status, xhr) {
-                if (status === "success") {
-                    preencherCbxResponsavel();
-                    const $wrap = $('#frm_cadastrarOS');
-                    preencherCbxCliente($wrap);
-
-                } else {
-                    alert("Erro ao carregar o formulário: " + xhr.status + " " + xhr.statusText);
-                }
-            });
+            await abrirNovaOS();
             return;
         }
         if ($tbody.find("tr.novo-registro").length) {

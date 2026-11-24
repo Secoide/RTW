@@ -741,7 +741,11 @@ async function getColaboradoresResponsavelOS() {
 // Listar todos colaboradores em CBX (apenas ID e Nome)
 async function getColaboradoresCBX() {
   const [rows] = await connection.query(`
-    SELECT id, nome FROM funcionarios WHERE id <> '999' ORDER BY nome ASC;
+    SELECT f.id, f.nome, c.cargo AS cargo
+    FROM funcionarios f
+    LEFT JOIN tb_cargos c ON c.id = f.cargo
+    WHERE f.id <> '999'
+    ORDER BY f.nome ASC;
   `);
   return rows;
 }

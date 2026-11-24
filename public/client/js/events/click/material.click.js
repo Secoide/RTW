@@ -9,6 +9,7 @@ import {
   duplicarListaMaterialOS,
   excluirListaMaterialOS,
   listarHistoricoListaMaterialOS,
+  excluirHistoricoListaMaterialOS,
   moverListaMaterialOS,
   voltarListaMaterialOSComMotivo
 } from "../../services/api/material.api.js";
@@ -17,11 +18,30 @@ import { calcularValorRS } from "../../utils/material.utils.js";
 import { aplicarFiltros } from "../../services/filter/material.filter.js";
 import { renderTabela } from "../../utils/dom/material-render.js";
 import { atualizarResumo } from "../../utils/dom/material-resumo.js";
+import { exportarListaMaterialJSON, importarListaMaterialJSON, lerListaMaterialJSON } from "../../utils/material/lista-material-arquivo.js";
 
 export function initMaterialClicks() {
   let radarCotacaoItens = new Map();
   let modoSelecaoCotacao = false;
   let itensSelecionadosCotacao = new Set();
+  let listaImportada = null;
+
+  $(document).off("click.materialExportarListaJSON", ".material-lista-exportar-json")
+    .on("click.materialExportarListaJSON", ".material-lista-exportar-json", async function (evento) {
+      evento.stopPropagation();
+      if (this.disabled) return;
+      const id = this.dataset.id;
+      const lista = state.listasOS.find(item => String(item.id) === id);
+      this.disabled = true;
+      try {
+        await exportarListaMaterialJSON(lista);
+      } catch (erro) {
+        console.error(erro);
+        alert(erro.responseJSON?.erro || erro.message || "Não foi possível exportar a lista.");
+      } finally {
+        this.disabled = false;
+      }
+    });
 
   // 🔥 SALVAR (NOVO OU EXISTENTE)
   $(document).off("click.materialSalvarItem", "#listaMaterial .save")
@@ -248,11 +268,68 @@ export function initMaterialClicks() {
       $("#modalHistoricoListaMaterial").prop("hidden", true);
     });
 
+  $(document).off("click.materialExcluirHistoricoLista", ".material-historico-excluir")
+    .on("click.materialExcluirHistoricoLista", ".material-historico-excluir", async function () {
+      if (this.disabled) return;
+      const idLista = this.dataset.lista;
+      const idHistorico = this.dataset.historico;
+      this.disabled = true;
+      try {
+        const confirmado = await confirmarAcaoMaterial({
+          titulo: "Excluir registro do histórico",
+          mensagem: "Deseja apagar permanentemente este registro do histórico da lista?",
+          tipo: "danger",
+          confirmar: "Excluir"
+        });
+        if (!confirmado) return;
+        await excluirHistoricoListaMaterialOS(idLista, idHistorico);
+        renderHistoricoListaMaterial(await listarHistoricoListaMaterialOS(idLista));
+      } catch (erro) {
+        alert(erro.responseJSON?.erro || "Não foi possível excluir o registro do histórico.");
+      } finally {
+        this.disabled = false;
+      }
+    });
+
   $(document).off("click.materialFecharModalLista", "#btnFecharModalListaMaterial, #btnCancelarListaMaterial")
     .on("click.materialFecharModalLista", "#btnFecharModalListaMaterial, #btnCancelarListaMaterial", fecharModalListaMaterial);
 
+  $(document).off("click.materialImportarLista", "#btnImportarListaMaterial")
+    .on("click.materialImportarLista", "#btnImportarListaMaterial", function () {
+      $("#arquivoImportarListaMaterial").val("").trigger("click");
+    });
+
+  $(document).off("change.materialImportarLista", "#arquivoImportarListaMaterial")
+    .on("change.materialImportarLista", "#arquivoImportarListaMaterial", async function () {
+      const arquivo = this.files?.[0];
+      if (!arquivo || $("#listaMaterialId").val()) return;
+      const modal = document.getElementById("modalListaMaterial");
+      const controles = modal.querySelectorAll("button, input, select, textarea");
+      controles.forEach(controle => { controle.disabled = true; });
+      try {
+        const importada = lerListaMaterialJSON(await arquivo.text());
+        const origem = importada.lista;
+        $("#listaMaterialTituloInput").val(origem.titulo);
+        $("#listaMaterialDescricaoInput").val(origem.descricao || "");
+        $("#listaMaterialObservacaoRapidaInput").val(origem.observacao_rapida || "");
+        $("#listaMaterialPrioridadeInput").val(["baixa", "normal", "alta", "urgente"].includes(origem.prioridade) ? origem.prioridade : "normal");
+        $("#listaMaterialOrigemInput").val(origem.origem_setor === "engenharia" ? "engenharia" : "orcamento");
+        $("#listaMaterialSemPrazoInput").prop("checked", Boolean(Number(origem.sem_prazo)));
+        $("#listaMaterialPrazoInput").val(String(origem.prazo || "").slice(0, 10));
+        listaImportada = importada;
+        $("#listaMaterialImportacaoInfo").text(importada.itens.length +
+          " item(ns) carregado(s). Revise os dados e clique em Salvar para importar na OS atual. Compras e separações começam zeradas.").prop("hidden", false);
+      } catch (erro) {
+        alert(erro.message || "Não foi possível abrir a lista.");
+      } finally {
+        controles.forEach(controle => { controle.disabled = false; });
+        $("#listaMaterialPrazoInput").prop("disabled", $("#listaMaterialSemPrazoInput").is(":checked"));
+      }
+    });
+
   $(document).off("click.materialSalvarLista", "#btnSalvarListaMaterial")
     .on("click.materialSalvarLista", "#btnSalvarListaMaterial", async function () {
+      if (this.disabled) return;
       const id = $("#listaMaterialId").val();
       const payload = {
         id_os: state.osSelecionada,
@@ -276,17 +353,28 @@ export function initMaterialClicks() {
         return;
       }
 
-      if (id) {
-        await atualizarListaMaterialOS(id, payload);
-      } else {
-        payload.status = payload.origem_setor;
-        const nova = await criarListaMaterialOS(payload);
-        state.listaSelecionada = nova.insertId;
+      const controles = document.querySelectorAll("#modalListaMaterial button, #modalListaMaterial input, #modalListaMaterial select, #modalListaMaterial textarea");
+      controles.forEach(controle => { controle.disabled = true; });
+      try {
+        if (id) {
+          await atualizarListaMaterialOS(id, payload);
+        } else {
+          payload.status = payload.origem_setor;
+          const nova = listaImportada
+            ? await importarListaMaterialJSON(listaImportada, payload)
+            : await criarListaMaterialOS(payload);
+          state.listaSelecionada = nova.insertId;
+        }
+        fecharModalListaMaterial();
+        state.modoVisualizacao = "kanban";
+        await carregarMateriaisCompleto();
+      } catch (erro) {
+        console.error(erro);
+        alert(erro.responseJSON?.erro || "Não foi possível salvar a lista.");
+      } finally {
+        controles.forEach(controle => { controle.disabled = false; });
+        $("#listaMaterialPrazoInput").prop("disabled", $("#listaMaterialSemPrazoInput").is(":checked"));
       }
-
-      fecharModalListaMaterial();
-      state.modoVisualizacao = "kanban";
-      await carregarMateriaisCompleto();
     });
 
   $(document).off("change.materialListaSemPrazo", "#listaMaterialSemPrazoInput")
@@ -456,6 +544,8 @@ export function initMaterialClicks() {
     if ($tr.hasClass("editando")) return;
 
     $tr.addClass("editando");
+    $tr.find(".material-referencia-input").prop("hidden", false);
+    $tr.find("[data-referencia-texto]").prop("hidden", true);
 
     const quantidadeAtual = $tr.find("td").eq(5).text().trim();
     const observacaoAtual = $tr.find("td").eq(7).text().trim();
@@ -2051,6 +2141,9 @@ export function initMaterialClicks() {
   }
 
   function abrirModalListaMaterial(lista = null) {
+    listaImportada = null;
+    $("#btnImportarListaMaterial").prop("hidden", Boolean(lista));
+    $("#listaMaterialImportacaoInfo").prop("hidden", true).text("");
     $("#listaMaterialId").val(lista?.id || "");
     $("#listaMaterialTituloInput").val(lista?.titulo || "");
     $("#listaMaterialDescricaoInput").val(lista?.descricao || "");
@@ -2067,6 +2160,7 @@ export function initMaterialClicks() {
   }
 
   function fecharModalListaMaterial() {
+    listaImportada = null;
     $("#modalListaMaterial").prop("hidden", true);
   }
 
@@ -2211,8 +2305,13 @@ export function initMaterialClicks() {
     const html = historico.length
       ? historico.map(item => `
         <div class="historico-lista-material-item">
-          <strong>${formatarAcaoHistorico(item)}</strong>
-          <span>${item.usuario_nome || "Sistema"} - ${formatarDataHistorico(item.criado_em)}</span>
+            ${item.pode_excluir ? `<button type="button" class="material-historico-excluir"
+              data-lista="${Number(item.id_lista)}" data-historico="${Number(item.id)}"
+              title="Excluir registro do histórico" aria-label="Excluir registro do histórico">
+              <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            </button>` : ""}
+            <strong>${escapeHtmlLocal(formatarAcaoHistorico(item))}</strong>
+            <span>${escapeHtmlLocal(item.usuario_nome || "Sistema")} - ${formatarDataHistorico(item.criado_em)}</span>
           ${item.motivo ? `<p>${escapeHtmlLocal(item.motivo)}</p>` : ""}
         </div>
       `).join("")

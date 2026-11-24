@@ -3,19 +3,22 @@ import { renderVariacoesExistentes } from "../../utils/dom/material-form-render.
 import { materialState as state } from "../../state/material.state.js";
 import { ATRIBUTOS_POR_MATERIAL, CATEGORIA_POR_MATERIAL } from "../../utils/material/material.config.js";
 import { renderAtributos } from "../../utils/dom/material.atributos.render.js";
-import { atualizarEstadoImagemMaterial } from "../forms/material.modal.js";
+import { atualizarEstadoImagemMaterial, atualizarCadastroMaterial } from "../forms/material.modal.js";
+import { carregarVariacoes } from "../../services/api/material.api.js";
+
+const normalizarBusca = valor => String(valor ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 
 export function initMaterialForm() {
 
 
     $("#nomeMaterial")
         .off("input.materialForm")
-        .on("input.materialForm", async function () {
+        .on("input.materialForm", function () {
 
         const nome = getVal("#nomeMaterial").trim().toUpperCase();
 
-        if (ATRIBUTOS_POR_MATERIAL[nome]) {
-            state.atributosSelecionados = [...ATRIBUTOS_POR_MATERIAL[nome]];
+        if (!$("#idMaterial").val() && ATRIBUTOS_POR_MATERIAL[nome]) {
+            state.atributosSelecionados = [...new Set([...state.atributosSelecionados, ...ATRIBUTOS_POR_MATERIAL[nome]])];
             renderAtributos();
         }
 
@@ -23,29 +26,39 @@ export function initMaterialForm() {
             $("#categoriaMaterial").val(CATEGORIA_POR_MATERIAL[nome]);
         }
 
-        if (nome.length < 2) {
-            $("#variacoesExistentes").empty();
-            return;
-        }
-
-        try {
-
-            const variacoes = await $.ajax({
-                url: `/api/materiais/variacoes`,
-                method: "GET"
-            });
-
-            const existentes = variacoes.filter(
-                v => v.nome && v.nome.trim().toUpperCase().includes(nome)
-            );
-
-            renderVariacoesExistentes(existentes);
-
-        } catch (err) {
-            console.error("Erro ao buscar variações:", err);
-        }
-
+        atualizarCadastroMaterial();
     });
+
+    let consulta;
+    $("#buscarCadastroMaterial").off("input.materialForm").on("input.materialForm", async function () {
+        const campo = this;
+        const termo = normalizarBusca(campo.value);
+        if (!termo) {
+            $("#variacoesExistentes").empty();
+        }
+        try {
+            if (!termo || !state.listaVariacoes.length) consulta ||= carregarVariacoes().finally(() => { consulta = null; });
+            const variacoes = consulta ? await consulta : state.listaVariacoes;
+            if (normalizarBusca(campo.value) !== termo || $("#modalMaterial").hasClass("hidden")) return;
+            for (const [campo, seletor] of [["fabricante", "#materialFabricantes"], ["categoria", "#materialCategorias"]]) {
+                const sugestoes = [...new Set(variacoes.map(item => item[campo]?.trim()).filter(Boolean))];
+                sugestoes.sort((a, b) => a.localeCompare(b, "pt-BR"));
+                $(seletor).empty().append(sugestoes.map(sugestao => $("<option>").val(sugestao)[0]));
+            }
+            if (!termo) return;
+            const palavras = termo.replace(/(\d)\s*[x×]\s*(?=\d)/g, "$1 ").split(/\s+/);
+            const existentes = variacoes.filter(v => {
+                const indice = normalizarBusca([v.nome, v.codigo, v.fabricante, v.categoria, JSON.stringify(v.atributos ?? "")].join(" "));
+                return palavras.every(palavra => indice.includes(palavra));
+            });
+            $("#variacoesExistentes").removeClass("somente-visualizacao");
+            renderVariacoesExistentes(existentes);
+        } catch (err) {
+            if (normalizarBusca(campo.value) === termo) $("#variacoesExistentes").text("Não foi possível buscar materiais.");
+        }
+    });
+    $("#modalMaterial").off(".materialCadastro")
+        .on("input.materialCadastro change.materialCadastro", "#nomeMaterial, #categoriaMaterial, #codigo, #fabricante, #unidadeMaterial, #materialUsoGenerico, .input-attr", atualizarCadastroMaterial);
 
     //SALVAR FOTO
     (function () {
@@ -66,6 +79,7 @@ export function initMaterialForm() {
                 enableExif: true,
                 enableZoom: true
             });
+            document.getElementById('btn_cancel_crop').focus();
         }
         function closeCropModal() {
             document.getElementById('crop-modal').hidden = true;
@@ -73,6 +87,7 @@ export function initMaterialForm() {
             if (croppie) { croppie.destroy(); croppie = null; }
             $('#select_imagemmaterial').val('');
             $('#crop-area').empty();
+            document.getElementById('btn_uploadImagem').focus();
         }
 
         // 1) Botão "Carregar..." -> abrir seletor
@@ -174,6 +189,7 @@ export function initMaterialForm() {
 
                 closeCropModal();
                 limparImagemExistenteSelecionada();
+                atualizarCadastroMaterial();
 
                 if (typeof window.carregarCatalogoMateriais === 'function') {
                     await window.carregarCatalogoMateriais();
@@ -265,6 +281,7 @@ function initSelecionarImagemExistente() {
         $('#imagemmaterial').attr('src', `${imagem}?t=${Date.now()}`);
         $('#select_imagemmaterial').val('');
         $('#materialImagemExistentePainel').prop('hidden', true);
+        atualizarCadastroMaterial();
     });
 }
 

@@ -175,20 +175,29 @@ function initEstoqueEventos() {
   $(document)
     .off("click.estoqueSepararSalvar", ".estoque-salvar-separar")
     .on("click.estoqueSepararSalvar", ".estoque-salvar-separar", async function () {
-      const $container = $(this).closest(".input-separar");
-      const $tr = $(this).closest("tr");
-      const total = Number($container.data("total") || 0);
-      const valor = limitarSeparacao(Number($container.find(".estoque-qtd-separar").val() || 0), total);
-
-      await salvarSeparacaoEstoque($tr.data("id"), valor);
+      await salvarControleSeparacao($(this).closest("tr"));
     });
 
   $(document)
     .off("keypress.estoqueSeparar", ".estoque-qtd-separar")
-    .on("keypress.estoqueSeparar", ".estoque-qtd-separar", function (event) {
-      if (event.which === 13) {
-        $(this).closest(".input-separar").find(".estoque-salvar-separar").trigger("click");
+    .off("keydown.estoqueSeparar", ".estoque-qtd-separar")
+    .on("keydown.estoqueSeparar", ".estoque-qtd-separar", async function (event) {
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
+      if (["+", "-", "*"].includes(event.key)) {
+        event.preventDefault();
+        const $input = $(this);
+        const $container = $input.closest(".input-separar");
+        if ($container.data("saving")) return;
+        const total = Number($container.data("total") || 0);
+        const atual = Number($input.val() || 0);
+        const valor = event.key === "*" ? total : atual + (event.key === "+" ? 1 : -1);
+        $input.val(limitarSeparacao(valor, total));
+        return;
       }
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      if (event.originalEvent?.repeat) return;
+      await salvarControleSeparacao($(this).closest("tr"), true);
     });
 
   $(document)
@@ -272,8 +281,27 @@ async function carregarEstoque() {
   state.listas = listas || [];
   state.listasConferencia = listasConferencia || [];
 
+  const focoLista = sessionStorage.getItem("estoque_focus_lista");
+  if (focoLista) {
+    sessionStorage.removeItem("estoque_focus_lista");
+    state.filtros.listas = "";
+    state.filtros.prioridade = "";
+    state.filtros.materiais = "";
+    state.filtros.separacao = "";
+    $("#estoqueBuscaListas, #estoqueFiltroPrioridade, #estoqueBuscaMateriais, #estoqueFiltroSeparacao").val("");
+  }
+
   renderListasEstoque();
   renderListasConferencia();
+
+  if (focoLista) {
+    if (state.listas.some(lista => String(lista.id) === focoLista)) {
+      await selecionarListaEstoque(Number(focoLista));
+      document.querySelector(`.estoque-lista-card[data-lista="${Number(focoLista)}"]`)?.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    alert("Esta lista não está mais pendente no Estoque.");
+  }
 
   const listasVisiveis = getListasFiltradas();
   const focoConferencia = sessionStorage.getItem("estoque_conferencia_lista");
@@ -370,10 +398,10 @@ function renderListasEstoque() {
 
     return `
       <button type="button" class="estoque-lista-card" data-lista="${lista.id}">
-        <i class="fa-solid fa-flag estoque-prioridade-flag estoque-prioridade-${prioridade}" title="Prioridade ${formatarPrioridade(prioridade)}"></i>
         <div class="estoque-card-top">
-          <strong>OS ${escapeHtml(lista.id_os)}</strong>
-          <span title="${escapeHtml(descricao)}">${escapeHtml(descricao)}</span>
+          <strong class="estoque-lista-nome" title="${escapeHtml(lista.titulo || `Lista #${lista.id}`)}">${escapeHtml(lista.titulo || `Lista #${lista.id}`)}</strong>
+          <span class="estoque-lista-os">OS ${escapeHtml(lista.id_os)} · ${escapeHtml(formatarPrioridade(prioridade))}</span>
+          <small title="${escapeHtml(descricao)}">${escapeHtml(descricao)}</small>
         </div>
         <div class="estoque-card-progress">
           <b>${resumo.percentualSeparado.toFixed(0)}%</b>
@@ -421,10 +449,10 @@ function renderListasConferencia() {
 
     return `
       <button type="button" class="estoque-conferencia-card" data-lista="${lista.id}">
-        <i class="fa-solid fa-clipboard-check estoque-conferencia-icone" title="Conferir lista"></i>
         <div class="estoque-card-top">
-          <strong>OS ${escapeHtml(lista.id_os)}</strong>
-          <span title="${escapeHtml(descricao)}">${escapeHtml(descricao)}</span>
+          <strong class="estoque-lista-nome" title="${escapeHtml(lista.titulo || `Lista #${lista.id}`)}">${escapeHtml(lista.titulo || `Lista #${lista.id}`)}</strong>
+          <span class="estoque-lista-os">OS ${escapeHtml(lista.id_os)}</span>
+          <small title="${escapeHtml(descricao)}">${escapeHtml(descricao)}</small>
         </div>
         <div class="estoque-card-progress">
           <b>${percentual.toFixed(0)}%</b>
@@ -447,12 +475,14 @@ function renderDetalheLista(lista, materiais) {
   $("#btnEstoqueEnviarCompras").prop("hidden", false);
 
   $("#estoqueDetalheResumo").prop("hidden", false).html(`
-    <div><span>Itens</span><strong>${resumo.itens}</strong></div>
-    <div><span>Qtd. total</span><strong>${resumo.quantidade}</strong></div>
-    <div><span>Separado</span><strong>${resumo.separada}</strong></div>
-    <div><span>Faltante</span><strong>${resumo.faltante}</strong></div>
+    <dl class="estoque-resumo-numeros">
+      <div><dt>Itens</dt><dd>${resumo.itens}</dd></div>
+      <div><dt>Qtd. total</dt><dd>${resumo.quantidade}</dd></div>
+      <div><dt>Separado</dt><dd>${resumo.separada}</dd></div>
+      <div><dt>A separar</dt><dd>${resumo.faltante}</dd></div>
+    </dl>
     <div class="estoque-resumo-progresso">
-      <span>Progresso</span>
+      <span>Separação da lista</span>
       <strong>${resumo.percentualSeparado.toFixed(0)}%</strong>
       <div><i style="width:${resumo.percentualSeparado.toFixed(0)}%"></i></div>
     </div>
@@ -670,7 +700,7 @@ function renderTabelaEstoque(materiais) {
     const imgSrc = item.imagem ? `${item.imagem}?v=${item.versao_foto || ""}` : "/imagens/imagemmaterial.webp";
     const fotoHtml = ehMaterialLivre
       ? `<div class="estoque-material-livre-icone" title="Material específico sem cadastro"><i class="fa-solid fa-file-circle-question"></i></div>`
-      : `<img class="estoque-material-img" src="${escapeHtml(imgSrc)}" alt="">`;
+      : `<img class="estoque-material-img" src="${escapeHtml(imgSrc)}" alt="" loading="lazy" decoding="async">`;
     const observacao = item.observacao || item.obs || "";
 
     return `
@@ -681,7 +711,7 @@ function renderTabelaEstoque(materiais) {
         </td>
         <td class="estoque-material-desc">
           <strong>${escapeHtml(item.nome || "-")}</strong>
-          <span>${escapeHtml(item.atributos || "Sem descrição adicional")}</span>
+          ${item.atributos ? `<span>${escapeHtml(item.atributos)}</span>` : ""}
         </td>
         <td>${escapeHtml(item.codigo || "-")}</td>
         <td>${escapeHtml(item.fabricante || "-")}</td>
@@ -895,7 +925,7 @@ function abrirControleSeparacao($tr) {
       <button class="estoque-ajustar-separar" data-step="-1" title="Diminuir separado">
         <i class="fa-solid fa-minus"></i>
       </button>
-      <input class="estoque-qtd-separar" type="number" min="0" max="${total}" value="${atual}">
+      <input class="estoque-qtd-separar" type="number" min="0" max="${total}" value="${atual}" title="+ aumenta 1; - diminui 1; * preenche o total; Enter salva e avança">
       <button class="estoque-ajustar-separar" data-step="1" title="Aumentar separado">
         <i class="fa-solid fa-plus"></i>
       </button>
@@ -910,6 +940,36 @@ function abrirControleSeparacao($tr) {
   `);
 
   $tr.find(".estoque-qtd-separar").focus().select();
+}
+
+async function salvarControleSeparacao($tr, avancar = false) {
+  const $container = $tr.find(".input-separar");
+  if (!$container.length || $container.data("saving")) return;
+
+  const listaId = state.listaAtual?.id;
+  const proximos = avancar
+    ? $tr.nextAll("tr[data-id]").map((_, row) => String(row.dataset.id)).get()
+    : [];
+  const total = Number($container.data("total") || 0);
+  const valor = limitarSeparacao(Number($container.find(".estoque-qtd-separar").val() || 0), total);
+
+  $container.data("saving", true).find("button, input").prop("disabled", true);
+  try {
+    await salvarSeparacaoEstoque($tr.data("id"), valor);
+    if (!avancar || state.listaAtual?.id !== listaId) return;
+
+    const linhas = [...document.querySelectorAll("#estoqueMaterialTable > tbody > tr[data-id]")];
+    const proxima = proximos.map(id => linhas.find(row => row.dataset.id === id)).find(Boolean);
+    if (proxima) {
+      abrirControleSeparacao($(proxima));
+      proxima.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  } catch (err) {
+    console.error("Erro ao salvar separação:", err);
+    alert(err.responseJSON?.erro || "Não foi possível salvar a separação. Tente novamente.");
+  } finally {
+    $container.data("saving", false).find("button, input").prop("disabled", false);
+  }
 }
 
 async function salvarSeparacaoEstoque(idMaterialOS, valor) {

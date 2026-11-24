@@ -1,14 +1,16 @@
 import { materialState as state } from "../../state/material.state.js";
-import {
-  carregarVariacoes,
-  carregarFornecedores,
-  carregarOS
-} from "../../services/api/material.api.js";
+import { renderAtributos } from "../../utils/dom/material.atributos.render.js";
+import { atualizarCadastroMaterial } from "../../utils/dom/material-form-render.js";
+import { limparRelacionadosMaterial } from "../material/material.relacionados.js";
+
+export { atualizarCadastroMaterial };
 
 export function abrirModalMaterial() {
+  $("#imagemMaterialImportada").val("");
   $("#modalMaterial").removeClass("hidden").css("display", "flex");
   atualizarModoModalMaterial("novo");
   atualizarEstadoImagemMaterial();
+  $("#buscarCadastroMaterial").trigger("input").trigger("focus");
 }
 
 export function fecharModalMaterial() {
@@ -21,11 +23,16 @@ export function resetModalMaterial() {
   
     // 🔹 inputs simples
     $("#nomeMaterial").val("");
+    $("#buscarCadastroMaterial").val("");
+    $("#idMaterial").val("");
+    $("#materialUsoGenerico").prop("checked", false);
     $("#categoriaMaterial").val("");
     $("#codigo").val("");
     $("#fabricante").val("");
+    $("#unidadeMaterial option[data-unidade-importada]").remove();
     $("#unidadeMaterial").val("un");
     $("#imagemMaterialOrigemId").val("");
+    $("#imagemMaterialImportada").val("");
     $("#imagemMaterialOrigemTexto").text("");
     $("#imagemmaterial").attr("src", "/imagens/imagemmaterial.webp");
     $("#materialImagemExistentePainel").prop("hidden", true);
@@ -39,7 +46,9 @@ export function resetModalMaterial() {
 
     // 🔹 atributos
     state.atributosSelecionados = [];
-    $("#listaAtributos").empty();
+    $("#materialBuscarAtributo").val("").attr("aria-expanded", "false").removeAttr("aria-activedescendant");
+    $("#materialOpcoesAtributo").prop("hidden", true).empty();
+    limparRelacionadosMaterial();
     $("#valoresAtributos").empty();
 
     // 🔹 autocomplete / sugestões
@@ -47,8 +56,9 @@ export function resetModalMaterial() {
     $("#variacoesExistentes").empty().removeClass("somente-visualizacao");
 
     // 🔹 alertas
-    $("#alertDuplicado").hide();
-    carregarVariacoes();
+    $("#materialAvisoCadastro").removeData("validando").empty();
+    $("#modalMaterial [aria-invalid]").removeAttr("aria-invalid");
+    atualizarCadastroMaterial();
 }
 
 export function atualizarModoModalMaterial(modo = "novo", texto = "") {
@@ -70,31 +80,17 @@ export function atualizarModoModalMaterial(modo = "novo", texto = "") {
 }
 
 export function atualizarEstadoImagemMaterial() {
-  const possuiId = Boolean($("#idMaterial").val());
-  $(".variacao-imagem").toggleClass("imagem-bloqueada", !possuiId);
-  $("#btn_uploadImagem, #btn_usarImagemExistente").prop("disabled", !possuiId);
-  $("#imagemMaterialBloqueadaTexto").prop("hidden", possuiId);
+  const id = $("#idMaterial").val();
+  const podeEditarFoto = Boolean(id && $("#modoEdicaoMaterial").val() === "1");
+  $("#modalMaterial .variacao-imagem").toggleClass("imagem-bloqueada", !podeEditarFoto);
+  $("#btn_uploadImagem, #btn_usarImagemExistente").prop({ disabled: !podeEditarFoto, hidden: !podeEditarFoto });
+  $("#btnSalvarMaterialFoto").toggle(!id);
+  atualizarCadastroMaterial();
 }
 
 export function adicionarAtributo(atributo) {
-  console.log(state.atributosSelecionados);
   if (state.atributosSelecionados.includes(atributo)) return;
-
   state.atributosSelecionados.push(atributo);
-
-  $("#listaAtributos").append(`
-      <div class="chip" data-attr="${atributo}">
-            <span class="chip-label">${atributo}</span>
-            <span class="chip-remove">&times;</span>
-            </div>
-    `);
-
-  $("#valoresAtributos").append(`
-      <div class="attr-row">
-        <label>${atributo}</label>
-        <div class="autocomplete-container">
-          <input data-attr="${atributo}" class="input-attr">
-        </div>
-      </div>
-    `);
+  renderAtributos();
+  $("#valoresAtributos .input-attr").last().trigger("focus");
 }

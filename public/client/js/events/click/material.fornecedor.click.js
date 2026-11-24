@@ -100,13 +100,29 @@ export function initFornecedorClicks() {
   });
 
   $(document).on("click.materialFornecedor", ".deletar-forn", async function () {
+    const $btn = $(this);
+    if ($btn.data("deleting")) return;
     const id = $(this).data("id");
+    const idMaterial = $(this).closest(".linha-fornecedores").prev().data("id");
 
     if (!confirm("Excluir fornecedor?")) return;
 
-    await deleteFornecedor(id);
-
-    $(this).closest("tr").remove();
+    try {
+      $btn.data("deleting", true).prop("disabled", true);
+      await deleteFornecedor(id);
+      await carregarMateriaisCompleto();
+      const lista = await getFornecedoresMaterial(idMaterial);
+      const $linha = $("#tableMaterial > tbody > tr[data-id]").filter(function () {
+        return String($(this).data("id")) === String(idMaterial);
+      });
+      $linha.after(renderTabelaFornecedores(lista, idMaterial));
+      atualizarScoresFornecedores();
+    } catch (err) {
+      console.error("Erro ao excluir fornecedor:", err);
+      alert(err.responseJSON?.erro || "Não foi possível excluir o fornecedor. Tente novamente.");
+    } finally {
+      $btn.data("deleting", false).prop("disabled", false);
+    }
   });
 
   $(document).on("click.materialFornecedor", ".selecionar-forn", async function () {
@@ -214,7 +230,7 @@ export function initFornecedorClicks() {
       }
     } catch (err) {
       console.error("Erro ao salvar fornecedor:", err);
-      alert("Erro ao salvar fornecedor");
+      alert(err.responseJSON?.erro || "Erro ao salvar fornecedor");
     } finally {
       $btn.data("saving", false).prop("disabled", false);
     }

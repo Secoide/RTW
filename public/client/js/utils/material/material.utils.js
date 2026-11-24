@@ -1,6 +1,7 @@
 export function parseAtributos(str) {
 
     if (!str || str === "{}") return {};
+    if (typeof str === "object") return str;
 
     // 🔥 limpa aspas externas
     str = str.replace(/^"(.*)"$/, "$1");
@@ -9,7 +10,10 @@ export function parseAtributos(str) {
 
     str.split("|").forEach(par => {
 
-        let [key, val] = par.split(":");
+        const separador = par.indexOf(":");
+        if (separador < 0) return;
+        let key = par.slice(0, separador);
+        let val = par.slice(separador + 1);
 
         if (!key || !val) return;
 

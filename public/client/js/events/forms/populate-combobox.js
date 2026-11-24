@@ -24,17 +24,19 @@ export async function preencherCbxCliente($form) {
 }
 
 // Supervisor
-export async function preencherCbxSupervisor(idEmpresas, $form) {
+export async function preencherCbxSupervisor(idEmpresas, $form, signal) {
   const $cbx = $form.find("#selectSupervisor");
   $cbx.empty();
   try {
     const res = await fetch(`/api/supervisor/idEmpresa/${idEmpresas}`, {
       method: "GET",
       credentials: "include",
+      signal,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
+    if (signal?.aborted) return;
     $cbx.append('<option value="" disabled selected hidden>Selecione o Supervisor...</option>');
     data.forEach(s => {
       $cbx.append(`<option value="${s.id_supervisor}">${s.nome} - ${s.empresa}</option>`);
@@ -44,23 +46,26 @@ export async function preencherCbxSupervisor(idEmpresas, $form) {
       $cbx.val(data[0].id_supervisor).trigger("change");
     }
   } catch (err) {
+    if (signal?.aborted) return;
     console.error("Erro carregar supervisores:", err);
     mostrarErroUI("Erro ao tentar preencher combobox Supervisor");
   }
 }
 
 // Cidade
-export async function preencherCbxCidade(idEmpresas, $form) {
+export async function preencherCbxCidade(idEmpresas, $form, signal) {
   const $cbx = $form.find("#selectCidade");
   $cbx.empty();
   try {
     const res = await fetch(`/api/cidade/idEmpresa/${idEmpresas}`, {
       method: "GET",
       credentials: "include",
+      signal,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
+    if (signal?.aborted) return;
     $cbx.append('<option value="" disabled selected hidden>Selecione a Cidade...</option>');
     data.forEach(c => {
       $cbx.append(`<option value="${c.id_cidade}">${c.nome}</option>`);
@@ -70,6 +75,7 @@ export async function preencherCbxCidade(idEmpresas, $form) {
       $cbx.val(data[0].id_cidade).trigger("change");
     }
   } catch (err) {
+    if (signal?.aborted) return;
     console.error("Erro carregar cidades:", err);
     mostrarErroUI("Erro ao tentar preencher combobox Cidade");
   }

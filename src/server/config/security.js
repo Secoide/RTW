@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 
 // Função principal
 function securityConfig(app) {
+  const producao = process.env.NODE_ENV === "production";
   /**
    * 1. Helmet com Content Security Policy (CSP)
    * Evita carregamento de scripts e recursos de lugares não confiáveis
@@ -16,9 +17,11 @@ function securityConfig(app) {
 
   app.use(
     helmet({
+      strictTransportSecurity: producao ? undefined : false,
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
+          "upgrade-insecure-requests": producao ? [] : null,
           "default-src": ["'self'"],
           "script-src": [
             "'self'",

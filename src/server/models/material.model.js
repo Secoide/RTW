@@ -13,6 +13,167 @@ async function getMateriais() {
   return rows;
 }
 
+async function getCatalogoTransferencia(db = connection) {
+  const [rows] = await db.query(`
+    SELECT m.id AS id_material, m.nome, m.categoria, mv.id AS id_variacao,
+           mv.codigo, mv.fabricante, mv.unidade, mv.imagem, a.nome AS atributo, av.valor
+    FROM tb_materiais m
+    LEFT JOIN tb_materiais_variacoes mv ON mv.id_material = m.id
+    LEFT JOIN tb_materiais_atributos_valores av ON av.id_variacao = mv.id
+    LEFT JOIN tb_atributos a ON a.id = av.id_atributo
+    ORDER BY m.id, mv.id, a.nome, av.valor
+  `);
+  const materiais = new Map();
+  const variacoes = new Map();
+  for (const row of rows) {
+    if (!materiais.has(row.id_material)) {
+      materiais.set(row.id_material, {
+        id: row.id_material, nome: row.nome, categoria: row.categoria, variacoes: []
+      });
+    }
+    if (row.id_variacao === null) continue;
+    if (!variacoes.has(row.id_variacao)) {
+      const variacao = { id: row.id_variacao, codigo: row.codigo, fabricante: row.fabricante, unidade: row.unidade, imagem: row.imagem ?? null, atributos: [] };
+      variacoes.set(row.id_variacao, variacao);
+      materiais.get(row.id_material).variacoes.push(variacao);
+    }
+    if (row.atributo !== null) variacoes.get(row.id_variacao).atributos.push({ atributo: row.atributo, valor: row.valor });
+  }
+  return [...materiais.values()];
+}
+
+let tabelaRelacionados;
+function garantirRelacionados() {
+  tabelaRelacionados ||= (async () => {
+    const [tabelas] = await connection.query("SHOW TABLES LIKE 'tb_materiais_relacionados'");
+    if (tabelas.length) return;
+    const [[coluna]] = await connection.query("SHOW COLUMNS FROM tb_materiais_variacoes LIKE 'id'");
+    const tipo = coluna?.Type;
+    if (!/^(?:tinyint|smallint|mediumint|int|bigint)(?:\(\d+\))?(?: unsigned)?$/i.test(tipo ?? "")) {
+      throw new Error("Tipo de ID de material incompatível.");
+    }
+    const [[tabelaVariacoes]] = await connection.query(`
+      SELECT ENGINE AS engine
+      FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tb_materiais_variacoes'
+    `);
+    // MyISAM não pode ser referenciada por uma chave estrangeira InnoDB.
+    const chavesEstrangeiras = tabelaVariacoes?.engine?.toLowerCase() === "innodb" ? `,
+        FOREIGN KEY (id_variacao) REFERENCES tb_materiais_variacoes(id) ON DELETE CASCADE,
+        FOREIGN KEY (id_relacionado) REFERENCES tb_materiais_variacoes(id) ON DELETE CASCADE` : "";
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS tb_materiais_relacionados (
+        id_variacao ${tipo} NOT NULL,
+        id_relacionado ${tipo} NOT NULL,
+        quantidade DECIMAL(16,6) NULL,
+        PRIMARY KEY (id_variacao, id_relacionado),
+        INDEX (id_relacionado)${chavesEstrangeiras}
+      ) ENGINE=InnoDB
+    `);
+  })().catch(erro => { tabelaRelacionados = null; throw erro; });
+  return tabelaRelacionados;
+}
+
+function validarRelacionados(relacionados, idVariacao) {
+  const ids = new Set();
+  const invalido = () => Object.assign(new Error("Verifique os materiais relacionados e suas quantidades."), { status: 400 });
+  if (!Array.isArray(relacionados)) throw invalido();
+  return relacionados.map(item => {
+    const id = item?.id;
+    const quantidade = item?.quantidade ?? null;
+    if (!Number.isSafeInteger(id) || id <= 0 || id === Number(idVariacao) || ids.has(id) ||
+        (quantidade !== null && (typeof quantidade !== "number" || !Number.isFinite(quantidade) ||
+          quantidade < 0.000001 || quantidade >= 1e10 || Number(quantidade.toFixed(6)) !== quantidade))) {
+      throw invalido();
+    }
+    ids.add(id);
+    return { id, quantidade };
+  });
+}
+
+async function getRelacionados(id = null) {
+  await garantirRelacionados();
+  const [rows] = await connection.query(`
+    SELECT vinculo.id_variacao, vinculo.id_relacionado AS id, vinculo.quantidade
+    FROM tb_materiais_relacionados vinculo
+    JOIN tb_materiais_variacoes origem ON origem.id = vinculo.id_variacao
+    JOIN tb_materiais_variacoes destino ON destino.id = vinculo.id_relacionado
+    ${id === null ? "" : "WHERE vinculo.id_variacao = ?"}
+    ORDER BY vinculo.id_variacao, vinculo.id_relacionado
+  `, id === null ? [] : [id]);
+  return rows.map(item => ({ ...item, id: Number(item.id), quantidade: item.quantidade == null ? null : Number(item.quantidade) }));
+}
+
+async function gravarRelacionados(id, relacionados, db, substituir = true) {
+  const links = validarRelacionados(relacionados, id);
+  if (links.length) {
+    const ids = [Number(id), ...links.map(link => link.id)];
+    const [variacoes] = await db.query("SELECT id FROM tb_materiais_variacoes WHERE id IN (?)", [ids]);
+    if (variacoes.length !== ids.length) {
+      throw Object.assign(new Error("Um dos materiais relacionados não está disponível no catálogo."), { status: 400 });
+    }
+  }
+  if (substituir) await db.query("DELETE FROM tb_materiais_relacionados WHERE id_variacao = ?", [id]);
+  if (!links.length) return;
+  try {
+    await db.query(`
+      INSERT INTO tb_materiais_relacionados (id_variacao, id_relacionado, quantidade)
+      VALUES ?
+      ${substituir ? "" : "ON DUPLICATE KEY UPDATE id_relacionado = tb_materiais_relacionados.id_relacionado"}
+    `, [links.map(link => [id, link.id, link.quantidade])]);
+  } catch (erro) {
+    if (erro.code === "ER_NO_REFERENCED_ROW_2") {
+      throw Object.assign(new Error("Um dos materiais relacionados não está disponível no catálogo."), { status: 400 });
+    }
+    throw erro;
+  }
+}
+
+async function transacaoCadastro(executar) {
+  const db = await connection.getConnection();
+  try {
+    await db.beginTransaction();
+    const resultado = await executar(db);
+    await db.commit();
+    return resultado;
+  } catch (erro) {
+    await db.rollback();
+    throw erro;
+  } finally {
+    db.release();
+  }
+}
+
+async function transacaoImportarCatalogo(importar) {
+  const db = await connection.getConnection();
+  let bloqueado = false;
+  const nomeLock = "CONCAT('materiais-import:', LEFT(SHA2(DATABASE(), 256), 32))";
+  try {
+    const [[lock]] = await db.query(`SELECT GET_LOCK(${nomeLock}, 10) AS adquirido`);
+    if (Number(lock.adquirido) !== 1) {
+      throw Object.assign(new Error("Já existe uma importação em andamento. Tente novamente."), { status: 409 });
+    }
+    bloqueado = true;
+    await db.beginTransaction();
+    try {
+      const resultado = await importar(db);
+      await db.commit();
+      return resultado;
+    } catch (erro) {
+      await db.rollback();
+      throw erro;
+    }
+  } finally {
+    try {
+      if (bloqueado) await db.query(`SELECT RELEASE_LOCK(${nomeLock})`);
+      db.release();
+    } catch (erro) {
+      db.destroy();
+      console.error("Erro ao liberar importação do catálogo:", erro);
+    }
+  }
+}
+
 // 🔹 LISTAR VARIAÇÕES (autocomplete)
 async function getVariacoes() {
   const [rows] = await connection.query(`
@@ -235,8 +396,8 @@ function normalizarNumeroBuscaCatalogo(valor) {
   return String(numero).replace(/\.0+$/, "");
 }
 
-async function getVariacaoByID(id) {
-  const [rows] = await connection.query(`
+async function getVariacaoByID(id, db = connection) {
+  const [rows] = await db.query(`
     SELECT 
       mv.id,
       mv.id_material,
@@ -266,12 +427,12 @@ async function getMaterialById(id) {
 }
 
 // 🔹 BUSCAR por nome (exato / parcial)
-async function findMaterialByNome(nome) {
+async function findMaterialByNome(nome, exato = false) {
   const [rows] = await connection.query(`
     SELECT * FROM tb_materiais
-    WHERE nome LIKE ?
+    WHERE ${exato ? "UPPER(nome) = UPPER(?)" : "nome LIKE ?"}
     LIMIT 1
-  `, [`%${nome}%`]); // 🔥 corrigido
+  `, [exato ? nome : `%${nome}%`]);
 
   return rows[0] || null;
 }
@@ -304,8 +465,8 @@ async function getValoresAtributo(atributo) {
 // ================= ADD =================
 
 // 🔹 CRIAR material (BASE)
-async function createMaterial(data) {
-  const [result] = await connection.query(`
+async function createMaterial(data, db = connection) {
+  const [result] = await db.query(`
     INSERT INTO tb_materiais (nome, categoria)
     VALUES (?, ?)
   `, [
@@ -317,33 +478,53 @@ async function createMaterial(data) {
 }
 
 // 🔹 CRIAR variação
-async function createVariacao(data) {
-  const [result] = await connection.query(`
+function normalizarImagemCatalogo(imagem) {
+  if (imagem == null || imagem === "") return null;
+  const invalida = () => Object.assign(new Error("Endereço de imagem inválido."), { status: 400 });
+  if (typeof imagem !== "string") throw invalida();
+  let url;
+  try {
+    url = new URL(imagem);
+  } catch {
+    throw invalida();
+  }
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw invalida();
+  return url.href;
+}
+
+async function createVariacao(data, transacao = null) {
+  const cadastro = { ...data, imagem: normalizarImagemCatalogo(data.imagem) };
+  if (transacao) return inserirVariacao(cadastro, transacao);
+  if (cadastro.relacionados?.length) await garantirRelacionados();
+  return transacaoCadastro(db => inserirVariacao(cadastro, db));
+}
+
+async function inserirVariacao(data, db) {
+  const [result] = await db.query(`
     INSERT INTO tb_materiais_variacoes (id_material, codigo, fabricante, unidade)
     VALUES (?, ?, ?, ?)
-  `, [
-    data.id_material,
-    data.codigo || null,
-    data.fabricante || null,
-    data.unidade || "un"
-  ]);
-
+  `, [data.id_material, data.codigo || null, data.fabricante || null, data.unidade || "un"]);
+  for (const atributo of data.atributos || []) {
+    await addAtributoVariacao({ ...atributo, id_variacao: result.insertId }, db);
+  }
+  if (data.imagem) await atualizarImagemMaterial(result.insertId, data.imagem, db);
+  if (data.relacionados?.length) await gravarRelacionados(result.insertId, data.relacionados, db, false);
   return { insertId: result.insertId };
 }
 
 // 🔹 ADICIONAR atributo
-async function addAtributoVariacao(data) {
+async function addAtributoVariacao(data, db = connection) {
 
   let idAtributo;
 
   // 🔥 busca atributo
-  const [attr] = await connection.query(`
+  const [attr] = await db.query(`
     SELECT id FROM tb_atributos WHERE nome = ?
   `, [data.atributo]);
 
   if (!attr.length) {
 
-    const [novo] = await connection.query(`
+    const [novo] = await db.query(`
       INSERT INTO tb_atributos (nome)
       VALUES (?)
     `, [data.atributo]);
@@ -355,7 +536,7 @@ async function addAtributoVariacao(data) {
   }
 
   // 🔥 salva valor
-  await connection.query(`
+  await db.query(`
     INSERT INTO tb_materiais_atributos_valores
     (id_variacao, id_atributo, valor)
     VALUES (?, ?, ?)
@@ -371,8 +552,8 @@ async function addAtributoVariacao(data) {
 
 // ================= UPDATE =================
 
-async function updateMaterial(id, data) {
-  const [result] = await connection.query(`
+async function updateMaterial(id, data, db = connection) {
+  const [result] = await db.query(`
     UPDATE tb_materiais
     SET nome = ?, categoria = ?
     WHERE id = ?
@@ -385,14 +566,14 @@ async function updateMaterial(id, data) {
   return result.affectedRows > 0;
 }
 
-async function atualizarImagemMaterial(userId, caminhoImagem) {
+async function atualizarImagemMaterial(userId, caminhoImagem, db = connection) {
   const sql = 'UPDATE tb_materiais_variacoes SET imagem = ?, versao_foto = versao_foto + 1 WHERE id = ?';
-  const [result] = await connection.query(sql, [caminhoImagem, userId]);
+  const [result] = await db.query(sql, [caminhoImagem, userId]);
   return result;
 }
 
-async function updateVariacao(id, data) {
-  const [result] = await connection.query(`
+async function updateVariacao(id, data, db = connection) {
+  const [result] = await db.query(`
     UPDATE tb_materiais_variacoes
     SET codigo = ?, fabricante = ?, unidade = ?
     WHERE id = ?
@@ -507,8 +688,8 @@ function normalizarBoolean(valor) {
   return valor === true || valor === 1 || valor === "1" || valor === "true";
 }
 
-async function deleteAtributosVariacao(idVariacao) {
-  await connection.query(`
+async function deleteAtributosVariacao(idVariacao, db = connection) {
+  await db.query(`
     DELETE FROM tb_materiais_atributos_valores
     WHERE id_variacao = ?
   `, [idVariacao]);
@@ -567,6 +748,12 @@ async function deleteVariacao(id) {
       WHERE id = ?
     `, [id]);
 
+    try {
+      await conn.query("DELETE FROM tb_materiais_relacionados WHERE id_variacao = ? OR id_relacionado = ?", [id, id]);
+    } catch (erro) {
+      if (erro.code !== "ER_NO_SUCH_TABLE") throw erro;
+    }
+
     const [restantes] = await conn.query(`
       SELECT COUNT(*) AS total
       FROM tb_materiais_variacoes
@@ -606,6 +793,13 @@ async function deleteMaterial(id) {
 
 module.exports = {
   getMateriais,
+  getCatalogoTransferencia,
+  garantirRelacionados,
+  validarRelacionados,
+  getRelacionados,
+  gravarRelacionados,
+  transacaoCadastro,
+  transacaoImportarCatalogo,
   getVariacoes,
   getCatalogoMateriais,
   getVariacaoByID,
@@ -616,6 +810,7 @@ module.exports = {
 
   createMaterial,
   createVariacao,
+  normalizarImagemCatalogo,
   addAtributoVariacao,
 
   updateMaterial,

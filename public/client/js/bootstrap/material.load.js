@@ -14,8 +14,15 @@ export async function carregarMateriaisCompleto() {
   const listas = await carregarListasMateriaisOS();
   const listasSetor = await carregarListasSetorUsuario();
   const listaFoco = sessionStorage.getItem("material_focus_lista");
+  const listaFluxo = sessionStorage.getItem("material_focus_fluxo");
 
-  if (listaFoco && listas.some(lista => Number(lista.id) === Number(listaFoco))) {
+  if (listaFluxo) {
+    state.listaSelecionada = null;
+    state.modoVisualizacao = "kanban";
+    sessionStorage.removeItem("material_focus_fluxo");
+  }
+
+  if (!listaFluxo && listaFoco && listas.some(lista => Number(lista.id) === Number(listaFoco))) {
     state.listaSelecionada = listaFoco;
     state.modoVisualizacao = "detalhe";
     sessionStorage.removeItem("material_focus_lista");
@@ -31,6 +38,13 @@ export async function carregarMateriaisCompleto() {
   const dados = await carregarMateriais();
 
   aplicarModoMaterial(state.modoVisualizacao);
+
+  if (listaFluxo && listas.some(lista => String(lista.id) === listaFluxo)) {
+    const card = document.querySelector(`#materialKanbanView .material-lista-card[data-lista="${Number(listaFluxo)}"]`);
+    card?.classList.add("material-lista-destacada");
+    card?.querySelector(".material-lista-open")?.focus({ preventScroll: true });
+    card?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
 
   if (!dados) return;
 

@@ -5,6 +5,7 @@ import { fecharSocket, getSocket } from "../services/sockets/socket-service.js";
 import { carregarAniversariantes } from "../services/api/aniversariantes.js";
 import { reduzirNome } from "../utils/formatters/strings-format.js";
 import { VERSAO_SISTEMA } from "../config/system-version.js";
+import { iniciarAvisoAtualizacao } from "../services/ui/system-update-notice.js";
 import { carregarChangelog, carregarVersoesChangelog } from "../services/ui/changelog-loader.js";
 import { initPreferenciasUsuario } from "../services/ui/user-preferences.js";
 import { initNotificacoesSininho } from "../services/sockets/socket-notifications.js";
@@ -762,6 +763,7 @@ function mostrarAvisoEmpresaHome(mensagem, storageKey) {
 export async function initHome() {
 
   const socket = getSocket();
+  iniciarAvisoAtualizacao();
   iniciarVersaoHome();
   carregarAvisoEmpresaHome();
   observarPermissoesPorRoles();

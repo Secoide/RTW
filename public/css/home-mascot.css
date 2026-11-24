@@ -1,0 +1,34 @@
+#bemvindo .home-mascot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: auto 12px 18px;
+    padding-top: 10px;
+    flex-shrink: 0;
+}
+
+#bemvindo .home-mascot img {
+    display: block;
+    width: 118px;
+    height: 160px;
+    object-fit: contain;
+}
+
+#bemvindo .home-mascot figcaption {
+    color: #f4cf45;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    animation: home-mascot-typing 2.6s steps(44, end) 0.4s both;
+}
+
+@keyframes home-mascot-typing {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #bemvindo .home-mascot figcaption { animation: none; }
+}

@@ -71,6 +71,10 @@ export async function atualizarMaterial($tr) {
     id_os: state.osSelecionada // 🔥 ESSENCIAL
   };
 
+  $tr.find(".material-referencia-input:not([readonly])").each((_, campo) => {
+    payload[campo.dataset.field] = campo.value.trim();
+  });
+
 
   // 🔥 só envia se usuário realmente alterou o material
   if (id_variacao) {
